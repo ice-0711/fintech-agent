@@ -19,7 +19,7 @@ import random
 import time
 from typing import Any, Callable
 
-from .budget import BudgetExceeded, BudgetGate
+from .budget import BudgetExceeded, BudgetGate, estimate_tokens
 from .store import JobStore
 from .tools import TOOL_DECLARATIONS, ROLE_TOOLS, args_hash, dispatch
 
@@ -100,7 +100,9 @@ class GeminiAdapter:
     def job_id(self) -> str:
         return self.gate.job["job_id"]
 
-    def build_config(self, role: str, system_instruction: str):
+    def build_config(self, role: str, system_instruction: str, allow_tools: bool = True):
+        """allow_tools=False keeps the declarations (same prompt) but forces a text answer,
+        e.g. the last research call must return a draft so call 5 stays free for review."""
         from google.genai import types
 
         allowed = set(ROLE_TOOLS[role])
@@ -113,25 +115,34 @@ class GeminiAdapter:
             system_instruction=system_instruction,
             tools=[types.Tool(function_declarations=declarations)],
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            tool_config=None if allow_tools else types.ToolConfig(
+                function_calling_config=types.FunctionCallingConfig(mode=types.FunctionCallingConfigMode.NONE)),
             max_output_tokens=self.gate.limits.max_output_tokens,
             temperature=0,
             thinking_config=types.ThinkingConfig(thinking_level=types.ThinkingLevel(self.thinking_level.upper())),
         )
 
-    def send(self, role: str, contents: list[Any], system_instruction: str) -> Any:
+    @staticmethod
+    def prompt_text(role: str, contents: list[Any], system_instruction: str) -> str:
+        """Text we estimate and hash. Tool declarations are billed as input too
+        (live check 2026-09-28: ~500 tokens), so they are included."""
+        tools_json = json.dumps([t for t in TOOL_DECLARATIONS if t["name"] in ROLE_TOOLS[role]], ensure_ascii=False)
+        return system_instruction + "\n" + tools_json + "\n" + json.dumps(
+            [c.model_dump(mode="json", exclude_none=True) if hasattr(c, "model_dump") else c for c in contents],
+            ensure_ascii=False,
+        )
+
+    def estimate_input(self, role: str, contents: list[Any], system_instruction: str) -> int:
+        return estimate_tokens(self.prompt_text(role, contents, system_instruction))
+
+    def send(self, role: str, contents: list[Any], system_instruction: str, allow_tools: bool = True) -> Any:
         """One logical request = up to 1 + max_retries HTTP sends, all counted."""
 
         import httpx
         from google.genai import errors
 
-        config = self.build_config(role, system_instruction)
-        # Tool declarations are billed as input too (live check 2026-09-28: ~500 tokens),
-        # so they are part of the text we estimate and hash.
-        tools_json = json.dumps([t for t in TOOL_DECLARATIONS if t["name"] in ROLE_TOOLS[role]], ensure_ascii=False)
-        prompt_text = system_instruction + "\n" + tools_json + "\n" + json.dumps(
-            [c.model_dump(mode="json", exclude_none=True) if hasattr(c, "model_dump") else c for c in contents],
-            ensure_ascii=False,
-        )
+        config = self.build_config(role, system_instruction, allow_tools)
+        prompt_text = self.prompt_text(role, contents, system_instruction)
         prompt_hash = _hash(prompt_text)
         for attempt in range(self.gate.limits.max_retries + 1):
             self.heartbeat()  # renew the 60 s lease before a send that may take up to 45 s
@@ -171,6 +182,8 @@ class GeminiAdapter:
                 "prompt_version": self.prompt_version,
                 "prompt_hash": prompt_hash,
                 "thinking_level": self.thinking_level,
+                "input_estimate": res.input_estimate,
+                "estimate_under_actual": (usage.get("prompt_token_count") or 0) > res.input_estimate,
                 "usage": usage,
                 "finish_reason": str(getattr(candidate, "finish_reason", None)),
                 "function_calls": [fc.name for fc in (resp.function_calls or [])],

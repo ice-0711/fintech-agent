@@ -214,7 +214,11 @@ def test_estimate_counts_tool_declarations(adapter_factory, store):
     adapter, _, _ = adapter_factory([text_response("ok")])
     adapter.send("reviewer", [types.Content(role="user", parts=[types.Part.from_text(text="連線測試")])], "sys")
     reserved = store.list_usage(adapter.job_id)[0]["reserved_tokens"]
-    assert reserved - 1500 >= 597
+    import json as _json
+    from agents.budget import estimate_tokens
+    from agents.tools import ROLE_TOOLS, TOOL_DECLARATIONS
+    decl = _json.dumps([t for t in TOOL_DECLARATIONS if t["name"] in ROLE_TOOLS["reviewer"]], ensure_ascii=False)
+    assert reserved - 1500 > estimate_tokens(decl)
 
 
 def test_ledger_uses_adapter_prompt_version(store):

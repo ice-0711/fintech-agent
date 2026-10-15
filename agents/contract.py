@@ -76,9 +76,14 @@ def validate_job_request(payload: dict[str, Any]) -> dict[str, Any]:
     if not idempotency_key or len(idempotency_key) > 128:
         raise ContractError("idempotency_key 必填，且不超過 128 字元。")
 
+    focus = payload.get("focus")
+    if focus is not None and (not isinstance(focus, str) or len(focus) > 200):
+        raise ContractError("focus 為選填文字，不超過 200 字（例如開發案例題目）。")
+
     return {
         "ticker": ticker,
         "mode": mode,
+        "focus": focus,
         "cutoff_at": parse_cutoff(payload.get("cutoff_at")),
         "source_snapshot_id": snapshot_id,
         "idempotency_key": idempotency_key,
@@ -98,6 +103,7 @@ def new_job_record(request: dict[str, Any], model_id: str | None) -> dict[str, A
         "cutoff_at": request["cutoff_at"],
         "source_snapshot_id": request["source_snapshot_id"],
         "mode": request["mode"],
+        "focus": request.get("focus"),
         "status": "queued",
         "stage": "research",
         "model_id": model_id,

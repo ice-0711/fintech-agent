@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reviewer-output-v1.2",
+  "title": "Reviewer 輸出 schema（V1.2，W04-D 草稿）",
+  "description": "Reviewer 只能輸出覆核決定，沒有發布、核准或修改資料的欄位。額外欄位一律拒絕（additionalProperties=false），所以 publish、approved、status 之類的欄位會被擋下。草稿，尚未經 B 與組長驗收。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision", "issues", "checked_refs", "checked_metric_ids", "decision_summary"],
+  "properties": {
+    "decision": { "type": "string", "enum": ["pass", "revise", "insufficient"] },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim_id", "severity", "reason", "required_evidence"],
+        "properties": {
+          "claim_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "severity": { "type": "string", "enum": ["critical", "minor"] },
+          "reason": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "required_evidence": { "type": "string", "minLength": 12, "maxLength": 300 }
+        }
+      },
+      "maxItems": 10
+    },
+    "checked_refs": { "type": "array", "items": { "type": "string", "maxLength": 128 }, "maxItems": 30 },
+    "checked_metric_ids": { "type": "array", "items": { "type": "string", "maxLength": 64 }, "maxItems": 30 },
+    "decision_summary": { "type": "string", "maxLength": 120 }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "contract": "review-contract-v12",
+  "version": "1.0",
+  "date": "2026-10-15",
+  "owner": "組長（W05-L）；Reviewer prompt 與規則：D",
+  "roles": {
+    "researcher": {
+      "tools": [
+        "search_evidence",
+        "read_evidence",
+        "get_financial_snapshot",
+        "get_macro_snapshot",
+        "get_price_window",
+        "calculate_metrics"
+      ],
+      "prompt_version": "researcher-v1.2.0",
+      "prompt_sha256": "c2c3dd26dd5ddb411d71d2011646a0350086582dfca406516f670c8e549ea50e",
+      "prompt_file": "agents/prompts/researcher-v1.2.txt"
+    },
+    "reviewer": {
+      "tools": [
+        "read_evidence",
+        "get_financial_snapshot",
+        "get_macro_snapshot",
+        "calculate_metrics"
+      ],
+      "prompt_version": "reviewer-v1.2.0",
+      "prompt_sha256": "322625496a8e2ea48987a7d976febd94aa4d9c823ca3fcd0bf540cb0e1ccbaef",
+      "prompt_file": "agents/prompts/reviewer-v1.2.txt",
+      "forbidden": [
+        "search_evidence",
+        "get_price_window",
+        "publish",
+        "approve",
+        "write data"
+      ],
+      "needs_price_or_search": "return required_evidence to the Researcher (revise)"
+    }
+  },
+  "tools_version": "tools-v12.0",
+  "reviewer_output": {
+    "schema": "agent/reviewer_output.schema.json",
+    "additional_properties": false,
+    "decisions": {
+      "pass": "no unresolved critical issue; citations and key numbers checked",
+      "revise": "critical issue fixable within remaining sources and budget",
+      "insufficient": "key fact missing, conflict unresolved, source unread or budget short"
+    },
+    "invalid_output": "one format retry (counts toward the 8 sends); still invalid → insufficient"
+  },
+  "deterministic_checks": {
+    "module": "agents/review_checks.py (vendored from D's W05 draft, logic unchanged)",
+    "covers": [
+      "citation belongs to snapshot",
+      "number appears in cited source",
+      "available_at <= cutoff",
+      "single_quarter/ytd/annual/instant",
+      "TTM needs 4 consecutive quarters",
+      "currency/unit",
+      "P/E, P/B, FCF definitions",
+      "2330 industry reference only",
+      "unresolved source conflict",
+      "buy/sell/target price",
+      "prompt-injection text"
+    ],
+    "merge_rule": "final decision = stricter of model and rules (insufficient > revise > pass); a deterministic critical issue turns a model pass into revise",
+    "also_on_insufficient_drafts": "rules run without a model call so wrong facts are recorded"
+  },
+  "budget": {
+    "shared": "Researcher and Reviewer share one BudgetGate per job",
+    "max_model_sends": 8,
+    "initial_research_sends": 4,
+    "fifth_send": "reserved for review (dual mode)",
+    "max_tool_calls": 10,
+    "max_same_tool_args": 2,
+    "max_supplement_rounds": 2,
+    "max_input_tokens": 3000,
+    "max_output_tokens_incl_thinking": 1500,
+    "job_tokens": 40000,
+    "tool_headroom_tokens": 600,
+    "over_budget": "never skips review: a draft that cannot be reviewed ends insufficient_evidence, never succeeded"
+  },
+  "revision": {
+    "trigger": "final decision revise",
+    "max_rounds": 2,
+    "requires": ">= 2 remaining model sends",
+    "context": "fresh compact conversation: previous draft + review_feedback + observation digests",
+    "else": "insufficient_evidence (stop_reason unresolved_critical)"
+  },
+  "persistence": {
+    "job.stage": "research → review → revision → finished",
+    "job.review": "final merged review",
+    "job.checkpoint.reviews": "per round: model, rules, final",
+    "events": [
+      "model_call",
+      "tool_call",
+      "draft",
+      "review",
+      "rules_check",
+      "context_digested"
+    ]
+  },
+  "publication": {
+    "pass_means": "job.status = succeeded only",
+    "publication_status": "always 'draft' here",
+    "publish_path": "human approval + immutable report version + Storage PDF (W07); the model has no publish permission"
+  },
+  "draft_format_cr_adopted": {
+    "from": "D (reviewer-dev.md CR)",
+    "field": "claims[].facts[{metric,value,currency,period,period_basis,source_ref}]",
+    "status": "adopted by the lead's assistant 2026-10-15 — lead to confirm"
+  },
+  "known_gaps": [
+    "B: CASE-04 fixture gives eps_ttm without the 4 quarter labels, so D's TTM rule cannot verify it",
+    "B: tools_impl TTM sums non-consecutive quarters (D test test_ttm_requires_consecutive_quarters)",
+    "workflow (fixed-pipeline) mode not implemented yet (needed before the W10 experiment)"
+  ]
+}

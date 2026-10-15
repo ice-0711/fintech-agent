@@ -29,7 +29,7 @@
 
 ## token 估算方式
 
-送出前以保守上限預估：非 ASCII 字元 1 字 1 token、ASCII 2 字元 1 token（實際通常更少），單次輸入 >3,000 即拒送；每次預留「估計輸入＋1,500（已含 thinking）」，全 job ≤ 40,000。收到回應後以 `usage_metadata.total_token_count` 對帳；供應商沒回 usage 時保留預留值不退。live 驗證時需比對「估計 ≥ 實際」是否成立。
+送出前以保守上限預估：非 ASCII 字元 1 字 1 token、ASCII 3 字元 1 token（2026-10-15 W04 依 live 實測校準；W04 live 9 次發送皆為預估 ≥ 實際，約高 10–20%），單次輸入 >3,000 即拒送；每次預留「估計輸入＋1,500（已含 thinking）」，全 job ≤ 40,000。收到回應後以 `usage_metadata.total_token_count` 對帳；供應商沒回 usage 時保留預留值不退。live 驗證時需比對「估計 ≥ 實際」是否成立。
 
 ## 選型依據（2026-09-28 查官方文件）
 

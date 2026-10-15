@@ -23,6 +23,8 @@ TOOLS_VERSION = "tools-v12.0"
 
 CALC_OPERATIONS = ("growth_rate", "simple_return", "pe_ttm", "dcf_scenario", "peer_comparison")
 PEER_METRICS = ("pe_ttm", "pb", "revenue_yoy_quarter", "fcf", "dcf_gap")
+# per-company inputs accepted by B's calculator (agents/calculator.py calculate_peer_comparison)
+PEER_INPUT_KEYS = ("price", "eps_ttm", "pb", "bvps", "revenue_yoy", "fcf", "dcf_per_share")
 PEER_SUBJECT = "2454"
 PEER_COMPARATORS = ("2379", "3034", "2330")  # 2330 = industry reference, excluded from peer stats
 INDUSTRY_REFERENCE = ("2330",)
@@ -35,13 +37,12 @@ ALL_TICKERS = RESEARCH_TICKERS + COMPARISON_ONLY_TICKERS
 
 _TICKER = {"type": "string", "enum": list(RESEARCH_TICKERS)}
 _ANY_TICKER = {"type": "string", "enum": list(ALL_TICKERS)}
-_CUTOFF = {"type": "string", "description": "ISO-8601 with timezone; only data available at or before it"}
+_CUTOFF = {"type": "string", "description": "ISO-8601 with timezone, not after the job cutoff"}
 
 TOOL_DECLARATIONS: list[dict[str, Any]] = [
     {
         "name": "search_evidence",
-        "description": "Search the approved, already-ingested source index (filings, announcements, macro). "
-                       "Returns source ids, titles, published/available time and a short abstract. No web crawling.",
+        "description": "Search this job's approved source index. Returns source ids, titles, available time, abstract.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -55,8 +56,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
     },
     {
         "name": "read_evidence",
-        "description": "Read one immutable evidence fragment from this job's snapshot (≤1,200 Chinese chars) "
-                       "with paragraph, hash and exact source link. Unknown id returns no_data.",
+        "description": "Read one evidence fragment of this job's snapshot by id (paragraph, hash, link).",
         "parameters": {
             "type": "object",
             "properties": {"evidence_version_id": {"type": "string", "maxLength": 128}},
@@ -65,9 +65,8 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
     },
     {
         "name": "get_financial_snapshot",
-        "description": "FinMind-based financial values available at cutoff: revenue, net income, TTM EPS, FCF, "
-                       "shares, net debt. Each value carries period, basis, currency, unit, source and available_at; "
-                       "missing values are null with a reason.",
+        "description": "Financial values available at cutoff (revenue, net income, EPS/TTM, FCF, shares, net debt) "
+                       "with period, basis, currency, unit; missing = null.",
         "parameters": {
             "type": "object",
             "properties": {"ticker": _ANY_TICKER, "cutoff": _CUTOFF},
@@ -76,8 +75,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
     },
     {
         "name": "get_macro_snapshot",
-        "description": "Approved macro snapshot (whitelisted series only) with observation period and "
-                       "release/revision time.",
+        "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS) available at cutoff.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -89,8 +87,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
     },
     {
         "name": "get_price_window",
-        "description": "Taiwan-stock closing prices for the last 1, 5 or 20 trading sessions ending at end_at, "
-                       "with raw/adjusted basis. Missing or suspended = no_data.",
+        "description": "Closing prices of the last 1/5/20 trading sessions up to end_at.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -103,9 +100,11 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
     },
     {
         "name": "calculate_metrics",
-        "description": "Deterministic calculations only: growth_rate, simple_return, pe_ttm, dcf_scenario, "
-                       "peer_comparison (2454 vs 2379/3034, 2330 as industry reference, max 4 companies). "
-                       "Values must cite evidence_refs; invalid inputs return null with a reason.",
+        "description": "Deterministic math on numbers taken from tool results (never guessed). values by operation: "
+                       "growth_rate{current,previous}; simple_return{entry_price,exit_price}; pe_ttm{price,eps_ttm}; "
+                       "dcf_scenario{free_cash_flows[],wacc,terminal_growth,net_debt,shares_outstanding}; "
+                       "peer_comparison{subject:2454,comparators,metrics{ticker:{price,eps_ttm,pb,revenue_yoy,fcf}},"
+                       "price_as_of,cutoff,snapshot_ids,method_version}. 2330 is reference only. Cite evidence_refs.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -225,9 +224,16 @@ def _validate_peer_comparison(values: dict[str, Any], job_cutoff: str | None) ->
     if datetime.fromisoformat(price_as_of).date() > limit:
         raise ToolInputError(f"peer_comparison.price_as_of={price_as_of} 晚於 cutoff 當日")
     metrics = values.get("metrics") or []
-    bad_metrics = [m for m in metrics if m not in PEER_METRICS]
-    if not metrics or bad_metrics:
-        raise ToolInputError(f"peer_comparison.metrics 只限 {PEER_METRICS}")
+    if isinstance(metrics, dict):
+        # B's calculator shape: {ticker: {price, eps_ttm, pb, revenue_yoy, fcf}} with numbers or null
+        if not set(metrics) <= {subject, *comparators}:
+            raise ToolInputError("peer_comparison.metrics 只能包含主體與比較標的")
+        for row in metrics.values():
+            if not isinstance(row, dict) or not set(row) <= set(PEER_INPUT_KEYS) or not all(
+                    v is None or (isinstance(v, (int, float)) and not isinstance(v, bool)) for v in row.values()):
+                raise ToolInputError(f"peer_comparison.metrics 每家只限 {PEER_INPUT_KEYS} 的數值或 null")
+    elif not metrics or [m for m in metrics if m not in PEER_METRICS]:
+        raise ToolInputError(f"peer_comparison.metrics 只限 {PEER_METRICS}，或每家公司的數值表")
     snaps = values.get("snapshot_ids")
     if not isinstance(snaps, dict) or set(snaps) != {subject, *comparators}:
         raise ToolInputError("peer_comparison.snapshot_ids 需為每家公司各一個快照 id")
@@ -286,15 +292,19 @@ def register_tool(name: str, impl: ToolImpl) -> None:
     _REGISTRY[name] = impl
 
 
-def dispatch(role: str, name: str, args: dict[str, Any], job_cutoff: str | None = None) -> dict[str, Any]:
+def dispatch(role: str, name: str, args: dict[str, Any], job_cutoff: str | None = None,
+             executor: Callable[[str, dict[str, Any]], dict[str, Any]] | None = None) -> dict[str, Any]:
     """Validate then run. Validation failures and tool crashes come back as fixed results
-    the model can react to (retry another tool or stop), never as an exception."""
+    the model can react to (retry another tool or stop), never as an exception.
+
+    `executor` (optional) runs the validated call inside the job's snapshot (agents/snapshot.py);
+    without it the globally registered implementation is used."""
 
     try:
         validate_tool_call(role, name, args, job_cutoff)
     except ToolInputError as exc:
         return {"status": "invalid_input", "tool": name, "reason": str(exc), "data": None}
-    impl = _REGISTRY.get(name)
+    impl = (lambda a: executor(name, a)) if executor else _REGISTRY.get(name)
     if impl is None:
         return {"status": "no_data", "tool": name, "reason": "工具實作待 W03-B 註冊", "data": None}
     try:

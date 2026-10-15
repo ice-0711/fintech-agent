@@ -65,15 +65,21 @@ class BudgetExceeded(RuntimeError):
         return "insufficient_evidence"
 
 
-def estimate_tokens(text: str) -> int:
-    """Conservative upper-bound estimate: 1 token per non-ASCII char, 1 per 2 ASCII chars.
+ASCII_CHARS_PER_TOKEN = 3
 
-    This deliberately over-counts (Gemini is usually ~1 token/CJK char and
-    ~4 ASCII chars/token). The live check in W03 compares it with usageMetadata.
+
+def estimate_tokens(text: str) -> int:
+    """Upper-bound estimate: 1 token per non-ASCII char, 1 per 3 ASCII chars.
+
+    Calibrated 2026-10-15 (W04-L) on the W03 live check: estimates were 725 and 1,136 for
+    actual prompt counts of 597 and 1,007 (+21 %, +13 %). The previous 1-per-2 rule
+    over-counted by ~1.7x and left no room under the 3,000-token input cap once the
+    six tool declarations were included. Every send logs estimate vs actual
+    (event detail `input_estimate`), so an under-count is visible.
     """
 
     non_ascii = sum(1 for ch in text if ord(ch) > 127)
-    return non_ascii + math.ceil((len(text) - non_ascii) / 2)
+    return non_ascii + math.ceil((len(text) - non_ascii) / ASCII_CHARS_PER_TOKEN)
 
 
 def seconds_until_quota_reset(now: float) -> float:
@@ -123,6 +129,7 @@ class Reservation:
     call_number: int
     reserved_tokens: int
     role: str
+    input_estimate: int = 0
 
 
 @dataclass
@@ -190,7 +197,8 @@ class BudgetGate:
             prompt_version=prompt_version or job.get("prompt_version", ""), prompt_hash=prompt_hash,
             reserved_tokens=reserve,
         )
-        return Reservation(usage_id=usage_id, call_number=used + 1, reserved_tokens=reserve, role=role)
+        return Reservation(usage_id=usage_id, call_number=used + 1, reserved_tokens=reserve, role=role,
+                           input_estimate=est_in)
 
     def can_send_again(self) -> bool:
         """Cheap pre-check so a retry does not sleep when the next send would be refused anyway."""

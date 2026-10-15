@@ -76,7 +76,7 @@
   "declarations": [
     {
       "name": "search_evidence",
-      "description": "Search the approved, already-ingested source index (filings, announcements, macro). Returns source ids, titles, published/available time and a short abstract. No web crawling.",
+      "description": "Search this job's approved source index. Returns source ids, titles, available time, abstract.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -94,7 +94,7 @@
           },
           "cutoff": {
             "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
+            "description": "ISO-8601 with timezone, not after the job cutoff"
           },
           "limit": {
             "type": "integer",
@@ -112,7 +112,7 @@
     },
     {
       "name": "read_evidence",
-      "description": "Read one immutable evidence fragment from this job's snapshot (≤1,200 Chinese chars) with paragraph, hash and exact source link. Unknown id returns no_data.",
+      "description": "Read one evidence fragment of this job's snapshot by id (paragraph, hash, link).",
       "parameters": {
         "type": "object",
         "properties": {
@@ -128,7 +128,7 @@
     },
     {
       "name": "get_financial_snapshot",
-      "description": "FinMind-based financial values available at cutoff: revenue, net income, TTM EPS, FCF, shares, net debt. Each value carries period, basis, currency, unit, source and available_at; missing values are null with a reason.",
+      "description": "Financial values available at cutoff (revenue, net income, EPS/TTM, FCF, shares, net debt) with period, basis, currency, unit; missing = null.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -144,7 +144,7 @@
           },
           "cutoff": {
             "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
+            "description": "ISO-8601 with timezone, not after the job cutoff"
           }
         },
         "required": [
@@ -155,13 +155,13 @@
     },
     {
       "name": "get_macro_snapshot",
-      "description": "Approved macro snapshot (whitelisted series only) with observation period and release/revision time.",
+      "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS) available at cutoff.",
       "parameters": {
         "type": "object",
         "properties": {
           "cutoff": {
             "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
+            "description": "ISO-8601 with timezone, not after the job cutoff"
           },
           "series_ids": {
             "type": "array",
@@ -180,7 +180,7 @@
     },
     {
       "name": "get_price_window",
-      "description": "Taiwan-stock closing prices for the last 1, 5 or 20 trading sessions ending at end_at, with raw/adjusted basis. Missing or suspended = no_data.",
+      "description": "Closing prices of the last 1/5/20 trading sessions up to end_at.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -196,7 +196,7 @@
           },
           "end_at": {
             "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
+            "description": "ISO-8601 with timezone, not after the job cutoff"
           },
           "sessions": {
             "type": "integer",
@@ -216,7 +216,7 @@
     },
     {
       "name": "calculate_metrics",
-      "description": "Deterministic calculations only: growth_rate, simple_return, pe_ttm, dcf_scenario, peer_comparison (2454 vs 2379/3034, 2330 as industry reference, max 4 companies). Values must cite evidence_refs; invalid inputs return null with a reason.",
+      "description": "Deterministic math: growth_rate, simple_return, pe_ttm, dcf_scenario, peer_comparison (2454 vs 2379/3034; 2330 reference only; max 4 companies). Cite evidence_refs.",
       "parameters": {
         "type": "object",
         "properties": {
