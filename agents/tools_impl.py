@@ -50,6 +50,15 @@ def _load_snapshots() -> dict[str, Any]:
         return json.load(f)
 
 
+def _consecutive_quarters(periods: list[str]) -> bool:
+    """['2025Q3','2025Q4','2026Q1','2026Q2'] → True；跳季或格式不明 → False。"""
+    try:
+        idx = [int(p[:4]) * 4 + int(p[-1]) - 1 for p in periods]
+    except (ValueError, TypeError, IndexError):
+        return False
+    return all(b - a == 1 for a, b in zip(idx, idx[1:]))
+
+
 def _parse_iso(dt_str: str) -> datetime:
     return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
 
@@ -101,7 +110,14 @@ def search_evidence(ticker: str, query: str, cutoff: str, limit: int = 5) -> dic
 def read_evidence(evidence_version_id: str) -> dict[str, Any]:
     """讀取不可變文本片段 (<=1,200 字，Researcher/Reviewer 共用)"""
     snapshots = _load_snapshots()
-    for ev in snapshots.get("evidences", []):
+    # 開發案例證據在 fixtures/dev/case_fixtures.json（W04-B）；一併可讀。（組長修正 2026-10-15）
+    dev_path = PROJECT_ROOT / "fixtures" / "dev" / "case_fixtures.json"
+    dev_evidences = []
+    if dev_path.exists():
+        with open(dev_path, "r", encoding="utf-8") as f:
+            for snap in json.load(f).get("snapshots", {}).values():
+                dev_evidences.extend(snap.get("evidences", []))
+    for ev in snapshots.get("evidences", []) + dev_evidences:
         if ev.get("evidence_version_id") == evidence_version_id:
             return {
                 "status": "ok",
@@ -109,7 +125,7 @@ def read_evidence(evidence_version_id: str) -> dict[str, Any]:
                 "data": {
                     "evidence_version_id": ev["evidence_version_id"],
                     "paragraph": ev["paragraph"],
-                    "source_url": ev["source_url"],
+                    "source_url": ev.get("source_url"),
                     "content_hash": ev["content_hash"],
                     "available_at": ev["available_at"]
                 }
@@ -149,8 +165,12 @@ def get_financial_snapshot(ticker: str, cutoff: str) -> dict[str, Any]:
     fcf_ttm = None
     if len(available_quarters) >= 4:
         last_4 = available_quarters[-4:]
-        eps_ttm = round(sum(q["eps"] for q in last_4), 2)
-        fcf_ttm = round(sum(q["free_cash_flow"] for q in last_4), 2)
+        # 手冊 F01：TTM 需「連續」四季，且任一季缺值即為 null（不補 0）。（組長修正 2026-10-15）
+        if _consecutive_quarters([q["period"] for q in last_4]):
+            if all(q.get("eps") is not None for q in last_4):
+                eps_ttm = round(sum(q["eps"] for q in last_4), 2)
+            if all(q.get("free_cash_flow") is not None for q in last_4):
+                fcf_ttm = round(sum(q["free_cash_flow"] for q in last_4), 2)
 
     return {
         "status": "ok",
