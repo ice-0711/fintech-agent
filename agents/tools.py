@@ -28,7 +28,9 @@ PEER_COMPARATORS = ("2379", "3034", "2330")  # 2330 = industry reference, exclud
 INDUSTRY_REFERENCE = ("2330",)
 MAX_PEER_COMPANIES = 4
 PRICE_SESSIONS = (1, 5, 20)
-MACRO_SERIES_WHITELIST: tuple[str, ...] = ()  # locked in W02 with B; empty = none approved yet
+# Locked 2026-10-15 from B's approved snapshot (data/financial-snapshots.json → macro, FRED).
+# ch.02 also lists a Taiwan market indicator; add it here once B provides an approved series.
+MACRO_SERIES_WHITELIST: tuple[str, ...] = ("CPIAUCSL", "FEDFUNDS")
 ALL_TICKERS = RESEARCH_TICKERS + COMPARISON_ONLY_TICKERS
 
 _TICKER = {"type": "string", "enum": list(RESEARCH_TICKERS)}

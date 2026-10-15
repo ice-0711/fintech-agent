@@ -47,3 +47,16 @@ def job_request(**overrides):
     }
     req.update(overrides)
     return req
+
+
+@pytest.fixture(autouse=True)
+def isolated_tool_registry():
+    """Each test starts with no registered tool bodies (other suites, e.g. evaluation/,
+    import agents.register_tools which registers B's implementations globally)."""
+    from agents.tools import _REGISTRY
+
+    saved = dict(_REGISTRY)
+    _REGISTRY.clear()
+    yield
+    _REGISTRY.clear()
+    _REGISTRY.update(saved)

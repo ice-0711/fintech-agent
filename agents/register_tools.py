@@ -25,14 +25,25 @@ except ImportError:
     )
 
 
+def _kwargs_adapter(fn):
+    """dispatch() 以單一 args 字典呼叫工具（agents/tools.py ToolImpl 契約）；
+    B 的實作使用具名參數，這裡轉接為 fn(**args)。（組長整合，2026-10-15）"""
+
+    def call(args: dict) -> dict:
+        return fn(**args)
+
+    call.__name__ = getattr(fn, "__name__", "tool")
+    return call
+
+
 def init_tools() -> None:
     """將 6 大工具具體實作掛載至 agents.tools._REGISTRY"""
-    register_tool("search_evidence", search_evidence)
-    register_tool("read_evidence", read_evidence)
-    register_tool("get_financial_snapshot", get_financial_snapshot)
-    register_tool("get_macro_snapshot", get_macro_snapshot)
-    register_tool("get_price_window", get_price_window)
-    register_tool("calculate_metrics", calculate_metrics)
+    register_tool("search_evidence", _kwargs_adapter(search_evidence))
+    register_tool("read_evidence", _kwargs_adapter(read_evidence))
+    register_tool("get_financial_snapshot", _kwargs_adapter(get_financial_snapshot))
+    register_tool("get_macro_snapshot", _kwargs_adapter(get_macro_snapshot))
+    register_tool("get_price_window", _kwargs_adapter(get_price_window))
+    register_tool("calculate_metrics", _kwargs_adapter(calculate_metrics))
 
 
 # 模組載入時自動完成註冊
