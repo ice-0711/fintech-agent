@@ -1,5 +1,6 @@
 """agents/register_tools.py
-W03-B: 工具實作與 tools 註冊器的掛接入口。
+W03-B / W06 重構版: 工具實作與 tools 註冊器的掛接入口。
+使用 lambda args: fn(**args) 封裝，相容 tools.py 的 impl(args) 字典分發機制。
 """
 from __future__ import annotations
 
@@ -25,25 +26,14 @@ except ImportError:
     )
 
 
-def _kwargs_adapter(fn):
-    """dispatch() 以單一 args 字典呼叫工具（agents/tools.py ToolImpl 契約）；
-    B 的實作使用具名參數，這裡轉接為 fn(**args)。（組長整合，2026-10-15）"""
-
-    def call(args: dict) -> dict:
-        return fn(**args)
-
-    call.__name__ = getattr(fn, "__name__", "tool")
-    return call
-
-
 def init_tools() -> None:
     """將 6 大工具具體實作掛載至 agents.tools._REGISTRY"""
-    register_tool("search_evidence", _kwargs_adapter(search_evidence))
-    register_tool("read_evidence", _kwargs_adapter(read_evidence))
-    register_tool("get_financial_snapshot", _kwargs_adapter(get_financial_snapshot))
-    register_tool("get_macro_snapshot", _kwargs_adapter(get_macro_snapshot))
-    register_tool("get_price_window", _kwargs_adapter(get_price_window))
-    register_tool("calculate_metrics", _kwargs_adapter(calculate_metrics))
+    register_tool("search_evidence", lambda args: search_evidence(**args))
+    register_tool("read_evidence", lambda args: read_evidence(**args))
+    register_tool("get_financial_snapshot", lambda args: get_financial_snapshot(**args))
+    register_tool("get_macro_snapshot", lambda args: get_macro_snapshot(**args))
+    register_tool("get_price_window", lambda args: get_price_window(**args))
+    register_tool("calculate_metrics", lambda args: calculate_metrics(**args))
 
 
 # 模組載入時自動完成註冊
