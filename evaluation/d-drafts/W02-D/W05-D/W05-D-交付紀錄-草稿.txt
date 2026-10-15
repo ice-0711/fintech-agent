@@ -1,0 +1,12 @@
+【W05-D 交付紀錄（草稿，未驗收）】
+任務：Reviewer 工具調用與評分；補查與風險規則測試
+做了什麼：
+1. reviewer_runner.py：接 read/financial/calculate 唯讀函式，記錄 tool_trace、預算、風險等級。
+2. test_reviewer_runner.py：12 項；與 W04-D 合計 76 passed。
+3. reviewer-checks.json：20 份 mock 草稿的檢出/誤報原始紀錄（有錯 10/10 未放行；好草稿誤報 0/10）。
+4. v12-reviewer-development.md：結果、自查、限制。
+測到的情境：缺 EPS、來源矛盾、CapEx 符號、DCF 參數（WACC<=g、缺值）、無預算、工具 10 次上限。
+驗收自查：至少一案選工具（規則式，非 Gemini）；自述非證據；無預算即 insufficient；資料不足 risk=unverified。
+未完成 / 需他人：真模型實測；2317 資料（B）；F1/F3 修正（B）；CASE-26 定義（B）；預期答案確認（B/組長）。
+實際工時：（Ice 自行填寫）
+驗收：待 B 交叉評分與組長核可，AI 不能驗收。

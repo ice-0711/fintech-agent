@@ -1,0 +1,175 @@
+{
+ "label": "MOCK / 離線規則式 Reviewer，非真模型；預期答案為 D 自擬，未經 B/組長確認",
+ "flawed_total": 10,
+ "flawed_not_passed": 10,
+ "good_total": 10,
+ "good_false_revise": [],
+ "decision_mismatch_vs_expected": [],
+ "rows": [
+  {
+   "id": "CASE-01-good",
+   "expected": "pass",
+   "got": "pass",
+   "risk": "low",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-01-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-04-good",
+   "expected": "pass",
+   "got": "pass",
+   "risk": "low",
+   "tools": [
+    "calculate_metrics"
+   ]
+  },
+  {
+   "id": "CASE-04-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": [
+    "calculate_metrics"
+   ]
+  },
+  {
+   "id": "CASE-07-good",
+   "expected": "pass",
+   "got": "pass",
+   "risk": "low",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-07-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-08-good",
+   "expected": "pass",
+   "got": "pass",
+   "risk": "low",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-08-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-13-good",
+   "expected": "insufficient",
+   "got": "insufficient",
+   "risk": "unverified",
+   "tools": []
+  },
+  {
+   "id": "CASE-13-flawed",
+   "expected": "insufficient",
+   "got": "insufficient",
+   "risk": "unverified",
+   "tools": []
+  },
+  {
+   "id": "CASE-14-good",
+   "expected": "insufficient",
+   "got": "insufficient",
+   "risk": "unverified",
+   "tools": []
+  },
+  {
+   "id": "CASE-14-flawed",
+   "expected": "insufficient",
+   "got": "insufficient",
+   "risk": "unverified",
+   "tools": []
+  },
+  {
+   "id": "CASE-19-good",
+   "expected": "pass",
+   "got": "pass",
+   "risk": "low",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-19-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-20-good",
+   "expected": "pass",
+   "got": "pass",
+   "risk": "low",
+   "tools": []
+  },
+  {
+   "id": "CASE-20-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": []
+  },
+  {
+   "id": "CASE-25-good",
+   "expected": "pass",
+   "got": "pass",
+   "risk": "low",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-25-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": [
+    "read_evidence"
+   ]
+  },
+  {
+   "id": "CASE-26-good",
+   "expected": "insufficient",
+   "got": "insufficient",
+   "risk": "unverified",
+   "tools": []
+  },
+  {
+   "id": "CASE-26-flawed",
+   "expected": "revise",
+   "got": "revise",
+   "risk": "high",
+   "tools": []
+  }
+ ],
+ "na_note": "無 NA；分母 = 10 個 B dev 案例各 good/flawed 共 20 份"
+}

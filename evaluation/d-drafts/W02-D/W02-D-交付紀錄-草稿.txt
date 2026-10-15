@@ -1,0 +1,38 @@
+W02-D 交付紀錄（草稿）
+任務：評估案例規格與測試骨架；季度與比較測試規約
+狀態：草稿。AI 產出不等於驗收，需 B 交叉評分、組長核准。
+更新：2026-10-09
+
+一、本次完成內容
+1. case-schema.json：JSON Schema（2020-12），用 B 的 evaluation/dev-cases.json 驗證，0 個錯誤。
+2. case-manifest-draft.json：30 案例 manifest 草稿，依手冊06頁附表，並對照 B 的 dev-cases.json，不一致處已標記。
+3. evaluation-draft/mock_runner.py：離線 mock runner，產生 workflow、single、dual 三種模式的 run；匿名化（拿掉模式並打亂）；人工評分輸入格式與檢查。
+4. evaluation-draft/metrics.py：七項指標的計算函式，每項回傳分子、分母、NA 數。
+5. evaluation-draft/test_metrics.py：5 個範例驗證分母與 NA 處理，另含 mock runner 與評分表格式測試。
+6. v12-finance-cases.json：23 個財務規則測例（累計轉單季、缺期、公告時間、TTM、EPS、BVPS、價格口徑、FCF、股數），預期值先手算。
+7. evaluation-draft/test_calculator_against_finance_cases.py：把其中 5 個測例接到 B 的 agents/calculator.py 上驗證。
+
+二、實際執行紀錄
+- 2026-10-08 本機：~/fintech-venv/bin/python -m pytest -q tests → 111 passed in 29.72s（離線 mock，B 的既有測試）。
+- 2026-10-09 雲端工作環境（不是本機）：pytest test_metrics.py → 14 passed。
+- 同環境：test_calculator_against_finance_cases.py（對 B 的 calculator.py）→ 5 passed。
+- 變異檢查：故意把「分母為 0 回 NA」改成回 0，4 個測試失敗，確認測試擋得住 NA 變 0。
+- 以上都是 mock/離線，沒有呼叫任何模型，沒有新增 LLM 樣本，沒有使用保留案例答案。
+- 這些草稿尚未在 D 的本機重跑，也尚未 commit 到 repo，也未經 B 驗收。
+
+三、逐項驗收對照
+1. 5種案例類別具備：manifest 草稿有 5 類，每類 6 案，共 30 案（依手冊附表）。但 dev 清單與 B 的檔案不一致，正式清單待 B 確認。→ 部分完成
+2. NA 不當 0：metrics.py 與 test_metrics.py 已驗證（分母 0 回 NA、unknown 留在分母、沒有帳單的成本為 None）。→ 已有 mock 驗證
+3. 基線/單/雙模式可辨識：mock_runner 每筆 run 帶 mode（workflow、single、dual）與 run_kind=mock。→ 已有 mock 驗證
+4. 合成驗算與真實實驗分開；不新增 LLM 樣本：v12-finance-cases.json 全部標 synthetic_fixture=true；mock run 標 run_kind=mock、llm_calls=0。→ 已完成
+
+四、未完成與誰提供
+1. 正式 30 案例清單：手冊附表與 B 的 dev-cases.json 不一致（B 的 dev 有 5 個編號在手冊是保留測試：07、13、14、20、25；手冊的 dev 有 5 個 B 沒有：11、15、18、22、29）。需要 B 與組長決定哪份為正式版。
+2. v12-finance-cases.json 其餘 18 個測例（累計轉單季、TTM、P/B、FCF、同日價格、公告時間等）：agents/calculator.py 沒有對應函式，需要 B 說明這些規則放在哪個模組、介面是什麼。
+3. 與 B 對測例的預期值：尚未對過。
+4. 保留案例（20 個）的快照與預期：B 的 fixtures 目前只有 10 個 dev 案例。
+5. 草稿尚未放進 repo evaluation/ 與組員可讀位置，等 B 確認後再處理。
+6. calculator.py 的 growth_rate 分母用 abs(前期)，前期為負時的行為是否符合手冊，待 B 確認（D 的疑問，不是已確認的錯誤）。
+
+五、可貼回 Notion「交付紀錄」的文字
+W02-D 草稿已產出：case-schema.json（對 dev-cases.json 驗證 0 錯誤）、30 案例 manifest 草稿、mock runner（workflow/single/dual 可辨識、匿名化、人工評分格式）、七項指標函式與 5 個範例測試（14 passed，雲端環境）、23 個財務規則測例（5 個已對 B 的 calculator.py 驗證通過）。全部為離線 mock，無新增 LLM 樣本。未完成：正式 30 案例清單（手冊附表與 B 的 dev-cases.json 不一致，待 B/組長決定）、其餘 18 個測例待 B 說明規則所在模組。尚未經 B 交叉評分與組長核准。

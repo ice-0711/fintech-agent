@@ -1,0 +1,438 @@
+{
+  "dataset": "v12-finance-cases",
+  "version": "draft-1",
+  "status": "草稿：D 預先寫預期值，尚未與 B 對過，也尚未經驗收。",
+  "notes": [
+    "全部標 synthetic_fixture=true：這些是驗算用的合成測例，不是真實公司財報，不能當成實驗結果。",
+    "預期值都先用手算確認；FIN-01、FIN-10、FIN-18、FIN-19 的輸入取自 B 的 fixtures，其餘為手冊算例或 D 自編合成。",
+    "只用於離線規則驗證，不新增任何 LLM 樣本，也不使用 20 個保留案例的答案。",
+    "這份只定義輸入與預期值；實際被測的函式（例如 agents/calculator.py）要等 B 確認介面後再接上。"
+  ],
+  "case_count": 23,
+  "cases": [
+    {
+      "case_id": "FIN-01",
+      "group": "累計轉單季",
+      "rule": "Q2單季 = Q2累計 - Q1單季",
+      "inputs": {
+        "period": "2026Q2",
+        "period_basis": "ytd",
+        "ytd": 2607.3,
+        "prior_quarter_single_Q1": 1334.6,
+        "same_company": true,
+        "same_year": true,
+        "same_basis": true
+      },
+      "expected": {
+        "single_quarter": 1272.7,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "fixtures/dev/case_fixtures.json snap-dev-case-20",
+      "note": "與 B 的 CASE-20 數字一致（1272.7 億元）"
+    },
+    {
+      "case_id": "FIN-02",
+      "group": "累計轉單季",
+      "rule": "Q3單季 = Q3累計 - Q2累計",
+      "inputs": {
+        "period": "Q3",
+        "q3_ytd": 330,
+        "q2_ytd": 200
+      },
+      "expected": {
+        "single_quarter": 130,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊06頁規則，數字為 D 自編合成",
+      "note": "D 的合成算例，不是真實公司資料"
+    },
+    {
+      "case_id": "FIN-03",
+      "group": "累計轉單季",
+      "rule": "Q4單季 = 全年 - Q3累計",
+      "inputs": {
+        "period": "Q4",
+        "annual": 500,
+        "q3_ytd": 380
+      },
+      "expected": {
+        "single_quarter": 120,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊06頁規則，數字為 D 自編合成",
+      "note": "D 的合成算例"
+    },
+    {
+      "case_id": "FIN-04",
+      "group": "缺期",
+      "rule": "缺前期不能硬算",
+      "inputs": {
+        "period": "2026Q2",
+        "period_basis": "ytd",
+        "ytd": 2607.3,
+        "prior_quarter_single_Q1": null
+      },
+      "expected": {
+        "single_quarter": null,
+        "status": "NA",
+        "reason": "missing_prior_period"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F01",
+      "note": "缺值保留 null 與原因，不補 0"
+    },
+    {
+      "case_id": "FIN-05",
+      "group": "累計轉單季",
+      "rule": "同年同口徑才能相減",
+      "inputs": {
+        "period": "2026Q2",
+        "ytd": 2607.3,
+        "prior_quarter_single": 1334.6,
+        "prior_year": 2025,
+        "current_year": 2026
+      },
+      "expected": {
+        "single_quarter": null,
+        "status": "NA",
+        "reason": "year_or_basis_mismatch"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F01",
+      "note": "年度不同不可相減"
+    },
+    {
+      "case_id": "FIN-06",
+      "group": "存量",
+      "rule": "資產負債表是時點存量，四季不能相加",
+      "inputs": {
+        "item": "total_assets",
+        "basis": "instant",
+        "quarters": [
+          100,
+          110,
+          120,
+          130
+        ],
+        "operation": "sum"
+      },
+      "expected": {
+        "value": null,
+        "status": "NA",
+        "reason": "instant_not_additive"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F01",
+      "note": "若有人把四季存量相加，必須被擋"
+    },
+    {
+      "case_id": "FIN-07",
+      "group": "TTM",
+      "rule": "TTM 需要四個連續單季",
+      "inputs": {
+        "metric": "EPS",
+        "quarters": [
+          "2025Q3",
+          "2025Q4",
+          "2026Q1",
+          "2026Q2"
+        ],
+        "values": [
+          9,
+          10,
+          9.5,
+          9.7
+        ]
+      },
+      "expected": {
+        "ttm": 38.2,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "D 自編合成，對照 snap-dev-case-04",
+      "note": "合成值，加總剛好等於 B 的 CASE-04 的 TTM EPS 38.2，方便對照"
+    },
+    {
+      "case_id": "FIN-08",
+      "group": "TTM",
+      "rule": "缺一季或不連續不能算 TTM",
+      "inputs": {
+        "metric": "EPS",
+        "quarters": [
+          "2025Q3",
+          "2026Q1",
+          "2026Q2"
+        ],
+        "values": [
+          9,
+          9.5,
+          9.7
+        ]
+      },
+      "expected": {
+        "ttm": null,
+        "status": "NA",
+        "reason": "need_four_consecutive_quarters"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F01",
+      "note": "只有三季或有缺季"
+    },
+    {
+      "case_id": "FIN-09",
+      "group": "EPS/PE",
+      "rule": "P/E = 同日股價 / TTM EPS",
+      "inputs": {
+        "price": 120,
+        "ttm_eps": 6
+      },
+      "expected": {
+        "pe": 20.0,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "手冊提供的合成驗算資料"
+    },
+    {
+      "case_id": "FIN-10",
+      "group": "EPS/PE",
+      "rule": "與 B 的 CASE-04 對照",
+      "inputs": {
+        "price": 1005.0,
+        "ttm_eps": 38.2
+      },
+      "expected": {
+        "pe": 26.31,
+        "status": "ok",
+        "rounding": "兩位小數"
+      },
+      "synthetic_fixture": true,
+      "source": "fixtures/dev/case_fixtures.json snap-dev-case-04",
+      "note": "1005 / 38.2 = 26.309...，四捨五入為 26.31"
+    },
+    {
+      "case_id": "FIN-11",
+      "group": "EPS/PE",
+      "rule": "EPS <= 0 時 P/E 為不適用",
+      "inputs": {
+        "price": 120,
+        "ttm_eps": -2
+      },
+      "expected": {
+        "pe": null,
+        "status": "NA",
+        "reason": "not_applicable_nonpositive_eps"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "不可算出負的 P/E 或給評級"
+    },
+    {
+      "case_id": "FIN-12",
+      "group": "BVPS/PB",
+      "rule": "P/B = 股價 / BVPS",
+      "inputs": {
+        "price": 120,
+        "bvps": 30
+      },
+      "expected": {
+        "pb": 4.0,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "手冊提供的合成驗算資料"
+    },
+    {
+      "case_id": "FIN-13",
+      "group": "BVPS/PB",
+      "rule": "BVPS <= 0 時 P/B 為不適用",
+      "inputs": {
+        "price": 120,
+        "bvps": 0
+      },
+      "expected": {
+        "pb": null,
+        "status": "NA",
+        "reason": "not_applicable_nonpositive_denominator"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "分母不能為 0 或負"
+    },
+    {
+      "case_id": "FIN-14",
+      "group": "YoY",
+      "rule": "季營收 YoY = 本季 / 去年同季 - 1",
+      "inputs": {
+        "revenue": 120,
+        "revenue_prior_year_quarter": 100
+      },
+      "expected": {
+        "yoy_pct": 20.0,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "手冊提供的合成驗算資料"
+    },
+    {
+      "case_id": "FIN-15",
+      "group": "YoY",
+      "rule": "缺基期則 NA",
+      "inputs": {
+        "revenue": 120,
+        "revenue_prior_year_quarter": null
+      },
+      "expected": {
+        "yoy_pct": null,
+        "status": "NA",
+        "reason": "missing_base_period"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "不可用 0 當基期"
+    },
+    {
+      "case_id": "FIN-16",
+      "group": "FCF",
+      "rule": "FCF = 營業現金流 - 正值 CapEx",
+      "inputs": {
+        "operating_cash_flow": 100,
+        "capex": 30
+      },
+      "expected": {
+        "fcf": 70.0,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "手冊提供的合成驗算資料"
+    },
+    {
+      "case_id": "FIN-17",
+      "group": "FCF",
+      "rule": "來源 CapEx 為負號（現金流出）時先核符號再取正值",
+      "inputs": {
+        "operating_cash_flow": 100,
+        "capex": -30,
+        "capex_sign_convention": "outflow_negative"
+      },
+      "expected": {
+        "fcf": 70,
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02、rubric-v1 critical 第4項",
+      "note": "符號錯誤會讓 FCF 變 130，必須被擋"
+    },
+    {
+      "case_id": "FIN-18",
+      "group": "FCF",
+      "rule": "CapEx 缺失則 FCF 為 null（B 的 CASE-13）",
+      "inputs": {
+        "operating_cash_flow": 450.0,
+        "capex": null
+      },
+      "expected": {
+        "fcf": null,
+        "status": "NA",
+        "reason": "missing_capex"
+      },
+      "synthetic_fixture": true,
+      "source": "fixtures/dev/case_fixtures.json snap-dev-case-13",
+      "note": "不可把缺值當成 0"
+    },
+    {
+      "case_id": "FIN-19",
+      "group": "股數",
+      "rule": "流通股數缺失則每股價值為 null（B 的 CASE-14）",
+      "inputs": {
+        "equity_value": 5043.36,
+        "shares_outstanding": null
+      },
+      "expected": {
+        "value_per_share": null,
+        "status": "NA",
+        "reason": "missing_shares"
+      },
+      "synthetic_fixture": true,
+      "source": "fixtures/dev/case_fixtures.json snap-dev-case-14",
+      "note": "不可補 0 或補 1"
+    },
+    {
+      "case_id": "FIN-20",
+      "group": "價格口徑",
+      "rule": "同一報價基準日沒有價格時為 NA，不用別日價格補",
+      "inputs": {
+        "price_as_of": "2026-09-30",
+        "available_prices": [
+          "2026-09-29"
+        ]
+      },
+      "expected": {
+        "price": null,
+        "status": "NA",
+        "reason": "no_price_on_basis_date"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F02",
+      "note": "不得拿不同日期的價格補"
+    },
+    {
+      "case_id": "FIN-21",
+      "group": "價格口徑",
+      "rule": "原始價格與調整後價格不可混算報酬",
+      "inputs": {
+        "start_price_basis": "raw",
+        "end_price_basis": "adjusted"
+      },
+      "expected": {
+        "return_pct": null,
+        "status": "NA",
+        "reason": "price_basis_mismatch"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 F04、手冊06 CASE-24",
+      "note": "同一組報酬要用一致口徑"
+    },
+    {
+      "case_id": "FIN-22",
+      "group": "公告時間",
+      "rule": "未知公告時間以 captured_at 當可得時間，不倒填更早日期",
+      "inputs": {
+        "period_end": "2026-06-30",
+        "announced_at": null,
+        "captured_at": "2026-08-05T16:00:00+08:00"
+      },
+      "expected": {
+        "available_at": "2026-08-05T16:00:00+08:00",
+        "status": "ok"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 V1.2 固定資料規則",
+      "note": "財報期不是公告日"
+    },
+    {
+      "case_id": "FIN-23",
+      "group": "公告時間",
+      "rule": "cutoff 之後才可得的資料不可使用",
+      "inputs": {
+        "cutoff_at": "2026-08-12T17:00:00+08:00",
+        "available_at": "2026-08-13T09:00:00+08:00"
+      },
+      "expected": {
+        "usable": false,
+        "status": "excluded",
+        "reason": "available_after_cutoff"
+      },
+      "synthetic_fixture": true,
+      "source": "手冊 V1.2 固定資料規則",
+      "note": "available_at 晚於 cutoff 就排除"
+    }
+  ]
+}

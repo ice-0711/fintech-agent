@@ -1,0 +1,18 @@
+【W04-D 交付紀錄（草稿，未驗收）】
+任務：Reviewer prompt / schema、dev 案例離線評估
+做了什麼：
+1. reviewer-v12-prompt.txt / .md：runtime prompt（version reviewer-v1.2.0-draft，附 hash），估算 1,968 / 3,000 token。
+2. reviewer_output.schema.json + reviewer_v12.py：輸出驗證，無發布欄位，只允許 4 個工具。
+3. reviewer_checks.py + dev_drafts.json：離線規則核對器與 20 份 mock 草稿（B 的 10 個 dev 案例 × good/flawed）。
+4. test_reviewer_v12.py：64 passed。
+5. reviewer-dev.md：結果表、限制、4 題需讀來源的問題。
+驗收自查：
+- 輸出只有 pass/revise/insufficient：是（測試）
+- critical 指到 claim_id、required_evidence 具體：是（validate_review）
+- 無發布權：是（schema 擋多餘欄位）
+- 工具清單與 repo 相同：是（測試）
+- 真模型實測：否
+未完成 / 需他人：
+- 預期答案需 B 或組長確認；CASE-26 定義待 B；2317 資料待 B；尚未放進 repo。
+- 實際工時：（Ice 自行填寫）
+驗收：待 B 交叉評分與組長核可，AI 不能驗收。

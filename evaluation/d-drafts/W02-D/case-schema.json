@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fintech-agent 評估案例 schema（W02-D 初稿）",
+  "description": "草稿，尚未經 B 與組長驗收。欄位以 B 的 evaluation/dev-cases.json 為準，並補上手冊06頁要求、但 dev-cases.json 前5案沒看到的欄位（標為選填，待B確認）。",
+  "type": "object",
+  "required": ["dataset_version", "split", "case_count", "cases"],
+  "properties": {
+    "dataset_version": { "type": "string", "description": "例如 v1.2" },
+    "split": { "type": "string", "enum": ["dev", "holdout"], "description": "dev 是開發校準案例；holdout 是保留測試案例，只能在 W10、W11 正式評估使用，不能拿來調 prompt。" },
+    "case_count": { "type": "integer", "minimum": 1 },
+    "verified_by": { "type": "string" },
+    "notes": { "type": "string" },
+    "cases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "required": [
+        "case_id", "ticker", "category", "title", "cutoff_at",
+        "source_snapshot_id", "expected_behavior",
+        "expected_supported_claims", "expected_rejected_claims",
+        "allow_insufficient"
+      ],
+      "properties": {
+        "case_id": { "type": "string", "pattern": "^CASE-[0-9]{2}$" },
+        "ticker": { "type": "string", "enum": ["2330", "2317", "2454"], "description": "固定研究標的只有這三檔。" },
+        "category": {
+          "type": "string",
+          "enum": ["完整證據", "矛盾來源", "缺少關鍵資料", "金融單位/期間錯誤", "工具異常/不可信指令"],
+          "description": "手冊06頁固定的五類。dev-cases.json 的類別字串寫法需要和這裡對齊，待B確認。"
+        },
+        "title": { "type": "string" },
+        "cutoff_at": { "type": "string", "format": "date-time", "description": "資料截止時間，含時區。cutoff 之後才出現的證據不得使用。" },
+        "source_snapshot_id": { "type": "string" },
+        "expected_behavior": { "type": "string" },
+        "expected_supported_claims": { "type": "array", "items": { "type": "string" } },
+        "expected_rejected_claims": { "type": "array", "items": { "type": "string" } },
+        "allow_insufficient": { "type": "boolean", "description": "是否允許系統停在 insufficient。" },
+
+        "synthetic_fixture": { "type": "boolean", "description": "手冊規定：故意製造的錯誤必須標 true，不能宣稱真實公司真的發生。選填，待B確認 dev-cases.json 是逐案標或只在 notes 說明。" },
+        "fixture_id": { "type": "string", "description": "手冊06頁要求。選填，待B確認。" },
+        "source_ids": { "type": "array", "items": { "type": "string" }, "description": "手冊06頁要求。選填，待B確認。" },
+        "source_license_note": { "type": "string", "description": "資料來源與授權註記，手冊06頁要求。選填，待B確認。" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

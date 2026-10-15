@@ -1,0 +1,37 @@
+W03-D 交付紀錄（草稿）
+任務：驗證工具與計分程式；確定性計算交叉驗算
+狀態：草稿。AI 產出不等於驗收，需 B 交叉評分、組長核准。
+更新：2026-10-09
+
+一、本次完成內容
+1. test_adapter_tools.py：六工具驗證測試 45 項（B 規約 TEST-01 到 TEST-09、經 dispatch 的整合測試、DCF 回歸）。
+2. tool-validation.md：六工具 x 正常/缺失/無權限結果、發現清單（F1 到 F5）、逐項測試結果、未涵蓋項目。
+3. v12-financial-test-results.md：7 組手算合成例、DCF 手算、年度 DCF 相容（167.44 三方一致）、無法驗證的 18 個測例。
+4. sample-metrics-MOCK.csv：全 MOCK 的七項指標示例（27 列，每列都有醒目標籤與 data_kind=MOCK，分子分母與 NA 數可手算複核），供 E 練排版。
+
+二、實際執行紀錄
+- 環境：雲端工作環境，Python 3.13.16、pytest 9.1.1（不是 D 的 Mac）。
+- 被測 repo：HEAD 4f67d15，被測檔案無未 commit 修改。
+- 命令：REPO_ROOT=<repo> python -m pytest -q test_adapter_tools.py → 9 failed, 36 passed。
+- B 的規約 TEST-01 到 TEST-09：全部通過。
+- DCF：既有年度版、新版、D 獨立手算皆為 167.44 元/股。
+- 失敗的 9 項（沒有刪除）：dispatch 與工具簽名不相容 6 項（F1）、總經白名單未鎖 1 項（F2）、TTM 不連續 1 項（F3）、dev 快照讀不到 1 項（F4）。
+- 全部是離線 mock／本機資料檔，沒有呼叫模型，沒有 live。
+- 尚未在 D 本機重跑，也尚未放進 repo。
+
+三、逐項驗收對照
+1. mock 表有醒目標籤：sample-metrics-MOCK.csv 每列都有「MOCK 模擬資料｜不是實驗結果」標籤與 data_kind=MOCK。→ 完成
+2. 數學可人工複核：手算步驟寫在 v12-financial-test-results.md；MOCK 表有分子、分母、NA 數。→ 完成
+3. 未執行的整合測試如實列出：tool-validation.md 第六節與 v12-financial-test-results.md 第四節。→ 完成
+4. 不是只 import 成功；保留命令/版本/失敗原因：有命令、版本、9 項失敗與原因。→ 完成
+5. 六工具正常/缺失/無權限與 DCF 回歸：已做；dispatch 正常路徑目前失敗，待 B 修正後重跑。→ 部分完成（受阻於 B）
+
+四、未完成與誰提供
+1. F1 到 F4 需要 B 判斷與修正；修好後 D 重跑 dispatch 正常路徑。
+2. 其餘 18 個財務測例要接到哪個模組：B 說明。
+3. 資料檔沒有 2317（影響 E01 示範案例）：B 或組長說明是否另有補入計畫。
+4. 本機重跑與放進 repo：等 B 確認後處理。
+5. E 若要排版，只能使用 sample-metrics-MOCK.csv，不可當成實驗結果。
+
+五、可貼回 Notion「交付紀錄」的文字
+W03-D 草稿：六工具驗證測試 45 項（雲端環境、離線），36 通過、9 失敗；B 規約 TEST-01 到 TEST-09 全部通過；DCF 新舊實作與手算一致（167.44 元/股）；全 MOCK 指標表 27 列已產出供 E 排版。發現 dispatch 與工具簽名不相容（五個工具 TypeError、read_evidence 假性 no_data）、TTM 未檢查連續、工具讀不到 dev 快照、資料檔無 2317、總經白名單未鎖定，已列出交 B 修正。未做 live 與本機重跑。尚未經 B 交叉評分與組長核准。

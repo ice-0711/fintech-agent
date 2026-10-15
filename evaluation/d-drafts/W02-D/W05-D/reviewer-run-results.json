@@ -1,0 +1,166 @@
+[
+ {
+  "id": "CASE-01-good",
+  "expected": "pass",
+  "got": "pass",
+  "risk": "low",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-01-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-04-good",
+  "expected": "pass",
+  "got": "pass",
+  "risk": "low",
+  "tools": [
+   "calculate_metrics"
+  ]
+ },
+ {
+  "id": "CASE-04-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": [
+   "calculate_metrics"
+  ]
+ },
+ {
+  "id": "CASE-07-good",
+  "expected": "pass",
+  "got": "pass",
+  "risk": "low",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-07-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-08-good",
+  "expected": "pass",
+  "got": "pass",
+  "risk": "low",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-08-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-13-good",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "risk": "unverified",
+  "tools": []
+ },
+ {
+  "id": "CASE-13-flawed",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "risk": "unverified",
+  "tools": []
+ },
+ {
+  "id": "CASE-14-good",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "risk": "unverified",
+  "tools": []
+ },
+ {
+  "id": "CASE-14-flawed",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "risk": "unverified",
+  "tools": []
+ },
+ {
+  "id": "CASE-19-good",
+  "expected": "pass",
+  "got": "pass",
+  "risk": "low",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-19-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-20-good",
+  "expected": "pass",
+  "got": "pass",
+  "risk": "low",
+  "tools": []
+ },
+ {
+  "id": "CASE-20-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": []
+ },
+ {
+  "id": "CASE-25-good",
+  "expected": "pass",
+  "got": "pass",
+  "risk": "low",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-25-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": [
+   "read_evidence"
+  ]
+ },
+ {
+  "id": "CASE-26-good",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "risk": "unverified",
+  "tools": []
+ },
+ {
+  "id": "CASE-26-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "risk": "high",
+  "tools": []
+ }
+]
