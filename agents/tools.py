@@ -45,6 +45,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
         "description": "Search this job's approved source index. Returns source ids, titles, available time, abstract.",
         "parameters": {
             "type": "object",
+            "additionalProperties": False,
             "properties": {
                 "ticker": _TICKER,
                 "query": {"type": "string", "maxLength": 200},
@@ -59,6 +60,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
         "description": "Read one evidence fragment of this job's snapshot by id (paragraph, hash, link).",
         "parameters": {
             "type": "object",
+            "additionalProperties": False,
             "properties": {"evidence_version_id": {"type": "string", "maxLength": 128}},
             "required": ["evidence_version_id"],
         },
@@ -69,6 +71,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
                        "with period, basis, currency, unit; missing = null.",
         "parameters": {
             "type": "object",
+            "additionalProperties": False,
             "properties": {"ticker": _ANY_TICKER, "cutoff": _CUTOFF},
             "required": ["ticker", "cutoff"],
         },
@@ -78,6 +81,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
         "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS) available at cutoff.",
         "parameters": {
             "type": "object",
+            "additionalProperties": False,
             "properties": {
                 "cutoff": _CUTOFF,
                 "series_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 5},
@@ -90,6 +94,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
         "description": "Closing prices of the last 1/5/20 trading sessions up to end_at.",
         "parameters": {
             "type": "object",
+            "additionalProperties": False,
             "properties": {
                 "ticker": _ANY_TICKER,
                 "end_at": _CUTOFF,
@@ -107,6 +112,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
                        "price_as_of,cutoff,snapshot_ids,method_version}. 2330 is reference only. Cite evidence_refs.",
         "parameters": {
             "type": "object",
+            "additionalProperties": False,
             "properties": {
                 "operation": {"type": "string", "enum": list(CALC_OPERATIONS)},
                 "values": {"type": "object"},

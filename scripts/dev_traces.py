@@ -108,6 +108,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--live", action="store_true")
     ap.add_argument("--cases", default=",".join(CASES))
+    ap.add_argument("--model", help="compare another model listed in quota-baseline.json gemini_alternatives_checked")
     args = ap.parse_args()
     cases = load_cases()
     chosen = [cases[c] for c in args.cases.split(",")]
@@ -129,6 +130,12 @@ def main() -> None:
         baseline = json.loads((ROOT / "handoff" / "quota-baseline.json").read_text(encoding="utf-8"))
         quota = ProjectQuota.from_baseline(baseline)
         model_id = os.getenv("GEMINI_MODEL")
+        if args.model:  # comparison run: only with that model's own recorded quota, never a guessed one
+            alt = next((a for a in baseline.get("gemini_alternatives_checked", []) if a["model_id"] == args.model), None)
+            if alt is None:
+                sys.exit(f"{args.model} 沒有記錄在 quota-baseline.json，停止。")
+            quota = ProjectQuota(model_id=alt["model_id"], rpm=alt["rpm"], tpm=alt["tpm"], rpd=alt["rpd"])
+            model_id = args.model
         if model_id != quota.model_id:
             sys.exit(f"GEMINI_MODEL={model_id} 與 quota-baseline.json 的 {quota.model_id} 不一致，停止。")
         stamp = datetime.now().strftime("%Y%m%d%H%M")
@@ -147,9 +154,10 @@ def main() -> None:
         if c["case_id"] in live:
             entry["live"] = live[c["case_id"]]
         out["cases"].append(entry)
+    out_path = OUT if not args.model else OUT.with_name(f"researcher-v12-traces-{args.model}.json")
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("wrote", OUT.relative_to(ROOT))
+    out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("wrote", out_path.relative_to(ROOT))
 
 
 if __name__ == "__main__":

@@ -237,3 +237,31 @@ def test_insufficient_draft_with_wrong_fact_is_flagged_by_rules(store):
     assert final["status"] == "insufficient_evidence" and final["calls_used"] == 2  # no model review spent
     check = [e["detail"] for e in events if e["event_type"] == "rules_check"][0]
     assert set(check["critical"]) == {"c1"} and final["review"]["decision"] != "pass"
+
+
+def test_tool_call_on_text_only_turn_is_not_executed(store):
+    q = {"ticker": "2330", "query": "q", "cutoff": CASE01["cutoff_at"], "limit": 1}
+    final, client, events = run_case(store, CASE01, [
+        fc_response("search_evidence", q), fc_response("read_evidence", {"evidence_version_id": "ev-dev-01-official"}),
+        fc_response("search_evidence", dict(q, query="毛利")),
+        fc_response("get_macro_snapshot", {"cutoff": CASE01["cutoff_at"], "series_ids": ["CPIAUCSL"]})])  # 4th call
+    assert final["status"] == "insufficient_evidence" and final["stop_reason"] == "no_draft_on_final_turn"
+    assert final["calls_used"] == 4 and final["tool_calls_used"] == 3  # the refused call was not run
+    assert "tools_refused" in [e["event_type"] for e in events]
+
+
+def test_parallel_calls_beyond_two_are_skipped(store):
+    cut = CASE01["cutoff_at"]
+    many = types.GenerateContentResponse(
+        candidates=[types.Candidate(content=types.Content(role="model", parts=[
+            types.Part(function_call=types.FunctionCall(name="get_financial_snapshot", args={"ticker": "2330", "cutoff": cut})),
+            types.Part(function_call=types.FunctionCall(name="read_evidence", args={"evidence_version_id": "ev-dev-01-official"})),
+            types.Part(function_call=types.FunctionCall(name="get_price_window", args={"ticker": "2330", "end_at": cut, "sessions": 5})),
+        ]), finish_reason=types.FinishReason.STOP)],
+        usage_metadata=types.GenerateContentResponseUsageMetadata(prompt_token_count=100, candidates_token_count=10,
+                                                                  total_token_count=110))
+    final, client, events = run_case(store, CASE01, [many, text_response(draft(GOOD_CLAIMS)), text_response(PASS)])
+    assert final["tool_calls_used"] == 2 and tools_used(events) == ["get_financial_snapshot", "read_evidence"]
+    tool_turn = [c for c in client.calls[1]["contents"] if c.parts and c.parts[0].function_response][-1]
+    skipped = tool_turn.parts[2].function_response.response
+    assert skipped["status"] == "skipped"

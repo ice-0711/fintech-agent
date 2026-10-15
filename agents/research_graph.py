@@ -38,7 +38,8 @@ DECISION_RANK = {"pass": 0, "revise": 1, "insufficient": 2}
 MAX_STR, MAX_LIST, MAX_RESULT_CHARS = 200, 5, 900
 DROP_KEYS = {"content_hash", "output_hash", "source_id"}  # useless to the model, costly in tokens
 SOFT_INPUT_MARGIN = 300  # start digesting older tool results this far below the input cap
-TOOL_HEADROOM = 600      # a tool result adds ~200–400 tokens; below this headroom the model must answer
+TOOL_HEADROOM = 350      # compacted tool results are ~100–300 tokens; fit_context digests if one overshoots
+MAX_CALLS_PER_TURN = 2   # parallel calls beyond this are answered "skipped" (keeps the context small)
 MAX_FORMAT_RETRIES = 1
 
 
@@ -64,11 +65,11 @@ def digest(result: dict[str, Any], limit: int = 240) -> str:
     return text if len(text) <= limit else text[:limit] + "…"
 
 
-def shrink_history(contents: list[Any], observations: list[dict[str, Any]]) -> int:
-    """Replace older tool results (all but the newest turn) by short digests. Returns how many."""
+def shrink_history(contents: list[Any], observations: list[dict[str, Any]], include_last: bool = False) -> int:
+    """Replace older tool results (all but the newest turn, unless include_last) by short digests."""
     by_id = {o["obs_id"]: o for o in observations}
     shrunk = 0
-    for content in contents[:-1]:
+    for content in (contents if include_last else contents[:-1]):
         for part in content.parts or []:
             fr = part.function_response
             if fr is None or not isinstance(fr.response, dict) or fr.response.get("digested"):
@@ -182,6 +183,15 @@ class ResearchRun:
                 "tool_calls": lim.max_tool_calls - self.job.get("tool_calls_used", 0)}
 
     # -- tools ---------------------------------------------------------------
+    def run_calls(self, role: str, calls: list[Any]) -> list[Any]:
+        parts = [self.run_tool(role, c) for c in calls[:MAX_CALLS_PER_TURN]]
+        for c in calls[MAX_CALLS_PER_TURN:]:
+            parts.append(types.Part.from_function_response(name=c.name, response={
+                "status": "skipped", "reason": f"每輪最多執行 {MAX_CALLS_PER_TURN} 個工具；需要時下一輪再呼叫"}))
+        if len(calls) > MAX_CALLS_PER_TURN:
+            self.event(role, "calls_skipped", {"requested": len(calls), "executed": MAX_CALLS_PER_TURN})
+        return parts
+
     def run_tool(self, role: str, call: Any) -> Any:
         name, args = call.name, dict(call.args or {})
         h = args_hash(args)
@@ -212,6 +222,8 @@ class ResearchRun:
         before = adapter.estimate_input(role, contents, system)
         if before > cap - SOFT_INPUT_MARGIN:
             n = shrink_history(contents, self.observations)
+            if adapter.estimate_input(role, contents, system) > cap - 100:
+                n += shrink_history(contents, self.observations, include_last=True)
             if n:
                 self.event(role, "context_digested", {"results": n, "estimate_before": before,
                                                       "estimate_after": adapter.estimate_input(role, contents, system)})
@@ -221,9 +233,12 @@ class ResearchRun:
         if rem["tool_calls"] <= 0:
             return False
         if contents is not None:
+            limit = self.gate.limits.max_input_tokens - TOOL_HEADROOM
             est = self.adapters[role].estimate_input(role, contents, system)
-            if est > self.gate.limits.max_input_tokens - TOOL_HEADROOM:
-                return False  # no room for another tool result: answer now instead of overflowing
+            if est > limit and shrink_history(contents, self.observations):
+                est = self.adapters[role].estimate_input(role, contents, system)  # older results digested
+            if est > limit:
+                return False  # still no room for another tool result: answer now instead of overflowing
         if role == "researcher":
             if self.mode == "single":
                 return rem["model_calls"] > 1
@@ -243,12 +258,23 @@ class ResearchRun:
                 text="可信輸入：" + json.dumps(trusted, ensure_ascii=False))]))
         self.fit_context("researcher", self.r_contents, RESEARCHER_PROMPT)
         allow = self.tools_allowed("researcher", self.r_contents, RESEARCHER_PROMPT)
+        if not allow:
+            self.r_contents.append(types.Content(role="user", parts=[types.Part.from_text(
+                text="現在不能再呼叫工具：請依已取得的結果直接輸出規定的 JSON 草稿（不足就 status=insufficient）。")]))
         resp = self.adapters["researcher"].send("researcher", self.r_contents, RESEARCHER_PROMPT, allow_tools=allow)
         model_turn = resp.candidates[0].content if resp.candidates else None
         calls = resp.function_calls or []
+        if calls and not allow:
+            # The model asked for tools on a text-only turn: do not run them (that would eat the review call).
+            self.event("researcher", "tools_refused", {"requested": [c.name for c in calls]})
+            draft = {"status": "insufficient", "claims": [],
+                     "limitations": ["Researcher 在必須寫草稿的回合仍要求呼叫工具，未產出草稿"]}
+            draft.update({"ticker": job["ticker"], "snapshot_id": job["source_snapshot_id"], "as_of": job["cutoff_at"]})
+            self.draft = draft
+            return self.finish("insufficient_evidence", "no_draft_on_final_turn")
         if calls:
             self.r_contents.append(model_turn)
-            parts = [self.run_tool("researcher", c) for c in calls]
+            parts = self.run_calls("researcher", calls)
             self.r_contents.append(types.Content(role="user", parts=parts))
             self.save({}, "researcher")
             return {"next": "researcher"}
@@ -311,9 +337,14 @@ class ResearchRun:
                                               allow_tools=self.tools_allowed("reviewer", self.v_contents, REVIEWER_PROMPT))
         model_turn = resp.candidates[0].content if resp.candidates else None
         calls = resp.function_calls or []
+        if calls and not self.tools_allowed("reviewer", self.v_contents, REVIEWER_PROMPT):
+            self.event("reviewer", "tools_refused", {"requested": [c.name for c in calls]})
+            review = {"decision": "insufficient", "issues": [], "checked_refs": [], "checked_metric_ids": [],
+                      "decision_summary": "Reviewer 在必須下結論的回合仍要求工具，不能視為已核實"}
+            return self.finish("insufficient_evidence", "no_review_on_final_turn", review=review)
         if calls:
             self.v_contents.append(model_turn)
-            parts = [self.run_tool("reviewer", c) for c in calls]
+            parts = self.run_calls("reviewer", calls)
             self.v_contents.append(types.Content(role="user", parts=parts))
             self.save({}, "reviewer")
             return {"next": "reviewer"}

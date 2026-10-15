@@ -1,0 +1,573 @@
+{
+  "generated_at": "2026-10-15T02:03:49+00:00",
+  "commit": "20d2e9a",
+  "prompt_versions": {
+    "researcher": "researcher-v1.2.0",
+    "reviewer": "reviewer-v1.2.0"
+  },
+  "note": "mock = scripted model replies (MOCK) on real tools/snapshots; live = gemini chose every step.",
+  "cases": [
+    {
+      "case_id": "CASE-01",
+      "ticker": "2330",
+      "category": "完整證據",
+      "title": "台積電 2026Q2 先進製程與營收相符",
+      "expected_behavior": "提出具備引用之草稿；自主選擇 search/read 與 financial 工具",
+      "mock": {
+        "job_id": "3fffd3b8-7437-4ee6-8bbc-7e7c1d75efb7",
+        "status": "succeeded",
+        "stop_reason": "review_pass",
+        "path": [
+          "researcher:search_evidence→ok",
+          "researcher:read_evidence→ok"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 1889,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "search_evidence",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2126,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "read_evidence",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2334,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "draft"
+          },
+          {
+            "seq": 9,
+            "role": "reviewer",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 4,
+            "prompt_version": "reviewer-v1.2.0",
+            "input_estimate": 1919,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 10,
+            "role": "reviewer",
+            "event": "review",
+            "tool": null,
+            "final_decision": "pass",
+            "model_decision": "pass",
+            "rules_decision": "pass",
+            "critical": []
+          }
+        ],
+        "draft": {
+          "status": "draft",
+          "decision_summary": "MOCK",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "fact",
+              "text": "2026Q2 合併營收約 6,735 億元（新台幣）",
+              "evidence_refs": [
+                "ev-dev-01-official"
+              ],
+              "facts": [
+                {
+                  "metric": "revenue",
+                  "value": 6735,
+                  "currency": "TWD",
+                  "period": "2026Q2",
+                  "period_basis": "single_quarter",
+                  "source_ref": "ev-dev-01-official"
+                }
+              ],
+              "limitations": []
+            }
+          ],
+          "conflicts": [],
+          "limitations": [],
+          "ticker": "2330",
+          "snapshot_id": "snap-dev-case-01",
+          "as_of": "2026-07-20T09:00:00+00:00"
+        },
+        "review": {
+          "decision": "pass",
+          "issues": [],
+          "checked_refs": [
+            "ev-dev-01-official"
+          ],
+          "checked_metric_ids": [
+            "revenue"
+          ],
+          "decision_summary": "MOCK"
+        },
+        "budget": {
+          "calls_used": 4,
+          "tool_calls_used": 2,
+          "tokens_observed": 640,
+          "supplement_rounds": 0,
+          "active_seconds": 0.004
+        }
+      },
+      "live": {
+        "job_id": "69430692-7b3c-4121-a7ba-b11da4f44c92",
+        "status": "insufficient_evidence",
+        "stop_reason": "input_too_large",
+        "path": [
+          "researcher:get_financial_snapshot→ok",
+          "researcher:get_price_window→no_data",
+          "researcher:get_macro_snapshot→ok",
+          "researcher:search_evidence→ok",
+          "researcher:search_evidence→ok",
+          "researcher:get_evidence_by_id→invalid_input"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 1889,
+            "estimate_under_actual": false,
+            "prompt_tokens": 1680,
+            "total_tokens": 1918
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_price_window",
+            "status": "no_data",
+            "reason": "交易數據不足或停牌"
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_macro_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "search_evidence",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2781,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2585,
+            "total_tokens": 2658
+          },
+          {
+            "seq": 9,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "search_evidence",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 10,
+            "role": "researcher",
+            "event": "context_digested",
+            "tool": null
+          },
+          {
+            "seq": 11,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2859,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2545,
+            "total_tokens": 2576
+          },
+          {
+            "seq": 12,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_evidence_by_id",
+            "status": "invalid_input",
+            "reason": "未知工具 get_evidence_by_id；本系統只有六個工具"
+          },
+          {
+            "seq": 13,
+            "role": "researcher",
+            "event": "context_digested",
+            "tool": null
+          }
+        ],
+        "draft": null,
+        "review": null,
+        "budget": {
+          "calls_used": 3,
+          "tool_calls_used": 6,
+          "tokens_observed": 7152,
+          "supplement_rounds": 0,
+          "active_seconds": 12.174
+        }
+      }
+    },
+    {
+      "case_id": "CASE-04",
+      "ticker": "2330",
+      "category": "完整證據",
+      "title": "台積電 2026-09 收盤價與 P/E 核算",
+      "expected_behavior": "呼叫 get_price_window 與 calculate_metrics 驗算本益比",
+      "mock": {
+        "job_id": "f5a58b91-1589-40a1-8e97-fd3a7f053a6f",
+        "status": "succeeded",
+        "stop_reason": "review_pass",
+        "path": [
+          "researcher:get_price_window→ok",
+          "researcher:get_financial_snapshot→ok",
+          "researcher:calculate_metrics→ok"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 1888,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_price_window",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2071,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2242,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "calculate_metrics",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 9,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 4,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2419,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 10,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "draft"
+          },
+          {
+            "seq": 11,
+            "role": "reviewer",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 5,
+            "prompt_version": "reviewer-v1.2.0",
+            "input_estimate": 1943,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 12,
+            "role": "reviewer",
+            "event": "review",
+            "tool": null,
+            "final_decision": "pass",
+            "model_decision": "pass",
+            "rules_decision": "pass",
+            "critical": []
+          }
+        ],
+        "draft": {
+          "status": "draft",
+          "decision_summary": "MOCK",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "fact",
+              "text": "以同日收盤價與 TTM EPS 計算 P/E",
+              "evidence_refs": [
+                "obs-3"
+              ],
+              "limitations": []
+            }
+          ],
+          "conflicts": [],
+          "limitations": [],
+          "ticker": "2330",
+          "snapshot_id": "snap-dev-case-04",
+          "as_of": "2026-09-30T09:00:00+00:00"
+        },
+        "review": {
+          "decision": "pass",
+          "issues": [],
+          "checked_refs": [
+            "obs-3"
+          ],
+          "checked_metric_ids": [],
+          "decision_summary": "MOCK"
+        },
+        "budget": {
+          "calls_used": 5,
+          "tool_calls_used": 3,
+          "tokens_observed": 760,
+          "supplement_rounds": 0,
+          "active_seconds": 0.005
+        }
+      },
+      "live": {
+        "job_id": "c9e593ec-0482-47c8-a7ea-5000e875643d",
+        "status": "insufficient_evidence",
+        "stop_reason": "reserved_for_review",
+        "path": [
+          "researcher:get_financial_snapshot→ok",
+          "researcher:get_price_window→ok",
+          "researcher:get_macro_snapshot→ok",
+          "researcher:calculate_metrics→invalid_input",
+          "researcher:calculate_metrics→invalid_input",
+          "researcher:get_macro_snapshot→ok"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 1888,
+            "estimate_under_actual": false,
+            "prompt_tokens": 1681,
+            "total_tokens": 1831
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_price_window",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_macro_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2490,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2295,
+            "total_tokens": 2342
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "calculate_metrics",
+            "status": "invalid_input",
+            "reason": "calculate_metrics 不接受欄位 ['expressions', 'variables']"
+          },
+          {
+            "seq": 9,
+            "role": "researcher",
+            "event": "context_digested",
+            "tool": null
+          },
+          {
+            "seq": 10,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2644,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2290,
+            "total_tokens": 2328
+          },
+          {
+            "seq": 11,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "calculate_metrics",
+            "status": "invalid_input",
+            "reason": "calculate_metrics 不接受欄位 ['formula', 'inputs']"
+          },
+          {
+            "seq": 12,
+            "role": "researcher",
+            "event": "context_digested",
+            "tool": null
+          },
+          {
+            "seq": 13,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 4,
+            "prompt_version": "researcher-v1.2.0",
+            "input_estimate": 2820,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2365,
+            "total_tokens": 2417
+          },
+          {
+            "seq": 14,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_macro_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 15,
+            "role": "researcher",
+            "event": "context_digested",
+            "tool": null
+          }
+        ],
+        "draft": null,
+        "review": null,
+        "budget": {
+          "calls_used": 4,
+          "tool_calls_used": 6,
+          "tokens_observed": 8918,
+          "supplement_rounds": 0,
+          "active_seconds": 12.856
+        }
+      }
+    }
+  ],
+  "model_id": "gemini-3.6-flash"
+}

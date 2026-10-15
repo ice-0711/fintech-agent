@@ -79,6 +79,7 @@
       "description": "Search this job's approved source index. Returns source ids, titles, available time, abstract.",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "ticker": {
             "type": "string",
@@ -115,6 +116,7 @@
       "description": "Read one evidence fragment of this job's snapshot by id (paragraph, hash, link).",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "evidence_version_id": {
             "type": "string",
@@ -131,6 +133,7 @@
       "description": "Financial values available at cutoff (revenue, net income, EPS/TTM, FCF, shares, net debt) with period, basis, currency, unit; missing = null.",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "ticker": {
             "type": "string",
@@ -158,6 +161,7 @@
       "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS) available at cutoff.",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "cutoff": {
             "type": "string",
@@ -183,6 +187,7 @@
       "description": "Closing prices of the last 1/5/20 trading sessions up to end_at.",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "ticker": {
             "type": "string",
@@ -216,9 +221,10 @@
     },
     {
       "name": "calculate_metrics",
-      "description": "Deterministic math: growth_rate, simple_return, pe_ttm, dcf_scenario, peer_comparison (2454 vs 2379/3034; 2330 reference only; max 4 companies). Cite evidence_refs.",
+      "description": "Deterministic math on numbers taken from tool results (never guessed). values by operation: growth_rate{current,previous}; simple_return{entry_price,exit_price}; pe_ttm{price,eps_ttm}; dcf_scenario{free_cash_flows[],wacc,terminal_growth,net_debt,shares_outstanding}; peer_comparison{subject:2454,comparators,metrics{ticker:{price,eps_ttm,pb,revenue_yoy,fcf}},price_as_of,cutoff,snapshot_ids,method_version}. 2330 is reference only. Cite evidence_refs.",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "operation": {
             "type": "string",
