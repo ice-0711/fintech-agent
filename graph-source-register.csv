@@ -1,3 +1,4 @@
-graph_id,graph_type,relation_entity,data_source,max_nodes_edges,llm_usage,notes
-graph_supply,2d_network,IC_Design_Supply,manual_json_or_db,20_nodes/30_edges,0_LLM,以公開產業報告或年報為依據；純讀取已核准來源；嚴禁以 LLM 猜測供應鏈關聯
-graph_peer,2d_comparison,2454_Peers,manual_json_or_db,20_nodes/30_edges,0_LLM,2454為核心主體；連動2379與3034同業；2330僅作「產業參照」不計入同業平均
+register_id,graph_id,source_ticker,doc_type,doc_title,source_url,local_file,doc_date,doc_date_basis,captured_at,pdf_pages,license_note,used_by,status,notes
+GSR-01,graph_supply,2454,公司年報（114 年度）,聯發科 2025 年報 2.3 主要原料之供應狀況,https://doc.twse.com.tw/pdf/2025_2454_20260529F04_20261018_224539.pdf,2025_2454_20260529F04_20261018_223609.pdf,2026-05-29,twse_filename_upload_date（TWSE 電子書檔名之上傳日；待以封面核對）,2026-10-18T22:36:09+08:00,74,公開資訊觀測站法定公開文件；僅引用原句,graph-reviewed.csv → graph-approved.json,source_text_verified,doc.twse.com.tw 下載連結為暫存網址，可能失效；以本機檔與 hash 為準
+GSR-02,graph_supply,2379,公司年報（114 年度）,瑞昱 2025 年報 三、主要原料之供應狀況,https://doc.twse.com.tw/pdf/2025_2379_20260527F04_20261018_224618.pdf,2025_2379_20260527F04_20261018_223825.pdf,2026-05-27,twse_filename_upload_date（TWSE 電子書檔名之上傳日；待以封面核對）,2026-10-18T22:38:25+08:00,94,公開資訊觀測站法定公開文件；僅引用原句,graph-reviewed.csv → graph-approved.json,source_text_verified,同上
+GSR-03,graph_peer,2454/2379/3034/2330,比較快照,2454 同業比較快照（基準日 2026-09-30）,—,data/v12-peer-snapshot.json,2026-09-30,price_as_of,2026-10-18T12:00:00+08:00,—,FinMind／TWSE／MOPS 公開資料,graph_peer,approved_snapshot,2330 為產業參照，不入同業平均
