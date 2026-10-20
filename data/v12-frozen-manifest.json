@@ -1,0 +1,434 @@
+{
+  "manifest_version": "cases-v1",
+  "frozen_at": "2026-10-20T20:44:37+08:00",
+  "planned_sign_date": "2026-10-23",
+  "generated_by": "scripts/build_freeze.py",
+  "hash_rule": "文字檔 sha256_lf（CRLF→LF 後計算）；data/raw 原始檔為原始位元組 sha256",
+  "versions": {
+    "tools_version": "tools-v12.0",
+    "contract_version": "v1.2",
+    "question_version": "macro-fundamental-valuation-v1",
+    "prompt_version": "v1.2",
+    "tool_contract": "v1.1-w02",
+    "snapshot_manifest": "v1.6-tw-market",
+    "snapshot_cutoff": "2026-09-30",
+    "peer_snapshot": "v1.7-w04",
+    "macro_whitelist": [
+      "CPIAUCSL",
+      "FEDFUNDS"
+    ]
+  },
+  "cases": {
+    "file": "evaluation/cases_manifest_v1.json",
+    "cases_digest": "98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3",
+    "counts": {
+      "dev": 10,
+      "test": 20,
+      "total": 30
+    }
+  },
+  "peer_lock": {
+    "subject": "2454",
+    "price_as_of": "2026-09-30",
+    "cutoff_at": "2026-09-30T17:30:00+08:00",
+    "roles": {
+      "2454": "subject",
+      "2379": "peer",
+      "3034": "peer",
+      "2330": "industry_reference"
+    },
+    "peer_summary_statistics": {
+      "calculation_basis": "僅以 peer 角色（2379、3034）計算平均，完全排除 2330 與主體",
+      "peer_avg_pe": 23.23,
+      "peer_avg_pb": 6.29,
+      "peer_avg_revenue_yoy": 0.1363,
+      "peer_avg_fcf_ttm_100m": 167.85,
+      "n_peers": 2,
+      "excluded_entities": [
+        "2330"
+      ]
+    },
+    "file_sha256_lf": "45b7ad347f148c08b166064f7270397bdb2bd15e635d1558e29c11141a29ce02"
+  },
+  "data_files": [
+    {
+      "path": "data/financial-snapshots.json",
+      "present": true,
+      "sha256_lf": "b1136cf33b4670832b3c10d61be1657c2cc683f420ed88ec7143d8326db1849a",
+      "bytes": 51280
+    },
+    {
+      "path": "data/source-manifest.json",
+      "present": true,
+      "sha256_lf": "e63628d39574a0b70768fa83d957e67217ccb0530f0ff80670b7a1b1b8cf9746",
+      "bytes": 18004
+    },
+    {
+      "path": "data/v12-peer-snapshot.json",
+      "present": true,
+      "sha256_lf": "45b7ad347f148c08b166064f7270397bdb2bd15e635d1558e29c11141a29ce02",
+      "bytes": 8582
+    },
+    {
+      "path": "data/v12-finance-fact-sheet.md",
+      "present": true,
+      "sha256_lf": "2b62b63c4f12e219accffef73d5833acb99494d4b01c30047f98728d904e5e07",
+      "bytes": 8571
+    },
+    {
+      "path": "data/v12-financial-fixtures.json",
+      "present": true,
+      "sha256_lf": "7c4b8be2400f39a644f46b4b315a7b2064b7d6c0f1cf89774782104c54afa1d3",
+      "bytes": 37670
+    },
+    {
+      "path": "data/tool-contracts.json",
+      "present": true,
+      "sha256_lf": "8cdad2465a8fb802e6d565e22ac7fbecf5e2ab318476a57e2a14e03df79c2fcf",
+      "bytes": 17006
+    },
+    {
+      "path": "data/tool-field-map.md",
+      "present": true,
+      "sha256_lf": "e5c834b6a6cfc25edb6ebfbc48496d30a6153d11b2f076b3cb90142d566e22b3",
+      "bytes": 13280
+    },
+    {
+      "path": "data/v12-field-map.csv",
+      "present": true,
+      "sha256_lf": "10d4a0a092da40084dcdf3fa73c9082f7e0d771a688b7b021861e00f0109526e",
+      "bytes": 4972
+    },
+    {
+      "path": "data-contract.md",
+      "present": true,
+      "sha256_lf": "d5723d338d149d1af761e0b0315eb399aa45fa9880a5658a976ee180d56a7f65",
+      "bytes": 19651
+    },
+    {
+      "path": "source-register.csv",
+      "present": true,
+      "sha256_lf": "92db39c7f761483cd876d0d3d95ddedc937514f85628bda44145b024fb6ff1bc",
+      "bytes": 5699
+    },
+    {
+      "path": "graph-source-register.csv",
+      "present": true,
+      "sha256_lf": "06ca9182e7a7df6ed5250dfa4e783b9125664a5f0dd356a10ff2229e3303abba",
+      "bytes": 1477
+    },
+    {
+      "path": "graph-reviewed.csv",
+      "present": true,
+      "sha256_lf": "77cba089a46db36eca1d31779e1c890c1811436ed4ecf51e9b1f7a94553e6ec8",
+      "bytes": 1615
+    },
+    {
+      "path": "fixtures/tool-responses.json",
+      "present": true,
+      "sha256_lf": "c4eb67eb3b751ee5c7b2c58bcb64fc750a29836a6d69a05b1fff906c46e1a744",
+      "bytes": 35535
+    }
+  ],
+  "raw_files": [
+    {
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2330_74c3a822c42b.json",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "2330",
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "sha256": "74c3a822c42b6afbb1d40676bd96dac8fabe8caa779fd9b1c21274b8a0dae046",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2330_78a896d9c7c9.json",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2330",
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "sha256": "78a896d9c7c905ca7b693da38ec794962a2fce8031a9d61eaa70824d8b07be71",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2330_6d1581983651.json",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2330",
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "sha256": "6d1581983651e1cc0b316bb1662f462aad87dd0bc3b403d89352473012d03e5f",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2317_5229282b80dc.json",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "2317",
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "sha256": "5229282b80dc6bda4781bc1f8ff4e0ec1913b574bf716b94d8d18e5f29fe5f6e",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2317_46d7b96474b7.json",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2317",
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "sha256": "46d7b96474b7fddaec43eb9077ad247ba5c5fb38b6e230e99b4c0a761c0bbf06",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2317_476006bbf638.json",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2317",
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "sha256": "476006bbf63878c1758da1db325a26b3f34a5242b0bdfc88f9b482d5b76326ee",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2454_a3cd58156f0a.json",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "2454",
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "sha256": "a3cd58156f0a781acade3765c699f328265bd16fd1cfdce51920ea9809124766",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2454_937e40a91d1b.json",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2454",
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "sha256": "937e40a91d1b18c284a233a212e200c3bddb6909e95096409c09502fa9dfb476",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2454_6c61e30a189c.json",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2454",
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "sha256": "6c61e30a189c915417cf394b4e5fbb07f664cbf8e19cc669c0e9e1932591a434",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2379_9d8c64dda603.json",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "2379",
+      "captured_at": "2026-10-19T17:18:09+08:00",
+      "sha256": "9d8c64dda603d49821553d24dfd98290749e6573fa34367df0001ac0b3c509c5",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2379_82d46e5a0bf6.json",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2379",
+      "captured_at": "2026-10-19T17:18:09+08:00",
+      "sha256": "82d46e5a0bf6bdaeb90639180212ce802d807555d01207bc9cd99bf6a499c6d0",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2379_0db685b14c0a.json",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2379",
+      "captured_at": "2026-10-19T17:18:09+08:00",
+      "sha256": "0db685b14c0a9741a41bccc570e0e83bbb0cfed9815e78a4970bba579bfcab7c",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_3034_3410234b29d7.json",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "3034",
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "sha256": "3410234b29d7887e1e5cf878aa27afc47be3cc91694778e2a094b2807ee0e064",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_3034_0d82d615a3c1.json",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "3034",
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "sha256": "0d82d615a3c1b36579b8c8f2fee806ea7db6b4ad50b7016d7784e23cf4524d10",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_3034_fb7ba1de7e61.json",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "3034",
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "sha256": "fb7ba1de7e61d23f63bf8ed9115da4a7ec48bdefda587570a142bddb7ca1fc30",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockTradingDate_ALL_e9e18edc2ea7.json",
+      "dataset": "TaiwanStockTradingDate",
+      "entity": "ALL",
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "sha256": "e9e18edc2ea7068d1d12c6a97a5f38da7246d761beb20962af0653a096a2193c",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2330_64a825ed0238.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2330",
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "sha256": "64a825ed02380f86f368c6e815c3b23ea4774bef2710806ed7339f0e84286f2b",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2317_a08ee9b4a443.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2317",
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "sha256": "a08ee9b4a443b8a9b70df0107c3dff3a97f92081639c5b509be03a89d556749b",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2454_d8716e166cc0.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2454",
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "sha256": "d8716e166cc0f59b96c3ebb7721ef221dabf872630db017397d4f823193a96d0",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2379_5636e04a4417.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2379",
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "sha256": "5636e04a4417a759d2c0032d9c01a35d7896f0cfaf7556eeda8d1247c0fc0e67",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_3034_330b9cf87f14.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "3034",
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "sha256": "330b9cf87f14eb47ea60087cc650b5aad9b6e46f0c6eddf3f90d98ba4c856f44",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_TAIEX_f16dfc92126b.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "TAIEX",
+      "captured_at": "2026-10-20T20:44:34+08:00",
+      "sha256": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0",
+      "present": true,
+      "verified": true
+    }
+  ],
+  "manual_files": [
+    {
+      "path": "data/manual/announce_times.csv",
+      "present": true,
+      "sha256_lf": "5a601ffc382f59041085e9fdf0633ad998d78c077e832ef35d8a213b95dd1b2f",
+      "bytes": 2112
+    },
+    {
+      "path": "data/manual/balance_overrides.csv",
+      "present": true,
+      "sha256_lf": "3df96a96b810e80ebf854fb141011e765ac7b0e7ad77edfb9b41b9d489480bc7",
+      "bytes": 2076
+    },
+    {
+      "path": "data/manual/macro.csv",
+      "present": true,
+      "sha256_lf": "f89367150a991b6e6961d9195acbf8857d31b0bd518173eb6f37c8a424ecd361",
+      "bytes": 286
+    }
+  ],
+  "tool_files": [
+    {
+      "path": "agents/tools.py",
+      "present": true,
+      "sha256_lf": "f2a2f09b8140210c42cd67ceaafa612f1b135d516987050bb4dd41f0bd43f5c1",
+      "bytes": 17089
+    },
+    {
+      "path": "agents/tools_impl.py",
+      "present": true,
+      "sha256_lf": "0ad0bba0fd74d3fd68ad5e20ec452fa26a9585a74f3c57ac05865d6676ff8187",
+      "bytes": 17286
+    },
+    {
+      "path": "agents/calculator.py",
+      "present": true,
+      "sha256_lf": "c24415e0769ebd206bc5f0d1d11e616de199bec55625da6d7c7e7dddd672c82f",
+      "bytes": 11802
+    },
+    {
+      "path": "agents/register_tools.py",
+      "present": true,
+      "sha256_lf": "052379a90b84ca1ac65e4a5130db818f247380cbe05e1adccc0c5d54a33bda60",
+      "bytes": 2634
+    },
+    {
+      "path": "agents/snapshot.py",
+      "present": true,
+      "sha256_lf": "945a49b3edd6e83d1730bfe4b1cb479a6a906f2f0408c6f3c51b33c2c754ff17",
+      "bytes": 6590
+    },
+    {
+      "path": "agents/contract.py",
+      "present": true,
+      "sha256_lf": "c7e093ef481eaf3813afaa3f34b471f9d38141c2ee2dfb60b4ecf479235bf9ed",
+      "bytes": 4424
+    },
+    {
+      "path": "agents/review_checks.py",
+      "present": true,
+      "sha256_lf": "eb63968ac09b5ffb64721257cdcc1db18b151cb974c51eac49a2a34ee88b2c5f",
+      "bytes": 17957
+    },
+    {
+      "path": "agents/research_graph.py",
+      "present": true,
+      "sha256_lf": "ab806c26cf9a38b434b6adf96f1c03313db3e285523f3b5f438109da2cbf4f39",
+      "bytes": 26996
+    },
+    {
+      "path": "valuation_agent/dcf_model.py",
+      "present": true,
+      "sha256_lf": "04da6836e9a94d00cf8fbbe370f37fa787bc01637fdb26227136a9abf844592a",
+      "bytes": 4051
+    }
+  ],
+  "prompt_files": [
+    {
+      "path": "agents/prompts/researcher-v1.2.txt",
+      "present": true,
+      "sha256_lf": "c2c3dd26dd5ddb411d71d2011646a0350086582dfca406516f670c8e549ea50e",
+      "bytes": 2214
+    },
+    {
+      "path": "agents/prompts/reviewer-v1.2.txt",
+      "present": true,
+      "sha256_lf": "322625496a8e2ea48987a7d976febd94aa4d9c823ca3fcd0bf540cb0e1ccbaef",
+      "bytes": 2663
+    }
+  ],
+  "summary": {
+    "raw_files": 22,
+    "raw_files_present": 22,
+    "null_hashes": 0
+  },
+  "pending_approvals": [
+    "DCF 參數 WACC 10%、g 3%",
+    "股價可得時間 17:30 規則",
+    "台股市場總經指標",
+    "CR-W03／W05 snapshot.py 修正（保留集執行前）"
+  ]
+}
