@@ -1,0 +1,33 @@
+field_name,data_type,currency,unit,period_type,missing_handling,risk_level,source,known_status,validation_rule
+ticker,string,None,None,—,不可缺,high,快照,已知,2330/2317/2454 研究主體；2379/3034 僅比較
+period,string,None,None,—,不可缺,high,快照,已知,YYYYQn；財報期不是公告日
+period_basis,string,None,None,—,不可缺,high,快照,已知,single_quarter / ytd / annual / instant 之一
+revenue,float,TWD,100m,single_quarter/ytd/annual,null + missing_reason,high,finmind_fs_income,已知,單季由 YTD 差分（同公司同年同合併口徑）；無前期則不差分
+operating_income,float,TWD,100m,single_quarter/ytd/annual,null + missing_reason,high,finmind_fs_income,已知,本業獲利；負值不得隱匿
+net_income,float,TWD,100m,single_quarter/ytd/annual,null + missing_reason,high,finmind_fs_income,已知,歸屬母公司業主淨利
+eps,float,TWD,元,single_quarter,null + missing_reason,high,mops_eps_direct / finmind_fs_income,已知,必須標示 eps_source；2025Q4 採 finmind_quarterly 且經全年減 1–9 月驗證
+eps_source,string,None,None,single_quarter,不可缺,high,快照,已知,mops_direct / finmind_quarterly / unverified 三者之一
+eps_ttm,float,TWD,元,ttm（四連續單季）,不足 4 季或任一缺 → null,high,由快照計算,已知,TTM 所用季別不得為 unverified；不得以少於 4 季年化
+revenue_yoy_quarter,float,None,ratio,single_quarter,基期缺 → null,medium,由快照計算（growth_rate）,已知,本季單季營收 ÷ 去年同季單季營收 − 1
+operating_cash_flow,float,TWD,100m,single_quarter/ytd/annual,null + missing_reason,medium,finmind_cf,已知,FinMind 為累計值，需逐季差分
+capital_expenditure,float,TWD,100m,single_quarter/ytd/annual,null + missing_reason,medium,finmind_cf,已知,PropertyAndPlantAndEquipment；來源為負值流出，快照轉正並記錄
+free_cash_flow,float,TWD,100m,single_quarter/annual,null（不補 0）,high,finmind_cf,已知,FCF = CFO − 正值 CapEx；DCF 核心輸入
+fcf_ttm,float,TWD,100m,ttm（四連續單季）,不足 4 季或任一缺 → null,high,由快照計算,已知,四連續單季 FCF 加總
+shares_issued,float,Shares,1m,instant,null,high,finmind_bs,已知,OrdinaryShare（元）÷ 10 元面額 ÷ 1e6；不含債券換股權利證書
+treasury_shares,float,Shares,1m,instant,null（不補 0）,high,finmind_bs,已知,母公司暨子公司持有之母公司股數
+shares_outstanding,float,Shares,1m,instant,null,high,finmind_bs,已知,shares_issued − treasury_shares；存量不可跨期相加
+bvps,float,TWD,元/股,instant,非正 → null,high,finmind_bs,已知,歸屬母公司業主權益 ÷ shares_outstanding；不含非控制權益
+interest_bearing_debt,float,TWD,100m,instant,null（不補 0）,high,finmind_bs + mops_balance_overrides,已知,LongtermBorrowings + ShorttermBorrowings + BondsPayable + NotesPayable（人工覆寫）；不含租賃負債；科目不存在者覆寫為 0 並註明
+net_debt,float,TWD,100m,instant,null（不補 0）,high,finmind_bs + mops_balance_overrides,已知,interest_bearing_debt − CashAndCashEquivalents；淨現金允許為負
+close_price,float,TWD,元,instant（交易日）,null,high,finmind_price（twse_stock_day 比對）,已知（入庫時間未知）,未還原收盤價 raw_close；同業比較需同基準日
+pe_ratio,float,None,x,instant,分母非正或缺 → null,medium,由快照計算（pe_ttm）,已知,close_price ÷ eps_ttm；EPS ≤ 0 標 NA
+pb_ratio,float,None,x,instant,分母非正或缺 → null,medium,由快照計算（peer_comparison）,已知,close_price ÷ bvps；BVPS ≤ 0 標 NA
+wacc,float,None,%,instant,不補 0（DCF 關鍵）,high,valuation_agent/dcf_model.py 預設,未核定,須大於 terminal_growth；程式預設 10%（手冊文字 9%），待組長核定
+terminal_growth,float,None,%,instant,不補 0（DCF 關鍵）,high,valuation_agent/dcf_model.py 預設,未核定,不可大於等於 WACC；程式預設 3%，待組長核定
+statement_basis,string,None,None,—,不可缺,medium,快照,部分已知,本專案快照為 consolidated；2317 在 MOPS 無個體財報公告（已確認）；FinMind 合併口徑以 EPS 對帳抽查
+source_id,string,None,None,—,不可缺,high,source-register.csv,已知,須存在於 source-register.csv
+snapshot_id,string,None,None,—,不可缺,high,快照,已知,不可變
+content_hash,string,None,sha256,—,不可缺,high,快照,已知,64 位小寫十六進位；必須由實際檔案計算
+available_at,string,UTC+08:00,ISO-8601,instant,不可缺,high,mops_announce / 規則,部分已知,財報＝MOPS 發言時間；股價＝交易日 17:30；官方時間未知者＝captured_at，不得早於擷取時間
+available_at_basis,string,None,None,—,不可缺,high,快照,已知,official / rule_close_1730 / captured_at_fallback
+captured_at,string,UTC+08:00,ISO-8601,instant,不可缺,medium,原始檔擷取紀錄,已知,資料實際取得時間；官方時間未知時兼作可得時間
