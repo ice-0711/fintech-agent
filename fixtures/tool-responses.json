@@ -1,145 +1,1141 @@
 {
-  "fixture_version": "v1.2",
-  "note": "6 大工具標準輸出 Fixtures（包含正常回傳與 no_data / invalid_input 錯誤結構）",
-  "responses": {
-    "search_evidence": {
-      "success": {
+  "fixture_version": "v1.4-w02",
+  "contract_version": "v1.1-w02",
+  "generated_by": "scripts/build_w02_fixtures.py",
+  "source_snapshot": {
+    "file": "data/financial-snapshots.json",
+    "sha256": "abc97587722425e718d1579c6e6ef861b5d249dae513ae63d4c884ce4e6c9fe6"
+  },
+  "status_enum": [
+    "ok",
+    "no_data",
+    "invalid_input",
+    "unreadable",
+    "tool_error"
+  ],
+  "response_shape": [
+    "status",
+    "tool",
+    "reason",
+    "data"
+  ],
+  "check_modes": {
+    "exact": "整個 expected_response 必須相同",
+    "status_only": "只比 status；reason 為參考文字",
+    "fields": "比 status 與 data 中列出的數值欄位"
+  },
+  "scope": "TR-xx 是六工具的契約 fixture，不是研究評估案例，不計入固定 30 案（10 開發 + 20 保留）。只引用開發集 CASE-15、CASE-26 的快照；不引用任何保留案例。",
+  "note": "預期回傳為 W02 契約規格。真實數字取自快照；synthetic_fixture=true 為人工構造之錯誤輸入或擾動，不作為財務數字來源。",
+  "responses": [
+    {
+      "fixture_id": "TR-01",
+      "tool": "search_evidence",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2330",
+        "query": "營收",
+        "cutoff": "2026-07-20T17:00:00+08:00",
+        "limit": 5
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
         "status": "ok",
         "tool": "search_evidence",
+        "reason": null,
         "data": [
           {
-            "source_id": "src-2330-2026q2-report",
-            "title": "台灣積體電路製造股份有限公司 2026 年第二季財務報告公告",
+            "source_id": "src-2330-2026q2-announce",
+            "evidence_version_id": "ev-2330-2026q2-01",
+            "ticker": "2330",
+            "title": "台積公司公佈 2026 年第二季財務報告",
             "published_at": "2026-07-16T14:00:00+08:00",
             "captured_at": "2026-07-16T15:30:00+08:00",
             "available_at": "2026-07-16T14:00:00+08:00",
-            "content_hash": "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
-            "abstract": "台積公司公佈 2026 年第二季合併營收約為新台幣 6,735 億元，稅後純益約為新台幣 2,478 億元..."
+            "available_at_basis": "official",
+            "content_hash": "15df1f0d74d8ba451647b2906cc95fb4c4ffac59c78c914320f3d566261e5624",
+            "abstract": "台積公司 2026Q2 合併營收 12,703.8 億元，EPS 27.25 元，毛利率 67.7%。"
           }
         ]
+      }
+    },
+    {
+      "fixture_id": "TR-02",
+      "tool": "search_evidence",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2330",
+        "query": "營收",
+        "cutoff": "2026-06-01T00:00:00+08:00",
+        "limit": 5
       },
-      "no_data": {
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
         "status": "no_data",
         "tool": "search_evidence",
-        "reason": "在指定 cutoff 以前查無符合條件的公告或索引快照",
+        "reason": "指定 cutoff 前查無相符索引快照",
         "data": null
       }
     },
-    "read_evidence": {
-      "success": {
+    {
+      "fixture_id": "TR-03",
+      "tool": "search_evidence",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2379",
+        "query": "營收",
+        "cutoff": "2026-09-30T17:30:00+08:00",
+        "limit": 5
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "search_evidence",
+        "reason": "search_evidence.ticker='2379' 不在允許值 ['2330', '2317', '2454']",
+        "data": null
+      },
+      "note": "2379/3034 只透過財務與行情工具作同業比較輸入"
+    },
+    {
+      "fixture_id": "TR-04",
+      "tool": "search_evidence",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2330",
+        "query": "https://example.com 營收",
+        "cutoff": "2026-09-30T17:30:00+08:00",
+        "limit": 5
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "search_evidence",
+        "reason": "search_evidence 參數含 URL/路徑/SQL/指令字樣，拒絕執行",
+        "data": null
+      }
+    },
+    {
+      "fixture_id": "TR-05",
+      "tool": "read_evidence",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "evidence_version_id": "ev-2330-2026q2-01"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
         "status": "ok",
         "tool": "read_evidence",
+        "reason": null,
         "data": {
           "evidence_version_id": "ev-2330-2026q2-01",
-          "paragraph": "2026 年第二季毛利率為 53.2%，營業利益率為 42.5%，稅後純益率為 36.8%。先進製程（包含 7 奈米及更先進行程）營收達到全季晶圓銷售金額的 67%。",
-          "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
-          "content_hash": "f0e1d2c3b4a596877869504132231405abcdef0123456789abcdef0123456789",
-          "available_at": "2026-07-16T14:00:00+08:00"
+          "source_id": "src-2330-2026q2-announce",
+          "paragraph": "台積公司 2026 年第二季合併營收約為新台幣 1 兆 2,703.8 億元，稅後純益約為新台幣 7,065.6 億元，每股盈餘為新台幣 27.25 元。毛利率為 67.7%，營業利益率為 60.3%。",
+          "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2330&year=115&season=2",
+          "content_hash": "15df1f0d74d8ba451647b2906cc95fb4c4ffac59c78c914320f3d566261e5624",
+          "available_at": "2026-07-16T14:00:00+08:00",
+          "available_at_basis": "official"
         }
+      }
+    },
+    {
+      "fixture_id": "TR-06",
+      "tool": "read_evidence",
+      "role": "researcher",
+      "job_cutoff": "2026-08-05T17:00:00+08:00",
+      "job_snapshot_id": "snap-dev-case-15",
+      "input": {
+        "evidence_version_id": "ev-dev-15-unreadable"
       },
-      "no_data": {
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "unreadable",
+        "tool": "read_evidence",
+        "reason": "來源正文不可讀（paragraph 為 null），不得補造內容",
+        "data": null
+      },
+      "note": "CASE-15；不得崩潰"
+    },
+    {
+      "fixture_id": "TR-07",
+      "tool": "read_evidence",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "evidence_version_id": "ev-non-existent-999"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
         "status": "no_data",
         "tool": "read_evidence",
-        "reason": "查無指定 evidence_version_id 之不可變文本片段",
+        "reason": "查無指定片段: ev-non-existent-999",
         "data": null
       }
     },
-    "get_financial_snapshot": {
-      "success": {
+    {
+      "fixture_id": "TR-08",
+      "tool": "get_financial_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "cutoff": "2026-09-30T17:30:00+08:00"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
         "status": "ok",
         "tool": "get_financial_snapshot",
+        "reason": null,
         "data": {
-          "ticker": "2330",
+          "ticker": "2454",
+          "company_name": "聯發科技",
           "statement_basis": "consolidated",
           "currency": "TWD",
           "unit": "100m",
+          "latest_period": "2026Q2",
+          "period_basis": "single_quarter",
+          "ttm_periods": [
+            "2025Q3",
+            "2025Q4",
+            "2026Q1",
+            "2026Q2"
+          ],
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2026Q2",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "missing_reason": null,
           "metrics": {
-            "revenue_single_q": 6735.0,
-            "net_income_single_q": 2478.0,
-            "cfo_single_q": 3410.0,
-            "capex_single_q": 2100.0,
-            "fcf_single_q": 1310.0,
-            "eps_single_q": 9.55,
-            "eps_ttm": 38.2,
-            "shares_outstanding_m": 25930.0,
-            "net_debt": -8500.0
+            "revenue_single_q": 1521.83,
+            "operating_income_single_q": 228.68,
+            "net_income_single_q": 243.35,
+            "operating_cash_flow_single_q": 242.51,
+            "capital_expenditure_single_q": 65.55,
+            "free_cash_flow_single_q": 176.96,
+            "eps_single_q": 15.28,
+            "eps_source": "mops_direct",
+            "bvps": 265.77,
+            "eps_ttm": 60.69,
+            "fcf_ttm": 920.63,
+            "shares_outstanding_m": 1596.1013,
+            "net_debt": -1717.81
           },
-          "available_at": "2026-07-16T15:30:00+08:00"
+          "available_at": "2026-07-31T18:41:57+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00"
         }
       },
-      "no_data": {
-        "status": "no_data",
+      "note": "最新 2026Q2；TTM = 2025Q3–2026Q2"
+    },
+    {
+      "fixture_id": "TR-09",
+      "tool": "get_financial_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "cutoff": "2026-04-01T00:00:00+08:00"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
+        "status": "ok",
         "tool": "get_financial_snapshot",
-        "reason": "該個股在指定 cutoff 前無可用的完整財務快照",
+        "reason": null,
+        "data": {
+          "ticker": "2454",
+          "company_name": "聯發科技",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit": "100m",
+          "latest_period": "2025Q4",
+          "period_basis": "single_quarter",
+          "ttm_periods": null,
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2025Q4",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "missing_reason": "可得單季季數不足 4 季（僅 3 季），禁止年化推估",
+          "metrics": {
+            "revenue_single_q": 1501.88,
+            "operating_income_single_q": 218.5,
+            "net_income_single_q": 229.25,
+            "operating_cash_flow_single_q": 645.2,
+            "capital_expenditure_single_q": 46.42,
+            "free_cash_flow_single_q": 598.78,
+            "eps_single_q": 14.4,
+            "eps_source": "finmind_quarterly",
+            "bvps": 250.98,
+            "eps_ttm": null,
+            "fcf_ttm": null,
+            "shares_outstanding_m": 1596.1181,
+            "net_debt": -2342.9
+          },
+          "available_at": "2026-02-26T17:08:56+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00"
+        }
+      },
+      "note": "只有 2025Q2–Q4 三季可得 → TTM 為 null（不是 0）"
+    },
+    {
+      "fixture_id": "TR-10",
+      "tool": "get_financial_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "cutoff": "2026-07-31T18:00:00+08:00"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
+        "status": "ok",
+        "tool": "get_financial_snapshot",
+        "reason": null,
+        "data": {
+          "ticker": "2454",
+          "company_name": "聯發科技",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit": "100m",
+          "latest_period": "2026Q1",
+          "period_basis": "single_quarter",
+          "ttm_periods": [
+            "2025Q2",
+            "2025Q3",
+            "2025Q4",
+            "2026Q1"
+          ],
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2026Q1",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "missing_reason": null,
+          "metrics": {
+            "revenue_single_q": 1491.51,
+            "operating_income_single_q": 228.91,
+            "net_income_single_q": 241.54,
+            "operating_cash_flow_single_q": -176.57,
+            "capital_expenditure_single_q": 42.6,
+            "free_cash_flow_single_q": -219.17,
+            "eps_single_q": 15.17,
+            "eps_source": "mops_direct",
+            "bvps": 244.52,
+            "eps_ttm": 62.91,
+            "fcf_ttm": 1155.62,
+            "shares_outstanding_m": 1596.1102,
+            "net_debt": -1679.55
+          },
+          "available_at": "2026-04-30T17:58:34+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00"
+        }
+      },
+      "note": "2026Q2 於 18:41:57 才公告，cutoff 18:00 時最新仍為 2026Q1（財報期 ≠ 公告日）"
+    },
+    {
+      "fixture_id": "TR-11",
+      "tool": "get_financial_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "9999",
+        "cutoff": "2026-09-30T17:30:00+08:00"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "get_financial_snapshot",
+        "reason": "get_financial_snapshot.ticker='9999' 不在允許值",
         "data": null
       }
     },
-    "get_macro_snapshot": {
-      "success": {
+    {
+      "fixture_id": "TR-12",
+      "tool": "get_financial_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "cutoff": "2026-09-30T17:30:00+08:00",
+        "period_basis": "single_quarter"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "get_financial_snapshot",
+        "reason": "get_financial_snapshot 不接受欄位 ['period_basis']",
+        "data": null
+      },
+      "note": "契約只有 ticker、cutoff 兩個參數"
+    },
+    {
+      "fixture_id": "TR-13",
+      "tool": "get_financial_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "cutoff": "2025-01-01T00:00:00+08:00"
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "no_data",
+        "tool": "get_financial_snapshot",
+        "reason": "截至 cutoff 無可得財務資料",
+        "data": null
+      }
+    },
+    {
+      "fixture_id": "TR-14",
+      "tool": "get_macro_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "cutoff": "2026-09-30T17:30:00+08:00",
+        "series_ids": [
+          "CPIAUCSL",
+          "FEDFUNDS"
+        ]
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
         "status": "ok",
         "tool": "get_macro_snapshot",
+        "reason": null,
         "data": [
           {
             "series_id": "CPIAUCSL",
-            "indicator": "CPI",
+            "indicator": "CPI (美國消費者物價指數)",
             "observation_date": "2026-06",
-            "available_at": "2026-07-14T08:30:00-04:00",
-            "value": 314.2,
+            "value": 332.568,
             "unit": "Index 1982-1984=100",
-            "source": "FRED"
+            "available_at": "2026-07-14T08:30:00-04:00",
+            "available_at_basis": "official",
+            "source_id": "fred_macro",
+            "content_hash": "f2d75625af2f84f48a3090b56fef0c71e888a9e7d2e9844a18b561d889c6be27",
+            "vintage": null,
+            "vintage_missing_reason": "只有現行下載值，無歷史 vintage"
+          },
+          {
+            "series_id": "FEDFUNDS",
+            "indicator": "聯邦基金有效利率（月平均）",
+            "observation_date": "2026-06",
+            "value": 3.63,
+            "unit": "%",
+            "available_at": "2026-07-02T00:00:00-04:00",
+            "available_at_basis": "official",
+            "source_id": "fred_macro",
+            "content_hash": "f2d75625af2f84f48a3090b56fef0c71e888a9e7d2e9844a18b561d889c6be27",
+            "vintage": null,
+            "vintage_missing_reason": "只有現行下載值，無歷史 vintage"
           }
         ]
+      }
+    },
+    {
+      "fixture_id": "TR-15",
+      "tool": "get_macro_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "cutoff": "2026-09-30T17:30:00+08:00",
+        "series_ids": [
+          "UNRATE"
+        ]
       },
-      "no_data": {
-        "status": "no_data",
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
         "tool": "get_macro_snapshot",
-        "reason": "白名單指標於 cutoff 前無發布數值",
+        "reason": "series ['UNRATE'] 不在已核准白名單",
         "data": null
       }
     },
-    "get_price_window": {
-      "success": {
+    {
+      "fixture_id": "TR-16",
+      "tool": "get_macro_snapshot",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "cutoff": "2026-07-10T00:00:00+08:00",
+        "series_ids": [
+          "CPIAUCSL"
+        ]
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "no_data",
+        "tool": "get_macro_snapshot",
+        "reason": "指定指標於 cutoff 前無數據",
+        "data": null
+      },
+      "note": "2026-06 CPI 於 2026-07-14 才發布"
+    },
+    {
+      "fixture_id": "TR-17",
+      "tool": "get_price_window",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "end_at": "2026-09-30T17:30:00+08:00",
+        "sessions": 5
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
         "status": "ok",
         "tool": "get_price_window",
+        "reason": null,
         "data": {
-          "ticker": "2330",
+          "ticker": "2454",
           "currency": "TWD",
+          "unit": "TWD/share",
           "price_basis": "raw_close",
           "sessions": 5,
+          "source_id": "finmind_price",
+          "content_hash": "d8716e166cc0f59b96c3ebb7721ef221dabf872630db017397d4f823193a96d0",
+          "available_at": "2026-09-30T17:30:00+08:00",
+          "available_at_basis": "rule_close_1730",
+          "captured_at": "2026-10-19T17:18:11+08:00",
           "closes": [
-            { "trade_date": "2026-09-24", "close": 980.0 },
-            { "trade_date": "2026-09-25", "close": 985.0 },
-            { "trade_date": "2026-09-26", "close": 990.0 },
-            { "trade_date": "2026-09-27", "close": 995.0 },
-            { "trade_date": "2026-09-30", "close": 1005.0 }
+            {
+              "trade_date": "2026-09-22",
+              "close_price": 5180.0,
+              "available_at": "2026-09-22T17:30:00+08:00",
+              "available_at_basis": "rule_close_1730"
+            },
+            {
+              "trade_date": "2026-09-23",
+              "close_price": 5185.0,
+              "available_at": "2026-09-23T17:30:00+08:00",
+              "available_at_basis": "rule_close_1730"
+            },
+            {
+              "trade_date": "2026-09-24",
+              "close_price": 5285.0,
+              "available_at": "2026-09-24T17:30:00+08:00",
+              "available_at_basis": "rule_close_1730"
+            },
+            {
+              "trade_date": "2026-09-29",
+              "close_price": 4910.0,
+              "available_at": "2026-09-29T17:30:00+08:00",
+              "available_at_basis": "rule_close_1730"
+            },
+            {
+              "trade_date": "2026-09-30",
+              "close_price": 4920.0,
+              "available_at": "2026-09-30T17:30:00+08:00",
+              "available_at_basis": "rule_close_1730"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture_id": "TR-18",
+      "tool": "get_price_window",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "end_at": "2026-09-30T17:00:00+08:00",
+        "sessions": 1
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
+        "status": "ok",
+        "tool": "get_price_window",
+        "reason": null,
+        "data": {
+          "ticker": "2454",
+          "currency": "TWD",
+          "unit": "TWD/share",
+          "price_basis": "raw_close",
+          "sessions": 1,
+          "source_id": "finmind_price",
+          "content_hash": "d8716e166cc0f59b96c3ebb7721ef221dabf872630db017397d4f823193a96d0",
+          "available_at": "2026-09-29T17:30:00+08:00",
+          "available_at_basis": "rule_close_1730",
+          "captured_at": "2026-10-19T17:18:11+08:00",
+          "closes": [
+            {
+              "trade_date": "2026-09-29",
+              "close_price": 4910.0,
+              "available_at": "2026-09-29T17:30:00+08:00",
+              "available_at_basis": "rule_close_1730"
+            }
           ]
         }
       },
-      "no_data": {
-        "status": "no_data",
+      "note": "09-30 收盤價 17:30 才可得，end_at 17:00 時最新為 09-29"
+    },
+    {
+      "fixture_id": "TR-19",
+      "tool": "get_price_window",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "end_at": "2026-09-30T17:30:00+08:00",
+        "sessions": 10
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
         "tool": "get_price_window",
-        "reason": "個股於觀察窗內停牌或無交易數據",
+        "reason": "get_price_window.sessions=10 不在允許值 [1, 5, 20]",
         "data": null
       }
     },
-    "calculate_metrics": {
-      "success_pe_ttm": {
+    {
+      "fixture_id": "TR-20",
+      "tool": "get_price_window",
+      "role": "reviewer",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "ticker": "2454",
+        "end_at": "2026-09-30T17:30:00+08:00",
+        "sessions": 5
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "get_price_window",
+        "reason": "reviewer 無權使用 get_price_window",
+        "data": null
+      },
+      "note": "Reviewer 需查價時以 claim_id 退回 Researcher"
+    },
+    {
+      "fixture_id": "TR-21",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "pe_ttm",
+        "values": {
+          "price": 4920.0,
+          "eps_ttm": 60.69
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2",
+          "finmind_price"
+        ]
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
         "status": "ok",
         "tool": "calculate_metrics",
+        "reason": null,
         "data": {
-          "operation": "pe_ttm",
-          "calculation_basis": "price / eps_ttm",
-          "result_value": 26.31,
+          "result_value": 81.07,
           "is_applicable": true,
-          "evidence_refs": ["ev-price-20260930", "ev-eps-ttm-2026q2"]
+          "reason": null,
+          "evidence_refs": [
+            "snap-2454-2026Q2",
+            "finmind_price"
+          ],
+          "operation": "pe_ttm"
         }
+      }
+    },
+    {
+      "fixture_id": "TR-22",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "pe_ttm",
+        "values": {
+          "price": 4920.0,
+          "eps_ttm": -5.2
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2",
+          "finmind_price"
+        ]
       },
-      "invalid_input_negative_eps": {
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
         "status": "invalid_input",
         "tool": "calculate_metrics",
-        "reason": "EPS TTM 為非正數 (<= 0)，不適用 P/E 本益比計算，標註 NA",
+        "reason": "EPS TTM <= 0，不適用本益比 (NA)",
         "data": null
       }
+    },
+    {
+      "fixture_id": "TR-23",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "pe_ttm",
+        "values": {
+          "price": 4920.0,
+          "eps_ttm": 60.69
+        },
+        "evidence_refs": []
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "calculate_metrics",
+        "reason": "運算必須引用具體 evidence_refs 依據",
+        "data": null
+      }
+    },
+    {
+      "fixture_id": "TR-24",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "dcf_scenario",
+        "values": {
+          "free_cash_flows": [
+            920.63,
+            920.63,
+            920.63,
+            920.63,
+            920.63
+          ],
+          "wacc": 0.1,
+          "terminal_growth": 0.03,
+          "net_debt": -1717.81,
+          "shares_outstanding": 1596.1013
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2"
+        ]
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
+        "status": "ok",
+        "tool": "calculate_metrics",
+        "reason": null,
+        "data": {
+          "pv_fcf_total": 3489.91,
+          "terminal_value": 13546.41,
+          "pv_terminal": 8411.26,
+          "enterprise_value": 11901.17,
+          "equity_value": 13618.98,
+          "intrinsic_value_per_share": 853.27,
+          "sensitivity_matrix": {
+            "9.0%": {
+              "2.5%": 923.14,
+              "3.0%": 975.52,
+              "3.5%": 1037.44
+            },
+            "10.0%": {
+              "2.5%": 815.75,
+              "3.0%": 853.27,
+              "3.5%": 896.56
+            },
+            "11.0%": {
+              "2.5%": 733.58,
+              "3.0%": 761.52,
+              "3.5%": 793.18
+            }
+          },
+          "is_applicable": true,
+          "reason": null,
+          "evidence_refs": [
+            "snap-2454-2026Q2"
+          ],
+          "operation": "dcf_scenario"
+        }
+      },
+      "note": "WACC 10%、g 3% 為 valuation_agent/dcf_model.py 程式預設值；5 年持平 FCF；均待組長核定；內在價值非保證成交價"
+    },
+    {
+      "fixture_id": "TR-25",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "dcf_scenario",
+        "values": {
+          "free_cash_flows": [
+            920.63,
+            920.63,
+            920.63,
+            920.63,
+            920.63
+          ],
+          "wacc": 0.03,
+          "terminal_growth": 0.03,
+          "net_debt": -1717.81,
+          "shares_outstanding": 1596.1013
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2"
+        ]
+      },
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "calculate_metrics",
+        "reason": "WACC (0.03) 必須嚴格大於終端成長率 g (0.03)",
+        "data": null
+      }
+    },
+    {
+      "fixture_id": "TR-26",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "dcf_scenario",
+        "values": {
+          "free_cash_flows": [
+            920.63,
+            920.63,
+            920.63,
+            920.63,
+            920.63
+          ],
+          "wacc": 0.1,
+          "terminal_growth": 0.03,
+          "net_debt": null,
+          "shares_outstanding": 1596.1013
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2"
+        ]
+      },
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "calculate_metrics",
+        "reason": "DCF 關鍵參數缺失，嚴禁假補 0",
+        "data": null
+      }
+    },
+    {
+      "fixture_id": "TR-27",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "dcf_scenario",
+        "values": {
+          "free_cash_flows": [
+            920.63,
+            920.63,
+            920.63
+          ],
+          "wacc": 0.1,
+          "terminal_growth": 0.03,
+          "net_debt": -1717.81,
+          "shares_outstanding": 1596.1013
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2"
+        ]
+      },
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "calculate_metrics",
+        "reason": "DCF 預測期必須為 5 年，目前為 3 年",
+        "data": null
+      }
+    },
+    {
+      "fixture_id": "TR-28",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "peer_comparison",
+        "values": {
+          "subject": "2454",
+          "comparators": [
+            "2379",
+            "3034",
+            "2330"
+          ],
+          "metrics": {
+            "2454": {
+              "price": 4920.0,
+              "eps_ttm": 60.69,
+              "bvps": 265.77,
+              "revenue_yoy": 0.0121,
+              "fcf": 920.63
+            },
+            "2379": {
+              "price": 760.0,
+              "eps_ttm": 27.73,
+              "bvps": 97.83,
+              "revenue_yoy": 0.1767,
+              "fcf": 168.21
+            },
+            "3034": {
+              "price": 546.0,
+              "eps_ttm": 28.67,
+              "bvps": 113.33,
+              "revenue_yoy": 0.0959,
+              "fcf": 167.49
+            },
+            "2330": {
+              "price": 2480.0,
+              "eps_ttm": 86.28,
+              "bvps": 248.05,
+              "revenue_yoy": 0.3605,
+              "fcf": 11435.56
+            }
+          },
+          "price_as_of": "2026-09-30",
+          "cutoff": "2026-09-30T17:30:00+08:00",
+          "method_version": "peer-v1.2",
+          "snapshot_ids": {
+            "2454": "snap-2454-2026Q2",
+            "2379": "snap-2379-2026Q2",
+            "3034": "snap-3034-2026Q2",
+            "2330": "snap-2330-2026Q2"
+          }
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2",
+          "finmind_price"
+        ]
+      },
+      "synthetic_fixture": false,
+      "check_mode": "exact",
+      "expected_response": {
+        "status": "ok",
+        "tool": "calculate_metrics",
+        "reason": null,
+        "data": {
+          "subject": "2454",
+          "comparison_table": {
+            "2454": {
+              "role": "subject",
+              "price": 4920.0,
+              "pe_ttm": 81.07,
+              "pe_na_reason": null,
+              "pb_ratio": 18.51,
+              "pb_na_reason": null,
+              "revenue_yoy": 0.0121,
+              "revenue_yoy_na_reason": null,
+              "fcf": 920.63,
+              "fcf_na_reason": null,
+              "dcf_intrinsic_value": null,
+              "dcf_gap_pct": null
+            },
+            "2379": {
+              "role": "peer",
+              "price": 760.0,
+              "pe_ttm": 27.41,
+              "pe_na_reason": null,
+              "pb_ratio": 7.77,
+              "pb_na_reason": null,
+              "revenue_yoy": 0.1767,
+              "revenue_yoy_na_reason": null,
+              "fcf": 168.21,
+              "fcf_na_reason": null,
+              "dcf_intrinsic_value": null,
+              "dcf_gap_pct": null
+            },
+            "3034": {
+              "role": "peer",
+              "price": 546.0,
+              "pe_ttm": 19.04,
+              "pe_na_reason": null,
+              "pb_ratio": 4.82,
+              "pb_na_reason": null,
+              "revenue_yoy": 0.0959,
+              "revenue_yoy_na_reason": null,
+              "fcf": 167.49,
+              "fcf_na_reason": null,
+              "dcf_intrinsic_value": null,
+              "dcf_gap_pct": null
+            },
+            "2330": {
+              "role": "industry_reference",
+              "price": 2480.0,
+              "pe_ttm": 28.74,
+              "pe_na_reason": null,
+              "pb_ratio": 10.0,
+              "pb_na_reason": null,
+              "revenue_yoy": 0.3605,
+              "revenue_yoy_na_reason": null,
+              "fcf": 11435.56,
+              "fcf_na_reason": null,
+              "dcf_intrinsic_value": null,
+              "dcf_gap_pct": null
+            }
+          },
+          "peer_average_stats": {
+            "peer_avg_pe": 23.23,
+            "peer_avg_pb": 6.29,
+            "peer_avg_revenue_yoy": 0.1363,
+            "excluded_references": [
+              "2330"
+            ]
+          },
+          "is_applicable": true,
+          "reason": null,
+          "operation": "peer_comparison",
+          "evidence_refs": [
+            "snap-2454-2026Q2",
+            "finmind_price"
+          ]
+        }
+      },
+      "note": "2330 為 industry_reference，不入同業平均"
+    },
+    {
+      "fixture_id": "TR-29",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "peer_comparison",
+        "values": {
+          "subject": "2454",
+          "comparators": [
+            "2379",
+            "2317"
+          ],
+          "metrics": {
+            "2454": {
+              "price": 4920.0,
+              "eps_ttm": 60.69,
+              "bvps": 265.77,
+              "revenue_yoy": 0.0121,
+              "fcf": 920.63
+            },
+            "2379": {
+              "price": 760.0,
+              "eps_ttm": 27.73,
+              "bvps": 97.83,
+              "revenue_yoy": 0.1767,
+              "fcf": 168.21
+            }
+          },
+          "price_as_of": "2026-09-30",
+          "cutoff": "2026-09-30T17:30:00+08:00",
+          "method_version": "peer-v1.2",
+          "snapshot_ids": {
+            "2454": "snap-2454-2026Q2",
+            "2379": "snap-2379-2026Q2",
+            "2317": "snap-2317-2026Q2"
+          }
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2"
+        ]
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "calculate_metrics",
+        "reason": "比較標的只限 ('2379', '3034', '2330')，收到 ['2317']",
+        "data": null
+      }
+    },
+    {
+      "fixture_id": "TR-30",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "pb_ratio",
+        "values": {
+          "price": 4920.0,
+          "bvps": 265.77
+        },
+        "evidence_refs": [
+          "snap-2454-2026Q2"
+        ]
+      },
+      "synthetic_fixture": false,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "calculate_metrics",
+        "reason": "calculate_metrics.operation='pb_ratio' 不在允許值",
+        "data": null
+      },
+      "note": "P/B 只在 peer_comparison 內計算，不新增 operation"
+    },
+    {
+      "fixture_id": "TR-31",
+      "tool": "read_evidence",
+      "role": "researcher",
+      "job_cutoff": "2026-08-12T17:00:00+08:00",
+      "job_snapshot_id": "snap-dev-case-26",
+      "input": {
+        "evidence_version_id": "ev-2317-2026q2-consolidated"
+      },
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "tool_error",
+        "tool": "read_evidence",
+        "reason": "TimeoutError: read_evidence 逾時",
+        "data": null
+      },
+      "note": "CASE-26；由 dispatch 包成 tool_error，job 不得崩潰、不得發布未核實結果"
     }
-  }
+  ]
 }
