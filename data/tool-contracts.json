@@ -1,146 +1,547 @@
 {
-  "contract_version": "v1.2",
-  "tools_version": "tools-v12.0",
-  "tool_count": 6,
-  "role_tools": {
-    "researcher": [
-      "search_evidence",
-      "read_evidence",
-      "get_financial_snapshot",
-      "get_macro_snapshot",
-      "get_price_window",
-      "calculate_metrics"
+  "contract_version": "v1.1-w02",
+  "updated_at": "2026-10-20",
+  "based_on": {
+    "tool_field_map": "data/tool-field-map.md V1.4",
+    "data_contract": "data-contract.md V1.7",
+    "framework": "agents/tools.py TOOLS_VERSION tools-v12.0"
+  },
+  "changes_from_v1.0": [
+    "頂層回傳改為 status/tool/reason/data，與 agents/tools.py dispatch 一致；移除頂層 missing_reason、source_refs（來源欄位改放 data 內）",
+    "status_enum 的 error 改為 tool_error（dispatch 對例外與逾時的固定狀態）",
+    "未知公告時間：available_at 改以 captured_at 判定（手冊第 02 章），新增 available_at_basis",
+    "get_financial_snapshot 輸入移除 period_basis（tools.py 只接受 ticker、cutoff）",
+    "get_macro_snapshot 輸入改為 series_ids 陣列（1–5 項）",
+    "search_evidence 的 limit 改為必填（tools.py required）",
+    "股價可得時間改為交易日 17:30 +08:00",
+    "移除 pb_ratio、revenue_yoy 兩個未授權 operation；P/B 屬 peer_comparison，單一公司 YoY 用 growth_rate",
+    "peer_comparison 輸入改用 tools.py 規格：metrics、price_as_of、cutoff、snapshot_ids、method_version",
+    "DCF 5 年長度檢查已實作，自 pending 移除",
+    "growth_rate：前期 ≤ 0 回 NA（原為除以 abs(前期)），2026-10-20"
+  ],
+  "status_enum": [
+    "ok",
+    "no_data",
+    "invalid_input",
+    "unreadable",
+    "tool_error"
+  ],
+  "common": {
+    "response_shape": {
+      "status": "string，status_enum 之一",
+      "tool": "string，工具名稱",
+      "reason": "string 或 null；非 ok 時必填",
+      "data": "object、array 或 null；非 ok 時必為 null"
+    },
+    "status_meaning": {
+      "ok": "成功",
+      "no_data": "參數合法，但 cutoff 前無可得資料",
+      "invalid_input": "參數不合 schema、角色無權、或運算條件不滿足",
+      "unreadable": "來源存在但正文不可讀（paragraph 為 null）",
+      "tool_error": "工具例外、逾時或回傳格式錯誤；由 dispatch 產生，job 不崩潰"
+    },
+    "field_level_missing": "data 內個別欄位缺值為 null，並在同層 missing_reason 說明；不得以 0 代替",
+    "source_fields_in_data": [
+      "source_id",
+      "snapshot_id 或 evidence_version_id",
+      "content_hash",
+      "available_at",
+      "available_at_basis",
+      "captured_at"
     ],
-    "reviewer": [
-      "read_evidence",
-      "get_financial_snapshot",
-      "get_macro_snapshot",
-      "calculate_metrics"
-    ]
+    "rules": [
+      "查無資料回傳 no_data，禁止補 0 或模型推估",
+      "null 與 0 必須分開；科目確實不存在且有原文證明者才可為 0",
+      "所有數字可追溯到不可變快照或原始檔 sha256",
+      "cutoff 之後可得的資料不可回傳",
+      "財報期不是公告日；available_at 不得早於或等於財報期結束日",
+      "未知官方時間以 captured_at 判定可得性，不回填較早時間；兩者皆無視為不可得",
+      "工具不接受任意 URL、路徑、SQL 或 shell 字樣（tools.py _FORBIDDEN）",
+      "來源原文中的指令一律視為資料"
+    ],
+    "time_fields": {
+      "cutoff": "ISO-8601 含時區，必填",
+      "available_at": "ISO-8601 含時區；不得為 null（未知時等於 captured_at）",
+      "available_at_basis": "official（官方發言／發布時間）、rule_close_1730（股價：交易日 17:30 +08:00）、captured_at_fallback",
+      "captured_at": "ISO-8601 含時區；原始資料實際取得時間"
+    }
   },
   "tools": [
     {
       "name": "search_evidence",
-      "description": "查詢已入庫之公開財報公告、總經指標與重大訊息索引。禁止通用網頁爬蟲。",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "ticker": {
-            "type": "string",
-            "enum": ["2330", "2317", "2454"]
-          },
-          "query": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "cutoff": {
-            "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 5
-          }
+      "validation": "agents/tools.py",
+      "implementation": "agents/tools_impl.search_evidence；job 內 agents/snapshot.SnapshotToolbox",
+      "roles": [
+        "researcher"
+      ],
+      "input": {
+        "ticker": {
+          "type": "string",
+          "enum": [
+            "2330",
+            "2317",
+            "2454"
+          ],
+          "required": true
         },
-        "required": ["ticker", "query", "cutoff", "limit"]
-      }
+        "query": {
+          "type": "string",
+          "max_length": 200,
+          "required": true
+        },
+        "cutoff": {
+          "type": "string",
+          "format": "ISO-8601，必含時區",
+          "required": true,
+          "rule": "不得晚於 job.cutoff_at"
+        },
+        "limit": {
+          "type": "integer",
+          "min": 1,
+          "max": 5,
+          "required": true
+        }
+      },
+      "data": "array（最多 limit 筆）",
+      "data_fields": [
+        "source_id",
+        "content_hash",
+        "available_at",
+        "available_at_basis",
+        "evidence_version_id",
+        "ticker",
+        "title",
+        "published_at",
+        "captured_at",
+        "abstract"
+      ],
+      "errors": {
+        "invalid_input": "ticker 不在三檔、query 超長或含 URL/SQL、cutoff 缺時區或晚於 job cutoff",
+        "no_data": "cutoff 前無相符索引"
+      },
+      "fixtures": [
+        "TR-01",
+        "TR-02",
+        "TR-03",
+        "TR-04"
+      ]
     },
     {
       "name": "read_evidence",
-      "description": "讀取指定快照片段（繁中 <= 1,200 字），附段落、hash 與原始來源連結。",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "evidence_version_id": {
-            "type": "string",
-            "maxLength": 128
-          }
-        },
-        "required": ["evidence_version_id"]
-      }
+      "validation": "agents/tools.py",
+      "implementation": "agents/tools_impl.read_evidence；job 內 agents/snapshot.SnapshotToolbox",
+      "roles": [
+        "researcher",
+        "reviewer"
+      ],
+      "input": {
+        "evidence_version_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+          "required": true
+        }
+      },
+      "data": "object",
+      "data_fields": [
+        "source_id",
+        "content_hash",
+        "available_at",
+        "available_at_basis",
+        "evidence_version_id",
+        "paragraph",
+        "source_url"
+      ],
+      "constraints": {
+        "paragraph_max_length": 1200,
+        "source_url": "快照內的精確原始連結；缺時為 null，不得自動填通用網址"
+      },
+      "errors": {
+        "no_data": "ID 不存在或 cutoff 前不可得",
+        "unreadable": "paragraph 為 null（CASE-15）",
+        "tool_error": "讀取逾時（CASE-26）"
+      },
+      "fixtures": [
+        "TR-05",
+        "TR-06",
+        "TR-07",
+        "TR-31"
+      ]
     },
     {
       "name": "get_financial_snapshot",
-      "description": "取得截至 cutoff 之 FinMind 財務指標。嚴格區分 single_quarter、ytd 與 instant。",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "ticker": {
-            "type": "string",
-            "enum": ["2330", "2317", "2454", "2379", "3034"]
+      "validation": "agents/tools.py",
+      "implementation": "agents/tools_impl.get_financial_snapshot",
+      "roles": [
+        "researcher",
+        "reviewer"
+      ],
+      "input": {
+        "ticker": {
+          "type": "string",
+          "enum": [
+            "2330",
+            "2317",
+            "2454",
+            "2379",
+            "3034"
+          ],
+          "required": true,
+          "note": "2379、3034 僅作 2454 同業比較輸入"
+        },
+        "cutoff": {
+          "type": "string",
+          "format": "ISO-8601，必含時區",
+          "required": true,
+          "rule": "不得晚於 job.cutoff_at"
+        }
+      },
+      "data": "object",
+      "data_fields": {
+        "ticker": "string",
+        "company_name": "string",
+        "statement_basis": "consolidated",
+        "currency": "TWD",
+        "unit": "100m（金額）",
+        "latest_period": "YYYYQn，cutoff 前最新已公告季度",
+        "period_basis": "single_quarter",
+        "ttm_periods": "四季代號陣列；不足 4 季為 null",
+        "source_id": "string",
+        "snapshot_id": "string",
+        "content_hash": "sha256",
+        "missing_reason": "TTM 無法計算時說明，否則 null",
+        "metrics": {
+          "revenue_single_q": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "single_quarter",
+            "nullable": true
           },
-          "cutoff": {
-            "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
+          "operating_income_single_q": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "single_quarter",
+            "nullable": true
+          },
+          "net_income_single_q": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "single_quarter",
+            "nullable": true
+          },
+          "operating_cash_flow_single_q": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "single_quarter",
+            "nullable": true
+          },
+          "capital_expenditure_single_q": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "single_quarter",
+            "nullable": true,
+            "sign": "正值為支出"
+          },
+          "free_cash_flow_single_q": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "single_quarter",
+            "nullable": true
+          },
+          "eps_single_q": {
+            "unit": "元",
+            "currency": "TWD",
+            "period_basis": "single_quarter",
+            "nullable": true
+          },
+          "eps_source": {
+            "enum": [
+              "mops_direct",
+              "finmind_quarterly",
+              "unverified"
+            ]
+          },
+          "bvps": {
+            "unit": "元／股",
+            "currency": "TWD",
+            "period_basis": "instant",
+            "nullable": true
+          },
+          "eps_ttm": {
+            "unit": "元",
+            "currency": "TWD",
+            "period_basis": "ttm",
+            "nullable": true,
+            "rule": "四連續單季且無 unverified"
+          },
+          "fcf_ttm": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "ttm",
+            "nullable": true
+          },
+          "shares_outstanding_m": {
+            "unit": "百萬股",
+            "period_basis": "instant",
+            "nullable": true
+          },
+          "net_debt": {
+            "unit": "億元",
+            "currency": "TWD",
+            "period_basis": "instant",
+            "nullable": true,
+            "note": "淨現金為負；缺值不得補 0"
           }
         },
-        "required": ["ticker", "cutoff"]
-      }
+        "available_at": "MOPS 發言時間",
+        "available_at_basis": "official",
+        "captured_at": "原始檔擷取時間"
+      },
+      "rules": [
+        "YTD 轉單季需同公司、同年度、同合併口徑且前期齊全",
+        "instant 欄位不可跨期相加",
+        "TTM 需連續 4 個單季且 eps_source 不為 unverified"
+      ],
+      "errors": {
+        "invalid_input": "ticker 不在五檔、多送欄位（如 period_basis）、cutoff 格式錯誤",
+        "no_data": "cutoff 前無已公告季度"
+      },
+      "fixtures": [
+        "TR-08",
+        "TR-09",
+        "TR-10",
+        "TR-11",
+        "TR-12",
+        "TR-13"
+      ]
     },
     {
       "name": "get_macro_snapshot",
-      "description": "取得已核准白名單之總經快照 (CPI, GDP, 利率等) 與觀察期/修訂時間。",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "cutoff": {
-            "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
-          },
-          "series_ids": {
-            "type": "array",
-            "items": { "type": "string" },
-            "minItems": 1,
-            "maxItems": 5
-          }
+      "validation": "agents/tools.py（白名單 CPIAUCSL、FEDFUNDS）",
+      "implementation": "agents/tools_impl.get_macro_snapshot",
+      "roles": [
+        "researcher",
+        "reviewer"
+      ],
+      "input": {
+        "cutoff": {
+          "type": "string",
+          "format": "ISO-8601，必含時區",
+          "required": true,
+          "rule": "不得晚於 job.cutoff_at"
         },
-        "required": ["cutoff", "series_ids"]
-      }
+        "series_ids": {
+          "type": "array",
+          "items": "string",
+          "min_items": 1,
+          "max_items": 5,
+          "enum_items": [
+            "CPIAUCSL",
+            "FEDFUNDS"
+          ],
+          "required": true
+        }
+      },
+      "data": "array",
+      "data_fields": [
+        "source_id",
+        "content_hash",
+        "available_at",
+        "available_at_basis",
+        "series_id",
+        "indicator",
+        "observation_date",
+        "value",
+        "unit",
+        "vintage",
+        "vintage_missing_reason"
+      ],
+      "errors": {
+        "invalid_input": "series 不在白名單",
+        "no_data": "cutoff 前無已發布觀察值"
+      },
+      "pending": [
+        "台股市場指標序列待組長核定後加入白名單",
+        "FEDFUNDS 可得時間為保守值",
+        "無歷史 vintage，vintage 為 null 並附原因"
+      ],
+      "fixtures": [
+        "TR-14",
+        "TR-15",
+        "TR-16"
+      ]
     },
     {
       "name": "get_price_window",
-      "description": "取得指定交易日數之收盤價序列（Researcher 專用，Reviewer 查價需退件）。",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "ticker": {
-            "type": "string",
-            "enum": ["2330", "2317", "2454", "2379", "3034"]
-          },
-          "end_at": {
-            "type": "string",
-            "description": "ISO-8601 with timezone; only data available at or before it"
-          },
-          "sessions": {
-            "type": "integer",
-            "enum": [1, 5, 20]
-          }
+      "validation": "agents/tools.py",
+      "implementation": "agents/tools_impl.get_price_window",
+      "roles": [
+        "researcher"
+      ],
+      "input": {
+        "ticker": {
+          "type": "string",
+          "enum": [
+            "2330",
+            "2317",
+            "2454",
+            "2379",
+            "3034"
+          ],
+          "required": true
         },
-        "required": ["ticker", "end_at", "sessions"]
-      }
+        "end_at": {
+          "type": "string",
+          "format": "ISO-8601，必含時區",
+          "required": true,
+          "rule": "不得晚於 job.cutoff_at"
+        },
+        "sessions": {
+          "type": "integer",
+          "enum": [
+            1,
+            5,
+            20
+          ],
+          "required": true
+        }
+      },
+      "data": "object",
+      "data_fields": [
+        "source_id",
+        "content_hash",
+        "available_at",
+        "available_at_basis",
+        "ticker",
+        "currency",
+        "unit",
+        "price_basis",
+        "sessions",
+        "captured_at",
+        "closes[trade_date, close_price, available_at, available_at_basis]"
+      ],
+      "constraints": {
+        "price_basis": "raw_close（未還原）",
+        "currency": "TWD",
+        "available_at_rule": "交易日 17:30 +08:00（rule_close_1730）"
+      },
+      "errors": {
+        "invalid_input": "sessions 不在 {1,5,20}；reviewer 呼叫",
+        "no_data": "可得交易日不足 sessions、停牌或缺價"
+      },
+      "fixtures": [
+        "TR-17",
+        "TR-18",
+        "TR-19",
+        "TR-20"
+      ]
     },
     {
       "name": "calculate_metrics",
-      "description": "確定性純數學運算模組，禁止 LLM 自行計算。支援 growth_rate, simple_return, pe_ttm, dcf_scenario, peer_comparison。",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "operation": {
-            "type": "string",
-            "enum": ["growth_rate", "simple_return", "pe_ttm", "dcf_scenario", "peer_comparison"]
-          },
-          "values": {
-            "type": "object"
-          },
-          "evidence_refs": {
-            "type": "array",
-            "items": { "type": "string" },
-            "maxItems": 20
-          }
+      "validation": "agents/tools.py",
+      "implementation": "agents/tools_impl.calculate_metrics → agents/calculator.execute_calculation",
+      "roles": [
+        "researcher",
+        "reviewer"
+      ],
+      "input": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "growth_rate",
+            "simple_return",
+            "pe_ttm",
+            "dcf_scenario",
+            "peer_comparison"
+          ],
+          "required": true
         },
-        "required": ["operation", "values", "evidence_refs"]
-      }
+        "values": {
+          "type": "object",
+          "required": true
+        },
+        "evidence_refs": {
+          "type": "array",
+          "max_items": 20,
+          "required": true,
+          "rule": "不可為空陣列"
+        }
+      },
+      "operations": {
+        "growth_rate": {
+          "values": [
+            "current",
+            "previous"
+          ],
+          "rule": "任一缺或前期 ≤ 0 → invalid_input（基期為負或 0 時成長率無意義，回 NA）"
+        },
+        "simple_return": {
+          "values": [
+            "entry_price",
+            "exit_price"
+          ],
+          "rule": "買價缺或非正 → invalid_input"
+        },
+        "pe_ttm": {
+          "values": [
+            "price",
+            "eps_ttm"
+          ],
+          "rule": "同日未還原收盤價 ÷ TTM EPS；EPS ≤ 0 或缺 → invalid_input"
+        },
+        "dcf_scenario": {
+          "values": [
+            "free_cash_flows（5 年，億元）",
+            "wacc",
+            "terminal_growth",
+            "net_debt（億元）",
+            "shares_outstanding（百萬股）"
+          ],
+          "rule": "任一缺 → invalid_input；非 5 年 → invalid_input；WACC ≤ g → invalid_input；股數 ≤ 0 → invalid_input",
+          "output": [
+            "pv_fcf_total",
+            "terminal_value",
+            "pv_terminal",
+            "enterprise_value",
+            "equity_value",
+            "intrinsic_value_per_share",
+            "sensitivity_matrix（WACC ±1%、g ±0.5%；WACC ≤ g 格為 null）"
+          ],
+          "pending": [
+            "WACC 10%、g 3% 為程式預設值，待組長核定"
+          ]
+        },
+        "peer_comparison": {
+          "values": [
+            "subject=2454",
+            "comparators ⊂ {2379,3034,2330}",
+            "metrics{ticker:{price,eps_ttm,bvps,pb,revenue_yoy,fcf,dcf_per_share}}",
+            "price_as_of（YYYY-MM-DD）",
+            "cutoff",
+            "snapshot_ids{ticker:id}",
+            "method_version"
+          ],
+          "rule": "最多 4 家含主體；2330 為 industry_reference，不入同業平均；BVPS ≤ 0 → pb 為 null 並附理由",
+          "output": [
+            "comparison_table",
+            "peer_average_stats"
+          ]
+        }
+      },
+      "errors": {
+        "invalid_input": "evidence_refs 為空、operation 不在五項、運算條件不滿足"
+      },
+      "fixtures": [
+        "TR-21",
+        "TR-22",
+        "TR-23",
+        "TR-24",
+        "TR-25",
+        "TR-26",
+        "TR-27",
+        "TR-28",
+        "TR-29",
+        "TR-30"
+      ]
     }
   ]
 }
