@@ -23,15 +23,26 @@ def to_float(value: Any) -> float | None:
         return None
 
 
-def money_100m(value: Any) -> float:
-    """Convert raw TWD values to NT$100 million units."""
+def money_100m(value: Any) -> float | None:
+    """Convert raw TWD values to NT$100 million units.
+
+    缺值回傳 None（W03 修正：null 與 0 必須分開，不再補 0.0）。
+    """
 
     parsed = to_float(value)
     if parsed is None:
-        return 0.0
+        return None
     if abs(parsed) >= 10_000_000:
         return parsed / 100_000_000
     return parsed
+
+
+def fmt_100m(value: float | None) -> str:
+    """億元金額轉文字；缺值顯示「無資料」而不是 0。"""
+
+    if value is None or not isfinite(value):
+        return "無資料"
+    return f"{value:,.0f}"
 
 
 def percent(value: float | None) -> str:
@@ -110,8 +121,8 @@ def analyze_financials(financial_data: list[dict[str, Any]], stock_code: str, co
 
     summary = (
         f"{company_name}（{stock_code}）近 {len(records)} 年財務資料顯示，"
-        f"{latest_year} 年營收約 {latest_revenue_100m:,.0f} 億元，"
-        f"自由現金流約 {latest_fcf_100m:,.0f} 億元。"
+        f"{latest_year} 年營收約 {fmt_100m(latest_revenue_100m)} 億元，"
+        f"自由現金流約 {fmt_100m(latest_fcf_100m)} 億元。"
         f"營收相較期初成長 {percent(revenue_growth)}，淨利成長 {percent(net_income_growth)}，"
         f"最新營業利益率約 {percent(operating_margin)}、淨利率約 {percent(net_margin)}。"
         "整體判斷以實際 FinMind 財務數據為基礎，適合作為 DCF 估值與投資分析報告的文字摘要。"
@@ -120,13 +131,16 @@ def analyze_financials(financial_data: list[dict[str, Any]], stock_code: str, co
     strengths = [
         f"營收規模持續具備代表性，近年營收成長率約 {percent(revenue_growth)}。",
         f"最新年度營業利益率約 {percent(operating_margin)}，顯示本業獲利能力仍可支撐估值分析。",
-        f"最新年度自由現金流約 {latest_fcf_100m:,.0f} 億元，提供 DCF 模型可用的現金流基礎。",
+        f"最新年度自由現金流約 {fmt_100m(latest_fcf_100m)} 億元，提供 DCF 模型可用的現金流基礎。",
     ]
-    if net_debt_100m < 0:
-        strengths.append(f"最新年度呈現淨現金狀態，淨負債約 {net_debt_100m:,.0f} 億元，財務彈性較佳。")
+    if net_debt_100m is not None and net_debt_100m < 0:
+        strengths.append(f"最新年度呈現淨現金狀態，淨負債約 {fmt_100m(net_debt_100m)} 億元，財務彈性較佳。")
 
     risks = []
-    negative_fcf_years = [str(row.get("year")) for row in records if (to_float(row.get("free_cash_flow")) or 0) < 0]
+    negative_fcf_years = [
+        str(row.get("year")) for row in records
+        if (fcf := to_float(row.get("free_cash_flow"))) is not None and fcf < 0
+    ]
     if negative_fcf_years:
         risks.append(f"{'、'.join(negative_fcf_years)} 年自由現金流為負，顯示資本支出或營運資金波動需留意。")
     if fcf_growth is not None and fcf_growth < 0:
