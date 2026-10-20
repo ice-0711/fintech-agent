@@ -1,305 +1,376 @@
-"""agents/tools_impl.py
-W03-B / W06 重構版: 6 大工具標準實作模組。
-嚴格對齊 V1.2 工具契約、真實 2026 公開財務與行情快照：
-- 嚴格 No Look-Ahead 防前視
-- 缺值保持 null，嚴禁補 0
-- 2330 僅作為產業參照，絕不計入同業平均
-- 支援解包調用與字典調用雙重相容
+"""agents/tools_impl.py — W03-B 六工具實作（V1.4，對齊 data/tool-contracts.json v1.1-w02）
+
+規則
+----
+- 回傳頂層固定為 status / tool / reason / data（與 agents/tools.py dispatch 一致）。
+- 嚴格防前視：只回傳 cutoff / end_at 之前可得的資料。
+- 可得時間依據 available_at_basis：
+    official             財報＝MOPS 發言時間；總經＝官方發布時間
+    rule_close_1730      股價＝交易日 17:30 +08:00
+    captured_at_fallback 官方時間未知，以 captured_at 判定；兩者皆無視為不可得
+- 缺值保持 null 並附 missing_reason，不補 0。
+- 不產生任何來源網址或 hash：快照沒有就回傳 null。
+- 參數格式檢查由 agents/tools.py validate_tool_call 負責；本檔再做最低限度防呆，
+  讓直接呼叫（測試、snapshot.py）也不會崩潰。
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
-import os
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 try:
     from agents.calculator import execute_calculation
-except ImportError:
+except ImportError:  # 以 agents/ 為工作目錄執行時
     from calculator import execute_calculation  # type: ignore
 
 CURRENT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = CURRENT_DIR.parent
+SNAPSHOT_PATH = PROJECT_ROOT / "data" / "financial-snapshots.json"
+MACRO_CSV = PROJECT_ROOT / "data" / "manual" / "macro.csv"
 
-CANDIDATE_PATHS = [
-    PROJECT_ROOT / "data" / "financial-snapshots.json",
-    PROJECT_ROOT / "financial-snapshots.json",
-    CURRENT_DIR / "data" / "financial-snapshots.json",
-    CURRENT_DIR / "financial-snapshots.json",
-    Path("data/financial-snapshots.json"),
-    Path("financial-snapshots.json"),
-]
+RESEARCH_TICKERS = ("2330", "2317", "2454")
+ALL_TICKERS = RESEARCH_TICKERS + ("2379", "3034")
+# 白名單只在 agents/tools.py 維護一處（組長核定）；此處直接引用，避免兩份不一致
+try:
+    from agents.tools import MACRO_SERIES_WHITELIST
+except ImportError:  # 以 agents/ 為工作目錄執行時
+    try:
+        from tools import MACRO_SERIES_WHITELIST  # type: ignore
+    except ImportError:
+        MACRO_SERIES_WHITELIST = ("CPIAUCSL", "FEDFUNDS")
+PRICE_SESSIONS = (1, 5, 20)
+PRICE_AVAILABLE_TIME = "T17:30:00+08:00"
+EVIDENCE_MAX_CHARS = 1200
+QUERY_MAX_CHARS = 200
 
-MACRO_SERIES_WHITELIST = ["CPIAUCSL", "FEDFUNDS", "UNRATE", "GDP", "DGS10", "TWII"]
+
+# -------------------------------------------------------------------------
+# 共用
+# -------------------------------------------------------------------------
+def _resp(tool: str, status: str, data: Any = None, reason: str | None = None) -> dict[str, Any]:
+    """固定回傳結構；非 ok 時 data 一律為 None。"""
+    return {"status": status, "tool": tool, "reason": reason, "data": data if status == "ok" else None}
 
 
-def _resolve_snapshot_path() -> Path | None:
-    for p in CANDIDATE_PATHS:
-        if p.exists():
-            return p
-    return None
+def _params(args: tuple[Any, ...], kwargs: dict[str, Any], names: tuple[str, ...]) -> dict[str, Any]:
+    """相容三種呼叫：fn({...})、fn(**kwargs)、fn(位置參數...)（research_ui/comparison.py 使用位置參數）。"""
+    if args and isinstance(args[0], dict) and len(args) == 1:
+        return args[0]
+    params = dict(zip(names, args))
+    params.update(kwargs)
+    return params
+
+
+def _parse_iso(value: str) -> datetime:
+    parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError(f"時間缺少時區：{value}")
+    return parsed
 
 
 def _load_snapshots() -> dict[str, Any]:
-    snap_path = _resolve_snapshot_path()
-    if snap_path is None:
-        return {"evidences": [], "financials": {}, "macro": [], "prices": {}}
-    with open(snap_path, "r", encoding="utf-8") as f:
+    if not SNAPSHOT_PATH.exists():
+        return {"evidences": [], "financials": {}, "macro": [], "prices": {}, "source_manifest": {}}
+    with open(SNAPSHOT_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def _parse_iso(dt_str: str) -> datetime:
-    return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
+def _raw_file(snap: dict[str, Any], dataset: str, ticker: str | None) -> dict[str, Any]:
+    """原始 FinMind 檔紀錄（sha256、captured_at）；找不到回傳空 dict。"""
+    for raw in snap.get("source_manifest", {}).get("raw_files", []):
+        if raw.get("dataset") == dataset and raw.get("data_id") == ticker:
+            return raw
+    return {}
+
+
+@lru_cache(maxsize=1)
+def _macro_csv_hash() -> str | None:
+    return hashlib.sha256(MACRO_CSV.read_bytes()).hexdigest() if MACRO_CSV.exists() else None
+
+
+def _effective_available(row: dict[str, Any]) -> tuple[datetime | None, str | None, str | None]:
+    """回傳 (可得時間, available_at 字串, basis)。兩個時間皆無 → (None, None, None)。"""
+    if row.get("available_at"):
+        return _parse_iso(row["available_at"]), row["available_at"], "official"
+    if row.get("captured_at"):
+        return _parse_iso(row["captured_at"]), row["captured_at"], "captured_at_fallback"
+    return None, None, None
+
+
+def _next_period(period: str) -> str:
+    year, q = int(period[:4]), int(period[-1])
+    return f"{year + 1}Q1" if q == 4 else f"{year}Q{q + 1}"
+
+
+def _consecutive(periods: list[str]) -> bool:
+    return all(_next_period(a) == b for a, b in zip(periods, periods[1:]))
 
 
 # -------------------------------------------------------------------------
-# 工具 1: search_evidence
+# 工具 1：search_evidence（Researcher）
 # -------------------------------------------------------------------------
 def search_evidence(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    """查詢已入庫快照之公開文件索引 (Researcher 專用)"""
-    params = args[0] if args and isinstance(args[0], dict) else kwargs
-    ticker = params.get("ticker", "")
-    query = params.get("query", "")
-    cutoff = params.get("cutoff", "")
-    limit = int(params.get("limit", 5))
+    tool = "search_evidence"
+    p = _params(args, kwargs, ("ticker", "query", "cutoff", "limit"))
+    ticker, query, cutoff = p.get("ticker", ""), p.get("query", "") or "", p.get("cutoff", "")
 
-    if ticker not in ("2330", "2317", "2454", "2379", "3034"):
-        return {"status": "invalid_input", "tool": "search_evidence", "reason": f"未授權研究標的: {ticker}", "data": None}
-
+    if ticker not in RESEARCH_TICKERS:
+        return _resp(tool, "invalid_input", reason=f"search_evidence 只限研究主體 {RESEARCH_TICKERS}，收到 {ticker}")
+    if len(query) > QUERY_MAX_CHARS:
+        return _resp(tool, "invalid_input", reason=f"query 超過 {QUERY_MAX_CHARS} 字")
     try:
+        limit = int(p.get("limit", 5))
         cutoff_dt = _parse_iso(cutoff)
-    except Exception as exc:
-        return {"status": "invalid_input", "tool": "search_evidence", "reason": f"cutoff 格式錯誤: {exc}", "data": None}
+    except (TypeError, ValueError) as exc:
+        return _resp(tool, "invalid_input", reason=f"參數格式錯誤：{exc}")
+    if not 1 <= limit <= 5:
+        return _resp(tool, "invalid_input", reason="limit 只限 1 至 5")
 
-    snapshots = _load_snapshots()
-    matches = []
+    words = [w for w in query.split() if w]
+    rows = []
+    for ev in _load_snapshots().get("evidences", []):
+        if ev.get("ticker") != ticker:
+            continue
+        when, available_at, basis = _effective_available(ev)
+        if when is None or when > cutoff_dt:
+            continue
+        haystack = " ".join(str(ev.get(k) or "") for k in ("title", "abstract", "paragraph"))
+        if words and not any(w in haystack for w in words):
+            continue
+        rows.append({
+            "source_id": ev.get("source_id"),
+            "evidence_version_id": ev.get("evidence_version_id"),
+            "ticker": ticker,
+            "title": ev.get("title"),
+            "published_at": ev.get("published_at"),
+            "captured_at": ev.get("captured_at"),
+            "available_at": available_at,
+            "available_at_basis": basis,
+            "content_hash": ev.get("content_hash"),
+            "abstract": ev.get("abstract"),
+        })
 
-    for ev in snapshots.get("evidences", []):
-        if ev.get("ticker") == ticker:
-            avail_dt = _parse_iso(ev["available_at"])
-            if avail_dt <= cutoff_dt:
-                query_words = [w for w in query.strip().split() if w]
-                title = ev.get("title", "")
-                abstract = ev.get("abstract", "")
-                paragraph = ev.get("paragraph", "")
-                if not query_words or any(word in title or word in abstract or word in paragraph for word in query_words):
-                    matches.append({
-                        "source_id": ev.get("source_id"),
-                        "evidence_version_id": ev.get("evidence_version_id"),
-                        "ticker": ticker,
-                        "title": title,
-                        "published_at": ev.get("published_at"),
-                        "captured_at": ev.get("captured_at"),
-                        "available_at": ev.get("available_at"),
-                        "content_hash": ev.get("content_hash"),
-                        "abstract": abstract
-                    })
-
-    if not matches:
-        return {"status": "no_data", "tool": "search_evidence", "reason": "指定 cutoff 前查無相符索引快照", "data": None}
-
-    return {"status": "ok", "tool": "search_evidence", "data": matches[:limit]}
+    if not rows:
+        return _resp(tool, "no_data", reason="指定 cutoff 前查無相符索引快照")
+    return _resp(tool, "ok", rows[:limit])
 
 
 # -------------------------------------------------------------------------
-# 工具 2: read_evidence
+# 工具 2：read_evidence（Researcher / Reviewer）
 # -------------------------------------------------------------------------
 def read_evidence(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    """讀取不可變文本片段 (<=1,200 字，Researcher/Reviewer 共用)"""
-    params = args[0] if args and isinstance(args[0], dict) else kwargs
-    evidence_version_id = params.get("evidence_version_id", "")
+    tool = "read_evidence"
+    evidence_version_id = _params(args, kwargs, ("evidence_version_id",)).get("evidence_version_id", "")
 
-    snapshots = _load_snapshots()
-    for ev in snapshots.get("evidences", []):
-        if ev.get("evidence_version_id") == evidence_version_id:
-            paragraph = ev.get("paragraph", "")
-            if len(paragraph) > 1200:
-                paragraph = paragraph[:1200]
-            return {
-                "status": "ok",
-                "tool": "read_evidence",
-                "data": {
-                    "evidence_version_id": ev.get("evidence_version_id"),
-                    "paragraph": paragraph,
-                    "source_url": ev.get("source_url", "https://mops.twse.com.tw/mops/web/t05st01"),
-                    "content_hash": ev.get("content_hash"),
-                    "available_at": ev.get("available_at")
-                }
-            }
-    return {"status": "no_data", "tool": "read_evidence", "reason": f"查無指定片段: {evidence_version_id}", "data": None}
+    for ev in _load_snapshots().get("evidences", []):
+        if ev.get("evidence_version_id") != evidence_version_id:
+            continue
+        paragraph = ev.get("paragraph")
+        if paragraph is None:
+            return _resp(tool, "unreadable", reason="來源正文不可讀（paragraph 為 null），不得補造內容")
+        _, available_at, basis = _effective_available(ev)
+        return _resp(tool, "ok", {
+            "evidence_version_id": ev.get("evidence_version_id"),
+            "source_id": ev.get("source_id"),
+            "paragraph": str(paragraph)[:EVIDENCE_MAX_CHARS],
+            "source_url": ev.get("source_url"),          # 快照沒有就是 None，不填通用網址
+            "content_hash": ev.get("content_hash"),
+            "available_at": available_at,
+            "available_at_basis": basis,
+        })
+    return _resp(tool, "no_data", reason=f"查無指定片段: {evidence_version_id}")
 
 
 # -------------------------------------------------------------------------
-# 工具 3: get_financial_snapshot
+# 工具 3：get_financial_snapshot（Researcher / Reviewer）
 # -------------------------------------------------------------------------
+def _ttm(rows: list[dict[str, Any]], field: str) -> tuple[float | None, str | None]:
+    """四連續單季加總；任何條件不符回傳 (None, 原因)。"""
+    if len(rows) < 4:
+        return None, f"可得單季季數不足 4 季（僅 {len(rows)} 季），禁止年化推估"
+    last4 = rows[-4:]
+    periods = [r.get("period") for r in last4]
+    if not _consecutive(periods):
+        return None, f"最近四季不連續：{periods}"
+    if any(r.get("period_basis") != "single_quarter" for r in last4):
+        return None, "最近四季並非皆為 single_quarter"
+    missing = [r["period"] for r in last4 if r.get(field) is None]
+    if missing:
+        return None, f"{field} 於 {missing} 為 null"
+    if field == "eps":
+        unverified = [r["period"] for r in last4 if r.get("eps_source") == "unverified"]
+        if unverified:
+            return None, f"EPS 於 {unverified} 為 unverified，不得作為正式 TTM"
+    return round(sum(r[field] for r in last4), 2), None
+
+
 def get_financial_snapshot(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    """取得單季、TTM 與存量財務指標 (含連續 4 季單季檢查與補齊契約欄位)"""
-    params = args[0] if args and isinstance(args[0], dict) else kwargs
-    ticker = params.get("ticker", "")
-    cutoff = params.get("cutoff", "")
+    tool = "get_financial_snapshot"
+    p = _params(args, kwargs, ("ticker", "cutoff"))
+    ticker, cutoff = p.get("ticker", ""), p.get("cutoff", "")
 
+    if ticker not in ALL_TICKERS:
+        return _resp(tool, "invalid_input", reason=f"ticker 只限 {ALL_TICKERS}，收到 {ticker}")
     try:
         cutoff_dt = _parse_iso(cutoff)
-    except Exception as exc:
-        return {"status": "invalid_input", "tool": "get_financial_snapshot", "reason": f"cutoff 格式錯誤: {exc}", "data": None}
+    except ValueError as exc:
+        return _resp(tool, "invalid_input", reason=f"cutoff 格式錯誤：{exc}")
 
-    snapshots = _load_snapshots()
-    company_data = snapshots.get("financials", {}).get(ticker)
+    snap = _load_snapshots()
+    company = snap.get("financials", {}).get(ticker)
+    if not company:
+        return _resp(tool, "no_data", reason=f"查無 {ticker} 財務資料")
 
-    if not company_data:
-        return {"status": "no_data", "tool": "get_financial_snapshot", "reason": f"查無 {ticker} 財務資料", "data": None}
+    rows = []
+    for q in company.get("quarters", []):
+        when, _, _ = _effective_available(q)
+        if when is not None and when <= cutoff_dt:
+            rows.append(q)
+    rows.sort(key=lambda r: r["period"])
+    if not rows:
+        return _resp(tool, "no_data", reason="截至 cutoff 無可得財務資料")
 
-    available_quarters = []
-    for q in company_data.get("quarters", []):
-        if _parse_iso(q["available_at"]) <= cutoff_dt:
-            available_quarters.append(q)
+    latest = rows[-1]
+    eps_ttm, eps_reason = _ttm(rows, "eps")
+    fcf_ttm, fcf_reason = _ttm(rows, "free_cash_flow")
+    reasons = [r for r in dict.fromkeys([eps_reason, fcf_reason]) if r]
+    _, available_at, basis = _effective_available(latest)
+    raw = _raw_file(snap, "TaiwanStockFinancialStatements", ticker)
 
-    if not available_quarters:
-        return {"status": "no_data", "tool": "get_financial_snapshot", "reason": f"截至 {cutoff} 無可得財務資料", "data": None}
-
-    latest_q = available_quarters[-1]
-
-    # 嚴格校驗：必須為連續 4 個 single_quarter 且無缺失值方可加總 TTM
-    eps_ttm = None
-    fcf_ttm = None
-    ttm_missing_reason = None
-
-    if len(available_quarters) >= 4:
-        last_4 = available_quarters[-4:]
-        is_all_single_q = all(q.get("period_basis") == "single_quarter" for q in last_4)
-        has_no_null_eps = all(q.get("eps") is not None for q in last_4)
-        has_no_null_fcf = all(q.get("free_cash_flow") is not None for q in last_4)
-
-        if is_all_single_q and has_no_null_eps and has_no_null_fcf:
-            eps_ttm = round(sum(q["eps"] for q in last_4), 2)
-            fcf_ttm = round(sum(q["free_cash_flow"] for q in last_4), 2)
-        else:
-            ttm_missing_reason = "單季資料存在缺失或期間口徑不一致，拒絕推估 TTM"
-    else:
-        ttm_missing_reason = f"可得單季季數不足 4 季 (僅 {len(available_quarters)} 季)，禁止年化推估"
-
-    return {
-        "status": "ok",
-        "tool": "get_financial_snapshot",
-        "data": {
-            "ticker": ticker,
-            "company_name": company_data.get("company_name", ticker),
-            "statement_basis": company_data.get("statement_basis", "consolidated"),
-            "currency": company_data.get("currency", "TWD"),
-            "unit": "100m",
-            "latest_period": latest_q.get("period"),
-            "period_basis": latest_q.get("period_basis", "single_quarter"),
-            "source_id": latest_q.get("source_id", f"src-finmind-{ticker}-fs"),
-            "snapshot_id": latest_q.get("snapshot_id", f"snap-{ticker}-{latest_q.get('period')}"),
-            "content_hash": latest_q.get("content_hash", ""),
-            "missing_reason": ttm_missing_reason,
-            "metrics": {
-                "revenue_single_q": latest_q.get("revenue"),
-                "operating_income_single_q": latest_q.get("operating_income"),
-                "net_income_single_q": latest_q.get("net_income"),
-                "operating_cash_flow_single_q": latest_q.get("operating_cash_flow"),
-                "capital_expenditure_single_q": latest_q.get("capital_expenditure"),
-                "free_cash_flow_single_q": latest_q.get("free_cash_flow"),
-                "eps_single_q": latest_q.get("eps"),
-                "bvps": latest_q.get("bvps"),
-                "eps_ttm": eps_ttm,
-                "fcf_ttm": fcf_ttm,
-                "shares_outstanding_m": latest_q.get("shares_outstanding"),
-                "net_debt": latest_q.get("net_debt")
-            },
-            "available_at": latest_q["available_at"]
-        }
-    }
+    return _resp(tool, "ok", {
+        "ticker": ticker,
+        "company_name": company.get("company_name", ticker),
+        "statement_basis": company.get("statement_basis", "consolidated"),
+        "currency": company.get("currency", "TWD"),
+        "unit": "100m",
+        "latest_period": latest.get("period"),
+        "period_basis": latest.get("period_basis"),
+        "ttm_periods": [r["period"] for r in rows[-4:]] if eps_ttm is not None or fcf_ttm is not None else None,
+        "source_id": latest.get("source_id"),
+        "snapshot_id": latest.get("snapshot_id"),
+        "content_hash": latest.get("content_hash"),
+        "missing_reason": "；".join(reasons) if reasons else None,
+        "metrics": {
+            "revenue_single_q": latest.get("revenue"),
+            "operating_income_single_q": latest.get("operating_income"),
+            "net_income_single_q": latest.get("net_income"),
+            "operating_cash_flow_single_q": latest.get("operating_cash_flow"),
+            "capital_expenditure_single_q": latest.get("capital_expenditure"),
+            "free_cash_flow_single_q": latest.get("free_cash_flow"),
+            "eps_single_q": latest.get("eps"),
+            "eps_source": latest.get("eps_source"),
+            "bvps": latest.get("bvps"),
+            "eps_ttm": eps_ttm,
+            "fcf_ttm": fcf_ttm,
+            "shares_outstanding_m": latest.get("shares_outstanding"),
+            "net_debt": latest.get("net_debt"),
+        },
+        "available_at": available_at,
+        "available_at_basis": basis,
+        "captured_at": raw.get("captured_at"),
+    })
 
 
 # -------------------------------------------------------------------------
-# 工具 4: get_macro_snapshot
+# 工具 4：get_macro_snapshot（Researcher / Reviewer）
 # -------------------------------------------------------------------------
 def get_macro_snapshot(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    """取得白名單總經快照 (FRED / TWII)"""
-    params = args[0] if args and isinstance(args[0], dict) else kwargs
-    cutoff = params.get("cutoff", "")
-    series_ids = params.get("series_ids", [])
+    tool = "get_macro_snapshot"
+    p = _params(args, kwargs, ("cutoff", "series_ids"))
+    cutoff, series_ids = p.get("cutoff", ""), p.get("series_ids") or []
 
+    if not isinstance(series_ids, list) or not 1 <= len(series_ids) <= 5:
+        return _resp(tool, "invalid_input", reason="series_ids 需為 1 至 5 項的陣列")
+    unauthorized = [s for s in series_ids if s not in MACRO_SERIES_WHITELIST]
+    if unauthorized:
+        return _resp(tool, "invalid_input", reason=f"series {unauthorized} 不在已核准白名單 {MACRO_SERIES_WHITELIST}")
     try:
         cutoff_dt = _parse_iso(cutoff)
-    except Exception as exc:
-        return {"status": "invalid_input", "tool": "get_macro_snapshot", "reason": f"cutoff 格式錯誤: {exc}", "data": None}
+    except ValueError as exc:
+        return _resp(tool, "invalid_input", reason=f"cutoff 格式錯誤：{exc}")
 
-    # 檢查是否全為白名單序列
-    unauthorized = [sid for sid in series_ids if sid not in MACRO_SERIES_WHITELIST]
-    if unauthorized:
-        return {"status": "invalid_input", "tool": "get_macro_snapshot", "reason": f"未授權總經序列: {unauthorized}", "data": None}
+    rows = []
+    for m in _load_snapshots().get("macro", []):
+        if m.get("series_id") not in series_ids:
+            continue
+        when, available_at, basis = _effective_available(m)
+        if when is None or when > cutoff_dt:
+            continue
+        rows.append({
+            "series_id": m["series_id"],
+            "indicator": m.get("indicator"),
+            "observation_date": m.get("observation_date"),
+            "value": m.get("value"),
+            "unit": m.get("unit"),
+            "available_at": available_at,
+            "available_at_basis": basis,
+            "source_id": m.get("source_id", "fred_macro"),
+            "content_hash": m.get("content_hash") or _macro_csv_hash(),
+            "vintage": m.get("vintage"),
+            "vintage_missing_reason": None if m.get("vintage") else "只有現行下載值，無歷史 vintage",
+        })
 
-    snapshots = _load_snapshots()
-    macro_list = snapshots.get("macro", [])
-
-    matched = []
-    for item in macro_list:
-        if item.get("series_id") in series_ids:
-            if _parse_iso(item["available_at"]) <= cutoff_dt:
-                matched.append(item)
-
-    if not matched:
-        return {"status": "no_data", "tool": "get_macro_snapshot", "reason": "指定指標於 cutoff 前無數據", "data": None}
-
-    return {"status": "ok", "tool": "get_macro_snapshot", "data": matched}
+    if not rows:
+        return _resp(tool, "no_data", reason="指定指標於 cutoff 前無數據")
+    return _resp(tool, "ok", rows)
 
 
 # -------------------------------------------------------------------------
-# 工具 5: get_price_window
+# 工具 5：get_price_window（Researcher）
 # -------------------------------------------------------------------------
 def get_price_window(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    """取得指定交易日收盤價視窗 (Researcher 專用，依 FinMind 17:30 官方可得時間判定)"""
-    params = args[0] if args and isinstance(args[0], dict) else kwargs
-    ticker = params.get("ticker", "")
-    end_at = params.get("end_at", "")
-    sessions = int(params.get("sessions", 1))
+    tool = "get_price_window"
+    p = _params(args, kwargs, ("ticker", "end_at", "sessions"))
+    ticker, end_at = p.get("ticker", ""), p.get("end_at", "")
 
-    if sessions not in (1, 5, 20):
-        return {"status": "invalid_input", "tool": "get_price_window", "reason": "sessions 只限 1, 5, 20", "data": None}
-
+    if ticker not in ALL_TICKERS:
+        return _resp(tool, "invalid_input", reason=f"ticker 只限 {ALL_TICKERS}，收到 {ticker}")
     try:
+        sessions = int(p.get("sessions", 1))
         end_dt = _parse_iso(end_at)
-    except Exception as exc:
-        return {"status": "invalid_input", "tool": "get_price_window", "reason": f"end_at 格式錯誤: {exc}", "data": None}
+    except (TypeError, ValueError) as exc:
+        return _resp(tool, "invalid_input", reason=f"參數格式錯誤：{exc}")
+    if sessions not in PRICE_SESSIONS:
+        return _resp(tool, "invalid_input", reason="sessions 只限 1, 5, 20")
 
-    snapshots = _load_snapshots()
-    price_series = snapshots.get("prices", {}).get(ticker, [])
+    snap = _load_snapshots()
+    rows = []
+    for row in snap.get("prices", {}).get(ticker, []):
+        available_at = row["trade_date"] + PRICE_AVAILABLE_TIME
+        if _parse_iso(available_at) <= end_dt and row.get("close") is not None:
+            rows.append({"trade_date": row["trade_date"], "close_price": row["close"],
+                         "available_at": available_at, "available_at_basis": "rule_close_1730"})
+    rows.sort(key=lambda r: r["trade_date"])
+    if len(rows) < sessions:
+        return _resp(tool, "no_data", reason="可得交易日不足，或指定區間停牌／休市")
 
-    # 以平日 17:30:00+08:00 作為 FinMind 當日行情入庫可得時點
-    valid_prices = []
-    for p in price_series:
-        avail_dt = _parse_iso(p["trade_date"] + "T17:30:00+08:00")
-        if avail_dt <= end_dt:
-            valid_prices.append(p)
-
-    if not valid_prices or len(valid_prices) < sessions:
-        return {"status": "no_data", "tool": "get_price_window", "reason": "交易數據不足或指定區間停牌/休市", "data": None}
-
-    target_window = valid_prices[-sessions:]
-    return {
-        "status": "ok",
-        "tool": "get_price_window",
-        "data": {
-            "ticker": ticker,
-            "currency": "TWD",
-            "price_basis": "raw_close",
-            "sessions": sessions,
-            "closes": target_window
-        }
-    }
+    window = rows[-sessions:]
+    raw = _raw_file(snap, "TaiwanStockPrice", ticker)
+    return _resp(tool, "ok", {
+        "ticker": ticker,
+        "currency": "TWD",
+        "unit": "TWD/share",
+        "price_basis": "raw_close",
+        "sessions": sessions,
+        "source_id": "finmind_price",
+        "content_hash": raw.get("sha256"),
+        "available_at": window[-1]["available_at"],
+        "available_at_basis": "rule_close_1730",
+        "captured_at": raw.get("captured_at"),
+        "closes": window,
+    })
 
 
 # -------------------------------------------------------------------------
-# 工具 6: calculate_metrics
+# 工具 6：calculate_metrics（Researcher / Reviewer）
 # -------------------------------------------------------------------------
 def calculate_metrics(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    """確定性純數學運算入口，委派給 agents.calculator.execute_calculation"""
-    params = args[0] if args and isinstance(args[0], dict) else kwargs
-    operation = params.get("operation", "")
-    values = params.get("values", {})
-    evidence_refs = params.get("evidence_refs", [])
-    return execute_calculation(operation=operation, values=values, evidence_refs=evidence_refs)
+    """確定性運算入口，委派給 agents.calculator.execute_calculation。"""
+    p = _params(args, kwargs, ("operation", "values", "evidence_refs"))
+    return execute_calculation(operation=p.get("operation", ""), values=p.get("values") or {},
+                               evidence_refs=p.get("evidence_refs") or [])
