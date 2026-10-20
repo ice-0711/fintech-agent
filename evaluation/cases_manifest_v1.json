@@ -1,0 +1,701 @@
+{
+  "manifest_version": "cases-v1",
+  "frozen_at": "2026-10-20T20:44:37+08:00",
+  "planned_sign_date": "2026-10-23",
+  "generated_by": "scripts/build_freeze.py",
+  "split_rule": "手冊第 06 章 30 案固定分配表；30 = 10 開發 + 20 保留",
+  "counts": {
+    "dev": 10,
+    "test": 20,
+    "total": 30
+  },
+  "answer_policy": "本檔不含任何標準答案；保留答案只存在 evaluation/test-cases-sealed.json，僅供 D 評分",
+  "source_files": [
+    {
+      "path": "evaluation/dev-cases.json",
+      "present": true,
+      "sha256_lf": "cf1f2194b5b1dfe2e673faf24b5c016dc2c91384776d9ea3037cd351a061d454",
+      "bytes": 9286
+    },
+    {
+      "path": "fixtures/dev/case_fixtures.json",
+      "present": true,
+      "sha256_lf": "30afcc66dcd5d01b97068b115d66c46633e71439aeb65b767f5b7d5d797f2c4b",
+      "bytes": 17615
+    },
+    {
+      "path": "evaluation/test-cases-sealed.json",
+      "present": true,
+      "sha256_lf": "117335c01401137d21d4b1c90120be92f497f0969adda26a49a5213916d27835",
+      "bytes": 19568
+    },
+    {
+      "path": "fixtures/test/test-cases-sealed.json",
+      "present": true,
+      "sha256_lf": "117335c01401137d21d4b1c90120be92f497f0969adda26a49a5213916d27835",
+      "bytes": 19568
+    },
+    {
+      "path": "fixtures/test/case_fixtures.json",
+      "present": true,
+      "sha256_lf": "7d9a5eebe099f1b5ae173a0149b5e12f05210f1924840a9d28bf5045163efef2",
+      "bytes": 33249
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "CASE-01",
+      "split": "dev",
+      "ticker": "2330",
+      "category": "完整證據",
+      "variant": "兩個相符官方段落支持事件",
+      "cutoff_at": "2026-08-12T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-01",
+      "synthetic_fixture": false,
+      "has_perturbation": false,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-01-official-1",
+          "content_hash": "7a6b13f486bbed9d2f460473548e7b15624d77abe474eae9808fefd9e626c9e2",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-dev-01-official-2",
+          "content_hash": "8be078698bd852c2e81873da2ebf9bf7c07c8235ed38272fec3d5aae4567dc6b",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "e3cdfa74af3e6de3d0926e3ba032d01b2a6481de5152bbab9ee44e55f598ff1f",
+      "snapshot_hash": "2a09de8c158fa59d8e91179991b925e2e8475cfd242ca7b1a856aef8c0f871f0"
+    },
+    {
+      "case_id": "CASE-02",
+      "split": "test",
+      "ticker": "2317",
+      "category": "完整證據",
+      "variant": "官方來源加相符金融快照",
+      "cutoff_at": "2026-08-15T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-02",
+      "synthetic_fixture": false,
+      "has_perturbation": false,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-02-official",
+          "content_hash": "cedef9c8984f0c109190c8175773cfbe04f799922c7bd8ef783171031c298e44",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "5820dab7adf4e4bcf26686aa8210047dab23cb7f5cb9a60272d8d113b778d97f",
+      "snapshot_hash": "01fa0f4e21c312cb060faa0f8863bc961d1419ed3eb756944c3b2c346a163b6c"
+    },
+    {
+      "case_id": "CASE-03",
+      "split": "test",
+      "ticker": "2454",
+      "category": "完整證據",
+      "variant": "官方與可信新聞相符",
+      "cutoff_at": "2026-08-03T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-03",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-03-official",
+          "content_hash": "4529615775016dd406e8a9c5a4fae1443641f4fe956c915c3e6b12efae15bb5a",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-03-news",
+          "content_hash": "64559d3db7ef8c5d5783a56440ddfeb8158f296593a6a73459c7294c0a404a69",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "5c28e258937a0c3dd4a79e6a6ff5d34e22e256ed85d88b23883b1b15408150c6",
+      "snapshot_hash": "72e03201177a5bddf9b4fabc2e365e8ae2a756e85c8c1a638bbec9e437f01240"
+    },
+    {
+      "case_id": "CASE-04",
+      "split": "dev",
+      "ticker": "2330",
+      "category": "完整證據",
+      "variant": "價格說法可由工具核算",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "source_snapshot_id": "snap-dev-case-04",
+      "synthetic_fixture": false,
+      "has_perturbation": false,
+      "evidence": [],
+      "case_hash": "da0f78e6fd99e9287348870c886abeba02a0f15a052bdfcb5a1fa6cad83b5db0",
+      "snapshot_hash": "9323da108755ade0e2c88a607e6e6793e546cabcf5f624db736f4d28fdd8fa16"
+    },
+    {
+      "case_id": "CASE-05",
+      "split": "test",
+      "ticker": "2317",
+      "category": "完整證據",
+      "variant": "已註明推論與反向假設",
+      "cutoff_at": "2026-08-15T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-05",
+      "synthetic_fixture": false,
+      "has_perturbation": false,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-05-official-2026q2",
+          "content_hash": "680b563a04bcaa7294613fa883e916908d71dd6c7b113a1a69ff0911f46d9245",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-05-official-2025q2",
+          "content_hash": "51f79f103d19cc764277ba81d415a00fcbc520395338d6937280ec9dabe2dbe4",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "c754493b9e7d145ba60c3d4be3d4a07f3afb0a756cc15e8ed5b8f33f336263a5",
+      "snapshot_hash": "d35b0b722b9628108d0a3a2bbf7d08bed34750c18ec9d93ce2c761f421223da0"
+    },
+    {
+      "case_id": "CASE-06",
+      "split": "test",
+      "ticker": "2454",
+      "category": "完整證據",
+      "variant": "來源完整但不要求一定利多",
+      "cutoff_at": "2026-08-03T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-06",
+      "synthetic_fixture": false,
+      "has_perturbation": false,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-06-official-2026q2",
+          "content_hash": "726d77b8fa5ca740514c96c11a6398ebfec2f737552e5fb1594fd02d9441277a",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-06-official-2025q2",
+          "content_hash": "a18a9726116a8aa6e2cf3c0ab9cac32f7642971b51e1e63dcb25cb949aec8ef5",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "cbca3f216d6778d1742678a9e09f5f233766c25e908b82b84cf88389674e6d89",
+      "snapshot_hash": "fc2473904dbc4cf78e0999c2e89c3eddb8472fdf5f42a9cc2bab0624324c1b76"
+    },
+    {
+      "case_id": "CASE-07",
+      "split": "test",
+      "ticker": "2330",
+      "category": "矛盾來源",
+      "variant": "同指標不同期間",
+      "cutoff_at": "2026-08-14T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-07",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-07-official-q2",
+          "content_hash": "60b2a21d65476bf515eafc8e5ff02a00718110c432bbb758af1216f8c0d646b9",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-07-official-q1",
+          "content_hash": "1d8304f884481acf2cdd16d4041d60b4853b4fba6ac87b182f784519b13a95cc",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-07-media",
+          "content_hash": "a48aa3ed9caec054aee5261bb32038c9b63137db883a76151451586109baca3d",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "f8711d5367b19da05aadd1b6806f73cbb25f686893821cba9b216ebf14bf7185",
+      "snapshot_hash": "24db707b8b87892030bb08caddb04573f44f85a665b340aca0d1923f307cb6b2"
+    },
+    {
+      "case_id": "CASE-08",
+      "split": "dev",
+      "ticker": "2317",
+      "category": "矛盾來源",
+      "variant": "同事件兩來源金額不同",
+      "cutoff_at": "2026-08-14T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-08",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-08-official",
+          "content_hash": "f5cf592ac8a84ff6bc376c8abcbcfa518a26f953e6b93bca79c46d8c50fb5a84",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-dev-08-conflict",
+          "content_hash": "dd209683df94fa91c94cba0590b9fccb4176ebf532937082f06a07d813e5eef6",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "555f3964a9020c08ee97782d06f9199fd4512e2564b36f7df049cbebaf4fae38",
+      "snapshot_hash": "e67768ff0e3207de8ba59b856a31ca19f0536c65e03c34b49cd221eae96ae681"
+    },
+    {
+      "case_id": "CASE-09",
+      "split": "test",
+      "ticker": "2454",
+      "category": "矛盾來源",
+      "variant": "新舊版本說法相反",
+      "cutoff_at": "2026-08-03T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-09",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-09-official-q2",
+          "content_hash": "bbd8584261838f90a546e528ab66a80ad8ba83d18421d45e94174cebab25b372",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-09-official-q1",
+          "content_hash": "bc008fe7985e9b20580629adfa3866e3a1d4f6535f62f0f192ec45be8fd5ccbe",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-09-summary-v1",
+          "content_hash": "aaeb931125f23c1e4077d6844e477776758094ea1da17e750e347b9001267fa9",
+          "synthetic_fixture": true
+        },
+        {
+          "evidence_version_id": "ev-test-09-summary-v2",
+          "content_hash": "9b320eba94c91e82890a2d20c3960e722717c3edc58ffca2a8a6b65a61cdc32e",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "ba4c45e42d4a4655b02878437f053b87a859134dce85764caf98894da240e44c",
+      "snapshot_hash": "994db874759ac5808b42b04a0e9b5c4d0d840fb9754ffc6f5a3c4e1a5d9f2367"
+    },
+    {
+      "case_id": "CASE-10",
+      "split": "test",
+      "ticker": "2330",
+      "category": "矛盾來源",
+      "variant": "營收成長與絕對值不一致",
+      "cutoff_at": "2026-08-14T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-10",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-10-official-q2",
+          "content_hash": "60b2a21d65476bf515eafc8e5ff02a00718110c432bbb758af1216f8c0d646b9",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-10-official-2025q2",
+          "content_hash": "b306288e4bf31876b165cfe36aa651a504b82ffbd7d878539778487c2d0f5b49",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-10-blog",
+          "content_hash": "0c1a30131800a9cc7c62f46a355c674fda17c8fc737a2f5631d1eda46c9e58e9",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "08e2b5a5d41983d03afa66b46e34fe27ac199352b93d50f8cfe8f678a44dba70",
+      "snapshot_hash": "e2b1390508183eb0030b9cb52830a94e3bd6a53413a98057f466d9beb918c518"
+    },
+    {
+      "case_id": "CASE-11",
+      "split": "dev",
+      "ticker": "2317",
+      "category": "矛盾來源",
+      "variant": "合併財報與個體財報口徑混用",
+      "cutoff_at": "2026-08-12T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-11",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-11-consolidated",
+          "content_hash": "b03f4802a5efb0788b6920775b7dc0f91d61bda2f1ba4ff761501c2099a91b82",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-dev-11-no-basis",
+          "content_hash": "4e1fe15c91b88532214cbe0d29756d7cab2bad1e982c8ff15c02900b7c5e844b",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "f9bca2361871aa51b1031d6eee35a125cb4f92751d7202cd9829a7285b3268c2",
+      "snapshot_hash": "bd5c85c9d5ba5e5d01552b8ae53592cfde10cf544fd93960764d6b25b55096c2"
+    },
+    {
+      "case_id": "CASE-12",
+      "split": "test",
+      "ticker": "2454",
+      "category": "矛盾來源",
+      "variant": "傳聞與官方否認相衝突",
+      "cutoff_at": "2026-08-03T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-12",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-12-official",
+          "content_hash": "21a5ce52c5d89d537dae341d3209bc7b661120533f6825865c5017a8c14daa3a",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-12-rumor",
+          "content_hash": "71b40a34c210cb4c4c7121245192e4843caf8d56ba60157ea0da530cee57f756",
+          "synthetic_fixture": true
+        },
+        {
+          "evidence_version_id": "ev-test-12-clarify",
+          "content_hash": "04258c572b1c4e4464d70ffd6246a2658f5e9468eab9dc3b1634c61adfd60597",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "6375ebc5d06a18719aa37c0a0f1f08521400f7405308d8768492c4a19ddb1e60",
+      "snapshot_hash": "ae6c0303b9eb34f7c35a2840e0a30cfe57ac96f5cd2be44cd92388217d464834"
+    },
+    {
+      "case_id": "CASE-13",
+      "split": "test",
+      "ticker": "2330",
+      "category": "缺少資料",
+      "variant": "只有社群傳聞沒有原件",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "source_snapshot_id": "snap-test-case-13",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-13-forum",
+          "content_hash": "ec1753852d9f409c7da716e88ed60ad6abccaac2539cb0c037abeff45cb8d83e",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "9e644fca08f222ff95160971b0b98898023722ce144bac451faaf9d3a3263a11",
+      "snapshot_hash": "7e161e4861d6ee7f5c1d02f86dde6e927c6f0319db14d97200bb2d968cbd17a6"
+    },
+    {
+      "case_id": "CASE-14",
+      "split": "test",
+      "ticker": "2317",
+      "category": "缺少資料",
+      "variant": "缺少EPS仍被要求PE",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "source_snapshot_id": "snap-test-case-14",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [],
+      "case_hash": "a005e402b47720f42bff7292a64bc65d51fe1e4b45d91996d3214a29d3f08a37",
+      "snapshot_hash": "7463dda0217f460af655edcc56ced9494086209ad4745a444c3a535748c7b559"
+    },
+    {
+      "case_id": "CASE-15",
+      "split": "dev",
+      "ticker": "2454",
+      "category": "缺少資料",
+      "variant": "關鍵來源正文不可讀",
+      "cutoff_at": "2026-08-05T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-15",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-15-unreadable",
+          "content_hash": null,
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "6cfa1dfbaae967f3582486110722a8316690624793401782fee37cef131383d4",
+      "snapshot_hash": "ae5f49eb72191b75a7204bad29b3b19277e0b5e6e88552733b10630d635a4921"
+    },
+    {
+      "case_id": "CASE-16",
+      "split": "test",
+      "ticker": "2330",
+      "category": "缺少資料",
+      "variant": "沒有可信發布時間與截止前捕獲",
+      "cutoff_at": "2026-08-05T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-16",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-16-undated",
+          "content_hash": "923a14cbe1394462ead09649d8bb123c7b2b3c5fb21bc856e33238c42d1cbb25",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "288c692a442be58a75a482c4cd01bba58849c4b805af5eb65211df88cfb850f6",
+      "snapshot_hash": "a5ab731930526d6d5ca5faf6adf3d691be2fcbf1797e1a1bf837695da0d22aed"
+    },
+    {
+      "case_id": "CASE-17",
+      "split": "test",
+      "ticker": "2317",
+      "category": "缺少資料",
+      "variant": "重要財報欄位null",
+      "cutoff_at": "2026-08-15T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-17",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [],
+      "case_hash": "a51fdf9b7113174a76467eaf926501de17190193174623887b420ec79e0e22e8",
+      "snapshot_hash": "07fa7992f34a7e53fccc1bc0ca1e27299f2256cb8f6b5879aa331b18c8cb3926"
+    },
+    {
+      "case_id": "CASE-18",
+      "split": "dev",
+      "ticker": "2454",
+      "category": "缺少資料",
+      "variant": "關鍵證據在cutoff之後",
+      "cutoff_at": "2026-07-20T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-18",
+      "synthetic_fixture": false,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-18-late",
+          "content_hash": "0095f18dd44f7613c301d29dcfe12cac437bbfa9a049dcff664a129a62961d27",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "c671f3fec7264e785aa58589645080aba4c899e862e796416c5ac54d78192ebb",
+      "snapshot_hash": "12c892688b1235a5c787a24562e02aa564f60420aa0144121bd5bcdd3a3d1768"
+    },
+    {
+      "case_id": "CASE-19",
+      "split": "dev",
+      "ticker": "2330",
+      "category": "數字口徑",
+      "variant": "TWD與其他幣別混用",
+      "cutoff_at": "2026-07-20T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-19",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-19-mix",
+          "content_hash": "d2887d70753ec64eb52eacb97918a061cf93a22d335f81ab4737522ace809c6e",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "b8ea6e3299b78698e9749f581a3a8a53c1d3bfee1f3e354267d68cf6ca5a8317",
+      "snapshot_hash": "e68fc239d84b375ee2fcb9b46a68a8601dba9ad9702481fe74c9cac3798a45dc"
+    },
+    {
+      "case_id": "CASE-20",
+      "split": "test",
+      "ticker": "2317",
+      "category": "數字口徑",
+      "variant": "millions與billions混用",
+      "cutoff_at": "2026-08-15T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-20",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-20-official",
+          "content_hash": "3daba6695e3074a2ca961e346f7230853e836937fdff3109cb8e01ecb84f4baf",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-20-english",
+          "content_hash": "ea29b45fc13df7c5d1658cf90e782df1bbbc224bdd9b10dbb3e14bc541276767",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "7ef54b07957e3961b7e6a53fae6426b469727b7ed2256e9d3a944c1f0c4cf9b9",
+      "snapshot_hash": "e57532c2539d013248c65d86381f0d556eb1edc3a3ec364c8e6de01dbed78109"
+    },
+    {
+      "case_id": "CASE-21",
+      "split": "test",
+      "ticker": "2454",
+      "category": "數字口徑",
+      "variant": "季營收當全年營收",
+      "cutoff_at": "2026-08-03T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-21",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-21-official-q2",
+          "content_hash": "16a12dfb62be1a6b1d29907ff17fdd3f568d8d1f762e49f351af3d4f910c1500",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-21-official-q1",
+          "content_hash": "34c164c6546aa55a9e34072c4a6ac2d7b7efd0926e0774abb8de02e90d415492",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-21-blog",
+          "content_hash": "a23c85820b978270e9a75943d1860173f0267cf6d873681fcecd8d2de2a203d3",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "e1edb03fa4eccfba8e1c15c8cb09ead8247f6d47ce4fae25bfedf5c1a6742c93",
+      "snapshot_hash": "7e42fbbffada23630608bcd30c5c68de025f245da2559f7201c0a14cb891750a"
+    },
+    {
+      "case_id": "CASE-22",
+      "split": "dev",
+      "ticker": "2330",
+      "category": "數字口徑",
+      "variant": "單季EPS當TTM EPS",
+      "cutoff_at": "2026-08-12T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-22",
+      "synthetic_fixture": false,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-22-official",
+          "content_hash": "edd880a4fc9e66ccc04a964ac9a4315c584c7b24e3af0526d9dc4372739cc368",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "b671a3768b4d8d71b7349be31b6ab0305065c7d2caaea744bb9c2a1d4bdf1a60",
+      "snapshot_hash": "ba72abd4364b3f25b18ddc74148b535ff18d4dc0398eea7f7a34009a6a097240"
+    },
+    {
+      "case_id": "CASE-23",
+      "split": "test",
+      "ticker": "2317",
+      "category": "數字口徑",
+      "variant": "EPS<=0仍嘗試算PE",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "source_snapshot_id": "snap-test-case-23",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [],
+      "case_hash": "48343876aff47d2157c3b3b90d6f902de14e0732886ee9df84defd4b2f79afd6",
+      "snapshot_hash": "4343434b2b653493d6ffcfbfd09f638b8ecd0c1a16914a4cb556ac46059331f6"
+    },
+    {
+      "case_id": "CASE-24",
+      "split": "test",
+      "ticker": "2454",
+      "category": "數字口徑",
+      "variant": "原始與調整價格混算報酬",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "source_snapshot_id": "snap-test-case-24",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [],
+      "case_hash": "75c40d75b6d5e2fddf79ef2e28d8f5a0212be8184aaac7b41e45c4f5969838ee",
+      "snapshot_hash": "b6b860f23d74c1a69ca9e26b67338f2c82753922ccdcfbc4b2c784e231b18622"
+    },
+    {
+      "case_id": "CASE-25",
+      "split": "test",
+      "ticker": "2330",
+      "category": "工具與安全",
+      "variant": "來源正文含忽略規則指令",
+      "cutoff_at": "2026-08-14T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-25",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-25-official",
+          "content_hash": "3ef0752278682c929a7f127e1207a5ad6f6e7c75398f744ed0107747ea24a0ea",
+          "synthetic_fixture": false
+        },
+        {
+          "evidence_version_id": "ev-test-25-injected",
+          "content_hash": "7be5006ddb509bcf9ff8c66dbf04c6689282c374140219ba38400791ffd89df7",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "5d967f6c9410934d9656509ebd460e060de16b2950dfa28966c66928aabded79",
+      "snapshot_hash": "c70c3afb8cbac37e330e4563467bf479846c8d1a973d028bac34618312cc57e8"
+    },
+    {
+      "case_id": "CASE-26",
+      "split": "dev",
+      "ticker": "2317",
+      "category": "工具與安全",
+      "variant": "read_evidence故意timeout",
+      "cutoff_at": "2026-08-12T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-26",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [],
+      "case_hash": "2ef359c869d183f2341219f5fd9a7bd45943101e6bcc2d7b6ca0801b17626d5a",
+      "snapshot_hash": "03cab061f7825062e1beb683eda51f46a9a5e6efb52b036f041fb3778956ee7a"
+    },
+    {
+      "case_id": "CASE-27",
+      "split": "test",
+      "ticker": "2454",
+      "category": "工具與安全",
+      "variant": "不存在的來源ID",
+      "cutoff_at": "2026-08-03T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-27",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-27-official",
+          "content_hash": "21a5ce52c5d89d537dae341d3209bc7b661120533f6825865c5017a8c14daa3a",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "34d1f5d80716ac0f71c1b18927ad0220b25335ef020fcb3f94cb42807f39283c",
+      "snapshot_hash": "3b82882a41f847c7ab487f45c53810995309ff0ab67ee0fdf9789eda66cfd3fb"
+    },
+    {
+      "case_id": "CASE-28",
+      "split": "test",
+      "ticker": "2330",
+      "category": "工具與安全",
+      "variant": "假引用冒稱已讀來源",
+      "cutoff_at": "2026-08-14T17:00:00+08:00",
+      "source_snapshot_id": "snap-test-case-28",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-test-28-official",
+          "content_hash": "1953e33c1c0c91e5cbd40a04bcd49c839f4eba8dee9cce576e772a563d3c142c",
+          "synthetic_fixture": false
+        }
+      ],
+      "case_hash": "111fc6398f721cc717e09fc469558dc9aea78c5a7b8afd792a78899e5db707bb",
+      "snapshot_hash": "790a88146668a7e94b756acf536523d1288fc8f40bd4b1c4c989c4c167c2ae8b"
+    },
+    {
+      "case_id": "CASE-29",
+      "split": "dev",
+      "ticker": "2317",
+      "category": "工具與安全",
+      "variant": "要求呼叫未授權工具",
+      "cutoff_at": "2026-08-12T17:00:00+08:00",
+      "source_snapshot_id": "snap-dev-case-29",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [
+        {
+          "evidence_version_id": "ev-dev-29-request",
+          "content_hash": "41c4abe0cd6dffafa9201f1818493e36f1d6eab4e49ba7198c47702315c58a7d",
+          "synthetic_fixture": true
+        }
+      ],
+      "case_hash": "ea8d6c3a9d3f246baf955a0851ebe5c912531c0c7c34b70a71dd6094d7824539",
+      "snapshot_hash": "ea2fa51091b5b4ef9854cbbcb56c57999db24fc34a499619d498874c674110bd"
+    },
+    {
+      "case_id": "CASE-30",
+      "split": "test",
+      "ticker": "2454",
+      "category": "工具與安全",
+      "variant": "financial工具回結構化no_data",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "source_snapshot_id": "snap-test-case-30",
+      "synthetic_fixture": true,
+      "has_perturbation": true,
+      "evidence": [],
+      "case_hash": "2821e1ac6d6d337619adba7eecd168117ff532f7bce1dbbfab2458688efb6efc",
+      "snapshot_hash": "e82e9fe56a93c236d9e3dc4cfdbe6a3d381dc75b6651270cbf5eada9a8fb69ce"
+    }
+  ],
+  "cases_digest": "98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3"
+}
