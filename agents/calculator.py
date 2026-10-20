@@ -6,6 +6,10 @@ W03-B / W06 重構版: calculate_metrics 純數學確定性運算實作模組。
 3. pe_ttm: 本益比 (同日市價 / TTM EPS，EPS<=0 標註 NA)
 4. dcf_scenario: 現金流折現估值 (WACC > g，缺值不補0，輸出敏感度矩陣)
 5. peer_comparison: 同業比較 (對齊組長驗證器，2330 嚴格排除於平均值計算之外)
+
+W06 修正（2026-10-20）：growth_rate 基期 ≤ 0 回傳 NA（原為除以 abs(基期)）。
+W03 修正（2026-10-20）：ok 回傳補 reason=None；peer_comparison 接受 tools.py 的
+dcf_per_share、fcf 鍵，補各指標 NA 理由，並檢查比較標的白名單。
 """
 
 from __future__ import annotations
@@ -15,9 +19,10 @@ from typing import Any
 def calculate_growth_rate(current: float | None, previous: float | None) -> dict[str, Any]:
     if current is None or previous is None:
         return {"result_value": None, "is_applicable": False, "reason": "數值缺失 (null)"}
-    if previous == 0:
-        return {"result_value": None, "is_applicable": False, "reason": "基期數值為 0，無法計算成長率"}
-    val = round((current - previous) / abs(previous), 4)
+    if previous <= 0:
+        # 基期為負或 0 時成長率無意義（例：−100 → −50 不是「成長 50%」），比照「分母非正 NA」
+        return {"result_value": None, "is_applicable": False, "reason": "基期為負或 0，成長率無意義（NA）"}
+    val = round((current - previous) / previous, 4)
     return {"result_value": val, "is_applicable": True, "reason": None}
 
 
@@ -69,6 +74,15 @@ def calculate_dcf_scenario(
             "sensitivity_matrix": None,
             "is_applicable": False,
             "reason": "DCF 關鍵參數缺失，嚴禁假補 0"
+        }
+    if len(free_cash_flows) != 5:
+        return {
+            "enterprise_value": None,
+            "equity_value": None,
+            "intrinsic_value_per_share": None,
+            "sensitivity_matrix": None,
+            "is_applicable": False,
+            "reason": f"DCF 預測期必須為 5 年，目前為 {len(free_cash_flows)} 年"
         }
 
     if wacc <= terminal_growth:
@@ -125,61 +139,88 @@ def calculate_dcf_scenario(
     }
 
 
+PEER_SUBJECT = "2454"
+PEER_ALLOWED = ("2379", "3034", "2330")
+INDUSTRY_REFERENCE = ("2330",)
+MAX_PEER_COMPANIES = 4
+
+
+def _positive(x: Any) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and x > 0
+
+
 def calculate_peer_comparison(
     subject: str,
     comparators: list[str],
     metrics_map: dict[str, Any]
 ) -> dict[str, Any]:
-    """同業比較計算 (支援以指標名稱為清單或以股票為鍵的雙向格式，嚴格排除 2330)"""
-    if subject != "2454":
-        return {"is_applicable": False, "reason": "同業比較主體只限 2454"}
+    """同業比較：PE、PB、季營收 YoY、FCF、DCF 差距；2330 為產業參照，不入同業平均。
 
+    metrics_map 每家可含：price, eps_ttm, bvps, pb, revenue_yoy, fcf, dcf_per_share
+    （dcf_intrinsic_value 為舊鍵名，仍相容）。缺值一律 null 並附 NA 理由，不補 0。
+    """
+    if subject != PEER_SUBJECT:
+        return {"is_applicable": False, "reason": f"同業比較主體只限 {PEER_SUBJECT}"}
+    comparators = list(comparators or [])
+    bad = [c for c in comparators if c not in PEER_ALLOWED]
+    if bad:
+        return {"is_applicable": False, "reason": f"比較標的只限 {PEER_ALLOWED}，收到 {bad}"}
+    if len(set(comparators)) != len(comparators):
+        return {"is_applicable": False, "reason": "比較標的不可重複"}
     total_companies = [subject] + comparators
-    if len(total_companies) > 4:
-        return {"is_applicable": False, "reason": "比較公司總數不可超過 4 家"}
+    if len(total_companies) > MAX_PEER_COMPANIES:
+        return {"is_applicable": False, "reason": f"比較公司總數不可超過 {MAX_PEER_COMPANIES} 家"}
 
-    # 支援組長驗證器結構：如果 metrics_map 內包含以股票為鍵的字典或 metrics_data
-    data_dict = metrics_map.get("metrics_data", metrics_map)
+    data_dict = metrics_map.get("metrics_data", metrics_map) if isinstance(metrics_map, dict) else {}
 
-    table = {}
-    peer_pes = []
-    peer_pbs = []
-    peer_yoys = []
+    table: dict[str, Any] = {}
+    peer_pes: list[float] = []
+    peer_pbs: list[float] = []
+    peer_yoys: list[float] = []
 
     for code in total_companies:
-        data = data_dict.get(code, {})
-        p = data.get("price")
+        data = data_dict.get(code) or {}
+        price = data.get("price")
         eps = data.get("eps_ttm")
         bvps = data.get("bvps")
         pb = data.get("pb")
         yoy = data.get("revenue_yoy")
-        dcf_val = data.get("dcf_intrinsic_value")
+        fcf = data.get("fcf")
+        dcf_val = data.get("dcf_per_share", data.get("dcf_intrinsic_value"))
 
-        pe_val = round(p / eps, 2) if (p and eps and eps > 0) else None
-        pe_na_reason = "EPS TTM 缺失或非正數" if (pe_val is None) else None
+        if not _positive(price):
+            pe_val, pe_reason = None, "基準日收盤價缺失"
+        elif not _positive(eps):
+            pe_val, pe_reason = None, "EPS TTM 缺失或非正數"
+        else:
+            pe_val, pe_reason = round(price / eps, 2), None
 
-        if pb is None and p is not None and bvps is not None and bvps > 0:
-            pb = round(p / bvps, 2)
-        pb_na_reason = "BVPS 缺失或非正數" if (pb is None) else None
+        if pb is None and _positive(price) and _positive(bvps):
+            pb = round(price / bvps, 2)
+        if pb is None:
+            pb_reason = "BVPS 缺失或非正數" if _positive(price) else "基準日收盤價缺失"
+        else:
+            pb_reason = None
 
-        # 計算市價與 DCF 差距百分比
-        dcf_gap = round((dcf_val - p) / p, 4) if (dcf_val is not None and p is not None and p > 0) else None
+        dcf_gap = round((dcf_val - price) / price, 4) if (dcf_val is not None and _positive(price)) else None
 
-        role = "industry_reference" if code == "2330" else ("subject" if code == subject else "peer")
-
+        role = "industry_reference" if code in INDUSTRY_REFERENCE else ("subject" if code == subject else "peer")
         table[code] = {
             "role": role,
-            "price": p,
+            "price": price,
             "pe_ttm": pe_val,
-            "pe_na_reason": pe_na_reason,
+            "pe_na_reason": pe_reason,
             "pb_ratio": pb,
-            "pb_na_reason": pb_na_reason,
+            "pb_na_reason": pb_reason,
             "revenue_yoy": yoy,
+            "revenue_yoy_na_reason": None if yoy is not None else "季營收或去年同季基期缺失",
+            "fcf": fcf,
+            "fcf_na_reason": None if fcf is not None else "FCF TTM 缺失",
             "dcf_intrinsic_value": dcf_val,
-            "dcf_gap_pct": dcf_gap
+            "dcf_gap_pct": dcf_gap,
         }
 
-        # 核心防呆：只有 peer 角色才進入同業平均計算，2330 嚴格排除
+        # 只有 peer 角色進入同業平均；2330 與主體都不計入
         if role == "peer":
             if pe_val is not None:
                 peer_pes.append(pe_val)
@@ -188,18 +229,14 @@ def calculate_peer_comparison(
             if yoy is not None:
                 peer_yoys.append(yoy)
 
-    avg_pe = round(sum(peer_pes) / len(peer_pes), 2) if peer_pes else None
-    avg_pb = round(sum(peer_pbs) / len(peer_pbs), 2) if peer_pbs else None
-    avg_yoy = round(sum(peer_yoys) / len(peer_yoys), 4) if peer_yoys else None
-
     return {
         "subject": subject,
         "comparison_table": table,
         "peer_average_stats": {
-            "peer_avg_pe": avg_pe,
-            "peer_avg_pb": avg_pb,
-            "peer_avg_revenue_yoy": avg_yoy,
-            "excluded_references": ["2330"]
+            "peer_avg_pe": round(sum(peer_pes) / len(peer_pes), 2) if peer_pes else None,
+            "peer_avg_pb": round(sum(peer_pbs) / len(peer_pbs), 2) if peer_pbs else None,
+            "peer_avg_revenue_yoy": round(sum(peer_yoys) / len(peer_yoys), 4) if peer_yoys else None,
+            "excluded_references": list(INDUSTRY_REFERENCE),
         },
         "is_applicable": True,
         "reason": None
@@ -256,5 +293,6 @@ def execute_calculation(operation: str, values: dict[str, Any], evidence_refs: l
     return {
         "status": "ok",
         "tool": "calculate_metrics",
+        "reason": None,
         "data": res
     }
