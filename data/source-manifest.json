@@ -1,68 +1,439 @@
 {
-  "manifest_version": "v1.2",
-  "generated_at": "2026-09-28T09:00:00+08:00",
-  "verified_by": "Team Member B",
+  "manifest_version": "v1.3-w03",
+  "generated_by": "scripts/build_source_manifest.py",
+  "generated_at": "2026-10-20T20:44:34+08:00",
   "hash_algorithm": "sha256",
-  "lock_status": "frozen_w03",
+  "lock_status": "draft_w03（W06 凍結時鎖定）",
   "statement_basis": "consolidated",
-  "sources": [
+  "snapshot": {
+    "file": "data/financial-snapshots.json",
+    "content_hash": "47e140672d60dabefa0bc991dadf9469da0fdfc4d389098ea2b12a3676d3fa33",
+    "manifest_version": "v1.6-tw-market",
+    "cutoff": "2026-09-30",
+    "generated_at": "2026-10-19T17:18:11+08:00"
+  },
+  "raw_files": [
     {
-      "source_id": "src-finmind-2454-fs",
-      "entity": "2454",
-      "source_type": "financial",
-      "provider": "FinMind (TaiwanStockFinancialStatements)",
-      "endpoint_url": "https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockFinancialStatements&data_id=2454",
-      "published_at": "2026-08-10T15:00:00+08:00",
-      "captured_at": "2026-08-10T16:00:00+08:00",
-      "available_at": "2026-08-10T15:00:00+08:00",
-      "content_hash": "9b12e3f4a56c7890bcdef1234567890abcdef1234567890abcdef1234567890a",
-      "currency": "TWD",
-      "unit": "100m",
-      "covered_periods": ["2025Q3", "2025Q4", "2026Q1", "2026Q2"],
-      "notes": "已差分還原單季發生額；四連續季單季可算 TTM"
-    },
-    {
-      "source_id": "src-finmind-2330-fs",
+      "source_id": "finmind_fs_income",
+      "dataset": "TaiwanStockFinancialStatements",
       "entity": "2330",
-      "source_type": "financial",
-      "provider": "FinMind (TaiwanStockFinancialStatements)",
-      "endpoint_url": "https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockFinancialStatements&data_id=2330",
-      "published_at": "2026-07-16T14:00:00+08:00",
-      "captured_at": "2026-07-16T15:30:00+08:00",
-      "available_at": "2026-07-16T14:00:00+08:00",
-      "content_hash": "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2",
-      "currency": "TWD",
-      "unit": "100m",
-      "covered_periods": ["2026Q2"],
-      "notes": "單季完整財務快照"
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "content_hash": "74c3a822c42b6afbb1d40676bd96dac8fabe8caa779fd9b1c21274b8a0dae046",
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2330_74c3a822c42b.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
     },
     {
-      "source_id": "src-finmind-price-20260930",
-      "entity": "2454/2379/3034/2330",
-      "source_type": "market",
-      "provider": "FinMind (TaiwanStockPrice)",
-      "endpoint_url": "https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice",
-      "published_at": "2026-09-30T15:30:00+08:00",
-      "captured_at": "2026-09-30T16:00:00+08:00",
-      "available_at": "2026-09-30T15:30:00+08:00",
-      "content_hash": "7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f",
-      "currency": "TWD",
-      "price_basis": "raw_close",
-      "sessions": 5,
-      "notes": "統一報價基準日 2026-09-30，作為同業估值比率分子"
+      "source_id": "finmind_bs",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2330",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "content_hash": "78a896d9c7c905ca7b693da38ec794962a2fce8031a9d61eaa70824d8b07be71",
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2330_78a896d9c7c9.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
     },
     {
-      "source_id": "src-fred-macro-2026q2",
-      "entity": "US_Economy",
-      "source_type": "macro",
-      "provider": "FRED (stlouisfed.org)",
-      "endpoint_url": "https://api.stlouisfed.org/fred/series/observations",
-      "published_at": "2026-07-14T08:30:00-04:00",
-      "captured_at": "2026-07-14T10:00:00-04:00",
-      "available_at": "2026-07-14T08:30:00-04:00",
-      "content_hash": "4a5b6c7d8e9f0123456789abcdef0123456789abcdef0123456789abcdef0123",
-      "series_whitelist": ["CPIAUCSL", "FEDFUNDS", "UNRATE", "GDP", "DGS10"],
-      "notes": "總經白名單指標快照"
+      "source_id": "finmind_cf",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2330",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "content_hash": "6d1581983651e1cc0b316bb1662f462aad87dd0bc3b403d89352473012d03e5f",
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2330_6d1581983651.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_fs_income",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "2317",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:07+08:00",
+      "content_hash": "5229282b80dc6bda4781bc1f8ff4e0ec1913b574bf716b94d8d18e5f29fe5f6e",
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2317_5229282b80dc.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_bs",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2317",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "content_hash": "46d7b96474b7fddaec43eb9077ad247ba5c5fb38b6e230e99b4c0a761c0bbf06",
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2317_46d7b96474b7.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_cf",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2317",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "content_hash": "476006bbf63878c1758da1db325a26b3f34a5242b0bdfc88f9b482d5b76326ee",
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2317_476006bbf638.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_fs_income",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "2454",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "content_hash": "a3cd58156f0a781acade3765c699f328265bd16fd1cfdce51920ea9809124766",
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2454_a3cd58156f0a.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_bs",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2454",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "content_hash": "937e40a91d1b18c284a233a212e200c3bddb6909e95096409c09502fa9dfb476",
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2454_937e40a91d1b.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_cf",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2454",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:08+08:00",
+      "content_hash": "6c61e30a189c915417cf394b4e5fbb07f664cbf8e19cc669c0e9e1932591a434",
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2454_6c61e30a189c.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_fs_income",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "2379",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:09+08:00",
+      "content_hash": "9d8c64dda603d49821553d24dfd98290749e6573fa34367df0001ac0b3c509c5",
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_2379_9d8c64dda603.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_bs",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "2379",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:09+08:00",
+      "content_hash": "82d46e5a0bf6bdaeb90639180212ce802d807555d01207bc9cd99bf6a499c6d0",
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_2379_82d46e5a0bf6.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_cf",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "2379",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:09+08:00",
+      "content_hash": "0db685b14c0a9741a41bccc570e0e83bbb0cfed9815e78a4970bba579bfcab7c",
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2379_0db685b14c0a.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_fs_income",
+      "dataset": "TaiwanStockFinancialStatements",
+      "entity": "3034",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "content_hash": "3410234b29d7887e1e5cf878aa27afc47be3cc91694778e2a094b2807ee0e064",
+      "file": "data/raw/finmind/TaiwanStockFinancialStatements_3034_3410234b29d7.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_bs",
+      "dataset": "TaiwanStockBalanceSheet",
+      "entity": "3034",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "content_hash": "0d82d615a3c1b36579b8c8f2fee806ea7db6b4ad50b7016d7784e23cf4524d10",
+      "file": "data/raw/finmind/TaiwanStockBalanceSheet_3034_0d82d615a3c1.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_cf",
+      "dataset": "TaiwanStockCashFlowsStatement",
+      "entity": "3034",
+      "request_range": [
+        "2025-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "content_hash": "fb7ba1de7e61d23f63bf8ed9115da4a7ec48bdefda587570a142bddb7ca1fc30",
+      "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_3034_fb7ba1de7e61.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_trading_date",
+      "dataset": "TaiwanStockTradingDate",
+      "entity": "ALL",
+      "request_range": [
+        "2026-09-10",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "content_hash": "e9e18edc2ea7068d1d12c6a97a5f38da7246d761beb20962af0653a096a2193c",
+      "file": "data/raw/finmind/TaiwanStockTradingDate_ALL_e9e18edc2ea7.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_price",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2330",
+      "request_range": [
+        "2026-09-10",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:10+08:00",
+      "content_hash": "64a825ed02380f86f368c6e815c3b23ea4774bef2710806ed7339f0e84286f2b",
+      "file": "data/raw/finmind/TaiwanStockPrice_2330_64a825ed0238.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_price",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2317",
+      "request_range": [
+        "2026-09-10",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "content_hash": "a08ee9b4a443b8a9b70df0107c3dff3a97f92081639c5b509be03a89d556749b",
+      "file": "data/raw/finmind/TaiwanStockPrice_2317_a08ee9b4a443.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_price",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2454",
+      "request_range": [
+        "2026-09-10",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "content_hash": "d8716e166cc0f59b96c3ebb7721ef221dabf872630db017397d4f823193a96d0",
+      "file": "data/raw/finmind/TaiwanStockPrice_2454_d8716e166cc0.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_price",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2379",
+      "request_range": [
+        "2026-09-10",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "content_hash": "5636e04a4417a759d2c0032d9c01a35d7896f0cfaf7556eeda8d1247c0fc0e67",
+      "file": "data/raw/finmind/TaiwanStockPrice_2379_5636e04a4417.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_price",
+      "dataset": "TaiwanStockPrice",
+      "entity": "3034",
+      "request_range": [
+        "2026-09-10",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-19T17:18:11+08:00",
+      "content_hash": "330b9cf87f14eb47ea60087cc650b5aad9b6e46f0c6eddf3f90d98ba4c856f44",
+      "file": "data/raw/finmind/TaiwanStockPrice_3034_330b9cf87f14.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
+    },
+    {
+      "source_id": "finmind_tw_market",
+      "dataset": "TaiwanStockPrice",
+      "entity": "TAIEX",
+      "request_range": [
+        "2026-01-01",
+        "2026-09-30"
+      ],
+      "captured_at": "2026-10-20T20:44:34+08:00",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0",
+      "file": "data/raw/finmind/TaiwanStockPrice_TAIEX_f16dfc92126b.json",
+      "file_present": true,
+      "hash_verified": true,
+      "license_note": "FinMind 原始回應不可轉散布；僅保存於本機與 repo（.gitignore 視授權）"
     }
-  ]
+  ],
+  "manual_files": [
+    {
+      "source_id": "mops_announce",
+      "file": "data/manual/announce_times.csv",
+      "content_hash": "a05833987b4eece8c5caa3bae85d74e4a6fc96922aac380902601cdecb173c28",
+      "modified_at": "2026-10-17T03:44:14+08:00",
+      "note": "檔案修改時間，不代表原始資料取得時間"
+    },
+    {
+      "source_id": "mops_balance_overrides",
+      "file": "data/manual/balance_overrides.csv",
+      "content_hash": "118e220fc01af0f1ebbb9e1f0f0b38b1da91094734b68dd0b2080ea984857878",
+      "modified_at": "2026-10-18T02:27:33+08:00",
+      "note": "檔案修改時間，不代表原始資料取得時間"
+    },
+    {
+      "source_id": "fred_macro",
+      "file": "data/manual/macro.csv",
+      "content_hash": "f2d75625af2f84f48a3090b56fef0c71e888a9e7d2e9844a18b561d889c6be27",
+      "modified_at": "2026-10-17T04:46:44+08:00",
+      "note": "檔案修改時間，不代表原始資料取得時間"
+    }
+  ],
+  "evidences": [
+    {
+      "evidence_version_id": "ev-2330-2026q2-01",
+      "source_id": "src-2330-2026q2-announce",
+      "ticker": "2330",
+      "published_at": "2026-07-16T14:00:00+08:00",
+      "available_at": "2026-07-16T14:00:00+08:00",
+      "captured_at": "2026-07-16T15:30:00+08:00",
+      "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2330&year=115&season=2",
+      "content_hash": "15df1f0d74d8ba451647b2906cc95fb4c4ffac59c78c914320f3d566261e5624",
+      "time_verified": false,
+      "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
+    },
+    {
+      "evidence_version_id": "ev-2454-2026q2-01",
+      "source_id": "src-2454-2026q2-announce",
+      "ticker": "2454",
+      "published_at": "2026-07-31T15:00:00+08:00",
+      "available_at": "2026-07-31T15:00:00+08:00",
+      "captured_at": "2026-07-31T16:00:00+08:00",
+      "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2454&year=115&season=2",
+      "content_hash": "fc9403235d8a8d4aac188d83012bca78a5b8e337e6ca765c73c1254fb81b7e73",
+      "time_verified": false,
+      "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
+    },
+    {
+      "evidence_version_id": "ev-2317-2026q2-01",
+      "source_id": "src-2317-2026q2-announce",
+      "ticker": "2317",
+      "published_at": "2026-08-05T16:00:00+08:00",
+      "available_at": "2026-08-05T16:00:00+08:00",
+      "captured_at": "2026-08-05T17:30:00+08:00",
+      "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2317&year=115&season=2",
+      "content_hash": "6596852c22d0e05e80e2ea78c0b27ad012172f900db21dc8129b5d0c82dd3932",
+      "time_verified": false,
+      "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
+    },
+    {
+      "evidence_version_id": "ev-2379-2026q2-01",
+      "source_id": "src-2379-2026q2-announce",
+      "ticker": "2379",
+      "published_at": "2026-08-05T16:00:00+08:00",
+      "available_at": "2026-08-05T16:00:00+08:00",
+      "captured_at": "2026-08-05T17:30:00+08:00",
+      "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2379&year=115&season=2",
+      "content_hash": "dd573f5f4156ee674e83f26b54602fa2bc0c27f1529222c589317903c3a51ba5",
+      "time_verified": false,
+      "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
+    },
+    {
+      "evidence_version_id": "ev-3034-2026q2-01",
+      "source_id": "src-3034-2026q2-announce",
+      "ticker": "3034",
+      "published_at": "2026-08-08T16:00:00+08:00",
+      "available_at": "2026-08-08T16:00:00+08:00",
+      "captured_at": "2026-08-08T17:30:00+08:00",
+      "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=3034&year=115&season=2",
+      "content_hash": "5f718b7671600579d4a63bdace58624153ca19dd2adf5ca8cde5438cf9b95f55",
+      "time_verified": false,
+      "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
+    }
+  ],
+  "summary": {
+    "raw_files": 22,
+    "raw_files_present": 22,
+    "manual_files": 3,
+    "evidences": 5,
+    "null_hashes": 0
+  }
 }
