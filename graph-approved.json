@@ -1,0 +1,103 @@
+{
+  "graph_version": "graph-v1",
+  "approved_at": "2026-10-20T20:44:37+08:00",
+  "generated_by": "scripts/build_freeze.py",
+  "conditional_feature": "F06（條件式）；本檔獨立保存，不屬於 30 案正式實驗輸入，不得改寫任何案例",
+  "llm_usage": 0,
+  "limits": {
+    "max_nodes": 20,
+    "max_edges": 30
+  },
+  "rules": [
+    "只收 review_status = source_text_verified 且有原句、文件日期、來源者",
+    "verified_date 為審核日，不代替 doc_date",
+    "不以 LLM 推測供應關係"
+  ],
+  "supply_graph": {
+    "nodes": [
+      {
+        "id": "2330",
+        "label": "台積電",
+        "role": "industry_reference"
+      },
+      {
+        "id": "2379",
+        "label": "瑞昱",
+        "role": "company"
+      },
+      {
+        "id": "2454",
+        "label": "聯發科",
+        "role": "company"
+      }
+    ],
+    "edges": [
+      {
+        "relation_id": "REL-01",
+        "source": "2454",
+        "target": "2330",
+        "relation_type": "晶圓代工供應",
+        "quote_original": "本公司產品之主要原料為晶圓，主要供應商包括台灣積體電路製造(股)公司、聯華電子(股)公司及 GlobalFoundries 等專業晶圓代工公司，其在品質與製程能力均有相當程度的水準，供貨量與配合程度均符合本公司的需求與期望。",
+        "quote_pdf_page": "74",
+        "doc_date": "2026-05-29",
+        "doc_date_basis": "TWSE 電子書檔名之上傳日（F04 年報），待以年報封面核對",
+        "evidence_title": "聯發科2025年報 2.3 主要原料之供應狀況",
+        "evidence_url": "https://doc.twse.com.tw/pdf/2025_2454_20260529F04_20261018_224539.pdf",
+        "evidence_file": "2025_2454_20260529F04_20261018_223609.pdf",
+        "register_id": "GSR-01",
+        "verified_date": "2026-10-18",
+        "verified_by": "黃意棠"
+      },
+      {
+        "relation_id": "REL-02",
+        "source": "2379",
+        "target": "2330",
+        "relation_type": "晶圓代工供應",
+        "quote_original": "瑞昱主要原料為晶圓，主要供應商包括台灣積體電路製造(股)公司、聯華電子(股)公司及其他專業晶圓代工廠及半導體委外封裝、測試廠，在品質、製程與封測能力具有相當的水準。",
+        "quote_pdf_page": "94",
+        "doc_date": "2026-05-27",
+        "doc_date_basis": "TWSE 電子書檔名之上傳日（F04 年報），待以年報封面核對",
+        "evidence_title": "瑞昱2025年報 三、主要原料之供應狀況",
+        "evidence_url": "https://doc.twse.com.tw/pdf/2025_2379_20260527F04_20261018_224618.pdf",
+        "evidence_file": "2025_2379_20260527F04_20261018_223825.pdf",
+        "register_id": "GSR-02",
+        "verified_date": "2026-10-18",
+        "verified_by": "黃意棠"
+      }
+    ],
+    "excluded_rows": [],
+    "source_file": "graph-reviewed.csv",
+    "source_sha256_lf": "77cba089a46db36eca1d31779e1c890c1811436ed4ecf51e9b1f7a94553e6ec8"
+  },
+  "peer_panel": {
+    "source_file": "data/v12-peer-snapshot.json",
+    "source_sha256_lf": "45b7ad347f148c08b166064f7270397bdb2bd15e635d1558e29c11141a29ce02",
+    "price_as_of": "2026-09-30",
+    "nodes": [
+      {
+        "id": "2454",
+        "label": "聯發科",
+        "role": "subject",
+        "include_in_peer_stats": false
+      },
+      {
+        "id": "2379",
+        "label": "瑞昱",
+        "role": "peer",
+        "include_in_peer_stats": true
+      },
+      {
+        "id": "3034",
+        "label": "聯詠",
+        "role": "peer",
+        "include_in_peer_stats": true
+      },
+      {
+        "id": "2330",
+        "label": "台積電",
+        "role": "industry_reference",
+        "include_in_peer_stats": false
+      }
+    ]
+  }
+}
