@@ -1,12 +1,391 @@
 {
-  "manifest_version": "v1.2-real2026",
-  "generated_at": "2026-10-15T12:00:00+08:00",
+  "manifest_version": "v1.6-tw-market",
+  "generated_at": "2026-10-19T17:18:11+08:00",
+  "cutoff": "2026-09-30",
   "source_manifest": {
-    "provider": "FinMind, MOPS & FRED 2026 Official",
-    "verified_by": "Team Member B",
+    "provider": "FinMind（財報、股價、交易日、台股加權指數）；MOPS（公告時間、證據原文、負債覆寫、對帳值，人工）；FRED（總經，人工）",
     "hash_algorithm": "sha256",
     "statement_basis": "consolidated",
-    "notes": "全歷史真實資料替換版；排除 9/25-9/28 連假休市"
+    "statement_basis_note": "假設 FinMind 回傳為合併報表，請以抽查確認",
+    "units": {
+      "revenue / operating_income / net_income / operating_cash_flow / capital_expenditure / free_cash_flow / net_debt": "億元 TWD",
+      "shares_issued / treasury_shares / shares_outstanding": "百萬股",
+      "eps / bvps / prices": "元 TWD"
+    },
+    "share_definition": {
+      "shares_issued": "資產負債表 OrdinaryShare（普通股股本，元）÷ 10 元面額；不含債券換股權利證書",
+      "treasury_shares": "資產負債表 NumberOfSharesInEntityHeldByEntityAndByItsSubsidiaries",
+      "shares_outstanding": "shares_issued − treasury_shares（流通在外股數）",
+      "bvps": "歸屬於母公司業主之權益 ÷ shares_outstanding"
+    },
+    "debt_definition": "計息總負債 = LongtermBorrowings + 公司資料中存在的 ShorttermBorrowings、BondsPayable、NotesPayable（應付短期票券，FinMind 無此科目，以 MOPS 人工覆寫）；淨負債 = 計息總負債 − CashAndCashEquivalents；不含租賃負債",
+    "debt_path_note": "年度 DCF（Supabase 路徑）不計入應付短期票券，與本快照定義不同，詳見 data-contract.md 第五節",
+    "eps_source_rule": "單季 EPS 依來源標記：mops_direct = 有 MOPS 原文對帳值且已通過比對；finmind_quarterly = 2025Q4 FinMind 單季值，經全年減 1–9 月驗證；unverified = 尚無原文比對，不得宣告為已驗證。見 data-contract.md 第二節第 2-1 條",
+    "eps_source_summary": {
+      "mops_direct": 20,
+      "finmind_quarterly": 5,
+      "unverified": 0
+    },
+    "raw_files": [
+      {
+        "dataset": "TaiwanStockFinancialStatements",
+        "data_id": "2330",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:07+08:00",
+        "sha256": "74c3a822c42b6afbb1d40676bd96dac8fabe8caa779fd9b1c21274b8a0dae046",
+        "file": "data/raw/finmind/TaiwanStockFinancialStatements_2330_74c3a822c42b.json"
+      },
+      {
+        "dataset": "TaiwanStockBalanceSheet",
+        "data_id": "2330",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:07+08:00",
+        "sha256": "78a896d9c7c905ca7b693da38ec794962a2fce8031a9d61eaa70824d8b07be71",
+        "file": "data/raw/finmind/TaiwanStockBalanceSheet_2330_78a896d9c7c9.json"
+      },
+      {
+        "dataset": "TaiwanStockCashFlowsStatement",
+        "data_id": "2330",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:07+08:00",
+        "sha256": "6d1581983651e1cc0b316bb1662f462aad87dd0bc3b403d89352473012d03e5f",
+        "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2330_6d1581983651.json"
+      },
+      {
+        "dataset": "TaiwanStockFinancialStatements",
+        "data_id": "2317",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:07+08:00",
+        "sha256": "5229282b80dc6bda4781bc1f8ff4e0ec1913b574bf716b94d8d18e5f29fe5f6e",
+        "file": "data/raw/finmind/TaiwanStockFinancialStatements_2317_5229282b80dc.json"
+      },
+      {
+        "dataset": "TaiwanStockBalanceSheet",
+        "data_id": "2317",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:08+08:00",
+        "sha256": "46d7b96474b7fddaec43eb9077ad247ba5c5fb38b6e230e99b4c0a761c0bbf06",
+        "file": "data/raw/finmind/TaiwanStockBalanceSheet_2317_46d7b96474b7.json"
+      },
+      {
+        "dataset": "TaiwanStockCashFlowsStatement",
+        "data_id": "2317",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:08+08:00",
+        "sha256": "476006bbf63878c1758da1db325a26b3f34a5242b0bdfc88f9b482d5b76326ee",
+        "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2317_476006bbf638.json"
+      },
+      {
+        "dataset": "TaiwanStockFinancialStatements",
+        "data_id": "2454",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:08+08:00",
+        "sha256": "a3cd58156f0a781acade3765c699f328265bd16fd1cfdce51920ea9809124766",
+        "file": "data/raw/finmind/TaiwanStockFinancialStatements_2454_a3cd58156f0a.json"
+      },
+      {
+        "dataset": "TaiwanStockBalanceSheet",
+        "data_id": "2454",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:08+08:00",
+        "sha256": "937e40a91d1b18c284a233a212e200c3bddb6909e95096409c09502fa9dfb476",
+        "file": "data/raw/finmind/TaiwanStockBalanceSheet_2454_937e40a91d1b.json"
+      },
+      {
+        "dataset": "TaiwanStockCashFlowsStatement",
+        "data_id": "2454",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:08+08:00",
+        "sha256": "6c61e30a189c915417cf394b4e5fbb07f664cbf8e19cc669c0e9e1932591a434",
+        "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2454_6c61e30a189c.json"
+      },
+      {
+        "dataset": "TaiwanStockFinancialStatements",
+        "data_id": "2379",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:09+08:00",
+        "sha256": "9d8c64dda603d49821553d24dfd98290749e6573fa34367df0001ac0b3c509c5",
+        "file": "data/raw/finmind/TaiwanStockFinancialStatements_2379_9d8c64dda603.json"
+      },
+      {
+        "dataset": "TaiwanStockBalanceSheet",
+        "data_id": "2379",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:09+08:00",
+        "sha256": "82d46e5a0bf6bdaeb90639180212ce802d807555d01207bc9cd99bf6a499c6d0",
+        "file": "data/raw/finmind/TaiwanStockBalanceSheet_2379_82d46e5a0bf6.json"
+      },
+      {
+        "dataset": "TaiwanStockCashFlowsStatement",
+        "data_id": "2379",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:09+08:00",
+        "sha256": "0db685b14c0a9741a41bccc570e0e83bbb0cfed9815e78a4970bba579bfcab7c",
+        "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_2379_0db685b14c0a.json"
+      },
+      {
+        "dataset": "TaiwanStockFinancialStatements",
+        "data_id": "3034",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:10+08:00",
+        "sha256": "3410234b29d7887e1e5cf878aa27afc47be3cc91694778e2a094b2807ee0e064",
+        "file": "data/raw/finmind/TaiwanStockFinancialStatements_3034_3410234b29d7.json"
+      },
+      {
+        "dataset": "TaiwanStockBalanceSheet",
+        "data_id": "3034",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:10+08:00",
+        "sha256": "0d82d615a3c1b36579b8c8f2fee806ea7db6b4ad50b7016d7784e23cf4524d10",
+        "file": "data/raw/finmind/TaiwanStockBalanceSheet_3034_0d82d615a3c1.json"
+      },
+      {
+        "dataset": "TaiwanStockCashFlowsStatement",
+        "data_id": "3034",
+        "start": "2025-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:10+08:00",
+        "sha256": "fb7ba1de7e61d23f63bf8ed9115da4a7ec48bdefda587570a142bddb7ca1fc30",
+        "file": "data/raw/finmind/TaiwanStockCashFlowsStatement_3034_fb7ba1de7e61.json"
+      },
+      {
+        "dataset": "TaiwanStockTradingDate",
+        "data_id": null,
+        "start": "2026-09-10",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:10+08:00",
+        "sha256": "e9e18edc2ea7068d1d12c6a97a5f38da7246d761beb20962af0653a096a2193c",
+        "file": "data/raw/finmind/TaiwanStockTradingDate_ALL_e9e18edc2ea7.json"
+      },
+      {
+        "dataset": "TaiwanStockPrice",
+        "data_id": "2330",
+        "start": "2026-09-10",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:10+08:00",
+        "sha256": "64a825ed02380f86f368c6e815c3b23ea4774bef2710806ed7339f0e84286f2b",
+        "file": "data/raw/finmind/TaiwanStockPrice_2330_64a825ed0238.json"
+      },
+      {
+        "dataset": "TaiwanStockPrice",
+        "data_id": "2317",
+        "start": "2026-09-10",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:11+08:00",
+        "sha256": "a08ee9b4a443b8a9b70df0107c3dff3a97f92081639c5b509be03a89d556749b",
+        "file": "data/raw/finmind/TaiwanStockPrice_2317_a08ee9b4a443.json"
+      },
+      {
+        "dataset": "TaiwanStockPrice",
+        "data_id": "2454",
+        "start": "2026-09-10",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:11+08:00",
+        "sha256": "d8716e166cc0f59b96c3ebb7721ef221dabf872630db017397d4f823193a96d0",
+        "file": "data/raw/finmind/TaiwanStockPrice_2454_d8716e166cc0.json"
+      },
+      {
+        "dataset": "TaiwanStockPrice",
+        "data_id": "2379",
+        "start": "2026-09-10",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:11+08:00",
+        "sha256": "5636e04a4417a759d2c0032d9c01a35d7896f0cfaf7556eeda8d1247c0fc0e67",
+        "file": "data/raw/finmind/TaiwanStockPrice_2379_5636e04a4417.json"
+      },
+      {
+        "dataset": "TaiwanStockPrice",
+        "data_id": "3034",
+        "start": "2026-09-10",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-19T17:18:11+08:00",
+        "sha256": "330b9cf87f14eb47ea60087cc650b5aad9b6e46f0c6eddf3f90d98ba4c856f44",
+        "file": "data/raw/finmind/TaiwanStockPrice_3034_330b9cf87f14.json"
+      },
+      {
+        "dataset": "TaiwanStockPrice",
+        "data_id": "TAIEX",
+        "start": "2026-01-01",
+        "end": "2026-09-30",
+        "captured_at": "2026-10-20T20:44:34+08:00",
+        "sha256": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0",
+        "file": "data/raw/finmind/TaiwanStockPrice_TAIEX_f16dfc92126b.json"
+      }
+    ]
+  },
+  "debt_items_by_company": {
+    "2330": {
+      "used": [
+        "LongtermBorrowings",
+        "BondsPayable"
+      ],
+      "absent_optional": [
+        "ShorttermBorrowings",
+        "NotesPayable"
+      ]
+    },
+    "2317": {
+      "used": [
+        "LongtermBorrowings",
+        "ShorttermBorrowings",
+        "BondsPayable",
+        "NotesPayable"
+      ],
+      "absent_optional": []
+    },
+    "2454": {
+      "used": [
+        "LongtermBorrowings",
+        "ShorttermBorrowings"
+      ],
+      "absent_optional": [
+        "BondsPayable",
+        "NotesPayable"
+      ]
+    },
+    "2379": {
+      "used": [
+        "LongtermBorrowings",
+        "ShorttermBorrowings"
+      ],
+      "absent_optional": [
+        "BondsPayable",
+        "NotesPayable"
+      ]
+    },
+    "3034": {
+      "used": [
+        "LongtermBorrowings"
+      ],
+      "absent_optional": [
+        "ShorttermBorrowings",
+        "BondsPayable",
+        "NotesPayable"
+      ]
+    }
+  },
+  "debt_overrides": {
+    "2330": [],
+    "2317": [
+      {
+        "period": "2025Q2",
+        "type": "NotesPayable",
+        "value_twd": 98062437000.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 115Q2合併資產負債表 114/06/30 應付短期票券 98"
+      },
+      {
+        "period": "2025Q3",
+        "type": "NotesPayable",
+        "value_twd": 104855613000.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 114Q3合併資產負債表 114/09/30 應付短期票券 104"
+      },
+      {
+        "period": "2025Q4",
+        "type": "NotesPayable",
+        "value_twd": 104793309000.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 114年度合併資產負債表 114/12/31 應付短期票券 104"
+      },
+      {
+        "period": "2026Q1",
+        "type": "NotesPayable",
+        "value_twd": 90058690000.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 115Q1合併資產負債表 115/03/31 應付短期票券 90"
+      },
+      {
+        "period": "2026Q2",
+        "type": "NotesPayable",
+        "value_twd": 93458760000.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 115Q2合併資產負債表 115/06/30 應付短期票券 93"
+      }
+    ],
+    "2454": [
+      {
+        "period": "2025Q3",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 114Q3 合併資產負債表未列長期借款科目；短期借款與 FinMind 相符"
+      }
+    ],
+    "2379": [
+      {
+        "period": "2025Q4",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 114Q4 合併資產負債表未列長期借款科目"
+      },
+      {
+        "period": "2026Q1",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 115Q1 合併資產負債表未列長期借款科目"
+      },
+      {
+        "period": "2026Q2",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 115Q2 合併資產負債表未列長期借款科目"
+      }
+    ],
+    "3034": [
+      {
+        "period": "2025Q2",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 114Q2 合併資產負債表未列長期借款科目"
+      },
+      {
+        "period": "2025Q3",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 114Q3 合併資產負債表未列長期借款科目"
+      },
+      {
+        "period": "2025Q4",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 114 年度合併資產負債表未列長期借款科目"
+      },
+      {
+        "period": "2026Q1",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 115Q1 合併資產負債表未列長期借款科目"
+      },
+      {
+        "period": "2026Q2",
+        "type": "LongtermBorrowings",
+        "value_twd": 0.0,
+        "source_url": "https://mops.twse.com.tw/mops/web/t05st01",
+        "note": "MOPS 115Q2 合併資產負債表未列長期借款科目"
+      }
+    ]
   },
   "evidences": [
     {
@@ -76,134 +455,409 @@
     }
   ],
   "financials": {
-    "2454": {
-      "company_name": "聯發科技",
-      "statement_basis": "consolidated",
-      "currency": "TWD",
-      "quarters": [
-        {
-          "period": "2025Q3",
-          "period_basis": "single_quarter",
-          "revenue": 1318.1,
-          "operating_income": 238.6,
-          "net_income": 255.9,
-          "operating_cash_flow": 310.5,
-          "capital_expenditure": 42.1,
-          "free_cash_flow": 268.4,
-          "eps": 15.94,
-          "bvps": 285.5,
-          "shares_outstanding": 1600.0,
-          "net_debt": -720.0,
-          "available_at": "2025-11-10T16:00:00+08:00"
-        },
-        {
-          "period": "2025Q4",
-          "period_basis": "single_quarter",
-          "revenue": 1420.0,
-          "operating_income": 252.0,
-          "net_income": 268.0,
-          "operating_cash_flow": 330.0,
-          "capital_expenditure": 45.0,
-          "free_cash_flow": 285.0,
-          "eps": 16.75,
-          "bvps": 295.0,
-          "shares_outstanding": 1600.0,
-          "net_debt": -780.0,
-          "available_at": "2026-03-15T16:00:00+08:00"
-        },
-        {
-          "period": "2026Q1",
-          "period_basis": "single_quarter",
-          "revenue": 1480.5,
-          "operating_income": 280.5,
-          "net_income": 295.2,
-          "operating_cash_flow": 360.0,
-          "capital_expenditure": 40.0,
-          "free_cash_flow": 320.0,
-          "eps": 18.45,
-          "bvps": 308.2,
-          "shares_outstanding": 1600.0,
-          "net_debt": -850.0,
-          "available_at": "2026-05-10T16:00:00+08:00"
-        },
-        {
-          "period": "2026Q2",
-          "period_basis": "single_quarter",
-          "revenue": 1521.83,
-          "operating_income": 228.68,
-          "net_income": 246.05,
-          "operating_cash_flow": 375.0,
-          "capital_expenditure": 46.2,
-          "free_cash_flow": 328.8,
-          "eps": 15.28,
-          "bvps": 318.6,
-          "shares_outstanding": 1600.0,
-          "net_debt": -920.0,
-          "available_at": "2026-07-31T15:00:00+08:00"
-        }
-      ]
-    },
     "2330": {
       "company_name": "台積電",
       "statement_basis": "consolidated",
       "currency": "TWD",
       "quarters": [
         {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "available_at": "2025-08-12T18:20:44+08:00",
+          "revenue": 9337.92,
+          "operating_income": 4634.24,
+          "net_income": 3982.73,
+          "operating_cash_flow": 4970.64,
+          "capital_expenditure": 2972.26,
+          "free_cash_flow": 1998.38,
+          "eps": 15.36,
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.6155,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.6155,
+          "bvps": 176.65,
+          "net_debt": -14808.53,
+          "debt_items": [
+            "LongtermBorrowings",
+            "BondsPayable"
+          ],
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2025Q2",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f"
+        },
+        {
           "period": "2025Q3",
           "period_basis": "single_quarter",
-          "revenue": 7596.9,
-          "net_income": 3252.6,
-          "operating_cash_flow": 3950.0,
-          "capital_expenditure": 2080.0,
-          "free_cash_flow": 1870.0,
-          "eps": 12.54,
-          "bvps": 152.0,
-          "shares_outstanding": 25930.0,
-          "net_debt": -7800.0,
-          "available_at": "2025-10-16T14:00:00+08:00"
+          "available_at": "2025-11-11T18:17:55+08:00",
+          "revenue": 9899.18,
+          "operating_income": 5006.85,
+          "net_income": 4523.01,
+          "operating_cash_flow": 4268.29,
+          "capital_expenditure": 2874.52,
+          "free_cash_flow": 1393.77,
+          "eps": 17.44,
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.5245,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.5245,
+          "bvps": 192.74,
+          "net_debt": -15525.31,
+          "debt_items": [
+            "LongtermBorrowings",
+            "BondsPayable"
+          ],
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2025Q3",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f"
         },
         {
           "period": "2025Q4",
           "period_basis": "single_quarter",
-          "revenue": 8350.0,
-          "net_income": 3748.0,
-          "operating_cash_flow": 4200.0,
-          "capital_expenditure": 2150.0,
-          "free_cash_flow": 2050.0,
-          "eps": 14.45,
-          "bvps": 165.0,
-          "shares_outstanding": 25930.0,
-          "net_debt": -8100.0,
-          "available_at": "2026-01-15T14:00:00+08:00"
+          "available_at": "2026-02-10T18:16:19+08:00",
+          "revenue": 10460.9,
+          "operating_income": 5649.02,
+          "net_income": 5057.44,
+          "operating_cash_flow": 7255.09,
+          "capital_expenditure": 3569.06,
+          "free_cash_flow": 3686.03,
+          "eps": 19.51,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 25932.5245,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.5245,
+          "bvps": 208.99,
+          "net_debt": -18717.94,
+          "debt_items": [
+            "LongtermBorrowings",
+            "BondsPayable"
+          ],
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2025Q4",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f"
         },
         {
           "period": "2026Q1",
           "period_basis": "single_quarter",
-          "revenue": 10500.0,
-          "net_income": 5780.0,
-          "operating_cash_flow": 6100.0,
-          "capital_expenditure": 2900.0,
-          "free_cash_flow": 3200.0,
-          "eps": 22.30,
-          "bvps": 182.0,
-          "shares_outstanding": 25930.0,
-          "net_debt": -8300.0,
-          "available_at": "2026-04-16T14:00:00+08:00"
+          "available_at": "2026-05-12T18:33:04+08:00",
+          "revenue": 11341.03,
+          "operating_income": 6589.66,
+          "net_income": 5724.8,
+          "operating_cash_flow": 6989.76,
+          "capital_expenditure": 3507.63,
+          "free_cash_flow": 3482.13,
+          "eps": 22.08,
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.5245,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.5245,
+          "bvps": 227.16,
+          "net_debt": -21346.19,
+          "debt_items": [
+            "LongtermBorrowings",
+            "BondsPayable"
+          ],
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2026Q1",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f"
         },
         {
           "period": "2026Q2",
           "period_basis": "single_quarter",
+          "available_at": "2026-08-11T18:46:58+08:00",
           "revenue": 12703.8,
-          "operating_income": 7660.4,
-          "net_income": 7065.6,
-          "operating_cash_flow": 7500.0,
-          "capital_expenditure": 3200.0,
-          "free_cash_flow": 4300.0,
+          "operating_income": 7666.03,
+          "net_income": 7065.62,
+          "operating_cash_flow": 7833.65,
+          "capital_expenditure": 4960.02,
+          "free_cash_flow": 2873.63,
           "eps": 27.25,
-          "bvps": 205.4,
-          "shares_outstanding": 25930.0,
-          "net_debt": -8500.0,
-          "available_at": "2026-07-16T14:00:00+08:00"
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.3701,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.3701,
+          "bvps": 248.05,
+          "net_debt": -22699.55,
+          "debt_items": [
+            "LongtermBorrowings",
+            "BondsPayable"
+          ],
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2026Q2",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f"
+        }
+      ]
+    },
+    "2317": {
+      "company_name": "鴻海",
+      "statement_basis": "consolidated",
+      "currency": "TWD",
+      "quarters": [
+        {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "available_at": "2025-08-14T14:15:05+08:00",
+          "revenue": 17934.68,
+          "operating_income": 565.96,
+          "net_income": 443.61,
+          "operating_cash_flow": 729.39,
+          "capital_expenditure": 333.15,
+          "free_cash_flow": 396.24,
+          "eps": 3.19,
+          "eps_source": "mops_direct",
+          "shares_issued": 13891.7019,
+          "treasury_shares": 1.4831,
+          "shares_outstanding": 13890.2188,
+          "bvps": 105.14,
+          "net_debt": 294.76,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings",
+            "BondsPayable",
+            "NotesPayable"
+          ],
+          "source_id": "src-finmind-2317-fs",
+          "snapshot_id": "snap-2317-2025Q2",
+          "content_hash": "73b542e821487e66d758bd0f848b362134b300ff222c1d3fa86dfc718b5225c0"
+        },
+        {
+          "period": "2025Q3",
+          "period_basis": "single_quarter",
+          "available_at": "2025-11-12T14:16:10+08:00",
+          "revenue": 20589.49,
+          "operating_income": 705.36,
+          "net_income": 576.73,
+          "operating_cash_flow": -714.11,
+          "capital_expenditure": 356.49,
+          "free_cash_flow": -1070.6,
+          "eps": 4.15,
+          "eps_source": "mops_direct",
+          "shares_issued": 13964.2223,
+          "treasury_shares": 1.4831,
+          "shares_outstanding": 13962.7392,
+          "bvps": 117.18,
+          "net_debt": 2492.38,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings",
+            "BondsPayable",
+            "NotesPayable"
+          ],
+          "source_id": "src-finmind-2317-fs",
+          "snapshot_id": "snap-2317-2025Q3",
+          "content_hash": "73b542e821487e66d758bd0f848b362134b300ff222c1d3fa86dfc718b5225c0"
+        },
+        {
+          "period": "2025Q4",
+          "period_basis": "single_quarter",
+          "available_at": "2026-03-16T14:15:14+08:00",
+          "revenue": 26063.72,
+          "operating_income": 855.91,
+          "net_income": 452.12,
+          "operating_cash_flow": 2763.88,
+          "capital_expenditure": 609.64,
+          "free_cash_flow": 2154.24,
+          "eps": 3.23,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 13964.2223,
+          "treasury_shares": 1.4831,
+          "shares_outstanding": 13962.7392,
+          "bvps": 126.96,
+          "net_debt": 1888.95,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings",
+            "BondsPayable",
+            "NotesPayable"
+          ],
+          "source_id": "src-finmind-2317-fs",
+          "snapshot_id": "snap-2317-2025Q4",
+          "content_hash": "73b542e821487e66d758bd0f848b362134b300ff222c1d3fa86dfc718b5225c0"
+        },
+        {
+          "period": "2026Q1",
+          "period_basis": "single_quarter",
+          "available_at": "2026-05-14T14:15:12+08:00",
+          "revenue": 21195.33,
+          "operating_income": 756.49,
+          "net_income": 499.19,
+          "operating_cash_flow": 32.17,
+          "capital_expenditure": 357.74,
+          "free_cash_flow": -325.57,
+          "eps": 3.56,
+          "eps_source": "mops_direct",
+          "shares_issued": 14003.4032,
+          "treasury_shares": 1.4831,
+          "shares_outstanding": 14001.9201,
+          "bvps": 127.12,
+          "net_debt": 1969.73,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings",
+            "BondsPayable",
+            "NotesPayable"
+          ],
+          "source_id": "src-finmind-2317-fs",
+          "snapshot_id": "snap-2317-2026Q1",
+          "content_hash": "73b542e821487e66d758bd0f848b362134b300ff222c1d3fa86dfc718b5225c0"
+        },
+        {
+          "period": "2026Q2",
+          "period_basis": "single_quarter",
+          "available_at": "2026-08-12T14:15:01+08:00",
+          "revenue": 25258.94,
+          "operating_income": 948.03,
+          "net_income": 599.74,
+          "operating_cash_flow": -723.39,
+          "capital_expenditure": 451.12,
+          "free_cash_flow": -1174.51,
+          "eps": 4.27,
+          "eps_source": "mops_direct",
+          "shares_issued": 14028.6486,
+          "treasury_shares": 1.4831,
+          "shares_outstanding": 14027.1655,
+          "bvps": 136.02,
+          "net_debt": 2772.25,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings",
+            "BondsPayable",
+            "NotesPayable"
+          ],
+          "source_id": "src-finmind-2317-fs",
+          "snapshot_id": "snap-2317-2026Q2",
+          "content_hash": "73b542e821487e66d758bd0f848b362134b300ff222c1d3fa86dfc718b5225c0"
+        }
+      ]
+    },
+    "2454": {
+      "company_name": "聯發科技",
+      "statement_basis": "consolidated",
+      "currency": "TWD",
+      "quarters": [
+        {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "available_at": "2025-07-30T18:19:17+08:00",
+          "revenue": 1503.69,
+          "operating_income": 293.79,
+          "net_income": 278.48,
+          "operating_cash_flow": 456.69,
+          "capital_expenditure": 44.74,
+          "free_cash_flow": 411.95,
+          "eps": 17.5,
+          "eps_source": "mops_direct",
+          "shares_issued": 1601.658,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1593.8639,
+          "bvps": 236.15,
+          "net_debt": -1794.09,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2025Q2",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa"
+        },
+        {
+          "period": "2025Q3",
+          "period_basis": "single_quarter",
+          "available_at": "2025-10-31T17:10:18+08:00",
+          "revenue": 1420.97,
+          "operating_income": 221.88,
+          "net_income": 252.21,
+          "operating_cash_flow": 391.81,
+          "capital_expenditure": 27.74,
+          "free_cash_flow": 364.06,
+          "eps": 15.84,
+          "eps_source": "mops_direct",
+          "shares_issued": 1603.9286,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1345,
+          "bvps": 263.22,
+          "net_debt": -1823.47,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2025Q3",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa"
+        },
+        {
+          "period": "2025Q4",
+          "period_basis": "single_quarter",
+          "available_at": "2026-02-26T17:08:56+08:00",
+          "revenue": 1501.88,
+          "operating_income": 218.5,
+          "net_income": 229.25,
+          "operating_cash_flow": 645.2,
+          "capital_expenditure": 46.42,
+          "free_cash_flow": 598.78,
+          "eps": 14.4,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 1603.9122,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1181,
+          "bvps": 250.98,
+          "net_debt": -2342.9,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2025Q4",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa"
+        },
+        {
+          "period": "2026Q1",
+          "period_basis": "single_quarter",
+          "available_at": "2026-04-30T17:58:34+08:00",
+          "revenue": 1491.51,
+          "operating_income": 228.91,
+          "net_income": 241.54,
+          "operating_cash_flow": -176.57,
+          "capital_expenditure": 42.6,
+          "free_cash_flow": -219.17,
+          "eps": 15.17,
+          "eps_source": "mops_direct",
+          "shares_issued": 1603.9043,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1102,
+          "bvps": 244.52,
+          "net_debt": -1679.55,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2026Q1",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa"
+        },
+        {
+          "period": "2026Q2",
+          "period_basis": "single_quarter",
+          "available_at": "2026-07-31T18:41:57+08:00",
+          "revenue": 1521.83,
+          "operating_income": 228.68,
+          "net_income": 243.35,
+          "operating_cash_flow": 242.51,
+          "capital_expenditure": 65.55,
+          "free_cash_flow": 176.96,
+          "eps": 15.28,
+          "eps_source": "mops_direct",
+          "shares_issued": 1603.8954,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1013,
+          "bvps": 265.77,
+          "net_debt": -1717.81,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2026Q2",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa"
         }
       ]
     },
@@ -213,60 +867,129 @@
       "currency": "TWD",
       "quarters": [
         {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "available_at": "2025-07-31T18:23:47+08:00",
+          "revenue": 319.14,
+          "operating_income": 40.08,
+          "net_income": 39.09,
+          "operating_cash_flow": 63.8,
+          "capital_expenditure": 4.37,
+          "free_cash_flow": 59.43,
+          "eps": 7.62,
+          "eps_source": "mops_direct",
+          "shares_issued": 512.8636,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 512.8636,
+          "bvps": 84.39,
+          "net_debt": -76.15,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2025Q2",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7"
+        },
+        {
           "period": "2025Q3",
           "period_basis": "single_quarter",
-          "revenue": 307.5,
-          "net_income": 33.3,
-          "eps": 6.50,
-          "bvps": 145.0,
-          "operating_cash_flow": 42.0,
-          "capital_expenditure": 11.0,
-          "free_cash_flow": 31.0,
-          "shares_outstanding": 512.0,
-          "net_debt": -160.0,
-          "available_at": "2025-11-05T16:00:00+08:00"
+          "available_at": "2025-10-29T18:10:18+08:00",
+          "revenue": 294.91,
+          "operating_income": 31.13,
+          "net_income": 34.29,
+          "operating_cash_flow": 69.51,
+          "capital_expenditure": 3.45,
+          "free_cash_flow": 66.05,
+          "eps": 6.69,
+          "eps_source": "mops_direct",
+          "shares_issued": 512.8636,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 512.8636,
+          "bvps": 92.5,
+          "net_debt": -165.72,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2025Q3",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7"
         },
         {
           "period": "2025Q4",
           "period_basis": "single_quarter",
-          "revenue": 320.0,
-          "net_income": 34.8,
-          "eps": 6.80,
-          "bvps": 152.0,
-          "operating_cash_flow": 45.0,
-          "capital_expenditure": 12.0,
-          "free_cash_flow": 33.0,
-          "shares_outstanding": 512.0,
-          "net_debt": -170.0,
-          "available_at": "2026-03-10T16:00:00+08:00"
+          "available_at": "2026-02-26T22:38:25+08:00",
+          "revenue": 262.78,
+          "operating_income": 23.35,
+          "net_income": 26.54,
+          "operating_cash_flow": 19.72,
+          "capital_expenditure": 10.6,
+          "free_cash_flow": 9.12,
+          "eps": 5.18,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 515.5126,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 515.5126,
+          "bvps": 101.26,
+          "net_debt": -29.76,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2025Q4",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7"
         },
         {
           "period": "2026Q1",
           "period_basis": "single_quarter",
-          "revenue": 345.0,
-          "net_income": 36.6,
-          "eps": 7.15,
-          "bvps": 158.5,
-          "operating_cash_flow": 48.0,
-          "capital_expenditure": 13.0,
-          "free_cash_flow": 35.0,
-          "shares_outstanding": 512.0,
-          "net_debt": -175.0,
-          "available_at": "2026-05-08T16:00:00+08:00"
+          "available_at": "2026-04-30T18:13:49+08:00",
+          "revenue": 364.23,
+          "operating_income": 43.32,
+          "net_income": 43.3,
+          "operating_cash_flow": 61.14,
+          "capital_expenditure": 11.22,
+          "free_cash_flow": 49.92,
+          "eps": 8.44,
+          "eps_source": "mops_direct",
+          "shares_issued": 515.5126,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 515.5126,
+          "bvps": 87.68,
+          "net_debt": -12.17,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2026Q1",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7"
         },
         {
           "period": "2026Q2",
           "period_basis": "single_quarter",
-          "revenue": 376.0,
+          "available_at": "2026-07-30T17:13:13+08:00",
+          "revenue": 375.53,
+          "operating_income": 37.25,
           "net_income": 38.05,
+          "operating_cash_flow": 48.21,
+          "capital_expenditure": 5.1,
+          "free_cash_flow": 43.12,
           "eps": 7.42,
-          "bvps": 165.0,
-          "operating_cash_flow": 50.0,
-          "capital_expenditure": 14.0,
-          "free_cash_flow": 36.0,
-          "shares_outstanding": 512.0,
-          "net_debt": -180.0,
-          "available_at": "2026-08-05T16:00:00+08:00"
+          "eps_source": "mops_direct",
+          "shares_issued": 515.5126,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 515.5126,
+          "bvps": 97.83,
+          "net_debt": -33.56,
+          "debt_items": [
+            "LongtermBorrowings",
+            "ShorttermBorrowings"
+          ],
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2026Q2",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7"
         }
       ]
     },
@@ -276,60 +999,124 @@
       "currency": "TWD",
       "quarters": [
         {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "available_at": "2025-07-29T16:07:17+08:00",
+          "revenue": 261.52,
+          "operating_income": 48.23,
+          "net_income": 37.39,
+          "operating_cash_flow": 17.4,
+          "capital_expenditure": 1.13,
+          "free_cash_flow": 16.27,
+          "eps": 6.14,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 98.01,
+          "net_debt": -547.19,
+          "debt_items": [
+            "LongtermBorrowings"
+          ],
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2025Q2",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a"
+        },
+        {
           "period": "2025Q3",
           "period_basis": "single_quarter",
-          "revenue": 265.0,
-          "net_income": 53.5,
-          "eps": 8.80,
-          "bvps": 168.0,
-          "operating_cash_flow": 62.0,
-          "capital_expenditure": 8.0,
-          "free_cash_flow": 54.0,
-          "shares_outstanding": 608.5,
-          "net_debt": -290.0,
-          "available_at": "2025-11-08T16:00:00+08:00"
+          "available_at": "2025-11-04T17:55:55+08:00",
+          "revenue": 245.74,
+          "operating_income": 38.57,
+          "net_income": 36.55,
+          "operating_cash_flow": 31.23,
+          "capital_expenditure": 4.94,
+          "free_cash_flow": 26.29,
+          "eps": 6.01,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 104.49,
+          "net_debt": -396.57,
+          "debt_items": [
+            "LongtermBorrowings"
+          ],
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2025Q3",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a"
         },
         {
           "period": "2025Q4",
           "period_basis": "single_quarter",
-          "revenue": 272.0,
-          "net_income": 56.0,
-          "eps": 9.20,
-          "bvps": 174.0,
-          "operating_cash_flow": 65.0,
-          "capital_expenditure": 8.5,
-          "free_cash_flow": 56.5,
-          "shares_outstanding": 608.5,
-          "net_debt": -300.0,
-          "available_at": "2026-03-12T16:00:00+08:00"
+          "available_at": "2026-03-10T17:51:32+08:00",
+          "revenue": 228.17,
+          "operating_income": 38.61,
+          "net_income": 36.9,
+          "operating_cash_flow": 31.89,
+          "capital_expenditure": 3.49,
+          "free_cash_flow": 28.41,
+          "eps": 6.07,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 111.32,
+          "net_debt": -424.19,
+          "debt_items": [
+            "LongtermBorrowings"
+          ],
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2025Q4",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a"
         },
         {
           "period": "2026Q1",
           "period_basis": "single_quarter",
-          "revenue": 278.0,
-          "net_income": 59.6,
-          "eps": 9.80,
-          "bvps": 179.5,
-          "operating_cash_flow": 68.0,
-          "capital_expenditure": 9.0,
-          "free_cash_flow": 59.0,
-          "shares_outstanding": 608.5,
-          "net_debt": -310.0,
-          "available_at": "2026-05-12T16:00:00+08:00"
+          "available_at": "2026-05-05T15:56:39+08:00",
+          "revenue": 231.45,
+          "operating_income": 40.28,
+          "net_income": 37.67,
+          "operating_cash_flow": 68.78,
+          "capital_expenditure": 4.1,
+          "free_cash_flow": 64.68,
+          "eps": 6.19,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 118.2,
+          "net_debt": -489.2,
+          "debt_items": [
+            "LongtermBorrowings"
+          ],
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2026Q1",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a"
         },
         {
           "period": "2026Q2",
           "period_basis": "single_quarter",
+          "available_at": "2026-08-04T16:30:51+08:00",
           "revenue": 286.6,
+          "operating_income": 64.66,
           "net_income": 63.28,
-          "eps": 10.40,
-          "bvps": 185.0,
-          "operating_cash_flow": 72.0,
-          "capital_expenditure": 9.5,
-          "free_cash_flow": 62.5,
-          "shares_outstanding": 608.5,
-          "net_debt": -320.0,
-          "available_at": "2026-08-08T16:00:00+08:00"
+          "operating_cash_flow": 49.48,
+          "capital_expenditure": 1.38,
+          "free_cash_flow": 48.11,
+          "eps": 10.4,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 113.33,
+          "net_debt": -539.9,
+          "debt_items": [
+            "LongtermBorrowings"
+          ],
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2026Q2",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a"
         }
       ]
     }
@@ -342,46 +1129,238 @@
       "available_at": "2026-07-14T08:30:00-04:00",
       "value": 332.568,
       "unit": "Index 1982-1984=100",
-      "source": "FRED"
+      "source": "FRED CPIAUCSL download; BLS release schedule"
     },
     {
       "series_id": "FEDFUNDS",
-      "indicator": "聯邦基金有效利率",
+      "indicator": "聯邦基金有效利率（月平均）",
       "observation_date": "2026-06",
-      "available_at": "2026-07-01T09:00:00-04:00",
+      "available_at": "2026-07-02T00:00:00-04:00",
       "value": 3.63,
       "unit": "%",
-      "source": "FRED"
+      "source": "FRED FEDFUNDS download; H.15 release schedule (conservative)"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-01-30",
+      "available_at": "2026-01-30T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 32063.75,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-02-26",
+      "available_at": "2026-02-26T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 35414.49,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-03-31",
+      "available_at": "2026-03-31T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 31722.99,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-04-30",
+      "available_at": "2026-04-30T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 38926.63,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-05-29",
+      "available_at": "2026-05-29T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 44732.94,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-06-30",
+      "available_at": "2026-06-30T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 46125.91,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-07-31",
+      "available_at": "2026-07-31T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 43119.75,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-08-31",
+      "available_at": "2026-08-31T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 46128.47,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
+    },
+    {
+      "series_id": "TAIEX",
+      "indicator": "台股加權指數（TAIEX）月底收盤",
+      "observation_date": "2026-09-30",
+      "available_at": "2026-09-30T17:30:00+08:00",
+      "available_at_basis": "rule_close_1730",
+      "value": 47940.13,
+      "unit": "指數點",
+      "source": "FinMind TaiwanStockPrice data_id=TAIEX（未還原收盤）",
+      "source_id": "finmind_tw_market",
+      "content_hash": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0"
     }
   ],
   "prices": {
-    "2454": [
-      { "trade_date": "2026-09-22", "close": 4850.0 },
-      { "trade_date": "2026-09-23", "close": 4880.0 },
-      { "trade_date": "2026-09-24", "close": 4900.0 },
-      { "trade_date": "2026-09-29", "close": 4910.0 },
-      { "trade_date": "2026-09-30", "close": 4920.0 }
-    ],
     "2330": [
-      { "trade_date": "2026-09-22", "close": 2420.0 },
-      { "trade_date": "2026-09-23", "close": 2450.0 },
-      { "trade_date": "2026-09-24", "close": 2460.0 },
-      { "trade_date": "2026-09-29", "close": 2470.0 },
-      { "trade_date": "2026-09-30", "close": 2480.0 }
+      {
+        "trade_date": "2026-09-22",
+        "close": 2460.0
+      },
+      {
+        "trade_date": "2026-09-23",
+        "close": 2500.0
+      },
+      {
+        "trade_date": "2026-09-24",
+        "close": 2475.0
+      },
+      {
+        "trade_date": "2026-09-29",
+        "close": 2475.0
+      },
+      {
+        "trade_date": "2026-09-30",
+        "close": 2480.0
+      }
+    ],
+    "2317": [
+      {
+        "trade_date": "2026-09-22",
+        "close": 253.0
+      },
+      {
+        "trade_date": "2026-09-23",
+        "close": 256.0
+      },
+      {
+        "trade_date": "2026-09-24",
+        "close": 250.5
+      },
+      {
+        "trade_date": "2026-09-29",
+        "close": 250.5
+      },
+      {
+        "trade_date": "2026-09-30",
+        "close": 251.5
+      }
+    ],
+    "2454": [
+      {
+        "trade_date": "2026-09-22",
+        "close": 5180.0
+      },
+      {
+        "trade_date": "2026-09-23",
+        "close": 5185.0
+      },
+      {
+        "trade_date": "2026-09-24",
+        "close": 5285.0
+      },
+      {
+        "trade_date": "2026-09-29",
+        "close": 4910.0
+      },
+      {
+        "trade_date": "2026-09-30",
+        "close": 4920.0
+      }
     ],
     "2379": [
-      { "trade_date": "2026-09-22", "close": 1130.0 },
-      { "trade_date": "2026-09-23", "close": 1140.0 },
-      { "trade_date": "2026-09-24", "close": 1145.0 },
-      { "trade_date": "2026-09-29", "close": 1145.0 },
-      { "trade_date": "2026-09-30", "close": 1150.0 }
+      {
+        "trade_date": "2026-09-22",
+        "close": 755.0
+      },
+      {
+        "trade_date": "2026-09-23",
+        "close": 761.0
+      },
+      {
+        "trade_date": "2026-09-24",
+        "close": 749.0
+      },
+      {
+        "trade_date": "2026-09-29",
+        "close": 760.0
+      },
+      {
+        "trade_date": "2026-09-30",
+        "close": 760.0
+      }
     ],
     "3034": [
-      { "trade_date": "2026-09-22", "close": 1200.0 },
-      { "trade_date": "2026-09-23", "close": 1210.0 },
-      { "trade_date": "2026-09-24", "close": 1215.0 },
-      { "trade_date": "2026-09-29", "close": 1215.0 },
-      { "trade_date": "2026-09-30", "close": 1220.0 }
+      {
+        "trade_date": "2026-09-22",
+        "close": 557.0
+      },
+      {
+        "trade_date": "2026-09-23",
+        "close": 545.0
+      },
+      {
+        "trade_date": "2026-09-24",
+        "close": 543.0
+      },
+      {
+        "trade_date": "2026-09-29",
+        "close": 540.0
+      },
+      {
+        "trade_date": "2026-09-30",
+        "close": 546.0
+      }
     ]
-  }
+  },
+  "tw_market_added_at": "2026-10-20T20:44:34+08:00",
+  "tw_market_note": "財報、股價、證據沿用原快照（generated_at 不變）；僅加入 TAIEX 月底收盤。FinMind 於 2026-10-20 將 2330 2026Q2 損益表改為 1–6 月累計值，故未重抓財報"
 }
