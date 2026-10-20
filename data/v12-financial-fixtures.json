@@ -1,117 +1,1098 @@
 {
-  "fixture_version": "v1.2",
-  "note": "多智能體系統標準財務驗算 Fixture（含單季/累計/時點分層、連續 4 季 TTM、同業對照數據）",
+  "fixture_version": "v1.4-w02",
+  "generated_by": "scripts/build_w02_fixtures.py",
+  "generated_at": "2026-10-20T20:39:55+08:00",
+  "cutoff": "2026-09-30T17:30:00+08:00",
+  "source_snapshot": {
+    "file": "data/financial-snapshots.json",
+    "sha256": "abc97587722425e718d1579c6e6ef861b5d249dae513ae63d4c884ce4e6c9fe6",
+    "manifest_version": "v1.5-eps-source"
+  },
+  "note": "真實季度資料取自快照（synthetic_fixture=false）；synthetic_examples 為人工驗算例（synthetic_fixture=true，年度用 2099 以免與真實資料混淆），不得作為財務數字來源。",
   "companies": {
     "2454": {
       "company_name": "聯發科技",
+      "role": "subject",
       "statement_basis": "consolidated",
       "currency": "TWD",
       "unit_money": "100m",
       "unit_shares": "1m",
       "quarters": [
         {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 1503.69,
+          "operating_income": 293.79,
+          "net_income": 278.48,
+          "operating_cash_flow": 456.69,
+          "capital_expenditure": 44.74,
+          "free_cash_flow": 411.95,
+          "eps": 17.5,
+          "eps_source": "mops_direct",
+          "shares_issued": 1601.658,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1593.8639,
+          "bvps": 236.15,
+          "net_debt": -1794.09,
+          "available_at": "2025-07-30T18:19:17+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00",
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2025Q2",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "synthetic_fixture": false
+        },
+        {
           "period": "2025Q3",
           "period_basis": "single_quarter",
-          "revenue": 1318.1,
-          "operating_income": 238.6,
-          "net_income": 255.9,
-          "operating_cash_flow": 310.5,
-          "capital_expenditure": 42.1,
-          "free_cash_flow": 268.4,
-          "eps": 15.94,
-          "shares_outstanding": 1600.0,
-          "net_debt": -720.0,
-          "available_at": "2025-11-10T16:00:00+08:00"
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 1420.97,
+          "operating_income": 221.88,
+          "net_income": 252.21,
+          "operating_cash_flow": 391.81,
+          "capital_expenditure": 27.74,
+          "free_cash_flow": 364.06,
+          "eps": 15.84,
+          "eps_source": "mops_direct",
+          "shares_issued": 1603.9286,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1345,
+          "bvps": 263.22,
+          "net_debt": -1823.47,
+          "available_at": "2025-10-31T17:10:18+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00",
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2025Q3",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "synthetic_fixture": false
         },
         {
           "period": "2025Q4",
           "period_basis": "single_quarter",
-          "revenue": 1296.5,
-          "operating_income": 247.2,
-          "net_income": 257.1,
-          "operating_cash_flow": 295.0,
-          "capital_expenditure": 45.0,
-          "free_cash_flow": 250.0,
-          "eps": 16.02,
-          "shares_outstanding": 1600.0,
-          "net_debt": -750.0,
-          "available_at": "2026-03-15T16:00:00+08:00"
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 1501.88,
+          "operating_income": 218.5,
+          "net_income": 229.25,
+          "operating_cash_flow": 645.2,
+          "capital_expenditure": 46.42,
+          "free_cash_flow": 598.78,
+          "eps": 14.4,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 1603.9122,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1181,
+          "bvps": 250.98,
+          "net_debt": -2342.9,
+          "available_at": "2026-02-26T17:08:56+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00",
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2025Q4",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "synthetic_fixture": false
         },
         {
           "period": "2026Q1",
           "period_basis": "single_quarter",
-          "revenue": 1334.6,
-          "operating_income": 321.8,
-          "net_income": 316.4,
-          "operating_cash_flow": 380.2,
-          "capital_expenditure": 38.6,
-          "free_cash_flow": 341.6,
-          "eps": 19.85,
-          "shares_outstanding": 1600.0,
-          "net_debt": -810.0,
-          "available_at": "2026-05-10T16:00:00+08:00"
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 1491.51,
+          "operating_income": 228.91,
+          "net_income": 241.54,
+          "operating_cash_flow": -176.57,
+          "capital_expenditure": 42.6,
+          "free_cash_flow": -219.17,
+          "eps": 15.17,
+          "eps_source": "mops_direct",
+          "shares_issued": 1603.9043,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1102,
+          "bvps": 244.52,
+          "net_debt": -1679.55,
+          "available_at": "2026-04-30T17:58:34+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00",
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2026Q1",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "synthetic_fixture": false
         },
         {
           "period": "2026Q2",
           "period_basis": "single_quarter",
-          "revenue": 1272.7,
-          "operating_income": 249.6,
-          "net_income": 259.6,
-          "operating_cash_flow": 305.1,
-          "capital_expenditure": 41.2,
-          "free_cash_flow": 263.9,
-          "eps": 16.19,
-          "shares_outstanding": 1600.0,
-          "net_debt": -830.0,
-          "available_at": "2026-08-10T16:00:00+08:00"
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 1521.83,
+          "operating_income": 228.68,
+          "net_income": 243.35,
+          "operating_cash_flow": 242.51,
+          "capital_expenditure": 65.55,
+          "free_cash_flow": 176.96,
+          "eps": 15.28,
+          "eps_source": "mops_direct",
+          "shares_issued": 1603.8954,
+          "treasury_shares": 7.7941,
+          "shares_outstanding": 1596.1013,
+          "bvps": 265.77,
+          "net_debt": -1717.81,
+          "available_at": "2026-07-31T18:41:57+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:08+08:00",
+          "source_id": "src-finmind-2454-fs",
+          "snapshot_id": "snap-2454-2026Q2",
+          "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+          "synthetic_fixture": false
         }
       ],
       "ttm_summary": {
         "as_of_period": "2026Q2",
-        "eps_ttm": 68.0,
-        "fcf_ttm": 1123.9,
-        "is_complete_4_quarters": true
+        "periods": [
+          "2025Q3",
+          "2025Q4",
+          "2026Q1",
+          "2026Q2"
+        ],
+        "eps_ttm": 60.69,
+        "eps_ttm_unit": "TWD/share",
+        "fcf_ttm": 920.63,
+        "fcf_ttm_unit": "100m TWD",
+        "eps_sources": [
+          "mops_direct",
+          "finmind_quarterly",
+          "mops_direct",
+          "mops_direct"
+        ],
+        "is_complete_4_quarters": true,
+        "rounding_note": "各季值取自快照（由原始值計算後四捨五入至 0.01），TTM 為四季快照值相加"
       },
       "market_snapshot": {
         "trade_date": "2026-09-30",
-        "close_price": 1250.0,
-        "pe_ttm": 18.38,
-        "pb_ratio": 3.85
+        "close_price": 4920.0,
+        "currency": "TWD",
+        "unit": "TWD/share",
+        "price_basis": "raw_close",
+        "available_at": "2026-09-30T17:30:00+08:00",
+        "available_at_basis": "rule_close_1730",
+        "captured_at": "2026-10-19T17:18:11+08:00",
+        "source_id": "finmind_price",
+        "content_hash": "d8716e166cc0f59b96c3ebb7721ef221dabf872630db017397d4f823193a96d0",
+        "verification": "與 TWSE STOCK_DAY 2026-09 原始檔逐日比對一致（data-contract.md 待決事項 9）",
+        "pe_ttm": 81.07,
+        "pe_missing_reason": null,
+        "bvps": 265.77,
+        "pb_ratio": 18.51,
+        "revenue_yoy_quarter": 0.0121,
+        "revenue_yoy_basis": "2026Q2 單季 ÷ 2025Q2 單季 − 1"
       }
     },
     "2379": {
       "company_name": "瑞昱半導體",
       "role": "peer",
+      "statement_basis": "consolidated",
+      "currency": "TWD",
+      "unit_money": "100m",
+      "unit_shares": "1m",
+      "quarters": [
+        {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 319.14,
+          "operating_income": 40.08,
+          "net_income": 39.09,
+          "operating_cash_flow": 63.8,
+          "capital_expenditure": 4.37,
+          "free_cash_flow": 59.43,
+          "eps": 7.62,
+          "eps_source": "mops_direct",
+          "shares_issued": 512.8636,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 512.8636,
+          "bvps": 84.39,
+          "net_debt": -76.15,
+          "available_at": "2025-07-31T18:23:47+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:09+08:00",
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2025Q2",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2025Q3",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 294.91,
+          "operating_income": 31.13,
+          "net_income": 34.29,
+          "operating_cash_flow": 69.51,
+          "capital_expenditure": 3.45,
+          "free_cash_flow": 66.05,
+          "eps": 6.69,
+          "eps_source": "mops_direct",
+          "shares_issued": 512.8636,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 512.8636,
+          "bvps": 92.5,
+          "net_debt": -165.72,
+          "available_at": "2025-10-29T18:10:18+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:09+08:00",
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2025Q3",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2025Q4",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 262.78,
+          "operating_income": 23.35,
+          "net_income": 26.54,
+          "operating_cash_flow": 19.72,
+          "capital_expenditure": 10.6,
+          "free_cash_flow": 9.12,
+          "eps": 5.18,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 515.5126,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 515.5126,
+          "bvps": 101.26,
+          "net_debt": -29.76,
+          "available_at": "2026-02-26T22:38:25+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:09+08:00",
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2025Q4",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2026Q1",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 364.23,
+          "operating_income": 43.32,
+          "net_income": 43.3,
+          "operating_cash_flow": 61.14,
+          "capital_expenditure": 11.22,
+          "free_cash_flow": 49.92,
+          "eps": 8.44,
+          "eps_source": "mops_direct",
+          "shares_issued": 515.5126,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 515.5126,
+          "bvps": 87.68,
+          "net_debt": -12.17,
+          "available_at": "2026-04-30T18:13:49+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:09+08:00",
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2026Q1",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2026Q2",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 375.53,
+          "operating_income": 37.25,
+          "net_income": 38.05,
+          "operating_cash_flow": 48.21,
+          "capital_expenditure": 5.1,
+          "free_cash_flow": 43.12,
+          "eps": 7.42,
+          "eps_source": "mops_direct",
+          "shares_issued": 515.5126,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 515.5126,
+          "bvps": 97.83,
+          "net_debt": -33.56,
+          "available_at": "2026-07-30T17:13:13+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:09+08:00",
+          "source_id": "src-finmind-2379-fs",
+          "snapshot_id": "snap-2379-2026Q2",
+          "content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7",
+          "synthetic_fixture": false
+        }
+      ],
+      "ttm_summary": {
+        "as_of_period": "2026Q2",
+        "periods": [
+          "2025Q3",
+          "2025Q4",
+          "2026Q1",
+          "2026Q2"
+        ],
+        "eps_ttm": 27.73,
+        "eps_ttm_unit": "TWD/share",
+        "fcf_ttm": 168.21,
+        "fcf_ttm_unit": "100m TWD",
+        "eps_sources": [
+          "mops_direct",
+          "finmind_quarterly",
+          "mops_direct",
+          "mops_direct"
+        ],
+        "is_complete_4_quarters": true,
+        "rounding_note": "各季值取自快照（由原始值計算後四捨五入至 0.01），TTM 為四季快照值相加"
+      },
       "market_snapshot": {
         "trade_date": "2026-09-30",
-        "close_price": 510.0,
-        "pe_ttm": 19.5,
-        "pb_ratio": 4.1,
-        "revenue_yoy_quarter": 0.125
+        "close_price": 760.0,
+        "currency": "TWD",
+        "unit": "TWD/share",
+        "price_basis": "raw_close",
+        "available_at": "2026-09-30T17:30:00+08:00",
+        "available_at_basis": "rule_close_1730",
+        "captured_at": "2026-10-19T17:18:11+08:00",
+        "source_id": "finmind_price",
+        "content_hash": "5636e04a4417a759d2c0032d9c01a35d7896f0cfaf7556eeda8d1247c0fc0e67",
+        "verification": "與 TWSE STOCK_DAY 2026-09 原始檔逐日比對一致（data-contract.md 待決事項 9）",
+        "pe_ttm": 27.41,
+        "pe_missing_reason": null,
+        "bvps": 97.83,
+        "pb_ratio": 7.77,
+        "revenue_yoy_quarter": 0.1767,
+        "revenue_yoy_basis": "2026Q2 單季 ÷ 2025Q2 單季 − 1"
       }
     },
     "3034": {
       "company_name": "聯詠科技",
       "role": "peer",
+      "statement_basis": "consolidated",
+      "currency": "TWD",
+      "unit_money": "100m",
+      "unit_shares": "1m",
+      "quarters": [
+        {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 261.52,
+          "operating_income": 48.23,
+          "net_income": 37.39,
+          "operating_cash_flow": 17.4,
+          "capital_expenditure": 1.13,
+          "free_cash_flow": 16.27,
+          "eps": 6.14,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 98.01,
+          "net_debt": -547.19,
+          "available_at": "2025-07-29T16:07:17+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:10+08:00",
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2025Q2",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2025Q3",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 245.74,
+          "operating_income": 38.57,
+          "net_income": 36.55,
+          "operating_cash_flow": 31.23,
+          "capital_expenditure": 4.94,
+          "free_cash_flow": 26.29,
+          "eps": 6.01,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 104.49,
+          "net_debt": -396.57,
+          "available_at": "2025-11-04T17:55:55+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:10+08:00",
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2025Q3",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2025Q4",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 228.17,
+          "operating_income": 38.61,
+          "net_income": 36.9,
+          "operating_cash_flow": 31.89,
+          "capital_expenditure": 3.49,
+          "free_cash_flow": 28.41,
+          "eps": 6.07,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 111.32,
+          "net_debt": -424.19,
+          "available_at": "2026-03-10T17:51:32+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:10+08:00",
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2025Q4",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2026Q1",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 231.45,
+          "operating_income": 40.28,
+          "net_income": 37.67,
+          "operating_cash_flow": 68.78,
+          "capital_expenditure": 4.1,
+          "free_cash_flow": 64.68,
+          "eps": 6.19,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 118.2,
+          "net_debt": -489.2,
+          "available_at": "2026-05-05T15:56:39+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:10+08:00",
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2026Q1",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2026Q2",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 286.6,
+          "operating_income": 64.66,
+          "net_income": 63.28,
+          "operating_cash_flow": 49.48,
+          "capital_expenditure": 1.38,
+          "free_cash_flow": 48.11,
+          "eps": 10.4,
+          "eps_source": "mops_direct",
+          "shares_issued": 608.5115,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 608.5115,
+          "bvps": 113.33,
+          "net_debt": -539.9,
+          "available_at": "2026-08-04T16:30:51+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:10+08:00",
+          "source_id": "src-finmind-3034-fs",
+          "snapshot_id": "snap-3034-2026Q2",
+          "content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a",
+          "synthetic_fixture": false
+        }
+      ],
+      "ttm_summary": {
+        "as_of_period": "2026Q2",
+        "periods": [
+          "2025Q3",
+          "2025Q4",
+          "2026Q1",
+          "2026Q2"
+        ],
+        "eps_ttm": 28.67,
+        "eps_ttm_unit": "TWD/share",
+        "fcf_ttm": 167.49,
+        "fcf_ttm_unit": "100m TWD",
+        "eps_sources": [
+          "mops_direct",
+          "finmind_quarterly",
+          "mops_direct",
+          "mops_direct"
+        ],
+        "is_complete_4_quarters": true,
+        "rounding_note": "各季值取自快照（由原始值計算後四捨五入至 0.01），TTM 為四季快照值相加"
+      },
       "market_snapshot": {
         "trade_date": "2026-09-30",
-        "close_price": 540.0,
-        "pe_ttm": 15.2,
-        "pb_ratio": 3.6,
-        "revenue_yoy_quarter": 0.082
+        "close_price": 546.0,
+        "currency": "TWD",
+        "unit": "TWD/share",
+        "price_basis": "raw_close",
+        "available_at": "2026-09-30T17:30:00+08:00",
+        "available_at_basis": "rule_close_1730",
+        "captured_at": "2026-10-19T17:18:11+08:00",
+        "source_id": "finmind_price",
+        "content_hash": "330b9cf87f14eb47ea60087cc650b5aad9b6e46f0c6eddf3f90d98ba4c856f44",
+        "verification": "與 TWSE STOCK_DAY 2026-09 原始檔逐日比對一致（data-contract.md 待決事項 9）",
+        "pe_ttm": 19.04,
+        "pe_missing_reason": null,
+        "bvps": 113.33,
+        "pb_ratio": 4.82,
+        "revenue_yoy_quarter": 0.0959,
+        "revenue_yoy_basis": "2026Q2 單季 ÷ 2025Q2 單季 − 1"
       }
     },
     "2330": {
-      "company_name": "台灣積體電路製造",
+      "company_name": "台積電",
       "role": "industry_reference",
-      "note": "僅作產業參照，嚴禁計入 2454 同業平均計算",
+      "statement_basis": "consolidated",
+      "currency": "TWD",
+      "unit_money": "100m",
+      "unit_shares": "1m",
+      "quarters": [
+        {
+          "period": "2025Q2",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 9337.92,
+          "operating_income": 4634.24,
+          "net_income": 3982.73,
+          "operating_cash_flow": 4970.64,
+          "capital_expenditure": 2972.26,
+          "free_cash_flow": 1998.38,
+          "eps": 15.36,
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.6155,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.6155,
+          "bvps": 176.65,
+          "net_debt": -14808.53,
+          "available_at": "2025-08-12T18:20:44+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:07+08:00",
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2025Q2",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2025Q3",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 9899.18,
+          "operating_income": 5006.85,
+          "net_income": 4523.01,
+          "operating_cash_flow": 4268.29,
+          "capital_expenditure": 2874.52,
+          "free_cash_flow": 1393.77,
+          "eps": 17.44,
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.5245,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.5245,
+          "bvps": 192.74,
+          "net_debt": -15525.31,
+          "available_at": "2025-11-11T18:17:55+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:07+08:00",
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2025Q3",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2025Q4",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 10460.9,
+          "operating_income": 5649.02,
+          "net_income": 5057.44,
+          "operating_cash_flow": 7255.09,
+          "capital_expenditure": 3569.06,
+          "free_cash_flow": 3686.03,
+          "eps": 19.51,
+          "eps_source": "finmind_quarterly",
+          "shares_issued": 25932.5245,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.5245,
+          "bvps": 208.99,
+          "net_debt": -18717.94,
+          "available_at": "2026-02-10T18:16:19+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:07+08:00",
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2025Q4",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2026Q1",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 11341.03,
+          "operating_income": 6589.66,
+          "net_income": 5724.8,
+          "operating_cash_flow": 6989.76,
+          "capital_expenditure": 3507.63,
+          "free_cash_flow": 3482.13,
+          "eps": 22.08,
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.5245,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.5245,
+          "bvps": 227.16,
+          "net_debt": -21346.19,
+          "available_at": "2026-05-12T18:33:04+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:07+08:00",
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2026Q1",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f",
+          "synthetic_fixture": false
+        },
+        {
+          "period": "2026Q2",
+          "period_basis": "single_quarter",
+          "statement_basis": "consolidated",
+          "currency": "TWD",
+          "unit_money": "100m",
+          "unit_shares": "1m",
+          "unit_per_share": "TWD",
+          "revenue": 12703.8,
+          "operating_income": 7666.03,
+          "net_income": 7065.62,
+          "operating_cash_flow": 7833.65,
+          "capital_expenditure": 4960.02,
+          "free_cash_flow": 2873.63,
+          "eps": 27.25,
+          "eps_source": "mops_direct",
+          "shares_issued": 25932.3701,
+          "treasury_shares": 0.0,
+          "shares_outstanding": 25932.3701,
+          "bvps": 248.05,
+          "net_debt": -22699.55,
+          "available_at": "2026-08-11T18:46:58+08:00",
+          "available_at_basis": "official",
+          "captured_at": "2026-10-19T17:18:07+08:00",
+          "source_id": "src-finmind-2330-fs",
+          "snapshot_id": "snap-2330-2026Q2",
+          "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f",
+          "synthetic_fixture": false
+        }
+      ],
+      "ttm_summary": {
+        "as_of_period": "2026Q2",
+        "periods": [
+          "2025Q3",
+          "2025Q4",
+          "2026Q1",
+          "2026Q2"
+        ],
+        "eps_ttm": 86.28,
+        "eps_ttm_unit": "TWD/share",
+        "fcf_ttm": 11435.56,
+        "fcf_ttm_unit": "100m TWD",
+        "eps_sources": [
+          "mops_direct",
+          "finmind_quarterly",
+          "mops_direct",
+          "mops_direct"
+        ],
+        "is_complete_4_quarters": true,
+        "rounding_note": "各季值取自快照（由原始值計算後四捨五入至 0.01），TTM 為四季快照值相加"
+      },
       "market_snapshot": {
         "trade_date": "2026-09-30",
-        "close_price": 1005.0,
-        "pe_ttm": 26.31,
-        "pb_ratio": 6.8,
-        "revenue_yoy_quarter": 0.32
+        "close_price": 2480.0,
+        "currency": "TWD",
+        "unit": "TWD/share",
+        "price_basis": "raw_close",
+        "available_at": "2026-09-30T17:30:00+08:00",
+        "available_at_basis": "rule_close_1730",
+        "captured_at": "2026-10-19T17:18:10+08:00",
+        "source_id": "finmind_price",
+        "content_hash": "64a825ed02380f86f368c6e815c3b23ea4774bef2710806ed7339f0e84286f2b",
+        "verification": "與 TWSE STOCK_DAY 2026-09 原始檔逐日比對一致（data-contract.md 待決事項 9）",
+        "pe_ttm": 28.74,
+        "pe_missing_reason": null,
+        "bvps": 248.05,
+        "pb_ratio": 10.0,
+        "revenue_yoy_quarter": 0.3605,
+        "revenue_yoy_basis": "2026Q2 單季 ÷ 2025Q2 單季 − 1"
       }
     }
-  }
+  },
+  "peer_summary": {
+    "peer_avg_pe": 23.23,
+    "peer_avg_pb": 6.29,
+    "peer_avg_revenue_yoy": 0.1363,
+    "excluded_references": [
+      "2330"
+    ],
+    "calculation_basis": "只用 peer 角色（2379、3034）平均，排除 2330"
+  },
+  "synthetic_examples": [
+    {
+      "example_id": "SX-01",
+      "topic": "YTD 還原單季（含 Q4 = 全年 − Q3 累計）",
+      "input": {
+        "statement_basis": "consolidated",
+        "currency": "TWD",
+        "unit": "100m",
+        "fiscal_year": 2099,
+        "ytd": {
+          "Q1": 100.0,
+          "Q2": 250.0,
+          "Q3": 420.0
+        },
+        "annual": 600.0
+      },
+      "expected": {
+        "single_quarter": {
+          "Q1": 100.0,
+          "Q2": 150.0,
+          "Q3": 170.0,
+          "Q4": 180.0
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-02",
+      "topic": "前期缺值不得差分",
+      "input": {
+        "statement_basis": "consolidated",
+        "currency": "TWD",
+        "unit": "100m",
+        "ytd": {
+          "Q1": null,
+          "Q2": 250.0
+        }
+      },
+      "expected": {
+        "single_quarter": {
+          "Q2": {
+            "value": null,
+            "missing_reason": "Q1 累計值缺失，無法差分"
+          }
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-03",
+      "topic": "口徑不同不得差分",
+      "input": {
+        "currency": "TWD",
+        "unit": "100m",
+        "ytd": {
+          "Q1": {
+            "value": 100.0,
+            "statement_basis": "consolidated"
+          },
+          "Q2": {
+            "value": 260.0,
+            "statement_basis": "standalone"
+          }
+        }
+      },
+      "expected": {
+        "single_quarter": {
+          "Q2": {
+            "value": null,
+            "missing_reason": "Q1 與 Q2 口徑不同（合併 vs 個體）"
+          }
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-04",
+      "topic": "時點存量不可跨期相加",
+      "input": {
+        "unit": "1m shares",
+        "shares_outstanding": {
+          "Q1": 1000.0,
+          "Q2": 1010.0
+        }
+      },
+      "expected": {
+        "shares_outstanding_for_valuation": 1010.0,
+        "forbidden": "1000 + 1010 = 2010 不是有效數字；存量取最近一期"
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-05",
+      "topic": "不足 4 季不得算 TTM",
+      "input": {
+        "currency": "TWD",
+        "eps": {
+          "Q2": 5.0,
+          "Q3": 6.0,
+          "Q4": 7.0
+        }
+      },
+      "expected": {
+        "eps_ttm": {
+          "value": null,
+          "missing_reason": "僅 3 季，不得年化推估"
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-06",
+      "topic": "TTM 含 unverified EPS 不得作正式數字",
+      "input": {
+        "currency": "TWD",
+        "eps": [
+          {
+            "q": "Q1",
+            "v": 5.0,
+            "eps_source": "mops_direct"
+          },
+          {
+            "q": "Q2",
+            "v": 6.0,
+            "eps_source": "unverified"
+          },
+          {
+            "q": "Q3",
+            "v": 7.0,
+            "eps_source": "mops_direct"
+          },
+          {
+            "q": "Q4",
+            "v": 8.0,
+            "eps_source": "finmind_quarterly"
+          }
+        ]
+      },
+      "expected": {
+        "eps_ttm": {
+          "value": null,
+          "missing_reason": "Q2 EPS 為 unverified"
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-07",
+      "topic": "四連續季 TTM",
+      "input": {
+        "currency": "TWD",
+        "eps": {
+          "Q1": 5.0,
+          "Q2": 6.0,
+          "Q3": 7.0,
+          "Q4": 8.0
+        },
+        "eps_source": "mops_direct"
+      },
+      "expected": {
+        "eps_ttm": 26.0
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-08",
+      "topic": "null 與 0 分開",
+      "input": {
+        "currency": "TWD",
+        "unit": "100m",
+        "BondsPayable": {
+          "finmind": null,
+          "mops_note": "合併資產負債表無應付公司債科目（附 MOPS 網址）"
+        },
+        "ShorttermBorrowings": {
+          "finmind": null,
+          "mops_note": null
+        }
+      },
+      "expected": {
+        "BondsPayable": {
+          "value": 0.0,
+          "reason": "科目確實不存在，有原文證明"
+        },
+        "ShorttermBorrowings": {
+          "value": null,
+          "missing_reason": "FinMind 缺值且無人工覆寫"
+        },
+        "net_debt": {
+          "value": null,
+          "missing_reason": "計息負債有缺值，淨負債不得計算"
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-09",
+      "topic": "未知公告時間不視為較早可得",
+      "input": {
+        "cutoff": "2099-08-01T00:00:00+08:00",
+        "doc_a": {
+          "available_at": null,
+          "captured_at": "2099-08-05T10:00:00+08:00",
+          "period": "2099Q2"
+        },
+        "doc_b": {
+          "available_at": null,
+          "captured_at": null,
+          "period": "2099Q2"
+        }
+      },
+      "expected": {
+        "doc_a": {
+          "effective_available_at": "2099-08-05T10:00:00+08:00",
+          "available_at_basis": "captured_at_fallback",
+          "usable_at_cutoff": false
+        },
+        "doc_b": {
+          "effective_available_at": null,
+          "usable_at_cutoff": false,
+          "reason": "兩個時間皆未知，視為不可得；不得倒填為 2099-06-30"
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-10",
+      "topic": "年度相容：四單季加總等於年度值",
+      "input": {
+        "currency": "TWD",
+        "unit": "100m",
+        "single_quarter": [
+          100.0,
+          150.0,
+          170.0,
+          180.0
+        ],
+        "annual_reported": 600.0
+      },
+      "expected": {
+        "annual_from_quarters": 600.0,
+        "matches_annual": true,
+        "annual_dcf_input": "沿用年度值 600.0，不改年度 DCF 路徑"
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-11",
+      "topic": "CapEx 符號與 FCF",
+      "input": {
+        "currency": "TWD",
+        "unit": "100m",
+        "case_a": {
+          "CashFlowsFromOperatingActivities": 50.0,
+          "PropertyAndPlantAndEquipment": -20.0
+        },
+        "case_b": {
+          "CashFlowsFromOperatingActivities": 50.0,
+          "PropertyAndPlantAndEquipment": 5.0
+        }
+      },
+      "expected": {
+        "case_a": {
+          "capital_expenditure": 20.0,
+          "free_cash_flow": 30.0
+        },
+        "case_b": {
+          "free_cash_flow": null,
+          "missing_reason": "CapEx 為正值，與來源慣例不符，中止並人工確認"
+        }
+      },
+      "synthetic_fixture": true
+    },
+    {
+      "example_id": "SX-12",
+      "topic": "EPS 或 BVPS 非正不計算比率",
+      "input": {
+        "currency": "TWD",
+        "price": 100.0,
+        "eps_ttm": -2.0,
+        "bvps": 0.0
+      },
+      "expected": {
+        "pe_ttm": {
+          "value": null,
+          "missing_reason": "EPS TTM ≤ 0"
+        },
+        "pb_ratio": {
+          "value": null,
+          "missing_reason": "BVPS ≤ 0"
+        }
+      },
+      "synthetic_fixture": true
+    }
+  ]
 }
