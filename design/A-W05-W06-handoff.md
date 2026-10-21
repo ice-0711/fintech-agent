@@ -49,7 +49,7 @@
 
 ## 5. 給組長的交接短訊（草稿，未發送）
 
-> 組長好，我是 A。W05–W06 在分支 `codex/W05-A-review-risk`（3 個 commit），請 review。
+> 組長好，我是 A。W05–W06 在分支 `codex/W05-A-review-risk`（5 個 commit，已 rebase 到你 10/21 的登入那版），請 review。
 > ① 你 W06 閘門列的「A 的比較測試失敗」已修：比較面板改吃 B 10/21 快照，P/E、P/B、YoY、FCF 全部由工具重現且與 B 一致；DCF 照你 10/21 核定（9%／3%／持平 5 年）。
 > ② 新增覆核與修正面板（每輪退件項目、草稿 v1/v2 差異、核准按鈕回 403）、REPLAY 你的 11 筆 live 紀錄、估值 ±15% 與資料品質風險、S01–S06 初版截圖。
 > ③ 想請你看兩個 CR：A04 每版草稿 append 到 `checkpoint["drafts"]`；A05 review 事件帶 issues。
