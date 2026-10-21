@@ -1,6 +1,6 @@
 {
   "manifest_version": "cases-v1",
-  "frozen_at": "2026-10-20T20:44:37+08:00",
+  "frozen_at": "2026-10-22T01:02:14+08:00",
   "planned_sign_date": "2026-10-23",
   "generated_by": "scripts/build_freeze.py",
   "hash_rule": "文字檔 sha256_lf（CRLF→LF 後計算）；data/raw 原始檔為原始位元組 sha256",
@@ -12,10 +12,11 @@
     "tool_contract": "v1.1-w02",
     "snapshot_manifest": "v1.6-tw-market",
     "snapshot_cutoff": "2026-09-30",
-    "peer_snapshot": "v1.7-w04",
+    "peer_snapshot": "v1.8-w06",
     "macro_whitelist": [
       "CPIAUCSL",
-      "FEDFUNDS"
+      "FEDFUNDS",
+      "TAIEX"
     ]
   },
   "cases": {
@@ -48,14 +49,14 @@
         "2330"
       ]
     },
-    "file_sha256_lf": "45b7ad347f148c08b166064f7270397bdb2bd15e635d1558e29c11141a29ce02"
+    "file_sha256_lf": "fc33742a47c29d47e8884cd5afc892fe4d6e3d454fc14090a3e7bd24d5303fca"
   },
   "data_files": [
     {
       "path": "data/financial-snapshots.json",
       "present": true,
-      "sha256_lf": "b1136cf33b4670832b3c10d61be1657c2cc683f420ed88ec7143d8326db1849a",
-      "bytes": 51280
+      "sha256_lf": "f7a29e8b96c0e211c87a48c7083451f60ca7b4362a75e8571d17e0c74d1aa6d7",
+      "bytes": 51282
     },
     {
       "path": "data/source-manifest.json",
@@ -66,68 +67,68 @@
     {
       "path": "data/v12-peer-snapshot.json",
       "present": true,
-      "sha256_lf": "45b7ad347f148c08b166064f7270397bdb2bd15e635d1558e29c11141a29ce02",
-      "bytes": 8582
+      "sha256_lf": "fc33742a47c29d47e8884cd5afc892fe4d6e3d454fc14090a3e7bd24d5303fca",
+      "bytes": 9344
     },
     {
       "path": "data/v12-finance-fact-sheet.md",
       "present": true,
-      "sha256_lf": "2b62b63c4f12e219accffef73d5833acb99494d4b01c30047f98728d904e5e07",
-      "bytes": 8571
+      "sha256_lf": "59aac58a4680d7870756335fc0055fe92d90c9de0fa8cc059226f7778059b283",
+      "bytes": 12839
     },
     {
       "path": "data/v12-financial-fixtures.json",
       "present": true,
-      "sha256_lf": "7c4b8be2400f39a644f46b4b315a7b2064b7d6c0f1cf89774782104c54afa1d3",
-      "bytes": 37670
+      "sha256_lf": "ec7e3841a2d2508ebab583f7dd2ec0491a235cbc95c15e378c7941665a0285a3",
+      "bytes": 37669
     },
     {
       "path": "data/tool-contracts.json",
       "present": true,
-      "sha256_lf": "8cdad2465a8fb802e6d565e22ac7fbecf5e2ab318476a57e2a14e03df79c2fcf",
-      "bytes": 17006
+      "sha256_lf": "cb79cbbe7347d3dab8849369ffdfbfa3424e45104c1d53019f8b4cf756e50473",
+      "bytes": 16694
     },
     {
       "path": "data/tool-field-map.md",
       "present": true,
-      "sha256_lf": "e5c834b6a6cfc25edb6ebfbc48496d30a6153d11b2f076b3cb90142d566e22b3",
-      "bytes": 13280
+      "sha256_lf": "c7dd052018cadfda8588d7975fed6637ce571f8cf284480c838f5bc65722ca6a",
+      "bytes": 13522
     },
     {
       "path": "data/v12-field-map.csv",
       "present": true,
       "sha256_lf": "10d4a0a092da40084dcdf3fa73c9082f7e0d771a688b7b021861e00f0109526e",
-      "bytes": 4972
+      "bytes": 5005
     },
     {
       "path": "data-contract.md",
       "present": true,
-      "sha256_lf": "d5723d338d149d1af761e0b0315eb399aa45fa9880a5658a976ee180d56a7f65",
-      "bytes": 19651
+      "sha256_lf": "95ab10ecf00163b544ad011bd81e338bbba912d395644609699e0a3d9e3278cb",
+      "bytes": 19848
     },
     {
       "path": "source-register.csv",
       "present": true,
-      "sha256_lf": "92db39c7f761483cd876d0d3d95ddedc937514f85628bda44145b024fb6ff1bc",
-      "bytes": 5699
+      "sha256_lf": "4c9c41b016e6a5a3480578cc1319298c70aca750dec59c122d5d626c88017840",
+      "bytes": 5716
     },
     {
       "path": "graph-source-register.csv",
       "present": true,
       "sha256_lf": "06ca9182e7a7df6ed5250dfa4e783b9125664a5f0dd356a10ff2229e3303abba",
-      "bytes": 1477
+      "bytes": 1481
     },
     {
       "path": "graph-reviewed.csv",
       "present": true,
-      "sha256_lf": "77cba089a46db36eca1d31779e1c890c1811436ed4ecf51e9b1f7a94553e6ec8",
-      "bytes": 1615
+      "sha256_lf": "f748c03169aec4c54927956aee44815dbe1121276f6f4707d9f53ee7c30f47a0",
+      "bytes": 1810
     },
     {
       "path": "fixtures/tool-responses.json",
       "present": true,
-      "sha256_lf": "c4eb67eb3b751ee5c7b2c58bcb64fc750a29836a6d69a05b1fff906c46e1a744",
-      "bytes": 35535
+      "sha256_lf": "2b4c2a7e88d5c3b9ac2e62396da68818efa11c17e6a78877f0c51723690351f5",
+      "bytes": 35562
     }
   ],
   "raw_files": [
@@ -354,32 +355,32 @@
     {
       "path": "agents/tools.py",
       "present": true,
-      "sha256_lf": "f2a2f09b8140210c42cd67ceaafa612f1b135d516987050bb4dd41f0bd43f5c1",
-      "bytes": 17089
+      "sha256_lf": "bf3a3e807f4c8ff788ad32c781dd4803e6c9fd40adde230b0a8d91c20b10c202",
+      "bytes": 17423
     },
     {
       "path": "agents/tools_impl.py",
       "present": true,
-      "sha256_lf": "0ad0bba0fd74d3fd68ad5e20ec452fa26a9585a74f3c57ac05865d6676ff8187",
-      "bytes": 17286
+      "sha256_lf": "a368caf0e0abcc7ab34ef55bb2c7f21084b75d506e0e4b4e684cdc701b2e525d",
+      "bytes": 17288
     },
     {
       "path": "agents/calculator.py",
       "present": true,
-      "sha256_lf": "c24415e0769ebd206bc5f0d1d11e616de199bec55625da6d7c7e7dddd672c82f",
-      "bytes": 11802
+      "sha256_lf": "b3b52dc601ea1554a2f5fb3b3ffd456dce9830b671f6f44d7a2cce5cb87de667",
+      "bytes": 12034
     },
     {
       "path": "agents/register_tools.py",
       "present": true,
-      "sha256_lf": "052379a90b84ca1ac65e4a5130db818f247380cbe05e1adccc0c5d54a33bda60",
-      "bytes": 2634
+      "sha256_lf": "6468cf193c3d19c6f6a408cd11ee1c8a4793eafb52c85b549635633156a0bfd1",
+      "bytes": 2636
     },
     {
       "path": "agents/snapshot.py",
       "present": true,
-      "sha256_lf": "945a49b3edd6e83d1730bfe4b1cb479a6a906f2f0408c6f3c51b33c2c754ff17",
-      "bytes": 6590
+      "sha256_lf": "f9126e1701c34a2d79f87326755359b16360f7e68e8ea5e43ffa7e36fe434d28",
+      "bytes": 8207
     },
     {
       "path": "agents/contract.py",
@@ -396,22 +397,22 @@
     {
       "path": "agents/research_graph.py",
       "present": true,
-      "sha256_lf": "ab806c26cf9a38b434b6adf96f1c03313db3e285523f3b5f438109da2cbf4f39",
-      "bytes": 26996
+      "sha256_lf": "23db6c638d02dfc65d6431dca83ce75f63ae736ec59a03cc93af16ff368c715f",
+      "bytes": 29678
     },
     {
       "path": "valuation_agent/dcf_model.py",
       "present": true,
-      "sha256_lf": "04da6836e9a94d00cf8fbbe370f37fa787bc01637fdb26227136a9abf844592a",
-      "bytes": 4051
+      "sha256_lf": "5e12d02892cf7facda748414da40bf6aa5234bb253d69893ebaddd46f89ef0e9",
+      "bytes": 4121
     }
   ],
   "prompt_files": [
     {
       "path": "agents/prompts/researcher-v1.2.txt",
       "present": true,
-      "sha256_lf": "c2c3dd26dd5ddb411d71d2011646a0350086582dfca406516f670c8e549ea50e",
-      "bytes": 2214
+      "sha256_lf": "e94edbe8dedc20a64015dece3478323ddb234a2aa61b70e113f1e5845e385061",
+      "bytes": 2614
     },
     {
       "path": "agents/prompts/reviewer-v1.2.txt",
@@ -425,10 +426,14 @@
     "raw_files_present": 22,
     "null_hashes": 0
   },
+  "approved": [
+    "DCF：WACC 9%、g 3%、5 年持平 FCF（組長 2026-10-21）",
+    "淨負債口徑：應付短期票券年度路徑不計入、租賃負債不計入（組長 2026-10-21）"
+  ],
   "pending_approvals": [
-    "DCF 參數 WACC 10%、g 3%",
-    "股價可得時間 17:30 規則",
-    "台股市場總經指標",
-    "CR-W03／W05 snapshot.py 修正（保留集執行前）"
+    "股價可得時間：B 採 17:30，組長核定文字為 CASE-04 14:30，待統一",
+    "agents/tools.py 白名單加入 TAIEX",
+    "開發案例版本：組長核定文字為 v1.4，B 現行為 v1.5（CASE-08 依附表改 2317）",
+    "CR-W05 snapshot.py 讀取保留集（保留集執行前）"
   ]
 }
