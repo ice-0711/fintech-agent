@@ -81,3 +81,13 @@ def job_status(job_id: str):
     if job is None:
         return jsonify({"ok": False, "error": "not_found"}), 404
     return jsonify({"ok": True, "job": public_job(job), "events": store.list_events(job_id)})
+
+
+@bp.post("/jobs/<job_id>/cancel")
+@require_token
+def cancel_job(job_id: str):
+    try:
+        job = get_store().request_cancel(job_id)
+    except KeyError:
+        return jsonify({"ok": False, "error": "not_found"}), 404
+    return jsonify({"ok": True, "job": public_job(job)})

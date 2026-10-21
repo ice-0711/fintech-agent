@@ -33,7 +33,7 @@ from agents.store import JobStore  # noqa: E402
 from agents.worker import run_once  # noqa: E402
 from test_provider_mock import FakeClient, fc_response, text_response  # noqa: E402
 
-CASES = ["CASE-01", "CASE-04", "CASE-13"]
+CASES = ["CASE-01", "CASE-04", "CASE-08", "CASE-11", "CASE-15", "CASE-18"]  # dev split only (v1.4)
 OUT = ROOT / "agent" / "researcher-v12-traces.json"
 
 
@@ -108,9 +108,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--live", action="store_true")
     ap.add_argument("--cases", default=",".join(CASES))
+    ap.add_argument("--out", help="output file name under agent/ (default researcher-v12-traces.json)")
+    ap.add_argument("--db", help="reuse this tmp/ sqlite file so the daily job cap J spans several runs")
     ap.add_argument("--model", help="compare another model listed in quota-baseline.json gemini_alternatives_checked")
     args = ap.parse_args()
     cases = load_cases()
+    unknown = [c for c in args.cases.split(",") if c not in cases]
+    if unknown:
+        sys.exit(f"{unknown} 不在開發集 evaluation/dev-cases.json（保留集不得用於開發）")
     chosen = [cases[c] for c in args.cases.split(",")]
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=ROOT).stdout.strip()
     out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "commit": commit,
@@ -139,7 +144,7 @@ def main() -> None:
         if model_id != quota.model_id:
             sys.exit(f"GEMINI_MODEL={model_id} 與 quota-baseline.json 的 {quota.model_id} 不一致，停止。")
         stamp = datetime.now().strftime("%Y%m%d%H%M")
-        store = JobStore(ROOT / "tmp" / f"dev_runs-{stamp}.sqlite3")  # fresh DB: no older paused job is resumed here
+        store = JobStore(ROOT / "tmp" / (args.db or f"dev_runs-{stamp}.sqlite3"))  # fresh DB unless --db
         client = make_client()
         for i, c in enumerate(chosen):
             if i:
@@ -154,7 +159,8 @@ def main() -> None:
         if c["case_id"] in live:
             entry["live"] = live[c["case_id"]]
         out["cases"].append(entry)
-    out_path = OUT if not args.model else OUT.with_name(f"researcher-v12-traces-{args.model}.json")
+    out_path = OUT.with_name(args.out) if args.out else (
+        OUT if not args.model else OUT.with_name(f"researcher-v12-traces-{args.model}.json"))
     OUT.parent.mkdir(exist_ok=True)
     out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("wrote", out_path.relative_to(ROOT))

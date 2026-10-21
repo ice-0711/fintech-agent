@@ -192,7 +192,10 @@ class JobStore:
         with self._lock:
             row = self._check_lease_locked(job_id, worker_id, token)
             job = json.loads(row["data"])
+            cancel = job.get("cancel_requested")
             job.update(changes)
+            if cancel:
+                job["cancel_requested"] = True
             job["checkpoint_version"] = job.get("checkpoint_version", 1) + 1
             job["updated_at"] = utc_now_iso()
             release = job["status"] in TERMINAL_STATUSES or job["status"] == "paused_quota"
@@ -204,6 +207,35 @@ class JobStore:
                 (job["status"], json.dumps(job, ensure_ascii=False), job["updated_at"], release, release, job_id),
             )
             return job
+
+    def request_cancel(self, job_id: str) -> dict[str, Any]:
+        """queued/paused jobs are cancelled at once; a running job gets cancel_requested and the
+        graph stops before its next step (budget already used stays recorded). Terminal jobs are unchanged."""
+
+        with self._lock:
+            row = self._conn.execute("select data from research_jobs where job_id = ?", (job_id,)).fetchone()
+            if row is None:
+                raise KeyError(job_id)
+            job = json.loads(row["data"])
+            if job["status"] in TERMINAL_STATUSES:
+                return job
+            job["cancel_requested"] = True
+            if job["status"] in ("queued", "paused_quota"):
+                job.update({"status": "cancelled", "stage": "finished", "stop_reason": "cancel_requested"})
+                job.pop("resume_after", None)
+            job["updated_at"] = utc_now_iso()
+            self._conn.execute(
+                "update research_jobs set status = ?, data = ?, updated_at = ? where job_id = ?",
+                (job["status"], json.dumps(job, ensure_ascii=False), job["updated_at"], job_id),
+            )
+            self._append_event_locked(job_id, "system", "cancel_requested", None, {"status": job["status"]})
+            return job
+
+    def cancel_requested(self, job_id: str) -> bool:
+        row = self._conn.execute(
+            "select json_extract(data, '$.cancel_requested') from research_jobs where job_id = ?", (job_id,)
+        ).fetchone()
+        return bool(row and row[0])
 
     def requeue(self, job_id: str) -> dict[str, Any]:
         """Manually put a paused_quota job back in the queue (e.g. after quota is verified)."""

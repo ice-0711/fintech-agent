@@ -260,7 +260,12 @@ class ResearchRun:
         return rem["model_calls"] > 1  # reviewer: keep one call for the decision
 
     # -- nodes ---------------------------------------------------------------
+    def cancelled(self) -> bool:
+        return self.lease.store.cancel_requested(self.job["job_id"])
+
     def researcher_node(self, state: GraphState) -> GraphState:
+        if self.cancelled():
+            return self.finish("cancelled", "cancel_requested")
         job = self.job
         if not self.r_contents:
             trusted = {"job_id": job["job_id"], "ticker": job["ticker"], "cutoff_at": job["cutoff_at"],
@@ -326,6 +331,8 @@ class ResearchRun:
         return {"next": "reviewer"}
 
     def reviewer_node(self, state: GraphState) -> GraphState:
+        if self.cancelled():
+            return self.finish("cancelled", "cancel_requested")
         job, draft = self.job, self.draft or {}
         claim_ids = [c["claim_id"] for c in draft.get("claims", [])]
         if not self.v_contents:

@@ -297,3 +297,53 @@ def test_simulated_tool_timeout_counts_active_time_and_job_continues(store):
     tool = [e["detail"] for e in events if e["event_type"] == "tool_call"][0]
     assert tool["status"] == "tool_error" and "逾時" in tool["reason"]
     assert final["active_seconds"] >= 15 and final["status"] == "insufficient_evidence"
+
+
+# ----- W06-L: cancel, no re-run of finished jobs ---------------------------------
+def test_cancel_queued_job_is_never_run(store):
+    job, _ = store.create_job(validate_job_request(job_request(**CASE01)), MODEL)
+    assert store.request_cancel(job["job_id"])["status"] == "cancelled"
+    assert run_once(store, "w1", make_research_handler(FakeClient([]), MODEL, QUOTA)) is None
+
+
+def test_cancel_running_job_stops_before_next_step_and_keeps_budget(store):
+    job, _ = store.create_job(validate_job_request(job_request(**CASE01)), MODEL)
+    client = FakeClient([fc_response("read_evidence", {"evidence_version_id": "ev-dev-01-official"}),
+                         text_response(draft(GOOD_CLAIMS))])
+    orig = client.generate_content
+
+    def cancel_after_first(**kw):
+        resp = orig(**kw)
+        store.request_cancel(job["job_id"])  # user cancels while the first call is in flight
+        return resp
+
+    client.generate_content = cancel_after_first
+    final = run_once(store, "w1", make_research_handler(client, MODEL, QUOTA))
+    assert final["status"] == "cancelled" and final["stop_reason"] == "cancel_requested"
+    assert final["calls_used"] == 1 and final["tool_calls_used"] == 1 and len(client.calls) == 1
+
+
+def test_finished_job_is_not_rerun_or_republished(store):
+    final, _, _ = run_case(store, CASE01, [
+        fc_response("read_evidence", {"evidence_version_id": "ev-dev-01-official"}),
+        text_response(draft(GOOD_CLAIMS)), text_response(PASS)])
+    assert final["status"] == "succeeded" and final["publication_status"] == "draft"
+    again, created = store.create_job(validate_job_request(job_request(
+        idempotency_key=CASE01["source_snapshot_id"] + "dual", **CASE01)), MODEL)
+    assert not created and again["status"] == "succeeded"
+    assert run_once(store, "w2", make_research_handler(FakeClient([]), MODEL, QUOTA)) is None
+    assert store.request_cancel(final["job_id"])["status"] == "succeeded"  # terminal stays terminal
+
+
+def test_cancel_api_requires_token(tmp_path, monkeypatch):
+    from flask import Flask
+    from agents.api import bp
+    monkeypatch.setenv("RESEARCH_DB_PATH", str(tmp_path / "api.sqlite3"))
+    app = Flask(__name__)
+    app.config["RESEARCH_API_TOKEN"] = "t"
+    app.register_blueprint(bp)
+    c = app.test_client()
+    job_id = c.post("/api/research/jobs", json=job_request(), headers={"Authorization": "Bearer t"}).get_json()["job"]["job_id"]
+    assert c.post(f"/api/research/jobs/{job_id}/cancel").status_code == 401
+    r = c.post(f"/api/research/jobs/{job_id}/cancel", headers={"Authorization": "Bearer t"})
+    assert r.status_code == 200 and r.get_json()["job"]["status"] == "cancelled"
