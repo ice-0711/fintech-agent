@@ -26,11 +26,19 @@
   };
   const STAGE_TEXT = { research: "研究", tools: "工具", review: "覆核", revision: "修正", finished: "結束" };
   const ROLE_TEXT = { researcher: "Researcher", reviewer: "Reviewer", system: "系統" };
-  const RISK_TEXT = { high: ["資料品質風險：高", "b-bad"], medium: ["資料品質風險：中", "b-warn"], low: ["資料品質風險：低", "b-ok"] };
-  const VALUATION_TEXT = {
-    below_model: "低於模型估值", above_model: "高於模型估值", near_model: "接近模型估值",
-    undeterminable: "無法判定", fixture_pending: "待 W05 規則（FIXTURE）"
-  };
+  const RISK_CLS = { high: "b-bad", medium: "b-warn", low: "b-ok", unassessed: "b-neutral" };
+  const VAL_CLS = { below_model: "b-run", above_model: "b-run", near_model: "b-neutral", undeterminable: "b-neutral" };
+  const DECISION = { pass: ["通過", "b-ok"], revise: ["退回修正", "b-warn"], insufficient: ["資料不足", "b-bad"] };
+  const SEVERITY = { critical: ["critical", "b-bad"], minor: ["minor", "b-warn"] };
+  const ISSUE_SOURCE = { rules: "確定性規則", model: "Reviewer 模型", both: "模型＋規則", recorded: "紀錄檔", unknown: "—" };
+  const RISK_NOTE = "資料品質風險只代表既定資料檢查的結果；「低」不代表股價風險低。";
+
+  function pct(v) { return (v * 100).toFixed(1) + "%"; }
+  function riskBadge(dq) { return dq ? badge(dq.label, RISK_CLS[dq.level] || "b-neutral") : badge("資料品質風險：未評估", "b-neutral"); }
+  function valuationText(v) {
+    if (!v) return "未提供";
+    return v.gap !== null && v.gap !== undefined ? `${v.label}（差距 ${pct(v.gap)}）` : `${v.label}${v.reason ? `：${v.reason}` : ""}`;
+  }
   const PDF_TEXT = { not_available: "線上 PDF 尚未提供（W07）", published: "可下載", pdf_failed: "PDF 產製失敗" };
   const OUTCOME_TEXT = { succeeded: null, insufficient_evidence: ["研究結果：資料不足", "b-warn"] };
 
@@ -124,8 +132,8 @@
       return;
     }
     box.innerHTML = rows.map(r => {
-      const risk = RISK_TEXT[r.data_quality_risk] || ["資料品質風險：未提供", "b-neutral"];
       const outcome = OUTCOME_TEXT[r.research_outcome];
+      const dq = r.data_quality;
       return `<article class="report-card" data-report="${esc(r.report_version_id)}">
         <header>
           <b>${esc(r.ticker)} ${esc(r.company)}</b>
@@ -137,15 +145,15 @@
           <span>資料截止 <b>${fmtTime(r.cutoff_at)}</b></span>
           <span>財報期 <b>${esc(r.financial_period || "NA（無可用財報）")}</b></span>
           <span>來源更新 <b>${fmtTime(r.data_updated_at)}</b></span>
-          <span>估值狀態 <b>${esc(VALUATION_TEXT[r.valuation_status] || "未提供")}</b></span>
+          <span>估值狀態 <b>${esc(valuationText(r.valuation))}</b></span>
           <span>PDF <b>${esc(PDF_TEXT[r.pdf_status] || "未提供")}</b></span>
         </div>
         <div class="tags">
-          ${badge(risk[0], risk[1])}
+          ${riskBadge(dq)}
           ${outcome ? badge(outcome[0], outcome[1]) : ""}
           ${r.snapshot_stale ? badge("快照過期", "b-warn") : ""}
         </div>
-        ${r.data_quality_reason ? `<div class="hint" style="margin:0">${esc(r.data_quality_reason)}</div>` : ""}
+        ${dq && dq.level !== "low" && dq.reasons && dq.reasons.length ? `<div class="hint" style="margin:0">${esc(dq.reasons.join("；"))}</div>` : ""}
         <div class="actions"><button type="button" class="ghost" data-open-report="${esc(r.report_version_id)}">開啟報告</button></div>
       </article>`;
     }).join("");
@@ -204,11 +212,17 @@
   /* ---------------- job status + trace (from the job DB) ---------------- */
   let pollTimer = null;
   let currentJobId = null;
+  let pollFailures = 0;
+  let lastJob = null;
 
   function openJob(jobId) {
     currentJobId = jobId;
+    currentReplayId = null;
+    pollFailures = 0;
+    lastJob = null;
     const url = new URL(location.href);
     url.searchParams.set("job", jobId);
+    url.searchParams.delete("replay");
     history.replaceState(null, "", url);
     $("#jobPanel").innerHTML = `<div class="empty">讀取 job 狀態中…</div>`;
     poll();
@@ -221,13 +235,26 @@
     try {
       const body = await getJson(`/api/ui/jobs/${encodeURIComponent(jobId)}`);
       if (jobId !== currentJobId) return;
-      renderJob(body.job);
+      if (pollFailures) setStatus("已重新連線，狀態從資料庫重新讀取");
+      pollFailures = 0;
+      lastJob = body.job;
+      renderJob(body.job, body.events);
       renderTrace(body.events);
+      renderReview(body.job.review_view, { live: true });
       if (!TERMINAL.includes(body.job.status)) pollTimer = setTimeout(poll, POLL_MS);
       else setStatus(`job ${STATUS_TEXT[body.job.status][0]}`);
     } catch (err) {
-      renderJobError(err);
-      if (err.status >= 500 || !err.status) pollTimer = setTimeout(poll, POLL_MS * 3);
+      if (err.status >= 500 || !err.status) {
+        // Transient: keep the last good state on screen and retry with backoff.
+        pollFailures += 1;
+        const wait = Math.min(POLL_MS * 2 ** pollFailures, 30000);
+        if (lastJob) renderJob(lastJob, null, `連線中斷（${esc(err.message)}），${Math.round(wait / 1000)} 秒後重試，第 ${pollFailures} 次。畫面保留最後一次讀到的狀態；job 仍在伺服器，重新整理也不會遺失。`);
+        else renderJobError(err);
+        setStatus("連線中斷，稍後自動重試");
+        pollTimer = setTimeout(poll, wait);
+      } else {
+        renderJobError(err);
+      }
     }
   }
 
@@ -242,7 +269,7 @@
     if (radio && !radio.checked) { radio.checked = true; renderFavorites(); }
   }
 
-  function renderJob(job) {
+  function renderJob(job, events, connNote) {
     syncEntry(job);
     const [text, cls] = STATUS_TEXT[job.status] || [job.status, "b-neutral"];
     let note = "";
@@ -256,9 +283,12 @@
       succeeded: "研究流程完成，但尚未經人工核准，所以不會出現在已發布清單。"
     };
     if (NOTES[job.status]) note = `<p class="hint">${esc(NOTES[job.status])}</p>`;
+    const recovered = (events || []).some(e => e.event_type === "lease_recovered");
     $("#jobPanel").innerHTML = `
-      <div class="actions">${badge(text, cls)}${badge(`階段：${STAGE_TEXT[job.stage] || job.stage}`, "b-neutral")}${job.mock ? badge("MOCK", "b-fixture") : ""}</div>
+      ${connNote ? `<div class="conn" role="status">${connNote}</div>` : ""}
+      <div class="actions">${badge(text, cls)}${badge(`階段：${STAGE_TEXT[job.stage] || job.stage}`, "b-neutral")}${job.mock ? badge("MOCK", "b-fixture") : ""}${job.replay ? badge("REPLAY", "b-fixture") : ""}</div>
       ${note}
+      ${recovered ? `<p class="hint">worker 中途中斷，已由檢查點接手繼續；已用的請求與工具次數延續，沒有歸零。</p>` : ""}
       <dl class="kv">
         <dt>標的</dt><dd>${esc(job.ticker)}・${esc(job.mode)}</dd>
         <dt>資料截止</dt><dd>${fmtTime(job.cutoff_at)}</dd>
@@ -266,6 +296,7 @@
         <dt>模型</dt><dd>${esc(job.model_id || "未設定（MOCK 不呼叫模型）")}・prompt ${esc(job.prompt_version)}</dd>
         <dt>停止原因</dt><dd>${esc(job.stop_reason || "—")}</dd>
         <dt>job_id</dt><dd class="mono">${esc(job.job_id)}</dd>
+        ${job.replay ? `<dt>紀錄來源</dt><dd class="mono">${esc(job.replay.file)}・commit ${esc(job.replay.commit)}・${fmtTime(job.replay.generated_at)}</dd><dt>案例</dt><dd>${esc(job.replay.case_id)}・${esc(job.replay.category)}・${esc(job.replay.title)}</dd>` : ""}
       </dl>
       <div class="meters">
         ${meter("模型請求", job.calls_used, 8)}
@@ -303,7 +334,7 @@
       return `<li class="r-${esc(e.role || "system")}">
         <span class="seq">#${esc(e.event_seq)}</span>
         <div>
-          <div class="line1">${badge(ROLE_TEXT[e.role] || e.role || "系統", "b-neutral")}<b>${esc(e.event_type)}</b>${e.tool_name ? badge(e.tool_name, "b-run") : ""}${ts ? badge(ts[0], ts[1]) : ""}${d.mock ? badge("MOCK", "b-fixture") : ""}<span class="hint" style="margin:0">${fmtTime(e.created_at, true)}</span></div>
+          <div class="line1">${badge(ROLE_TEXT[e.role] || e.role || "系統", "b-neutral")}<b>${esc(e.event_type)}</b>${e.tool_name ? badge(e.tool_name, "b-run") : ""}${ts ? badge(ts[0], ts[1]) : ""}${d.mock ? badge("MOCK", "b-fixture") : ""}${e.created_at ? `<span class="hint" style="margin:0">${fmtTime(e.created_at, true)}</span>` : ""}</div>
           ${d.summary ? `<div class="line2">${esc(d.summary)}</div>` : ""}
           ${d.decision_summary ? `<div class="line2">決策摘要：${esc(d.decision_summary)}</div>` : ""}
           ${args}${refs}
@@ -324,6 +355,119 @@
       setStatus(`取消失敗：${err.message}`);
     }
     poll();
+  }
+
+  /* ---------------- W05: review rounds, draft versions, approval ---------------- */
+  const CHANGE = { added: ["新增", "b-ok"], removed: ["刪除", "b-bad"], changed: ["修改", "b-warn"], unchanged: ["未變", "b-neutral"] };
+  const FIELD_TEXT = { kind: "種類", text: "內容", evidence_refs: "來源", limitations: "限制" };
+  let reviewState = { view: null, version: null };
+
+  function renderReview(view, opts = {}) {
+    const panel = $("#reviewPanel");
+    if (!view) { panel.innerHTML = `<div class="empty">選擇 job 或回放後，這裡顯示 Reviewer 每一輪的決定、退件項目與草稿版本。</div>`; return; }
+    reviewState.view = view;
+    if (!reviewState.version || reviewState.version > view.drafts.length) reviewState.version = view.drafts.length || null;
+    const rounds = view.rounds.length ? view.rounds.map(r => {
+      const fd = DECISION[r.final_decision] || [r.final_decision || "—", "b-neutral"];
+      return `<div class="round">
+        <div class="actions"><b>第 ${esc(r.round)} 輪</b>${badge(`最終：${fd[0]}`, fd[1])}
+          <span class="hint" style="margin:0">模型 ${esc(r.model_decision || "—")}・規則 ${esc(r.rules_decision || "—")}（較嚴者為準）</span></div>
+        ${r.decision_summary ? `<p class="hint">${esc(r.decision_summary)}</p>` : ""}
+        ${r.issues.length ? `<table class="issues"><thead><tr><th>主張</th><th>嚴重度</th><th>問題</th><th>要補的證據</th><th>提出者</th></tr></thead><tbody>${r.issues.map(i => {
+          const sv = SEVERITY[i.severity] || [i.severity, "b-neutral"];
+          return `<tr class="sev-${esc(i.severity)}"><td><button type="button" class="claim-link" data-claim="${esc(i.claim_id)}">${esc(i.claim_id)}</button></td><td>${badge(sv[0], sv[1])}</td><td>${esc(i.reason)}</td><td>${esc(i.required_evidence || "—")}</td><td class="hint">${esc(ISSUE_SOURCE[i.source] || i.source)}</td></tr>`;
+        }).join("")}</tbody></table>` : `<p class="hint">本輪沒有問題項目。</p>`}
+      </div>`;
+    }).join("") : `<div class="empty">${esc(view.empty_reason || "沒有覆核紀錄。")}</div>`;
+
+    const drafts = view.drafts;
+    const tabs = drafts.length > 1 ? `<div class="vtabs" role="tablist" aria-label="草稿版本">${drafts.map(d =>
+      `<button type="button" role="tab" class="vtab" data-version="${d.version}" aria-selected="${d.version === reviewState.version}">v${d.version}</button>`).join("")}</div>` : "";
+    const d = drafts.find(x => x.version === reviewState.version);
+    const diffBy = {};
+    (d && d.diff || []).forEach(x => { diffBy[x.claim_id] = x; });
+    // Round n reviews draft version n, so the issues of round n belong to version n.
+    const roundFor = d ? view.rounds.find(r => r.round === d.version) : null;
+    const flagged = new Set(roundFor ? roundFor.issues.filter(i => i.severity === "critical").map(i => i.claim_id) : []);
+    const draftHtml = d ? `
+      <div class="actions"><b>草稿 v${d.version}</b>${badge(d.status === "insufficient" ? "insufficient" : "draft", d.status === "insufficient" ? "b-warn" : "b-neutral")}
+        ${d.version > 1 ? `<span class="hint" style="margin:0">與 v${d.version - 1} 比較</span>` : ""}</div>
+      <div class="claims">${d.claims.map(c => {
+        const k = KIND[c.kind] || [c.kind, "b-neutral"];
+        const df = diffBy[c.claim_id];
+        const ch = df ? CHANGE[df.change] : null;
+        const before = df && df.change === "changed" && df.before && df.before.text ? `<p class="before"><span class="hint">修改前：</span>${esc(df.before.text)}</p>` : "";
+        return `<div class="claim" id="draft-${esc(c.claim_id)}">
+          <div class="head"><span class="mono">${esc(c.claim_id)}</span>${badge(k[0], k[1])}${ch ? badge(ch[0], ch[1]) : ""}${df && df.fields.length ? `<span class="hint" style="margin:0">改了：${df.fields.map(f => FIELD_TEXT[f] || f).join("、")}</span>` : ""}${flagged.has(c.claim_id) ? badge(`第 ${roundFor.round} 輪退件`, "b-bad") : ""}</div>
+          ${before}<p>${esc(c.text)}</p>
+          <div class="refs">來源：${(c.evidence_refs || []).length ? c.evidence_refs.map(r => `<span class="mono">${esc(r)}</span>`).join(" ") : "無"}</div>
+        </div>`;
+      }).join("")}
+      ${(d.diff || []).filter(x => x.change === "removed").map(x => `<div class="claim removed"><div class="head"><span class="mono">${esc(x.claim_id)}</span>${badge("刪除", "b-bad")}</div><p>${esc(x.before.text)}</p></div>`).join("")}
+      </div>
+      ${d.unknowns && d.unknowns.length ? `<p class="hint">未知：${esc(d.unknowns.join("；"))}</p>` : ""}` : `<div class="empty">還沒有草稿。</div>`;
+
+    const canApprove = view.rounds.length && view.rounds[view.rounds.length - 1].final_decision === "pass";
+    panel.innerHTML = `
+      <div class="actions">${badge(`補查 ${view.supplement_rounds || 0}/2 輪`, "b-neutral")}${badge(`發布狀態：${view.publication_status === "published" ? "已發布" : "未發布（draft）"}`, "b-neutral")}</div>
+      <div class="sub">覆核紀錄</div>${rounds}
+      <div class="sub">草稿版本（舊版保留，不覆蓋）</div>${tabs}${draftHtml}
+      ${view.drafts_complete ? "" : `<p class="footnote">這份紀錄只保存最後一版草稿，較早版本無法比較（已向組長提出 CR-A04：每一版草稿都存進 checkpoint）。</p>`}
+      <div class="approve">
+        <button type="button" id="approveBtn" ${canApprove ? "" : "disabled"}>核准發布</button>
+        <span class="hint" id="approveNote">${canApprove ? "覆核通過不等於發布；發布需要登入的核准人。" : "覆核尚未通過，不能核准。"}</span>
+      </div>`;
+    const btn = $("#approveBtn");
+    if (btn) btn.addEventListener("click", approve);
+    panel.querySelectorAll(".vtab").forEach(t => t.addEventListener("click", () => { reviewState.version = Number(t.dataset.version); renderReview(reviewState.view); }));
+  }
+
+  async function approve() {
+    const note = $("#approveNote");
+    try {
+      await getJson(`/api/ui/jobs/${encodeURIComponent(currentJobId || currentReplayId || "none")}/approve`, { method: "POST" });
+    } catch (err) {
+      note.textContent = err.status === 403 ? `沒有權限：${err.message}` : `核准失敗：${err.message}`;
+      note.className = "hint error";
+    }
+  }
+
+  /* ---------------- W05: REPLAY of recorded live runs ---------------- */
+  let currentReplayId = null;
+
+  async function loadReplayList() {
+    const sel = $("#replaySelect");
+    try {
+      const body = await getJson("/api/ui/replays");
+      sel.innerHTML = `<option value="">選擇一次真實執行紀錄…</option>` + body.replays.map(r =>
+        `<option value="${esc(r.replay_id)}">${esc(r.case_id)}・${esc(r.ticker)}・${esc(r.category)}・${esc(r.stop_reason)}${r.review_rounds ? `・覆核 ${r.review_rounds} 輪` : ""}（${esc((r.generated_at || "").slice(0, 10))}）</option>`).join("");
+    } catch (err) {
+      sel.innerHTML = `<option value="">紀錄讀取失敗：${esc(err.message)}</option>`;
+    }
+  }
+
+  async function openReplay(id) {
+    clearTimeout(pollTimer);
+    currentJobId = null;
+    currentReplayId = id;
+    reviewState = { view: null, version: null };
+    const url = new URL(location.href);
+    url.searchParams.set("replay", id);
+    url.searchParams.delete("job");
+    history.replaceState(null, "", url);
+    $("#jobPanel").innerHTML = `<div class="empty">讀取回放中…</div>`;
+    try {
+      const r = await getJson(`/api/ui/replays/${encodeURIComponent(id)}`);
+      if (id !== currentReplayId) return;
+      const job = { ...r.job, cutoff_at: null, source_snapshot_id: r.case.case_id, replay: { ...r.source, ...r.case } };
+      renderJob(job, r.events);
+      $("#jobPanel").insertAdjacentHTML("afterbegin", `<div class="conn replay">REPLAY：${esc(fmtTime(r.source.generated_at))} 的真實執行紀錄（Gemini ${esc(r.source.model_id)} 自己選每一步），不是現場運算。${esc(r.limits_of_record)}</div>`);
+      renderTrace(r.events);
+      renderReview(r.review_view, { replay: true });
+      setStatus(`回放 ${r.case.case_id}`);
+    } catch (err) {
+      $("#jobPanel").innerHTML = `<div class="empty error-box">${err.status === 404 ? "找不到這筆回放紀錄。" : esc(err.message)}</div>`;
+    }
   }
 
   /* ---------------- W04: report detail ---------------- */
@@ -353,15 +497,16 @@
   }
 
   function renderReport(r) {
-    const risk = RISK_TEXT[r.data_quality_risk] || ["資料品質風險：未提供", "b-neutral"];
     const outcome = OUTCOME_TEXT[r.research_outcome];
+    const v = r.valuation || {};
+    const dq = r.data_quality || {};
     const counts = { fact: 0, inference: 0, unknown: 0 };
     r.claims.forEach(c => { counts[c.kind] = (counts[c.kind] || 0) + 1; });
     const list = items => items && items.length ? `<ul class="plain">${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : `<p class="hint" style="margin:0">無</p>`;
     $("#reportPanel").innerHTML = `
       <div class="actions">
         <b style="font-size:16px">${esc(r.ticker)} ${esc(r.company)}</b>
-        ${r.synthetic_fixture ? badge("FIXTURE", "b-fixture") : ""}${badge("已發布", "b-ok")}${badge(risk[0], risk[1])}
+        ${r.synthetic_fixture ? badge("FIXTURE", "b-fixture") : ""}${badge("已發布", "b-ok")}${riskBadge(dq)}
         ${outcome ? badge(outcome[0], outcome[1]) : ""}${r.snapshot_stale ? badge("快照過期", "b-warn") : ""}
       </div>
       <p class="hint">${esc(r.question)}</p>
@@ -374,6 +519,14 @@
         <dt>模型／prompt</dt><dd>${esc(r.model_id || "無（FIXTURE，非 Agent 產出）")}・${esc(r.prompt_version)}</dd>
         <dt>PDF</dt><dd>${esc(PDF_TEXT[r.pdf_status] || "未提供")}</dd>
       </dl>
+      <div class="status-pair">
+        <div><div class="sub" style="margin-top:0">估值狀態</div>${badge(v.label || "無法判定", VAL_CLS[v.status] || "b-neutral")}
+          <p class="hint">${v.gap !== null && v.gap !== undefined ? `DCF 每股 ${esc(v.dcf_per_share)} 元，與同日收盤價差距 ${pct(v.gap)}。` : esc(v.reason || "")}</p>
+          <p class="footnote">±15% 是本專題的顯示門檻，不是經驗證的投資規則；DCF 取決於 WACC、g 與 FCF 假設。</p></div>
+        <div><div class="sub" style="margin-top:0">資料品質</div>${riskBadge(dq)}
+          <p class="hint">${esc((dq.reasons || []).join("；"))}</p>
+          <p class="footnote">${RISK_NOTE}</p></div>
+      </div>
       <div class="sub">主張（事實 ${counts.fact}・推論 ${counts.inference}・未知 ${counts.unknown}）</div>
       <div class="claims">${r.claims.map(c => {
         const k = KIND[c.kind] || [c.kind, "b-neutral"];
@@ -398,6 +551,9 @@
     ["fcf_ttm", "FCF (TTM)", v => v.toLocaleString("zh-TW", { maximumFractionDigits: 1 }) + " 億元"],
     ["dcf_gap", "DCF 差距", v => (v * 100).toFixed(1) + "%"]
   ];
+  function statLine(name, st, fmt, snap) {
+    return `<b>${name}：</b>${st.value !== null ? `${esc(fmt(st.value))}（n=${esc(st.n)}）` : `NA・${esc(st.na_reason)}`}${snap != null ? `・B 快照 ${esc(fmt(snap))}` : ""}`;
+  }
   const ROLE = { subject: ["主體", "b-run"], peer: ["同業", "b-neutral"], industry_reference: ["產業參照・不入平均", "b-warn"] };
 
   function cell(m, fmt) {
@@ -410,6 +566,17 @@
     return `<span class="cell-val">NA</span><div class="cell-na">${esc(m.na_reason)}</div>${snap}`;
   }
 
+  function sensitivity(d) {
+    const s = d.rows.find(r => r.role === "subject");
+    const m = s && s.valuation && s.valuation.sensitivity;
+    if (!m) return "";
+    const ws = Object.keys(m), gs = Object.keys(m[ws[0]]);
+    return `<details class="sens"><summary class="hint" style="cursor:pointer">2454 DCF 敏感度（每股元；WACC × g）</summary>
+      <div class="sens-wrap"><table class="cmp-table sens-table"><thead><tr><th>WACC＼g</th>${gs.map(g => `<th>${esc(g)}</th>`).join("")}</tr></thead>
+      <tbody>${ws.map(w => `<tr><th>${esc(w)}</th>${gs.map(g => `<td>${m[w][g] === null ? "NA" : esc(m[w][g])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <p class="footnote">同日收盤價 ${esc(s.price && s.price.value)} 元。基準情境 FCF 不成長，所以模型值偏保守；這張表用來看假設變動的影響，不是目標價。</p></details>`;
+  }
+
   async function loadComparison() {
     const panel = $("#comparisonPanel");
     try {
@@ -417,23 +584,26 @@
       const ps = d.peer_stats;
       panel.innerHTML = `
         <div class="cmp-head">
-          ${d.synthetic_fixture ? badge("FIXTURE／待 B、D 確認", "b-fixture") : ""}
+          ${d.synthetic_fixture ? badge("FIXTURE／待 B、D 確認", "b-fixture") : badge("B 真實快照・待 D 覆核", "b-run")}
           <span>報價基準日 ${esc(d.price_as_of)}</span>・<span>資料截止 ${fmtTime(d.cutoff_at)}</span>・<span class="mono">${esc(d.method_version)}</span>
           ${d.periods_consistent ? "" : badge("財報期不一致", "b-warn")}
         </div>
         <table class="cmp-table">
-          <thead><tr><th>公司（角色）</th><th>財報期／收盤</th>${METRICS.map(m => `<th>${m[1]}</th>`).join("")}<th>來源</th></tr></thead>
+          <thead><tr><th>公司（角色）</th><th>財報期／收盤</th>${METRICS.map(m => `<th>${m[1]}</th>`).join("")}<th>估值狀態／資料品質</th><th>來源</th></tr></thead>
           <tbody>${d.rows.map(r => {
             const role = ROLE[r.role] || [r.role, "b-neutral"];
             return `<tr class="${r.role === "industry_reference" ? "ref-row" : ""}">
               <td class="name-cell"><b>${esc(r.ticker)} ${esc(r.name)}</b><br>${badge(role[0], role[1])}</td>
               <td><span class="lbl-m">財報期／收盤</span><span>${esc(r.financial_period || "NA")}（${esc(r.quarters_available)} 季可得）<br>${r.price ? `${esc(r.price.value)} 元・${esc(r.price.trade_date)}` : `<span class="cell-na">無同日收盤價</span>`}</span></td>
               ${METRICS.map(m => `<td><span class="lbl-m">${m[1]}</span><span>${cell(r.metrics[m[0]], m[2])}</span></td>`).join("")}
+              <td><span class="lbl-m">估值／資料</span><span>${badge(r.valuation.label, VAL_CLS[r.valuation.status] || "b-neutral")}<br>${riskBadge(r.data_quality)}</span></td>
               <td><span class="lbl-m">來源</span><span>${refButtons(r.evidence) || "無"}</span></td>
             </tr>`;
           }).join("")}</tbody>
         </table>
-        <p class="hint"><b>同業平均 P/E：</b>${ps.pe_ttm !== null ? `${esc(ps.pe_ttm)} 倍（n=${esc(ps.n)}）` : `NA・${esc(ps.na_reason)}`}${ps.snapshot_value != null ? `（B 快照值 ${esc(ps.snapshot_value)}，未採用）` : ""}<br>${esc(ps.basis)}；排除：${esc(ps.excluded.join("、"))}</p>
+        <p class="hint">同業平均　${statLine("P/E", ps.pe_ttm, v => v.toFixed(2) + " 倍", ps.snapshot_values.pe_ttm)}　${statLine("P/B", ps.pb, v => v.toFixed(2) + " 倍", ps.snapshot_values.pb)}　${statLine("單季營收 YoY", ps.revenue_yoy_quarter, pct, ps.snapshot_values.revenue_yoy_quarter)}<br>${esc(ps.basis)}；排除：${esc(ps.excluded.join("、"))}</p>
+        ${sensitivity(d)}
+        <p class="footnote">${esc(d.data_status)}。DCF 假設：WACC ${pct(d.dcf_assumptions.wacc)}、g ${pct(d.dcf_assumptions.terminal_growth)}、${esc(d.dcf_assumptions.fcf_basis)}（${esc(d.dcf_assumptions.source)}）。${esc(d.valuation_footnote)}</p>
         ${d.checks.length ? `<details><summary class="hint" style="cursor:pointer">待 B、D 處理的 ${d.checks.length} 項資料問題</summary><ul class="checks">${d.checks.map(c => `<li>${esc(c.ticker)}・${esc(c.metric)}：${esc(c.issue)}</li>`).join("")}</ul></details>` : ""}
         <p class="footnote">主值只顯示工具可由快照重現的數字；缺值一律 NA＋原因，不以 0 補。P/E、P/B 不使用營收或獲利比代替。</p>`;
     } catch (err) {
@@ -501,9 +671,21 @@
   $("#drawerBackdrop").addEventListener("click", closeDrawer);
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#drawer").hidden) closeDrawer(); });
 
+  $("#replayOpen").addEventListener("click", () => { const id = $("#replaySelect").value; if (id) openReplay(id); });
+  document.addEventListener("click", e => {
+    const link = e.target.closest("[data-claim]");
+    if (!link) return;
+    const el = document.getElementById(`draft-${link.dataset.claim}`);
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600); }
+  });
+
   renderFavorites();
+  renderReview(null);
   loadPublished();
   loadComparison();
+  loadReplayList();
+  const replayParam = new URL(location.href).searchParams.get("replay");
+  if (replayParam) openReplay(replayParam);
   const reportParam = new URL(location.href).searchParams.get("report");
   if (reportParam) openReport(reportParam);
   const jobParam = new URL(location.href).searchParams.get("job");

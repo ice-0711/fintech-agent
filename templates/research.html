@@ -39,7 +39,7 @@
               <div class="row two">
                 <div>
                   <label class="lbl" for="cutoff">資料截止（Asia/Taipei）</label>
-                  <input type="datetime-local" id="cutoff" value="2026-09-30T17:00" required>
+                  <input type="datetime-local" id="cutoff" value="2026-09-30T17:30" required>
                 </div>
                 <div>
                   <label class="lbl" for="mode">模式</label>
@@ -54,7 +54,7 @@
               <div class="row">
                 <label class="lbl" for="scenario">MOCK 情境（只在測試環境出現）</label>
                 <select id="scenario">
-                  {% for s in scenarios %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+                  {% for s in scenarios %}<option value="{{ s }}">{{ {"revise_then_pass": "revise_then_pass（覆核退件→補查→通過）"}.get(s, s) }}</option>{% endfor %}
                 </select>
               </div>
               {% endif %}
@@ -67,6 +67,14 @@
                 2379、3034 只作 2454 比較參照，不能建立研究 job。
               </p>
             </form>
+          <div class="replay-box">
+            <label class="lbl" for="replaySelect">REPLAY：組長保存的真實執行紀錄（Gemini 自己選工具）</label>
+            <div class="replay-row">
+              <select id="replaySelect"><option value="">載入紀錄中…</option></select>
+              <button type="button" class="ghost" id="replayOpen">開啟回放</button>
+            </div>
+            <p class="hint">回放只讀取已保存的紀錄，不呼叫模型；畫面會標示 REPLAY 與紀錄日期。</p>
+          </div>
           </div>
         </section>
 
@@ -77,7 +85,7 @@
           </div>
         </section>
 
-        <section class="panel o6" id="dashboard" aria-labelledby="dashTitle">
+        <section class="panel o7" id="dashboard" aria-labelledby="dashTitle">
           <h2 id="dashTitle">收藏與已發布研究 <small>純讀・0 次 LLM</small></h2>
           <div class="body">
             <span class="lbl">我的收藏（只存在這個瀏覽器，最多 5 檔）</span>
@@ -111,7 +119,12 @@
           </div>
         </section>
 
-        <section class="panel o4" id="reportSection" aria-labelledby="reportTitle">
+        <section class="panel o4" id="reviewSection" aria-labelledby="reviewTitle">
+          <h2 id="reviewTitle">覆核與修正 <small>Reviewer 退件項目・草稿版本</small></h2>
+          <div class="body" id="reviewPanel"></div>
+        </section>
+
+        <section class="panel o5" id="reportSection" aria-labelledby="reportTitle">
           <h2 id="reportTitle">研究報告詳情 <small>只顯示已發布版本</small></h2>
           <div class="body" id="reportPanel">
             <div class="empty">從「收藏與已發布研究」點「開啟報告」。主張會標示事實／推論／未知，點來源 ID 可看精確來源版本。</div>
@@ -121,7 +134,7 @@
       </div>
     </div>
 
-    <section class="panel o5 wide" id="comparisonSection" aria-labelledby="cmpTitle">
+    <section class="panel o6 wide" id="comparisonSection" aria-labelledby="cmpTitle">
       <h2 id="cmpTitle">2454 季度同業比較 <small>純讀・0 次 LLM</small></h2>
       <div class="body" id="comparisonPanel">
         <div class="empty">載入比較資料中…</div>
