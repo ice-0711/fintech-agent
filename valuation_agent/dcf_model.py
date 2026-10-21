@@ -9,7 +9,7 @@ from __future__ import annotations
 
 def calculate_dcf_details(
     free_cash_flows,
-    wacc=0.1,
+    wacc=0.09,
     terminal_growth=0.03,
     net_debt=0,
     shares_outstanding=1,
@@ -18,7 +18,7 @@ def calculate_dcf_details(
 
     參數說明：
     - free_cash_flows: 未來自由現金流列表，建議放 5 年預測值
-    - wacc: 加權平均資金成本，預設 10%
+    - wacc: 加權平均資金成本，預設 9%（與 main.py、手冊第 02 章一致；組長 2026-10-21 核定）
     - terminal_growth: 終端成長率，預設 3%
     - net_debt: 淨負債，若公司是淨現金可輸入負數
     - shares_outstanding: 流通股數，若金額用「億元」，股數建議用「百萬股」
@@ -62,7 +62,7 @@ def calculate_dcf_details(
 
 def calculate_dcf(
     free_cash_flows,
-    wacc=0.1,
+    wacc=0.09,
     terminal_growth=0.03,
     net_debt=0,
     shares_outstanding=1,
