@@ -3,7 +3,8 @@
 POST /api/research/jobs      create (idempotent) → 202 with job_id
 GET  /api/research/jobs/<id> status + event trace (no secrets, no hidden reasoning)
 
-Auth is deny-by-default: requests need `Authorization: Bearer <RESEARCH_API_TOKEN>`.
+Auth is deny-by-default: a logged-in admin session (agents/admin.py) or
+`Authorization: Bearer <RESEARCH_API_TOKEN>`.
 If RESEARCH_API_TOKEN is not set on the server, every request is rejected.
 Existing /api/analyze is not changed here; bringing it under the same
 authorisation/quota policy is a separate decision for the team lead with A.
@@ -18,6 +19,7 @@ from pathlib import Path
 
 from flask import Blueprint, current_app, jsonify, request
 
+from .admin import is_admin
 from .contract import ContractError, validate_job_request
 from .store import JobStore
 
@@ -42,6 +44,8 @@ def get_store() -> JobStore:
 def require_token(view):
     @wraps(view)
     def wrapper(*args, **kwargs):
+        if is_admin():  # logged-in lead (browser session)
+            return view(*args, **kwargs)
         expected = current_app.config.get("RESEARCH_API_TOKEN") or os.getenv("RESEARCH_API_TOKEN")
         supplied = request.headers.get("Authorization", "").encode("utf-8", "surrogateescape")
         if not expected or not hmac.compare_digest(supplied, f"Bearer {expected}".encode()):

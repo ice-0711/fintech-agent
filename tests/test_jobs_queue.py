@@ -135,3 +135,34 @@ def test_api_create_is_idempotent_and_status_readable(client):
 def test_api_rejects_reference_ticker(client):
     resp = client.post("/api/research/jobs", json=job_request(ticker="3034"), headers=AUTH)
     assert resp.status_code == 400
+
+
+def test_admin_login_session_authorises_research_api(tmp_path, monkeypatch):
+    from agents.admin import bp as admin_bp, configure
+    monkeypatch.setenv("RESEARCH_DB_PATH", str(tmp_path / "api.sqlite3"))
+    monkeypatch.delenv("RESEARCH_API_TOKEN", raising=False)
+    app = Flask(__name__)
+    app.config.update(ADMIN_PASSWORD="right-pass", SECRET_KEY="test")
+    configure(app)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(bp)
+    c = app.test_client()
+    assert c.post("/api/research/jobs", json=job_request()).status_code == 401
+    assert "密碼錯誤" in c.post("/admin/login", data={"password": "wrong"}).get_data(as_text=True)
+    assert c.post("/api/research/jobs", json=job_request()).status_code == 401
+    assert c.post("/admin/login", data={"password": "right-pass"}).status_code == 302
+    assert c.post("/api/research/jobs", json=job_request()).status_code == 202
+    c.get("/admin/logout")
+    assert c.get("/api/research/jobs/x").status_code == 401
+
+
+def test_admin_login_closed_without_password(monkeypatch):
+    from agents.admin import bp as admin_bp, configure
+    monkeypatch.delenv("ADMIN_PASSWORD", raising=False)
+    app = Flask(__name__)
+    app.config["SECRET_KEY"] = "test"
+    configure(app)
+    app.register_blueprint(admin_bp)
+    c = app.test_client()
+    assert "尚未設定 ADMIN_PASSWORD" in c.get("/admin/login").get_data(as_text=True)
+    assert "密碼錯誤" in c.post("/admin/login", data={"password": ""}).get_data(as_text=True)

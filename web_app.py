@@ -14,6 +14,7 @@ from typing import Any
 
 from flask import Flask, jsonify, render_template, request, send_from_directory, url_for
 
+from agents.admin import bp as admin_bp, configure as admin_configure
 from agents.api import bp as research_jobs_bp
 from research_ui import bp as research_ui_bp
 from financial_analyzer import analyze_financials
@@ -30,6 +31,8 @@ ROOT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = ROOT_DIR / "output"
 
 app = Flask(__name__)
+admin_configure(app)
+app.register_blueprint(admin_bp)  # single admin login (lead), session cookie for the research API
 app.register_blueprint(research_jobs_bp)  # V1.2 research jobs; deny-by-default without RESEARCH_API_TOKEN
 app.register_blueprint(research_ui_bp)  # V1.2 research workspace UI (A); job entry is MOCK-only unless RESEARCH_UI_MOCK=1
 
