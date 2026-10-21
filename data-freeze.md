@@ -1,6 +1,6 @@
 # 資料與案例凍結紀錄（W06-B，cases-v1）
 
-- 產生時間：2026-10-20T20:44:37+08:00（`python scripts/build_freeze.py`）
+- 產生時間：2026-10-22T01:02:14+08:00（`python scripts/build_freeze.py`）
 - 預定簽出：2026-10-23
 - 案例摘要 hash（cases_digest）：`98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3`
 - 工具版本：tools-v12.0；契約 v1.1-w02；prompt v1.2；快照 v1.6-tw-market
@@ -87,10 +87,10 @@
 
 ## 六、待核定（不影響凍結，但影響結果解讀）
 
-- DCF 參數 WACC 10%、g 3%
-- 股價可得時間 17:30 規則
-- 台股市場總經指標
-- CR-W03／W05 snapshot.py 修正（保留集執行前）
+- 股價可得時間：B 採 17:30，組長核定文字為 CASE-04 14:30，待統一
+- agents/tools.py 白名單加入 TAIEX
+- 開發案例版本：組長核定文字為 v1.4，B 現行為 v1.5（CASE-08 依附表改 2317）
+- CR-W05 snapshot.py 讀取保留集（保留集執行前）
 
 ## 七、簽核
 
