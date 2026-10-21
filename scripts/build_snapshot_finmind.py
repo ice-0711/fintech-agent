@@ -705,7 +705,22 @@ def main():
     ap.add_argument("--no-control", action="store_true", help="略過 MOPS 對帳（不建議）")
     ap.add_argument("--tw-market-only", action="store_true",
                     help="沿用現有已核對快照，只抓台股加權指數 TAIEX 加入 macro；財報、股價、證據不重抓")
+    ap.add_argument("--cutoff", help="前瞻快照用（組長 2026-10-21 加入）：YYYY-MM-DDTHH:MM（台北時間），"
+                                     "例如 2026-10-30T21:00；預設沿用 2026-09-30")
+    ap.add_argument("--out", help="輸出檔（相對 repo 根目錄）。指定 --cutoff 時必填，避免覆蓋實驗用的凍結快照")
     args = ap.parse_args()
+
+    global CUTOFF, CUTOFF_DT, OUT
+    if args.cutoff:
+        if not args.out:
+            die("指定 --cutoff 時必須同時指定 --out（不可覆蓋 data/financial-snapshots.json）")
+        CUTOFF_DT = datetime.fromisoformat(args.cutoff).replace(tzinfo=TZ)
+        CUTOFF = CUTOFF_DT.date().isoformat()
+    if args.out:
+        OUT = (ROOT / args.out).resolve()
+        if OUT == (ROOT / "data" / "financial-snapshots.json").resolve() and args.cutoff:
+            die("--out 不可為 data/financial-snapshots.json")
+        OUT.parent.mkdir(parents=True, exist_ok=True)
 
     if args.list_types:
         list_types(args.list_types)
