@@ -172,3 +172,16 @@ def test_replay_of_case04_shows_recorded_reviewer_issues(ui):
 
 def test_unknown_replay_is_404(ui):
     assert ui.get("/api/ui/replays/nope:CASE-99").status_code == 404
+
+
+# ----- W06: interruption recovery ---------------------------------------------------------
+def test_worker_interruption_resumes_without_resetting_budget(ui, clock):
+    job_id = create(ui, scenario="revise_then_pass", idempotency_key="k-crash").get_json()["job"]["job_id"]
+    for _ in range(4):  # a few steps, then the page/worker goes quiet for longer than the 60 s lease
+        before = ui.get(f"/api/ui/jobs/{job_id}").get_json()["job"]
+        clock.advance(1.5)
+    clock.advance(61)
+    after = run_until_done(ui, clock, job_id, polls=30)
+    assert any(e["event_type"] == "lease_recovered" for e in after["events"])
+    assert after["job"]["calls_used"] >= before["calls_used"] and after["job"]["status"] == "succeeded"
+    assert [d["version"] for d in after["job"]["review_view"]["drafts"]] == [1, 2]  # no step repeated

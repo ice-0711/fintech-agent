@@ -1,0 +1,174 @@
+[
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S02-status-budget-running-1440x900.png",
+  "url": "http://127.0.0.1:5085/research?job=1e627b8b-687a-4d9b-8deb-88d618255a62",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:26.218Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S02-status-budget-running-390x844.png",
+  "url": "http://127.0.0.1:5085/research?job=1e627b8b-687a-4d9b-8deb-88d618255a62",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:28.680Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/w06/W06-connection-lost-1440x900.png",
+  "url": "http://127.0.0.1:5085/research?job=1e627b8b-687a-4d9b-8deb-88d618255a62",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:36.057Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/w06/W06-connection-lost-390x844.png",
+  "url": "http://127.0.0.1:5085/research?job=1e627b8b-687a-4d9b-8deb-88d618255a62",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:43.259Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S01-entry-1440x900.png",
+  "url": "http://127.0.0.1:5084/research",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:45.609Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S01-entry-390x844.png",
+  "url": "http://127.0.0.1:5084/research",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:47.721Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S03-review-revise-trace-1440x900.png",
+  "url": "http://127.0.0.1:5084/research?job=d9cd0cd7-a849-4c89-9ad3-fe24ab2a1a52",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:51.070Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S03-review-revise-trace-390x844.png",
+  "url": "http://127.0.0.1:5084/research?job=d9cd0cd7-a849-4c89-9ad3-fe24ab2a1a52",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:07:53.404Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S04-claims-source-drawer-1440x900.png",
+  "url": "http://127.0.0.1:5084/research?report=rv-fixture-2454-0002",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:00.430Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S04-claims-source-drawer-390x844.png",
+  "url": "http://127.0.0.1:5084/research?report=rv-fixture-2454-0002",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:02.905Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S05-insufficient-replay-1440x900.png",
+  "url": "http://127.0.0.1:5084/research?replay=researcher-v12-traces:CASE-13",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:05.612Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S05-insufficient-replay-390x844.png",
+  "url": "http://127.0.0.1:5084/research?replay=researcher-v12-traces:CASE-13",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:07.980Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S06-mobile-report-pdf-pending-390x844.png",
+  "url": "http://127.0.0.1:5084/research?report=rv-fixture-2317-0002",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:10.251Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/screenshots/S01-S06-v1/S06-report-pdf-pending-1440x900.png",
+  "url": "http://127.0.0.1:5084/research?report=rv-fixture-2317-0002",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:17.652Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/w06/W06-after-reload-same-job-1440x900.png",
+  "url": "http://127.0.0.1:5084/research?job=d9cd0cd7-a849-4c89-9ad3-fe24ab2a1a52",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:21.659Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/w06/W06-dashboard-360-full.png",
+  "url": "http://127.0.0.1:5084/research",
+  "viewport": "360x780",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:24.129Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/w06/W06-dashboard-390-full.png",
+  "url": "http://127.0.0.1:5084/research",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:26.489Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/w06/W06-dashboard-1440x900.png",
+  "url": "http://127.0.0.1:5084/research",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:29.869Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "out": "/home/claude/fintech-agent/design/w06/W06-favorites-empty-filter-390x844.png",
+  "url": "http://127.0.0.1:5084/research",
+  "viewport": "390x844",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:32.493Z"
+ },
+ {
+  "title": "研究工作台｜多智能體投資分析系統",
+  "requests": [
+   "GET /research",
+   "GET /static/research.css",
+   "GET /static/research.js",
+   "GET image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+   "GET /api/ui/published",
+   "GET /api/ui/comparison/2454",
+   "GET /api/ui/replays",
+   "GET /api/ui/reports/rv-fixture-2454-0002",
+   "GET /api/ui/reports/rv-fixture-2330-0002",
+   "GET /api/ui/reports/rv-fixture-2317-0002"
+  ],
+  "out": "/home/claude/fintech-agent/design/w06/W06-readonly-clickthrough-1440x900.png",
+  "url": "http://127.0.0.1:5084/research",
+  "viewport": "1440x900",
+  "horizontal_overflow_px": 0,
+  "taken_at": "2026-10-21T07:08:53.969Z"
+ }
+]

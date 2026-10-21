@@ -318,10 +318,13 @@ class MockJobs:
     def pump(self) -> None:
         conn = self.store._conn
         running = conn.execute(
-            "select r.job_id, r.lease_token, r.lease_owner from research_jobs r join ui_mock_jobs m using (job_id)"
-            " where r.status = 'running'"
+            "select r.job_id, r.lease_token, r.lease_owner, r.lease_expires_at from research_jobs r"
+            " join ui_mock_jobs m using (job_id) where r.status = 'running'"
         ).fetchone()
-        if running is None or running["lease_owner"] != WORKER_ID:
+        expired = running is not None and (running["lease_expires_at"] or 0) <= self.store.clock()
+        if running is None or running["lease_owner"] != WORKER_ID or expired:
+            # An expired lease means the (mock) worker went away; claim_next recovers the job from its
+            # checkpoint with budget counters intact and records lease_recovered, like the real worker.
             claimed = self.store.claim_next(WORKER_ID)
             if not claimed:
                 return
