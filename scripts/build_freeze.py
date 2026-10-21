@@ -55,7 +55,7 @@ CASE_FILES = [
 TOOL_FILES = [
     "agents/tools.py", "agents/tools_impl.py", "agents/calculator.py", "agents/register_tools.py",
     "agents/snapshot.py", "agents/contract.py", "agents/review_checks.py", "agents/research_graph.py",
-    "valuation_agent/dcf_model.py",
+    "valuation_agent/dcf_model.py", "agents/review_contract.py",
 ]
 PROMPT_FILES = ["agents/prompts/researcher-v1.2.txt", "agents/prompts/reviewer-v1.2.txt"]
 # 開發用、會進入模型上下文的檔案：不得含保留案例答案
@@ -227,8 +227,11 @@ def build_frozen_manifest(now: str, cases_manifest: dict) -> dict:
             "raw_files": len(raw_rows), "raw_files_present": sum(r["present"] for r in raw_rows),
             "null_hashes": sum(1 for r in raw_rows if not r["sha256"]),
         },
-        "pending_approvals": ["DCF 參數 WACC 10%、g 3%", "股價可得時間 17:30 規則", "台股市場總經指標",
-                              "CR-W03／W05 snapshot.py 修正（保留集執行前）"],
+        "approved": ["DCF：WACC 9%、g 3%、5 年持平 FCF（組長 2026-10-21）",
+                     "淨負債口徑：應付短期票券年度路徑不計入、租賃負債不計入（組長 2026-10-21）"],
+        "pending_approvals": ["股價可得時間：B 採 17:30，組長核定文字為 CASE-04 14:30，待統一（30 案 cutoff 均晚於兩者，不影響案例）",
+                              "開發案例版本：組長核定文字為 v1.4，B 現行為 v1.5（CASE-08 依附表改 2317）；live 執行須與凍結版本一致",
+                              "CR-W05 snapshot.py 讀取保留集（保留集執行前）"],
     }
 
 

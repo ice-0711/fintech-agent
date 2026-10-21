@@ -4,7 +4,7 @@
   "generated_by": "scripts/build_w02_fixtures.py",
   "source_snapshot": {
     "file": "data/financial-snapshots.json",
-    "sha256": "abc97587722425e718d1579c6e6ef861b5d249dae513ae63d4c884ce4e6c9fe6"
+    "sha256": "848bf793cd02d2c88072aa0710e75d9b91d0ae5ce02248ffa263e014e5384c14"
   },
   "status_enum": [
     "ok",
@@ -746,7 +746,7 @@
             920.63,
             920.63
           ],
-          "wacc": 0.1,
+          "wacc": 0.09,
           "terminal_growth": 0.03,
           "net_debt": -1717.81,
           "shares_outstanding": 1596.1013
@@ -762,13 +762,18 @@
         "tool": "calculate_metrics",
         "reason": null,
         "data": {
-          "pv_fcf_total": 3489.91,
-          "terminal_value": 13546.41,
-          "pv_terminal": 8411.26,
-          "enterprise_value": 11901.17,
-          "equity_value": 13618.98,
-          "intrinsic_value_per_share": 853.27,
+          "pv_fcf_total": 3580.93,
+          "terminal_value": 15804.15,
+          "pv_terminal": 10271.61,
+          "enterprise_value": 13852.54,
+          "equity_value": 15570.35,
+          "intrinsic_value_per_share": 975.52,
           "sensitivity_matrix": {
+            "8.0%": {
+              "2.5%": 1069.51,
+              "3.0%": 1146.6,
+              "3.5%": 1240.81
+            },
             "9.0%": {
               "2.5%": 923.14,
               "3.0%": 975.52,
@@ -778,11 +783,6 @@
               "2.5%": 815.75,
               "3.0%": 853.27,
               "3.5%": 896.56
-            },
-            "11.0%": {
-              "2.5%": 733.58,
-              "3.0%": 761.52,
-              "3.5%": 793.18
             }
           },
           "is_applicable": true,
@@ -793,7 +793,7 @@
           "operation": "dcf_scenario"
         }
       },
-      "note": "WACC 10%、g 3% 為 valuation_agent/dcf_model.py 程式預設值；5 年持平 FCF；均待組長核定；內在價值非保證成交價"
+      "note": "WACC 9%、g 3%、5 年持平 FCF：組長 2026-10-21 核定之全專案統一參數（程式預設，非個股風險估計）；內在價值非保證成交價"
     },
     {
       "fixture_id": "TR-25",
@@ -845,7 +845,7 @@
             920.63,
             920.63
           ],
-          "wacc": 0.1,
+          "wacc": 0.09,
           "terminal_growth": 0.03,
           "net_debt": null,
           "shares_outstanding": 1596.1013
@@ -877,7 +877,7 @@
             920.63,
             920.63
           ],
-          "wacc": 0.1,
+          "wacc": 0.09,
           "terminal_growth": 0.03,
           "net_debt": -1717.81,
           "shares_outstanding": 1596.1013

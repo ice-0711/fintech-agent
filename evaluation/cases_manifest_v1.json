@@ -1,6 +1,6 @@
 {
   "manifest_version": "cases-v1",
-  "frozen_at": "2026-10-20T20:44:37+08:00",
+  "frozen_at": "2026-10-22T01:49:46+08:00",
   "planned_sign_date": "2026-10-23",
   "generated_by": "scripts/build_freeze.py",
   "split_rule": "手冊第 06 章 30 案固定分配表；30 = 10 開發 + 20 保留",
@@ -14,14 +14,14 @@
     {
       "path": "evaluation/dev-cases.json",
       "present": true,
-      "sha256_lf": "cf1f2194b5b1dfe2e673faf24b5c016dc2c91384776d9ea3037cd351a061d454",
-      "bytes": 9286
+      "sha256_lf": "491a32847e4dfb98333b6904a333c05832d2827bae98372a006588705dc87427",
+      "bytes": 9288
     },
     {
       "path": "fixtures/dev/case_fixtures.json",
       "present": true,
-      "sha256_lf": "30afcc66dcd5d01b97068b115d66c46633e71439aeb65b767f5b7d5d797f2c4b",
-      "bytes": 17615
+      "sha256_lf": "0576565a27030be0591f88710454806738ddee0d8553fb01d0eda75b35878280",
+      "bytes": 17617
     },
     {
       "path": "evaluation/test-cases-sealed.json",

@@ -17,7 +17,8 @@
     "移除 pb_ratio、revenue_yoy 兩個未授權 operation；P/B 屬 peer_comparison，單一公司 YoY 用 growth_rate",
     "peer_comparison 輸入改用 tools.py 規格：metrics、price_as_of、cutoff、snapshot_ids、method_version",
     "DCF 5 年長度檢查已實作，自 pending 移除",
-    "growth_rate：前期 ≤ 0 回 NA（原為除以 abs(前期)），2026-10-20"
+    "growth_rate：前期 ≤ 0 回 NA（原為除以 abs(前期)），2026-10-20",
+    "DCF 參數已核定 WACC 9%、g 3%（2026-10-21）"
   ],
   "status_enum": [
     "ok",
@@ -360,7 +361,7 @@
         "no_data": "cutoff 前無已發布觀察值"
       },
       "pending": [
-        "台股市場指標序列待組長核定後加入白名單",
+        "台股市場指標 TAIEX 已加入白名單（組長 2026-10-21）",
         "FEDFUNDS 可得時間為保守值",
         "無歷史 vintage，vintage 為 null 並附原因"
       ],
@@ -506,9 +507,8 @@
             "intrinsic_value_per_share",
             "sensitivity_matrix（WACC ±1%、g ±0.5%；WACC ≤ g 格為 null）"
           ],
-          "pending": [
-            "WACC 10%、g 3% 為程式預設值，待組長核定"
-          ]
+          "pending": [],
+          "approved": "WACC 9%、g 3%、5 年持平 FCF 為全專案統一參數（組長 2026-10-21 核定）"
         },
         "peer_comparison": {
           "values": [

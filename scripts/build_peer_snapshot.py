@@ -3,7 +3,8 @@
 - 主體 2454；同業 2379、3034；產業參照 2330（不入同業平均）。
 - 所有數字由 data/financial-snapshots.json 計算，不手打；同一基準日 2026-09-30 收盤價。
 - 每家附財報快照 ID／hash／可得時間，與股價原始檔 hash／可得時間（交易日 17:30）。
-- 缺值為 null 並附原因；DCF 參數待組長核定前不計算差距。
+- 缺值為 null 並附原因。
+- DCF 依組長 2026-10-21 核定：WACC 9%、g 3%、5 年持平 TTM FCF；TTM FCF ≤ 0 標「無法判定」（v1.8）。
 
 執行：python scripts/build_peer_snapshot.py
 """
@@ -11,6 +12,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -18,6 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT = ROOT / "data" / "financial-snapshots.json"
 OUT = ROOT / "data" / "v12-peer-snapshot.json"
 TW = timezone(timedelta(hours=8))
+sys.path.insert(0, str(ROOT))
+from valuation_agent.dcf_model import calculate_dcf_details  # noqa: E402
+
+WACC, G, YEARS = 0.09, 0.03, 5  # 組長 2026-10-21 核定
 
 PRICE_AS_OF = "2026-09-30"
 CUTOFF = "2026-09-30T17:30:00+08:00"
@@ -33,6 +39,21 @@ COMPANIES = {  # 代號: (簡稱, 角色)
 def raw_file(snap, dataset, ticker):
     return next((r for r in snap["source_manifest"]["raw_files"]
                  if r["dataset"] == dataset and r["data_id"] == ticker), {})
+
+
+def dcf_fields(fcf_ttm, net_debt, shares, price):
+    """回傳 (每股內在價值, 差距, 狀態)；不可算時前兩者為 None。"""
+    if fcf_ttm is None or net_debt is None or not shares or shares <= 0:
+        return None, None, "無法判定：TTM FCF、淨負債或股數缺值"
+    if fcf_ttm <= 0:
+        return None, None, "無法判定：TTM FCF ≤ 0，5 年持平情境不適用"
+    iv = calculate_dcf_details(free_cash_flows=[fcf_ttm] * YEARS, wacc=WACC, terminal_growth=G,
+                               net_debt=net_debt, shares_outstanding=shares)["intrinsic_value_per_share"]
+    iv = round(iv, 2)
+    if iv <= 0:
+        return iv, None, "無法判定：每股內在價值 ≤ 0"
+    gap = round((iv - price) / price, 4) if price else None
+    return iv, gap, "已計算（WACC 9%、g 3%、5 年持平 TTM FCF；內在價值非目標價）"
 
 
 def build() -> dict:
@@ -54,6 +75,8 @@ def build() -> dict:
         yoy = round(latest["revenue"] / base - 1, 4) if base else None
         praw = raw_file(snap, "TaiwanStockPrice", code)
         fraw = raw_file(snap, "TaiwanStockFinancialStatements", code)
+        dcf_iv, dcf_gap, dcf_status = dcf_fields(fcf_ttm, latest.get("net_debt"),
+                                                 latest.get("shares_outstanding"), price)
 
         out_companies[code] = {
             "name": name,
@@ -81,9 +104,10 @@ def build() -> dict:
             "revenue_yoy_quarter": yoy,
             "revenue_yoy_basis": "2026Q2 單季營收 ÷ 2025Q2 單季營收 − 1",
             "fcf_ttm_100m": fcf_ttm,
-            "dcf_intrinsic_value": None,
-            "dcf_gap_pct": None,
-            "dcf_status": "WACC、g 待組長核定，未計算",
+            "dcf_intrinsic_value": dcf_iv,
+            "dcf_gap_pct": dcf_gap,
+            "dcf_status": dcf_status,
+            "dcf_params": {"wacc": WACC, "terminal_growth": G, "years": YEARS, "fcf_basis": "flat_ttm"},
             "financial_snapshot_id": latest["snapshot_id"],
             "financial_source_id": latest["source_id"],
             "financial_content_hash": latest["content_hash"],
@@ -96,7 +120,7 @@ def build() -> dict:
     peers = [c for c in out_companies.values() if c["role"] == "peer"]
     avg = lambda key, nd: (round(sum(v) / len(v), nd) if (v := [c[key] for c in peers if c[key] is not None]) else None)
     return {
-        "snapshot_version": "v1.7-w04",
+        "snapshot_version": "v1.8-w06",
         "generated_by": "scripts/build_peer_snapshot.py",
         "generated_at": datetime.now(TW).isoformat(timespec="seconds"),
         "verified_by": "Team Member B",

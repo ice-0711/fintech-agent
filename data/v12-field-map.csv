@@ -22,8 +22,8 @@ net_debt,float,TWD,100m,instant,null（不補 0）,high,finmind_bs + mops_balanc
 close_price,float,TWD,元,instant（交易日）,null,high,finmind_price（twse_stock_day 比對）,已知（入庫時間未知）,未還原收盤價 raw_close；同業比較需同基準日
 pe_ratio,float,None,x,instant,分母非正或缺 → null,medium,由快照計算（pe_ttm）,已知,close_price ÷ eps_ttm；EPS ≤ 0 標 NA
 pb_ratio,float,None,x,instant,分母非正或缺 → null,medium,由快照計算（peer_comparison）,已知,close_price ÷ bvps；BVPS ≤ 0 標 NA
-wacc,float,None,%,instant,不補 0（DCF 關鍵）,high,valuation_agent/dcf_model.py 預設,未核定,須大於 terminal_growth；程式預設 10%（手冊文字 9%），待組長核定
-terminal_growth,float,None,%,instant,不補 0（DCF 關鍵）,high,valuation_agent/dcf_model.py 預設,未核定,不可大於等於 WACC；程式預設 3%，待組長核定
+wacc,float,None,%,instant,不補 0（DCF 關鍵）,high,valuation_agent/dcf_model.py 預設,已核定,9%（組長 2026-10-21 核定，全專案統一；dcf_model.py 預設已改 9%）；須大於 terminal_growth；程式預設非個股風險估計
+terminal_growth,float,None,%,instant,不補 0（DCF 關鍵）,high,valuation_agent/dcf_model.py 預設,已核定,3%（組長 2026-10-21 核定）；不可大於等於 WACC
 statement_basis,string,None,None,—,不可缺,medium,快照,部分已知,本專案快照為 consolidated；2317 在 MOPS 無個體財報公告（已確認）；FinMind 合併口徑以 EPS 對帳抽查
 source_id,string,None,None,—,不可缺,high,source-register.csv,已知,須存在於 source-register.csv
 snapshot_id,string,None,None,—,不可缺,high,快照,已知,不可變

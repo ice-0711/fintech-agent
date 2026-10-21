@@ -6,8 +6,8 @@
 - status_only ：只比 status（reason 為參考文字）
 
 需要 job 快照的 TR（job_snapshot_id 不為 null）走 agents/snapshot.py 的 SnapshotToolbox；
-CASE-15（paragraph 為 null）與 CASE-26（timeout）需組長修改 snapshot.py 後才會通過，
-暫標 xfail，原因見 data/v12-adapter-tests.md 第三節。
+TR-06（CASE-15 正文不可讀）與 TR-31（CASE-26 逾時）由組長 2026-10-21 修正 snapshot.py 後
+改為正式檢查（不再 xfail）。
 """
 from __future__ import annotations
 
@@ -18,20 +18,6 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = json.loads((ROOT / "fixtures" / "tool-responses.json").read_text(encoding="utf-8"))
-NEEDS_SNAPSHOT_CR = {"TR-06": "snapshot.py 對 paragraph=null 會拋 TypeError（CR-01）",
-                     "TR-31": "snapshot.py 未實作 tool_simulation timeout（CR-02）"}
-
-
-def _snapshot_cr_applied() -> bool:
-    """組長套用 CR-01/02 後，這兩個 TR 就改為正式檢查，不再 xfail。"""
-    import inspect
-
-    from agents.snapshot import SnapshotToolbox
-
-    src = inspect.getsource(SnapshotToolbox.read_evidence)
-    return "tool_simulation" in src and "unreadable" in src
-
-
 def _ids(case):
     return case["fixture_id"]
 
@@ -48,9 +34,6 @@ def registered():
 
 @pytest.mark.parametrize("case", FIXTURES["responses"], ids=_ids)
 def test_tool_fixture(case, registered):
-    if case["fixture_id"] in NEEDS_SNAPSHOT_CR and not _snapshot_cr_applied():
-        pytest.xfail(NEEDS_SNAPSHOT_CR[case["fixture_id"]])
-
     executor = None
     if case["job_snapshot_id"]:
         from agents.snapshot import SnapshotToolbox
@@ -160,4 +143,4 @@ def test_ttm_rejects_unverified_and_gaps(tmp_path, monkeypatch):
         monkeypatch.setattr(tools_impl, "SNAPSHOT_PATH", path)
         out = tools_impl.get_financial_snapshot(ticker="2454", cutoff="2026-09-30T00:00:00+08:00")
         assert out["data"]["metrics"]["eps_ttm"] is None
-        assert needle in out["data"]["missing_reason"]
+        assert needle in out["data"]["missing_reason"]

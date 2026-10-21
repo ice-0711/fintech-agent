@@ -87,13 +87,15 @@ python scripts\build_source_manifest.py
 python scripts\build_w02_fixtures.py
 python scripts\check_sources.py
 pytest -q tests\test_adapter_tools.py tests\test_tool_fixtures.py
-pytest -q
+pytest -q tests
 ```
 
 | 項目 | 命令 | 結果（請填） | 執行日期 | commit |
 |---|---|---|---|---|
-| 重建 manifest | `python scripts\build_source_manifest.py` | 未執行 |  |  |
-| 產生 fixture | `python scripts\build_w02_fixtures.py` | 未執行 |  |  |
-| 來源與 cutoff 檢查 | `python scripts\check_sources.py` | 未執行 |  |  |
-| 適配層與契約測試 | `pytest -q tests\test_adapter_tools.py tests\test_tool_fixtures.py` | 未執行 |  |  |
-| 全套回歸 | `pytest -q` | 未執行 |  |  |
+| 重建 manifest | `python scripts\build_source_manifest.py` | 成功（TAIEX 對應 finmind_tw_market） | 2026-10-21 | 待合併後填 |
+| 產生 fixture | `python scripts\build_w02_fixtures.py` | 成功（31 個工具樣本） | 2026-10-21 | 待合併後填 |
+| 來源與 cutoff 檢查 | `python scripts\check_sources.py` | 35 列、0 錯誤 | 2026-10-21 | 待合併後填 |
+| 適配層與契約測試 | `pytest -q tests\test_adapter_tools.py tests\test_tool_fixtures.py` | 48 passed | 2026-10-21 | 待合併後填 |
+| 全套回歸 | `pytest -q tests` | 212 passed、10 failed（全在 `tests/test_research_graph.py`，寫死舊片段 ID 與 cutoff，見 `docs/CR-W05-regression.md` 第四節；B 的測試全過） | 2026-10-21 | 基準 origin/main e6b75ec |
+
+註：全專案 `pytest -q` 會收到 D 草稿區 `evaluation/d-drafts/W02-D/W03-D/test_adapter_tools.py`，與 `tests/test_adapter_tools.py` 同名，收集階段即中斷；回歸改以 `pytest -q tests` 執行，待組長於 pytest.ini 設 `testpaths = tests`。

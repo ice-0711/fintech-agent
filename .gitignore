@@ -57,3 +57,8 @@ Thumbs.db
 !operations/**/*.json
 # A 的設計與介面交付（W01–W04）
 !design/**/*.json
+
+data/raw/
+*.bak
+*.tmp
+_backup/

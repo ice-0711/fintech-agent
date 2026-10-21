@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""scripts/verify_fact_sheet.py — 重現 v12-finance-fact-sheet.md V1.7 的數字（組員 B）
+"""scripts/verify_fact_sheet.py — 重現 v12-finance-fact-sheet.md V1.9 的數字（組員 B）
 
 所有數字由 data/financial-snapshots.json 計算；DCF 由 dcf_model.calculate_dcf_details 計算。
 與 fact sheet 不一致時列出差異並以非零結束碼退出。
@@ -16,7 +16,7 @@ from valuation_agent.dcf_model import calculate_dcf_details  # 若路徑不同�
 SNAP = ROOT / "data" / "financial-snapshots.json"
 SUBJECT, PEERS, REF = "2454", ["2379", "3034"], "2330"
 LAST4 = ["2025Q3", "2025Q4", "2026Q1", "2026Q2"]
-WACC, G = 0.10, 0.03            # dcf_model 預設值，待組長核定
+WACC, G = 0.09, 0.03            # 組長 2026-10-21 核定
 TOL = 0.01
 
 EXPECT = {                      # 與 fact sheet 第二、四、五節一致
@@ -25,7 +25,7 @@ EXPECT = {                      # 與 fact sheet 第二、四、五節一致
     "3034": {"pe": 19.04, "pb": 4.82, "eps_ttm": 28.67, "fcf_ttm": 167.49},
     "2330": {"pe": 28.74, "pb": 10.00, "eps_ttm": 86.28, "fcf_ttm": 11435.56},
     "peer": {"pe": 23.23, "pb": 6.29, "yoy": 0.1363},
-    "dcf": {"iv": 853.27},
+    "dcf": {"iv": 975.52},
 }
 
 
@@ -88,7 +88,7 @@ def main():
     for t in [SUBJECT] + PEERS + [REF]:
         print(t, m[t])
     print("peer 平均 PE/PB/YoY：", round(peer_pe, 2), round(peer_pb, 2), round(peer_yoy, 4))
-    print("DCF 每股內在價值（WACC 10%、g 3%）：", dcf)
+    print("DCF 每股內在價值（WACC 9%、g 3%）：", dcf)
 
     if bad:
         print("\n不一致：")
@@ -98,4 +98,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()

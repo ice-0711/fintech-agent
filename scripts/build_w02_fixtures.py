@@ -42,7 +42,7 @@ PRICE_DATE = "2026-09-30"
 STATUS_ENUM = ["ok", "no_data", "invalid_input", "unreadable", "tool_error"]
 ROLES = {"2454": "subject", "2379": "peer", "3034": "peer", "2330": "industry_reference", "2317": "research_only"}
 TTM_PERIODS = ["2025Q3", "2025Q4", "2026Q1", "2026Q2"]
-DCF_PARAM_NOTE = "WACC 10%、g 3% 為 valuation_agent/dcf_model.py 程式預設值；5 年持平 FCF；均待組長核定"
+DCF_PARAM_NOTE = "WACC 9%、g 3%、5 年持平 FCF：組長 2026-10-21 核定之全專案統一參數（程式預設，非個股風險估計）"
 
 
 # ---------------------------------------------------------------------------
@@ -452,9 +452,9 @@ def build_tool_responses(fin: dict[str, Any]) -> dict[str, Any]:
     fcf, nd = c54["ttm_summary"]["fcf_ttm"], c54["quarters"][-1]["net_debt"]
     sh = c54["quarters"][-1]["shares_outstanding"]
     fcfs = [fcf] * 5
-    dv = {"free_cash_flows": fcfs, "wacc": 0.10, "terminal_growth": 0.03, "net_debt": nd, "shares_outstanding": sh}
-    d = dcf(fcfs, 0.10, 0.03, nd, sh)
-    d.update({"sensitivity_matrix": sensitivity(fcfs, 0.10, 0.03, nd, sh), "is_applicable": True, "reason": None,
+    dv = {"free_cash_flows": fcfs, "wacc": 0.09, "terminal_growth": 0.03, "net_debt": nd, "shares_outstanding": sh}
+    d = dcf(fcfs, 0.09, 0.03, nd, sh)
+    d.update({"sensitivity_matrix": sensitivity(fcfs, 0.09, 0.03, nd, sh), "is_applicable": True, "reason": None,
               "evidence_refs": ["snap-2454-2026Q2"], "operation": "dcf_scenario"})
     C.append(case("TR-24", "calculate_metrics",
                   {"operation": "dcf_scenario", "values": dv, "evidence_refs": ["snap-2454-2026Q2"]},
