@@ -24,6 +24,8 @@ from agents.contract import ContractError, validate_job_request
 from agents.store import JobStore, StaleLeaseError
 from agents import tools_impl
 
+from .review_view import review_view
+
 WORKER_ID = "ui-mock-worker"
 STEP_SECONDS = float(os.getenv("RESEARCH_UI_MOCK_STEP_SECONDS", "1.5"))
 
@@ -31,7 +33,7 @@ STEP_SECONDS = float(os.getenv("RESEARCH_UI_MOCK_STEP_SECONDS", "1.5"))
 PUBLIC_JOB_FIELDS = (
     "job_id", "ticker", "mode", "status", "stage", "cutoff_at", "source_snapshot_id", "question_version",
     "model_id", "prompt_version", "calls_used", "tokens_observed", "tool_calls_used", "supplement_rounds",
-    "active_seconds", "stop_reason", "checkpoint_version", "created_at", "updated_at",
+    "active_seconds", "stop_reason", "checkpoint_version", "created_at", "updated_at", "publication_status",
 )
 # Event detail keys the UI may show. Anything else (raw prompts, args, model text) is dropped.
 PUBLIC_DETAIL_KEYS = (
@@ -39,7 +41,7 @@ PUBLIC_DETAIL_KEYS = (
     "args_redacted", "output_hash", "claim_id", "severity", "required_evidence", "budget",
 )
 
-SCENARIOS = ("succeeded", "insufficient_evidence", "paused_quota", "failed", "timed_out")
+SCENARIOS = ("revise_then_pass", "succeeded", "insufficient_evidence", "paused_quota", "failed", "timed_out")
 CANCELLABLE = ("running",)
 
 
@@ -69,14 +71,24 @@ def _steps(scenario: str, ticker: str) -> list[dict[str, Any]]:
            "changes": {"stage": "tools", "tool_calls_used": 1, "active_seconds": 6.0}}
 
     if scenario == "insufficient_evidence":
+        ev = f"ev-{ticker}-2026q2-01"
         return [plan, fin,
-                {"role": "researcher", "event_type": "tool_call", "call": _tool("search_evidence", ticker=ticker, query="財報", limit=3),
+                {"role": "researcher", "event_type": "tool_call", "call": _tool("read_evidence", evidence_version_id=ev),
                  "changes": {"calls_used": 2, "tool_calls_used": 2, "active_seconds": 10.0}},
+                {"role": "researcher", "event_type": "draft", "detail": {
+                    "summary": "草稿狀態 insufficient：公告片段只有營收，現金流與 EPS 沒有原文可引用",
+                    "decision_summary": "可引用的原文不足以支持估值主張，停止並列出缺口"},
+                 "draft": {"status": "insufficient", "decision_summary": "可引用的原文不足以支持估值主張",
+                           "claims": [{"claim_id": "c1", "kind": "fact", "text": "2026Q2 合併營收為 2 兆 5,259 億元。",
+                                       "evidence_refs": [ev], "limitations": ["片段只有營收"]},
+                                      {"claim_id": "c2", "kind": "unknown", "text": "缺 2026Q2 現金流量表原文，無法核實自由現金流與 DCF。",
+                                       "evidence_refs": [], "limitations": []}],
+                           "unknowns": ["現金流量表原文", "EPS 原文"], "limitations": ["不產生估值結論"]},
+                 "changes": {"calls_used": 3, "active_seconds": 12.0}},
                 {"role": "researcher", "event_type": "stop", "detail": {
-                    "summary": "關鍵財報與證據皆無資料，停止並保留限制，不產生評級",
-                    "decision_summary": "兩個工具都回 no_data，沒有其他可用工具"},
-                 "changes": {"status": "insufficient_evidence", "stage": "finished", "calls_used": 3,
-                             "active_seconds": 12.0, "stop_reason": "missing_key_financials"}}]
+                    "summary": "資料不足，停止並保留限制，不產生評級"},
+                 "changes": {"status": "insufficient_evidence", "stage": "finished",
+                             "stop_reason": "researcher_insufficient"}}]
     if scenario == "paused_quota":
         return [plan, fin,
                 {"role": "system", "event_type": "quota_pause", "detail": {
@@ -96,6 +108,8 @@ def _steps(scenario: str, ticker: str) -> list[dict[str, Any]]:
                     "summary": "MOCK：主動執行時間達 180 秒上限，保存檢查點後停止，不冒充成功"},
                  "changes": {"status": "timed_out", "stage": "finished", "active_seconds": 180.0,
                              "stop_reason": "active_time_limit_180s"}}]
+    if scenario == "revise_then_pass":
+        return _revise_then_pass(ticker, plan, fin)
     # succeeded
     return [plan,
             {"role": "researcher", "event_type": "tool_call", "call": _tool("search_evidence", ticker=ticker, query="第二季", limit=3),
@@ -113,6 +127,73 @@ def _steps(scenario: str, ticker: str) -> list[dict[str, Any]]:
              "changes": {"calls_used": 3, "active_seconds": 21.0}},
             {"role": "system", "event_type": "finished", "detail": {"summary": "研究完成，等待人工核准（未發布）"},
              "changes": {"status": "succeeded", "stage": "finished", "stop_reason": "mock_completed"}}]
+
+
+def _revise_then_pass(ticker: str, plan: dict[str, Any], fin: dict[str, Any]) -> list[dict[str, Any]]:
+    """MOCK of the core demo: Reviewer rejects one claim, Researcher re-checks with a tool, then pass.
+
+    Numbers come from B's snapshot (fact sheet V1.7); tests assert they equal the tool outputs.
+    The deliberate error in draft v1 (single-quarter EPS presented as TTM) is a labelled test case.
+    """
+
+    fin_data = (tools_impl.get_financial_snapshot(ticker, "2026-09-30T17:30:00+08:00").get("data") or {})
+    m = fin_data.get("metrics") or {}
+    ev = f"ev-{ticker}-2026q2-01"
+    single_eps, ttm_eps, periods = m.get("eps_single_q"), m.get("eps_ttm"), fin_data.get("ttm_periods") or []
+    span = f"{periods[0]}–{periods[-1]}" if periods else "近四季"
+    c1 = {"claim_id": "c1", "kind": "fact", "evidence_refs": [ev], "limitations": [],
+          "text": f"{fin_data.get('latest_period')} 單季每股盈餘 {single_eps} 元。"}
+    v1 = {"status": "draft", "decision_summary": "讀取最新季財報與公告片段後撰稿",
+          "claims": [c1,
+                     {"claim_id": "c2", "kind": "fact", "evidence_refs": [ev], "limitations": [],
+                      "text": f"TTM EPS 為 {single_eps} 元。（測試案例：故意把單季 EPS 當成 TTM）"},
+                     {"claim_id": "c3", "kind": "unknown", "evidence_refs": [], "limitations": [],
+                      "text": "快照沒有 2026Q3 營收，無法判斷第三季動能。"}],
+          "unknowns": ["2026Q3 營收"], "limitations": []}
+    v2 = {"status": "draft", "decision_summary": "依覆核意見改用連續四季 EPS",
+          "claims": [c1,
+                     {"claim_id": "c2", "kind": "fact", "evidence_refs": [ev], "limitations": [f"TTM 期間 {span}"],
+                      "text": f"近四季 EPS 合計（TTM）為 {ttm_eps} 元（{span}）。"},
+                     v1["claims"][2]],
+          "unknowns": ["2026Q3 營收"], "limitations": []}
+    issue_c2 = {"claim_id": "c2", "severity": "critical",
+                "reason": f"{single_eps} 是 {fin_data.get('latest_period')} 單季 EPS，不是 TTM；期間口徑錯誤",
+                "required_evidence": "get_financial_snapshot(ticker, cutoff) 的 eps_ttm，確認連續四個單季"}
+    issue_c3 = {"claim_id": "c3", "severity": "minor", "reason": "未知項目可再列出下一個確認訊號",
+                "required_evidence": "在 next_signals 寫明 2026Q3 營收公告"}
+    round1 = {"round": 1,
+              "model": {"decision": "revise", "issues": [issue_c2, issue_c3], "checked_refs": [ev],
+                        "decision_summary": "c2 期間口徑錯誤，需補查連續四季 EPS"},
+              "rules": {"decision": "revise", "issues": [issue_c2], "checked_refs": [ev]},
+              "final": {"decision": "revise", "issues": [issue_c2, issue_c3], "checked_refs": [ev],
+                        "decision_summary": "c2 期間口徑錯誤，需補查連續四季 EPS"}}
+    round2 = {"round": 2,
+              "model": {"decision": "pass", "issues": [], "checked_refs": [ev], "decision_summary": "c2 已改為可由工具重現的 TTM"},
+              "rules": {"decision": "pass", "issues": [], "checked_refs": [ev]},
+              "final": {"decision": "pass", "issues": [], "checked_refs": [ev], "decision_summary": "c2 已改為可由工具重現的 TTM"}}
+    return [
+        plan,
+        {**fin, "changes": {"stage": "tools", "tool_calls_used": 1, "active_seconds": 6.0}},
+        {"role": "researcher", "event_type": "tool_call", "call": _tool("read_evidence", evidence_version_id=ev),
+         "changes": {"tool_calls_used": 2, "active_seconds": 8.0}},
+        {"role": "researcher", "event_type": "draft", "detail": {"summary": "草稿 v1：3 項主張", "evidence_refs": [ev]},
+         "draft": v1, "changes": {"stage": "review", "calls_used": 2, "active_seconds": 14.0}},
+        {"role": "reviewer", "event_type": "tool_call", "call": _tool("read_evidence", evidence_version_id=ev),
+         "changes": {"tool_calls_used": 3, "active_seconds": 16.0}},
+        {"role": "reviewer", "event_type": "review", "detail": {
+            "summary": "第 1 輪覆核：revise（c2 critical、c3 minor）", "decision_summary": "c2 期間口徑錯誤，需補查連續四季 EPS",
+            "claim_id": "c2", "severity": "critical", "required_evidence": issue_c2["required_evidence"]},
+         "review": round1, "changes": {"stage": "revision", "calls_used": 3, "supplement_rounds": 1, "active_seconds": 22.0}},
+        {"role": "researcher", "event_type": "tool_call", "call": _tool("get_financial_snapshot", ticker=ticker),
+         "detail": {"decision_summary": "依覆核要求補查連續四季 EPS"},
+         "changes": {"tool_calls_used": 4, "active_seconds": 25.0}},
+        {"role": "researcher", "event_type": "draft", "detail": {"summary": "草稿 v2：只修改 c2，其餘保留"},
+         "draft": v2, "changes": {"stage": "review", "calls_used": 4, "active_seconds": 30.0}},
+        {"role": "reviewer", "event_type": "review", "detail": {"summary": "第 2 輪覆核：pass", "decision_summary": "c2 已改為可由工具重現的 TTM"},
+         "review": round2, "changes": {"calls_used": 5, "active_seconds": 34.0}},
+        {"role": "system", "event_type": "finished", "detail": {"summary": "研究完成，等待人工核准（未發布）"},
+         "changes": {"status": "succeeded", "stage": "finished", "stop_reason": "review_pass", "publication_status": "draft"}},
+    ]
 
 
 def _run_tool(call: dict[str, Any], cutoff: str) -> dict[str, Any]:
@@ -189,6 +270,7 @@ class MockJobs:
             ).fetchone()[0]
         public = self.public_job(job)
         public["queue_ahead"] = queue_ahead
+        public["review_view"] = review_view(job)
         return public, [self.public_event(e) for e in self.store.list_events(job_id)]
 
     @staticmethod
@@ -266,8 +348,20 @@ class MockJobs:
                     tool_name = step["call"]["tool"]
                     detail.update(_run_tool(step["call"], job["cutoff_at"]))
                 self.store.append_event(job_id, step["role"], step["event_type"], tool_name, detail)
-                if step.get("changes"):
-                    self.store.update_job(job_id, WORKER_ID, token, step["changes"])
+                changes = dict(step.get("changes") or {})
+                if step.get("draft") or step.get("review"):
+                    current = self.store.get_job(job_id)
+                    cp = dict(current.get("checkpoint") or {})
+                    if step.get("draft"):
+                        draft = {**step["draft"], "ticker": current["ticker"], "as_of": current["cutoff_at"]}
+                        cp["drafts"] = list(cp.get("drafts") or []) + [draft]
+                        changes["draft"] = draft
+                    if step.get("review"):
+                        cp["reviews"] = list(cp.get("reviews") or []) + [step["review"]]
+                        changes["review"] = step["review"]["final"]
+                    changes["checkpoint"] = cp
+                if changes:
+                    self.store.update_job(job_id, WORKER_ID, token, changes)
                 else:
                     self.store.heartbeat(job_id, WORKER_ID, token)
                 conn.execute("update ui_mock_jobs set step = ? where job_id = ?", (index + 1, job_id))

@@ -1,79 +1,58 @@
 {
-  "fixture_version": "ui-fixture-v12.0",
+  "fixture_version": "ui-fixture-v12.1",
   "synthetic_fixture": true,
-  "fixture_note": "W02-A 介面測試用 FIXTURE：欄位依手冊第 04 章 F03；不是 Agent 產出、不是已核准研究。財報期與可得時間取自 B 的 data/financial-snapshots.json（B、D 尚未確認）。 報告主張（reports）為 W04-A 介面測試文字：事實句只抄寫 B 快照片段中的數字，推論句只用工具可重現的計算，不代表 Agent 或人工核准結論。",
-  "generated_at": "2026-10-05T11:00:00+08:00",
+  "fixture_note": "W05-A 介面測試用：報告文字與發布欄位是 FIXTURE，不是 Agent 產出、也不是人工核准的研究。主張裡的數字逐字取自 B 的快照片段（data/financial-snapshots.json v1.5）；估值狀態與資料品質風險由伺服器依同一快照即時計算，不寫在這個檔案裡。",
+  "generated_at": "2026-10-21T15:00:00+08:00",
   "published_reports": [
     {
-      "report_version_id": "rv-fixture-2454-0001",
+      "report_version_id": "rv-fixture-2454-0002",
       "ticker": "2454",
       "company": "聯發科",
       "publication_status": "published",
       "research_outcome": "succeeded",
-      "cutoff_at": "2026-09-30T17:00:00+08:00",
-      "financial_period": "2026Q2",
-      "published_at": "2026-10-02T10:00:00+08:00",
-      "data_updated_at": "2026-08-10T16:00:00+08:00",
-      "valuation_status": "fixture_pending",
-      "data_quality_risk": "medium",
-      "data_quality_reason": "同業 2379、3034 的證據片段尚未入庫（B 補件）",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "published_at": "2026-10-20T21:00:00+08:00",
       "pdf_status": "not_available",
       "synthetic_fixture": true
     },
     {
-      "report_version_id": "rv-fixture-2330-0001",
+      "report_version_id": "rv-fixture-2330-0002",
       "ticker": "2330",
       "company": "台積電",
       "publication_status": "published",
       "research_outcome": "succeeded",
-      "cutoff_at": "2026-09-30T17:00:00+08:00",
-      "financial_period": "2026Q2",
-      "published_at": "2026-10-01T18:30:00+08:00",
-      "data_updated_at": "2026-07-16T14:00:00+08:00",
-      "snapshot_stale": true,
-      "valuation_status": "fixture_pending",
-      "data_quality_risk": "medium",
-      "data_quality_reason": "快照過期：最新可得財報公告為 2026-07-16",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "published_at": "2026-10-19T18:30:00+08:00",
       "pdf_status": "not_available",
       "synthetic_fixture": true
     },
     {
-      "report_version_id": "rv-fixture-2317-0001",
+      "report_version_id": "rv-fixture-2317-0002",
       "ticker": "2317",
-      "company": "鴻海",
+      "company": "鴻海精密工業股份有限公司（Hon Hai Precision Industry）",
       "publication_status": "published",
       "research_outcome": "insufficient_evidence",
-      "cutoff_at": "2026-09-30T17:00:00+08:00",
-      "financial_period": null,
-      "published_at": "2026-10-01T20:00:00+08:00",
-      "data_updated_at": null,
-      "valuation_status": "undeterminable",
-      "data_quality_risk": "high",
-      "data_quality_reason": "缺關鍵資料：快照內沒有 2317 財報與證據片段",
+      "cutoff_at": "2026-09-30T17:30:00+08:00",
+      "published_at": "2026-10-18T20:00:00+08:00",
       "pdf_status": "not_available",
       "synthetic_fixture": true
     },
     {
-      "report_version_id": "rv-fixture-2454-0002-draft",
+      "report_version_id": "rv-fixture-2454-0003-draft",
       "ticker": "2454",
       "company": "聯發科",
       "publication_status": "draft",
       "research_outcome": "succeeded",
-      "cutoff_at": "2026-10-03T17:00:00+08:00",
-      "financial_period": "2026Q2",
+      "cutoff_at": "2026-10-20T17:30:00+08:00",
       "published_at": null,
-      "data_updated_at": "2026-08-10T16:00:00+08:00",
-      "valuation_status": "fixture_pending",
-      "data_quality_risk": "medium",
-      "data_quality_reason": "未核准草稿：公開端點必須看不到這一列",
       "pdf_status": "not_available",
       "synthetic_fixture": true
     }
   ],
   "reports": {
-    "rv-fixture-2454-0001": {
-      "question": "在 2026-09-30 資料截止下，聯發科的總經、基本面與估值觀察為何？（question_version macro-fundamental-valuation-v1）",
-      "source_snapshot_id": "fin-snap:v1.2",
+    "rv-fixture-2454-0002": {
+      "question": "截至 2026-09-30 17:30，總經、基本面與估值證據支持哪些觀察？有哪些反向證據、假設與待確認訊號？（macro-fundamental-valuation-v1）",
+      "source_snapshot_id": "fin-snap:v1.5-eps-source",
       "model_id": null,
       "prompt_version": "v1.2",
       "job_id": null,
@@ -81,7 +60,7 @@
         {
           "claim_id": "c1",
           "kind": "fact",
-          "text": "2026Q2 合併營收 1,272.7 億元，單季 EPS 16.19 元。",
+          "text": "2026Q2 合併營業收入 1,521.83 億元，單季每股純益 15.28 元，營業毛利率 46.2%。",
           "evidence_refs": [
             "ev-2454-2026q2-01"
           ],
@@ -90,48 +69,46 @@
         {
           "claim_id": "c2",
           "kind": "inference",
-          "text": "以 2026-09-30 收盤價與近 4 季 EPS 合計計算的 P/E，與同業平均比較見下方面板；P/E 只反映相對價格，不是買賣建議。",
+          "text": "以 2026-09-30 收盤價與近四季 EPS 合計計算的 P/E，高於同業 2379、3034 的平均；P/E 只反映相對價格，不是買賣建議。",
           "evidence_refs": [
-            "ev-2454-2026q2-01",
-            "ev-price-20260930-2454"
+            "ev-2454-2026q2-01"
           ],
           "limitations": [
-            "價格來源片段尚未入庫（B 補件）"
+            "P/E 由 calculate_metrics 計算，見同業比較面板"
           ]
         },
         {
           "claim_id": "c3",
           "kind": "inference",
-          "text": "單季營收年增率無法由快照重現：缺 2025Q2 基期。",
+          "text": "依組長核定的基準 DCF（WACC 9%、g 3%、FCF 持平 5 年），模型每股價值遠低於市價；此差距對 FCF 成長假設非常敏感。",
           "evidence_refs": [],
           "limitations": [
-            "B 快照值 15.0% 未經工具重現，不採用"
+            "WACC 為程式預設，非個股風險估計",
+            "基準情境不含成長，敏感度見比較面板"
           ]
         },
         {
           "claim_id": "c4",
           "kind": "unknown",
-          "text": "DCF 每股價值所需的 WACC 與終端成長率未在快照中提供，估值差距目前無法判定。",
+          "text": "快照沒有 2026Q3 營收或法說會資料，無法判斷第三季動能。",
           "evidence_refs": [],
-          "limitations": [
-            "W05 再依 ±15% 規則判定"
-          ]
+          "limitations": []
         }
       ],
       "counter_evidence": [
-        "2026Q2 單季 EPS 16.19 元低於 2026Q1 的 19.85 元（快照單季資料）。"
+        "稅後純益在公告片段為 246.05 億元，快照母公司淨利為 243.35 億元，口徑不同（含非控制權益與否）。"
       ],
       "next_signals": [
         "2026Q3 財報公告（公告後才可用，不倒填）"
       ],
       "limitations": [
-        "本報告為 FIXTURE，數字未經 D 確認",
-        "同業 2379、3034 只有 2026Q2 一季，TTM 不可算"
+        "報告文字為 FIXTURE，非 Agent 產出",
+        "數字待 D 覆核"
       ]
     },
-    "rv-fixture-2330-0001": {
-      "question": "在 2026-09-30 資料截止下，台積電的總經、基本面與估值觀察為何？",
-      "source_snapshot_id": "fin-snap:v1.2",
+    "rv-fixture-2330-0002": {
+      "question": "截至 2026-09-30 17:30，總經、基本面與估值證據支持哪些觀察？（macro-fundamental-valuation-v1）",
+      "source_snapshot_id": "fin-snap:v1.5-eps-source",
       "model_id": null,
       "prompt_version": "v1.2",
       "job_id": null,
@@ -139,62 +116,68 @@
         {
           "claim_id": "c1",
           "kind": "fact",
-          "text": "2026Q2 合併營收約 6,735 億元，EPS 9.55 元，毛利率 53.2%。",
+          "text": "2026Q2 合併營收約 1 兆 2,703.8 億元，每股盈餘 27.25 元，毛利率 67.7%。",
           "evidence_refs": [
             "ev-2330-2026q2-01"
           ],
-          "limitations": [
-            "快照最新公告為 2026-07-16，可能非最新"
-          ]
+          "limitations": []
         },
         {
           "claim_id": "c2",
-          "kind": "unknown",
-          "text": "近 4 季 EPS 無法由快照重現（只有 2026Q2 一季），P/E 不可算。",
+          "kind": "inference",
+          "text": "在 2454 的同業比較中，台積電只作產業參照，不計入同業平均。",
           "evidence_refs": [],
-          "limitations": [
-            "B 快照 eps_ttm 38.2 未經工具重現"
-          ]
+          "limitations": []
         }
       ],
       "counter_evidence": [],
       "next_signals": [
-        "補齊 2025Q3–2026Q1 單季資料"
+        "2026Q3 財報公告"
       ],
       "limitations": [
-        "本報告為 FIXTURE",
-        "快照過期"
+        "報告文字為 FIXTURE"
       ]
     },
-    "rv-fixture-2317-0001": {
-      "question": "在 2026-09-30 資料截止下，鴻海的總經、基本面與估值觀察為何？",
-      "source_snapshot_id": "fin-snap:v1.2",
+    "rv-fixture-2317-0002": {
+      "question": "截至 2026-09-30 17:30，總經、基本面與估值證據支持哪些觀察？（macro-fundamental-valuation-v1）",
+      "source_snapshot_id": "fin-snap:v1.5-eps-source",
       "model_id": null,
       "prompt_version": "v1.2",
       "job_id": null,
       "claims": [
         {
           "claim_id": "c1",
+          "kind": "fact",
+          "text": "2026Q2 合併營收為 2 兆 5,259 億元。",
+          "evidence_refs": [
+            "ev-2317-2026q2-01"
+          ],
+          "limitations": [
+            "公告片段只有營收，沒有 EPS 與現金流原文"
+          ]
+        },
+        {
+          "claim_id": "c2",
           "kind": "unknown",
-          "text": "快照內沒有鴻海的財報與證據片段，無法提出基本面或估值主張。",
+          "text": "近四季自由現金流為負，基準 DCF（FCF 持平）不適用，估值差距無法判定。",
           "evidence_refs": [],
           "limitations": [
-            "研究結果：資料不足，不產生評級"
+            "需要成長情境或其他估值方法，超出本期範圍"
           ]
         }
       ],
       "counter_evidence": [],
       "next_signals": [
-        "B 入庫 2317 財報與公告片段後重新研究"
+        "補上 2026Q2 現金流量表原文片段"
       ],
       "limitations": [
-        "本報告為 FIXTURE",
-        "資料不足"
+        "報告文字為 FIXTURE",
+        "研究結果：資料不足"
       ]
     },
-    "rv-fixture-2454-0002-draft": {
+    "rv-fixture-2454-0003-draft": {
       "question": "（未核准草稿）",
-      "source_snapshot_id": "fin-snap:v1.2",
+      "source_snapshot_id": "fin-snap:v1.5-eps-source",
       "model_id": null,
       "prompt_version": "v1.2",
       "job_id": null,

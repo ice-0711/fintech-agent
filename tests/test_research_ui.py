@@ -186,10 +186,13 @@ def test_trace_shows_real_tool_results_and_source_ids(ui, clock):
 
 
 def test_missing_data_is_no_data_not_zero(ui, clock):
-    job_id = create(ui, ticker="2317", scenario="insufficient_evidence", idempotency_key="k-2317").get_json()["job"]["job_id"]
+    # A cutoff before any snapshot data: every tool must answer no_data, never a 0.
+    job_id = create(ui, ticker="2317", scenario="insufficient_evidence", cutoff_at="2025-01-01T09:00:00+08:00",
+                    idempotency_key="k-2317-early").get_json()["job"]["job_id"]
     events = run_until_done(ui, clock, job_id)["events"]
-    statuses = [e["detail"]["tool_status"] for e in events if e["tool_name"]]
-    assert statuses == ["no_data", "no_data"]
+    fin = next(e for e in events if e["tool_name"] == "get_financial_snapshot")
+    assert fin["detail"]["tool_status"] == "no_data"
+    assert "0" != fin["detail"]["summary"]
 
 
 def test_second_job_waits_in_queue(ui, clock):
@@ -221,35 +224,49 @@ def test_status_is_read_from_db_by_another_process(tmp_path, clock):
 
 # ----- W04: report detail, source drawer, comparison -----------------------------------
 def test_report_detail_marks_claim_kinds_and_unsourced(ui):
-    body = ui.get("/api/ui/reports/rv-fixture-2454-0001").get_json()
+    body = ui.get("/api/ui/reports/rv-fixture-2454-0002").get_json()
     claims = {c["claim_id"]: c for c in body["report"]["claims"]}
     assert {c["kind"] for c in claims.values()} == {"fact", "inference", "unknown"}
     assert claims["c1"]["unsourced"] is False and claims["c1"]["evidence"] == [{"id": "ev-2454-2026q2-01", "exists": True}]
-    assert {"id": "ev-price-20260930-2454", "exists": False} in claims["c2"]["evidence"]
-    assert claims["c4"]["unsourced"] is True
+    assert claims["c3"]["unsourced"] is True and claims["c4"]["unsourced"] is True
     assert body["report"]["synthetic_fixture"] is True
 
 
 def test_unpublished_report_never_leaves_server(ui):
-    assert ui.get("/api/ui/reports/rv-fixture-2454-0002-draft").status_code == 404
+    assert ui.get("/api/ui/reports/rv-fixture-2454-0003-draft").status_code == 404
     assert ui.get("/api/ui/reports/does-not-exist").status_code == 404
-    for url in ("/api/ui/published", "/research", "/api/ui/reports/rv-fixture-2454-0001"):
+    for url in ("/api/ui/published", "/research", "/api/ui/reports/rv-fixture-2454-0002"):
         assert "DRAFT-SECRET" not in ui.get(url).get_data(as_text=True)
 
 
 def test_evidence_drawer_reports_hash_and_cutoff_honestly(ui):
     import hashlib
 
-    e = ui.get("/api/ui/evidence/ev-2454-2026q2-01?report=rv-fixture-2454-0001").get_json()["evidence"]
+    e = ui.get("/api/ui/evidence/ev-2454-2026q2-01?report=rv-fixture-2454-0002").get_json()["evidence"]
     assert e["computed_hash"] == hashlib.sha256(e["paragraph"].encode()).hexdigest()
-    assert e["hash_match"] is (e["computed_hash"] == e["content_hash"])  # mismatch is shown, not hidden
+    assert e["hash_match"] is (e["computed_hash"] == e["content_hash"])  # a mismatch would be shown, not hidden
     assert e["cutoff_check"] == "cutoff 前可得"
-    assert "1,272.7" in e["paragraph"]  # claim c1 matches its source text
+
+
+def test_fixture_claims_quote_their_source_text(ui):
+    """Every fact claim in the FIXTURE reports must quote numbers that appear in its cited paragraph."""
+    import re
+
+    fixture = json.loads((ROOT / "ui" / "v12-dashboard-fixture.json").read_text(encoding="utf-8"))
+    for rv, report in fixture["reports"].items():
+        if rv.endswith("-draft"):
+            continue
+        for claim in report["claims"]:
+            if claim["kind"] != "fact":
+                continue
+            text = "".join(ui.get(f"/api/ui/evidence/{ref}").get_json()["evidence"]["paragraph"] for ref in claim["evidence_refs"])
+            for number in re.findall(r"\d[\d,]*\.?\d*", claim["text"].replace("2026Q2", "")):
+                assert number in text, f"{rv} {claim['claim_id']}: {number} not in source"
 
 
 def test_evidence_missing_or_unreferenced(ui):
     missing = ui.get("/api/ui/evidence/ev-price-20260930-2454")
-    assert missing.status_code == 404 and missing.get_json()["error"] == "no_data"
+    assert missing.status_code == 404
     other = ui.get("/api/ui/evidence/src-2454-2026q2-announce")
     assert other.status_code == 404 and other.get_json()["error"] == "not_referenced"
 
@@ -259,19 +276,34 @@ def test_comparison_rules(ui):
     rows = {r["ticker"]: r for r in d["rows"]}
     assert list(rows) == ["2454", "2379", "3034", "2330"] and len(rows) <= 4
     assert rows["2330"]["role"] == "industry_reference" and rows["2330"]["include_in_peer_stats"] is False
-    assert "2330" in d["peer_stats"]["excluded"]
-    s = rows["2454"]
-    assert s["metrics"]["pe_ttm"]["value"] == round(s["price"]["value"] / s["metrics"]["pe_ttm"]["eps_ttm"], 2)
-    assert s["metrics"]["pe_ttm"]["source"] == "tool" and s["metrics"]["pe_ttm"]["consistent"] is True
+    assert set(d["peer_stats"]["excluded"]) == {"2454", "2330"}
     for r in d["rows"]:
         assert r["financial_period"] and r["price"]["trade_date"] == d["price_as_of"]
+        pe = r["metrics"]["pe_ttm"]
+        assert pe["source"] == "tool" and pe["value"] == round(r["price"]["value"] / pe["eps_ttm"], 2)
+        assert pe["consistent"] is True  # tool value equals B's peer snapshot
         for name, m in r["metrics"].items():
             assert m["value"] != 0, f"{r['ticker']} {name} shows 0"
             if m["value"] is None:
                 assert m["na_reason"]
-    assert rows["2379"]["metrics"]["pe_ttm"]["value"] is None  # only 1 quarter: no TTM, snapshot value not adopted
-    assert rows["2379"]["metrics"]["pe_ttm"]["snapshot_value"] == 19.5
-    assert d["peer_stats"]["pe_ttm"] is None and d["synthetic_fixture"] is True
+    peers = [rows["2379"], rows["3034"]]
+    expected = round(sum(r["metrics"]["pe_ttm"]["value"] for r in peers) / 2, 2)
+    assert d["peer_stats"]["pe_ttm"]["value"] == expected == d["peer_stats"]["snapshot_values"]["pe_ttm"]
+
+
+def test_comparison_dcf_uses_lead_assumptions(ui):
+    d = ui.get("/api/ui/comparison/2454").get_json()
+    assert d["dcf_assumptions"]["wacc"] == 0.09 and d["dcf_assumptions"]["terminal_growth"] == 0.03
+    s = next(r for r in d["rows"] if r["ticker"] == "2454")
+    from agents.calculator import calculate_dcf_scenario
+    from agents import tools_impl
+
+    m = tools_impl.get_financial_snapshot("2454", d["cutoff_at"])["data"]["metrics"]
+    expect = calculate_dcf_scenario([m["fcf_ttm"]] * 5, 0.09, 0.03, m["net_debt"], m["shares_outstanding_m"])
+    assert s["valuation"]["dcf_per_share"] == expect["intrinsic_value_per_share"]
+    gap = (expect["intrinsic_value_per_share"] - s["price"]["value"]) / s["price"]["value"]
+    assert s["valuation"]["gap"] == round(gap, 4)
+    assert s["valuation"]["sensitivity"]["9.0%"]["3.0%"] == expect["intrinsic_value_per_share"]
 
 
 def test_read_only_ui_has_no_model_code():

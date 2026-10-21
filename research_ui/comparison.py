@@ -1,37 +1,53 @@
-"""2454 peer-comparison panel data (W04-A), per ui/v12-comparison-contract.md.
+"""2454 peer-comparison panel data (W04-A, updated W05-A), per ui/v12-comparison-contract.md.
 
-Main values are only what B's deterministic tools can reproduce from the fixed
-snapshot (get_financial_snapshot, get_price_window, calculate_metrics). A value
-that exists only in B's peer snapshot is returned as `snapshot_value` with
-`source="snapshot_only"` and never enters peer statistics. Missing → null +
-reason, never 0. No LLM, no network.
+Main values come only from B's deterministic tools on the fixed snapshot
+(get_financial_snapshot, get_price_window, calculate_metrics). B's peer
+snapshot values are kept as `snapshot_value` and compared; a mismatch is a
+data-quality conflict. Missing → null + reason, never 0. No LLM, no network.
+
+DCF follows the lead's decisions of 2026-10-21 (handoff/decisions-2026-10.md):
+WACC 9 %, g 3 %, base case = 5 years flat at the TTM FCF, formula of
+valuation_agent/dcf_model.py as implemented in calculate_metrics(dcf_scenario).
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
 from agents import tools_impl
 
+from .risk import METHOD_VERSION as RISK_METHOD
+from .risk import VALUATION_FOOTNOTE, Check, data_quality_risk, valuation_status
+
 ROOT = Path(__file__).resolve().parent.parent
 PEER_SNAPSHOT = ROOT / "data" / "v12-peer-snapshot.json"
 ORDER = ("2454", "2379", "3034", "2330")
-METHOD_VERSION = "ui-peer-v1 / agents.calculator / tools-v12.0"
+DCF_ASSUMPTIONS = {"wacc": 0.09, "terminal_growth": 0.03, "years": 5,
+                   "fcf_basis": "5 年持平於 TTM FCF（基準情境）",
+                   "source": "組長核定 2026-10-21；WACC 為程式預設，非個股風險估計"}
+METHOD_VERSION = f"ui-peer-v2 / calculate_metrics / {RISK_METHOD}"
+STALE_AFTER = timedelta(days=120)  # latest quarter older than this at cutoff → marked stale
 
 
 def _na(reason: str, snapshot_value: Any = None, **extra: Any) -> dict[str, Any]:
     return {"value": None, "na_reason": reason, "source": "snapshot_only" if snapshot_value is not None else "none",
-            "snapshot_value": snapshot_value, **extra}
+            "snapshot_value": snapshot_value, "consistent": None, **extra}
 
 
-def _tool_value(value: float, snapshot_value: Any, **extra: Any) -> dict[str, Any]:
+def _tool_value(value: float, snapshot_value: Any, tol: float = 0.01, **extra: Any) -> dict[str, Any]:
     consistent = None
     if isinstance(snapshot_value, (int, float)):
-        consistent = abs(value - snapshot_value) <= max(0.01, abs(snapshot_value) * 0.001)
+        consistent = abs(value - snapshot_value) <= max(tol, abs(snapshot_value) * 0.001)
     return {"value": value, "na_reason": None, "source": "tool", "snapshot_value": snapshot_value,
             "consistent": consistent, **extra}
+
+
+def _calc(op: str, values: dict[str, Any], refs: list[str]) -> dict[str, Any]:
+    return tools_impl.calculate_metrics(op, values, refs or ["snapshot"])
 
 
 def _quarters(ticker: str, cutoff: str) -> list[dict[str, Any]]:
@@ -40,96 +56,168 @@ def _quarters(ticker: str, cutoff: str) -> list[dict[str, Any]]:
     return [q for q in company.get("quarters", []) if tools_impl._parse_iso(q["available_at"]) <= cutoff_dt]
 
 
-def _evidence_exists(ref: str) -> bool:
-    return tools_impl.read_evidence(ref).get("status") == "ok"
+def _evidence(ref: str) -> dict[str, Any]:
+    out = tools_impl.read_evidence(ref)
+    if out.get("status") != "ok":
+        return {"id": ref, "exists": False, "hash_match": None}
+    data = out["data"]
+    match = hashlib.sha256(data["paragraph"].encode("utf-8")).hexdigest() == data["content_hash"]
+    return {"id": ref, "exists": True, "hash_match": match}
+
+
+def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    issues: list[dict[str, Any]] = []
+    snap = dict(snap)
+    snap.setdefault("evidence_refs", [f"ev-{code}-2026q2-01"])
+    quarters = _quarters(code, cutoff)
+    fin = tools_impl.get_financial_snapshot(code, cutoff)
+    fin_data = fin.get("data") or {}
+    m = fin_data.get("metrics") or {}
+    refs = list(snap.get("evidence_refs") or [])
+
+    price = None
+    window = tools_impl.get_price_window(code, cutoff, 1)
+    if window.get("status") == "ok":
+        last = window["data"]["closes"][-1]
+        if last["trade_date"] == price_as_of:
+            price = {"value": last.get("close_price", last.get("close")), "trade_date": last["trade_date"],
+                     "basis": window["data"].get("price_basis"), "available_at": last.get("available_at")}
+
+    out: dict[str, Any] = {}
+    eps_ttm, bvps = m.get("eps_ttm"), m.get("bvps")
+
+    # P/E (TTM) = same-day close ÷ TTM EPS
+    if price is None:
+        out["pe_ttm"] = _na(f"{price_as_of} 無收盤價，不用其他日期補", snap.get("pe_ttm"))
+    elif eps_ttm is None:
+        out["pe_ttm"] = _na("TTM 需連續 4 季單季 EPS", snap.get("pe_ttm"))
+    else:
+        r = _calc("pe_ttm", {"price": price["value"], "eps_ttm": eps_ttm}, refs)
+        out["pe_ttm"] = (_tool_value(r["data"]["result_value"], snap.get("pe_ttm"), eps_ttm=eps_ttm)
+                         if r["status"] == "ok" else _na(r.get("reason") or "不適用", snap.get("pe_ttm")))
+
+    # P/B = same-day close ÷ BVPS (through the calculator's peer_comparison rule)
+    if price is None:
+        out["pb"] = _na(f"{price_as_of} 無收盤價", snap.get("pb_ratio"))
+    elif not isinstance(bvps, (int, float)) or bvps <= 0:
+        out["pb"] = _na("BVPS 缺失或非正數", snap.get("pb_ratio"))
+    else:
+        r = _calc("peer_comparison", {"subject": "2454", "comparators": [],
+                                      "metrics": {"2454": {"price": price["value"], "bvps": bvps}}}, refs)
+        pb = r["data"]["comparison_table"]["2454"]["pb_ratio"] if r["status"] == "ok" else None
+        out["pb"] = _tool_value(pb, snap.get("pb_ratio"), bvps=bvps) if pb is not None else _na("不適用", snap.get("pb_ratio"))
+
+    # single-quarter revenue YoY
+    latest = quarters[-1] if quarters else None
+    if latest is None:
+        out["revenue_yoy_quarter"] = _na("快照沒有可得季度", snap.get("revenue_yoy_quarter"))
+    else:
+        base_period = f"{int(latest['period'][:4]) - 1}{latest['period'][4:]}"
+        base = next((q for q in quarters if q["period"] == base_period), None)
+        if base is None:
+            out["revenue_yoy_quarter"] = _na(f"缺去年同季基期（{base_period}）", snap.get("revenue_yoy_quarter"))
+        else:
+            r = _calc("growth_rate", {"current": latest.get("revenue"), "previous": base.get("revenue")}, refs)
+            out["revenue_yoy_quarter"] = (_tool_value(r["data"]["result_value"], snap.get("revenue_yoy_quarter"), tol=0.0005,
+                                                      base_period=base_period)
+                                          if r["status"] == "ok" else _na(r.get("reason") or "不適用", snap.get("revenue_yoy_quarter")))
+
+    # FCF (TTM)
+    fcf_ttm = m.get("fcf_ttm")
+    out["fcf_ttm"] = (_tool_value(fcf_ttm, snap.get("fcf_ttm_100m"), tol=0.05, unit="億元") if fcf_ttm is not None
+                      else _na("TTM 需連續 4 季", snap.get("fcf_ttm_100m"), unit="億元"))
+
+    # DCF per share and gap
+    dcf_inputs = {"free_cash_flows": [fcf_ttm] * DCF_ASSUMPTIONS["years"] if fcf_ttm is not None else None,
+                  "wacc": DCF_ASSUMPTIONS["wacc"], "terminal_growth": DCF_ASSUMPTIONS["terminal_growth"],
+                  "net_debt": m.get("net_debt"), "shares_outstanding": m.get("shares_outstanding_m")}
+    dcf_per_share, sensitivity = None, None
+    if all(v is not None for v in dcf_inputs.values()):
+        r = _calc("dcf_scenario", dcf_inputs, refs)
+        if r["status"] == "ok":
+            dcf_per_share = r["data"]["intrinsic_value_per_share"]
+            sensitivity = r["data"].get("sensitivity_matrix")
+    valuation = valuation_status(dcf_per_share, price["value"] if price else None, dcf_inputs)
+    out["dcf_gap"] = ({"value": valuation["gap"], "na_reason": None, "source": "tool", "snapshot_value": snap.get("dcf_gap_pct"),
+                       "consistent": None, "dcf_per_share": dcf_per_share}
+                      if valuation["gap"] is not None else _na(valuation["reason"], snap.get("dcf_gap_pct")))
+
+    # data-quality checks (predefined list; see ui/v12-risk-state-cases.md)
+    evidence = [_evidence(r) for r in refs]
+    checks = [
+        Check("price_same_day", "同日收盤價", True, "pass" if price else "missing",
+              "" if price else f"{price_as_of} 無收盤價"),
+        Check("eps_ttm_4q", "連續 4 季 EPS（TTM）", True, "pass" if eps_ttm is not None else "missing",
+              "" if eps_ttm is not None else "不足 4 季"),
+        Check("fin_available_at", "財報可得時間", True,
+              "pass" if fin_data.get("available_at") else ("time_unknown" if fin_data else "missing"),
+              "" if fin_data.get("available_at") else "沒有可得時間"),
+        Check("source_traceable", "來源片段可追溯", True,
+              "conflict" if any(e["exists"] and e["hash_match"] is False for e in evidence)
+              else ("pass" if evidence and all(e["exists"] for e in evidence) else "missing"),
+              "" if evidence and all(e["exists"] and e["hash_match"] for e in evidence) else
+              "片段 hash 不符" if any(e["hash_match"] is False for e in evidence) else "引用的片段不在快照中"),
+        Check("bvps", "每股淨值 BVPS", False, "pass" if isinstance(bvps, (int, float)) and bvps > 0 else "missing"),
+        Check("yoy_base", "去年同季營收", False, "pass" if out["revenue_yoy_quarter"]["value"] is not None else "missing",
+              out["revenue_yoy_quarter"]["na_reason"] or ""),
+    ]
+    conflicts = [n for n, c in out.items() if c.get("consistent") is False]
+    checks.append(Check("snapshot_consistent", "工具值與 B 快照一致", True, "conflict" if conflicts else "pass",
+                        ("不一致：" + "、".join(conflicts)) if conflicts else ""))
+    if fin_data.get("available_at"):
+        age = tools_impl._parse_iso(cutoff) - tools_impl._parse_iso(fin_data["available_at"])
+        checks.append(Check("freshness", "財報新鮮度", False, "stale" if age > STALE_AFTER else "pass",
+                            f"最新可得財報為 {age.days} 天前公告" if age > STALE_AFTER else ""))
+    risk = data_quality_risk(checks).as_dict()
+
+    for name, cell in out.items():
+        if cell.get("consistent") is False:
+            issues.append({"ticker": code, "metric": name,
+                           "issue": f"工具值 {cell['value']} 與 B 快照 {cell['snapshot_value']} 不一致"})
+        elif cell["source"] == "snapshot_only":
+            issues.append({"ticker": code, "metric": name, "issue": cell["na_reason"]})
+
+    role = snap.get("role")
+    return {
+        "ticker": code,
+        "name": snap.get("name") or fin_data.get("company_name"),
+        "role": role,
+        "financial_period": fin_data.get("latest_period") or snap.get("financial_period"),
+        "available_at": fin_data.get("available_at"),
+        "available_at_basis": fin_data.get("available_at_basis"),
+        "quarters_available": len(quarters),
+        "ttm_periods": fin_data.get("ttm_periods"),
+        "price": price,
+        "metrics": out,
+        "valuation": {**valuation, "dcf_per_share": dcf_per_share, "sensitivity": sensitivity},
+        "data_quality": risk,
+        "evidence": evidence,
+        "include_in_peer_stats": role == "peer",
+    }, issues
 
 
 def build_comparison() -> dict[str, Any]:
     peer = json.loads(PEER_SNAPSHOT.read_text(encoding="utf-8"))
     price_as_of, cutoff = peer["price_as_of"], peer["cutoff_at"]
     rows, checks = [], []
-
     for code in ORDER:
         snap = peer["companies"].get(code)
         if snap is None:
             continue
-        quarters = _quarters(code, cutoff)
-        fin = tools_impl.get_financial_snapshot(code, cutoff)
-        fin_data = fin.get("data") or {}
-        metrics = fin_data.get("metrics") or {}
-
-        price = None
-        window = tools_impl.get_price_window(code, f"{price_as_of}T13:30:00+08:00", 1)
-        if window.get("status") == "ok":
-            last = window["data"]["closes"][-1]
-            if last["trade_date"] == price_as_of:
-                price = {"value": last["close"], "trade_date": last["trade_date"], "basis": window["data"]["price_basis"]}
-
-        refs = snap.get("evidence_refs") or []
-        out: dict[str, Any] = {}
-
-        # P/E (TTM)
-        eps_ttm = metrics.get("eps_ttm")
-        if price is None:
-            out["pe_ttm"] = _na(f"{price_as_of} 無收盤價，不用其他日期補", snap.get("pe_ttm"))
-        elif eps_ttm is None:
-            out["pe_ttm"] = _na(f"TTM 需連續 4 季，快照只有 {len(quarters)} 季", snap.get("pe_ttm"))
-        else:
-            calc = tools_impl.calculate_metrics("pe_ttm", {"price": price["value"], "eps_ttm": eps_ttm}, refs or ["snapshot"])
-            out["pe_ttm"] = (_tool_value(calc["data"]["result_value"], snap.get("pe_ttm"), eps_ttm=eps_ttm)
-                             if calc["status"] == "ok" else _na(calc.get("reason") or "不適用", snap.get("pe_ttm")))
-
-        # P/B — BVPS is not in the snapshot, so the tool cannot reproduce it.
-        out["pb"] = _na("快照沒有 BVPS，工具無法重算", snap.get("pb_ratio"))
-
-        # Single-quarter revenue YoY — needs the same quarter one year earlier.
-        latest = quarters[-1] if quarters else None
-        if latest is None:
-            out["revenue_yoy_quarter"] = _na("快照沒有可得季度", snap.get("revenue_yoy_quarter"))
-        else:
-            year, q = int(latest["period"][:4]), latest["period"][4:]
-            base_period = f"{year - 1}{q}"
-            base = next((x for x in quarters if x["period"] == base_period), None)
-            if base is None:
-                out["revenue_yoy_quarter"] = _na(f"缺去年同季基期（{base_period}）", snap.get("revenue_yoy_quarter"))
-            else:
-                calc = tools_impl.calculate_metrics("growth_rate", {"current": latest.get("revenue"), "previous": base.get("revenue")}, refs or ["snapshot"])
-                out["revenue_yoy_quarter"] = (_tool_value(calc["data"]["result_value"], snap.get("revenue_yoy_quarter"))
-                                              if calc["status"] == "ok" else _na(calc.get("reason") or "不適用", snap.get("revenue_yoy_quarter")))
-
-        # FCF (TTM) — operating cash flow minus positive CapEx, four consecutive quarters.
-        fcf_ttm = metrics.get("fcf_ttm")
-        out["fcf_ttm"] = (_tool_value(fcf_ttm, snap.get("fcf_100m"), unit="億元") if fcf_ttm is not None
-                          else _na(f"TTM 需連續 4 季，快照只有 {len(quarters)} 季", snap.get("fcf_100m"), unit="億元"))
-
-        # DCF gap — parameters (WACC, g) are not provided; judged in W05.
-        out["dcf_gap"] = _na("DCF 參數（WACC、g）未提供，W05 判定", snap.get("dcf_gap_pct"))
-
-        for name, cell in out.items():
-            if cell.get("consistent") is False:
-                checks.append({"ticker": code, "metric": name, "issue": f"工具值 {cell['value']} 與 B 快照 {cell['snapshot_value']} 不一致"})
-            elif cell["source"] == "snapshot_only":
-                checks.append({"ticker": code, "metric": name, "issue": cell["na_reason"]})
-
-        role = snap.get("role")
-        rows.append({
-            "ticker": code,
-            "name": snap.get("name") or fin_data.get("company_name"),
-            "role": role,
-            "financial_period": fin_data.get("latest_period") or snap.get("financial_period"),
-            "available_at": fin_data.get("available_at"),
-            "quarters_available": len(quarters),
-            "price": price,
-            "metrics": out,
-            "evidence": [{"id": r, "exists": _evidence_exists(r)} for r in refs],
-            "include_in_peer_stats": role == "peer",
-        })
+        row, issues = _row(code, snap, price_as_of, cutoff)
+        rows.append(row)
+        checks.extend(issues)
 
     subject_period = next((r["financial_period"] for r in rows if r["role"] == "subject"), None)
     peers = [r for r in rows if r["include_in_peer_stats"] and r["financial_period"] == subject_period]
-    pe_values = [r["metrics"]["pe_ttm"]["value"] for r in peers if r["metrics"]["pe_ttm"]["value"] is not None]
-    periods = sorted({r["financial_period"] for r in rows if r["financial_period"]})
 
+    def avg(metric: str, nd: int = 2) -> dict[str, Any]:
+        vals = [r["metrics"][metric]["value"] for r in peers if r["metrics"][metric]["value"] is not None]
+        return {"value": round(sum(vals) / len(vals), nd) if vals else None, "n": len(vals),
+                "na_reason": None if vals else "同業沒有可由工具重現的值"}
+
+    stats_snapshot = peer.get("peer_summary_statistics") or {}
+    synthetic = peer.get("synthetic_fixture")
     return {
         "ok": True,
         "subject": "2454",
@@ -137,22 +225,33 @@ def build_comparison() -> dict[str, Any]:
         "cutoff_at": cutoff,
         "snapshot_version": peer.get("snapshot_version"),
         "method_version": METHOD_VERSION,
-        "synthetic_fixture": True,
-        "fixture_note": "B 的同業快照未標明真實或合成，且尚未經 D 確認；本面板一律以 FIXTURE 呈現。",
-        "periods_consistent": len(periods) <= 1,
+        "synthetic_fixture": synthetic is not False,
+        "data_status": "B 標示為真實資料（synthetic_fixture=false），待 D 覆核" if synthetic is False
+                       else "B 未標示真實或合成，一律以 FIXTURE 呈現",
+        "periods_consistent": len({r["financial_period"] for r in rows if r["financial_period"]}) <= 1,
         "rows": rows,
         "peer_stats": {
-            "basis": "只用 role=peer、與主體同財報期、且 P/E 可由工具重現者；2330 產業參照一律排除",
-            "pe_ttm": round(sum(pe_values) / len(pe_values), 2) if pe_values else None,
-            "n": len(pe_values),
-            "na_reason": None if pe_values else "同業沒有可由工具重現的 P/E",
-            "snapshot_value": (peer.get("peer_summary_statistics") or {}).get("peer_avg_pe"),
+            "basis": "只用 role=peer、與主體同財報期、且可由工具重現者；2330 產業參照與主體一律排除",
+            "pe_ttm": avg("pe_ttm"), "pb": avg("pb"), "revenue_yoy_quarter": avg("revenue_yoy_quarter", 4),
+            "snapshot_values": {"pe_ttm": stats_snapshot.get("peer_avg_pe"), "pb": stats_snapshot.get("peer_avg_pb"),
+                                "revenue_yoy_quarter": stats_snapshot.get("peer_avg_revenue_yoy")},
             "excluded": [r["ticker"] for r in rows if not r["include_in_peer_stats"]],
         },
+        "dcf_assumptions": DCF_ASSUMPTIONS,
+        "valuation_footnote": VALUATION_FOOTNOTE,
         "checks": checks,
     }
 
 
+def company_row(code: str) -> dict[str, Any]:
+    """Same tool-derived row for any snapshot ticker (used by the published list)."""
+    peer = json.loads(PEER_SNAPSHOT.read_text(encoding="utf-8"))
+    snap = dict(peer["companies"].get(code) or {"role": "research"})
+    row, _ = _row(code, snap, peer["price_as_of"], peer["cutoff_at"])
+    return row
+
+
 def referenced_evidence_ids() -> set[str]:
     peer = json.loads(PEER_SNAPSHOT.read_text(encoding="utf-8"))
-    return {ref for company in peer["companies"].values() for ref in company.get("evidence_refs") or []}
+    refs = {ref for company in peer["companies"].values() for ref in company.get("evidence_refs") or []}
+    return refs | {f"ev-{code}-2026q2-01" for code in ("2330", "2317", "2454")}
