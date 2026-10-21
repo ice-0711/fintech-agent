@@ -71,6 +71,22 @@
       "tool": "str",
       "reason": "str",
       "data": null
+    },
+    "unreadable": {
+      "status": "unreadable",
+      "tool": "str",
+      "reason": "str",
+      "data": null
+    },
+    "skipped": {
+      "status": "skipped",
+      "reason": "str (more than 2 parallel calls in one turn)"
+    },
+    "refused": {
+      "status": "refused",
+      "tool": "str",
+      "reason": "str (tool budget)",
+      "data": null
     }
   },
   "declarations": [

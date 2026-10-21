@@ -16,6 +16,14 @@ from agents.worker import run_once
 from conftest import job_request
 from test_provider_mock import MODEL, FakeClient, fc_response, text_response
 
+@pytest.fixture(autouse=True)
+def frozen_case_fixtures(monkeypatch):
+    """Agent tests use their own frozen snapshots, independent of B's evolving fixtures/dev."""
+    from pathlib import Path
+    import agents.snapshot as snapshot
+    monkeypatch.setattr(snapshot, "DEV_FIXTURES", Path(__file__).parent / "fixtures" / "agent_case_fixtures.json")
+
+
 QUOTA = ProjectQuota(model_id=MODEL, rpm=1000, tpm=10**7, rpd=100000)
 CASE01 = {"ticker": "2330", "cutoff_at": "2026-07-20T17:00:00+08:00", "source_snapshot_id": "snap-dev-case-01",
           "focus": "台積電 2026Q2 先進製程與營收相符"}
@@ -265,3 +273,27 @@ def test_parallel_calls_beyond_two_are_skipped(store):
     tool_turn = [c for c in client.calls[1]["contents"] if c.parts and c.parts[0].function_response][-1]
     skipped = tool_turn.parts[2].function_response.response
     assert skipped["status"] == "skipped"
+
+
+CASE15 = {"ticker": "2454", "cutoff_at": "2026-08-05T17:00:00+08:00", "source_snapshot_id": "snap-dev-case-15"}
+CASE26 = {"ticker": "2317", "cutoff_at": "2026-08-12T17:00:00+08:00", "source_snapshot_id": "snap-dev-case-26"}
+
+
+def test_unreadable_source_is_reported_not_crashing(store):
+    final, client, events = run_case(store, CASE15, [
+        fc_response("search_evidence", {"ticker": "2454", "query": "法說", "cutoff": CASE15["cutoff_at"], "limit": 3}),
+        fc_response("read_evidence", {"evidence_version_id": "ev-dev-15-unreadable"}),
+        text_response(draft([{"claim_id": "c1", "kind": "unknown", "text": "法說會簡報正文不可讀", "evidence_refs": [],
+                              "limitations": ["來源不可讀"]}], status="insufficient"))])
+    assert [e["detail"]["status"] for e in events if e["event_type"] == "tool_call"] == ["ok", "unreadable"]
+    assert final["status"] == "insufficient_evidence"
+
+
+def test_simulated_tool_timeout_counts_active_time_and_job_continues(store):
+    final, client, events = run_case(store, CASE26, [
+        fc_response("read_evidence", {"evidence_version_id": "ev-2317-2026q2-consolidated"}),
+        text_response(draft([{"claim_id": "c1", "kind": "unknown", "text": "read_evidence 逾時，未取得來源",
+                              "evidence_refs": [], "limitations": ["工具逾時"]}], status="insufficient"))])
+    tool = [e["detail"] for e in events if e["event_type"] == "tool_call"][0]
+    assert tool["status"] == "tool_error" and "逾時" in tool["reason"]
+    assert final["active_seconds"] >= 15 and final["status"] == "insufficient_evidence"

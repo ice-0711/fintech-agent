@@ -334,8 +334,6 @@ def calculate_intrinsic_value(fundamental_data: dict[str, Any]) -> dict[str, Any
         net_debt = money_to_100m(fundamental_data.get("net_debt"))
     if net_debt is None:
         net_debt = money_to_100m(fundamental_data.get("latest", {}).get("net_debt"))
-    if net_debt is None:
-        net_debt = 0.0
 
     shares = env_float_optional([f"SHARES_OUTSTANDING_{stock_code}", "DEFAULT_SHARES_OUTSTANDING"])
     shares_outstanding = shares_to_million(shares) or shares_to_million(fundamental_data.get("shares_outstanding"))
@@ -343,6 +341,18 @@ def calculate_intrinsic_value(fundamental_data: dict[str, Any]) -> dict[str, Any
         shares_outstanding = shares_to_million(fundamental_data.get("latest", {}).get("shares_outstanding"))
     if not shares_outstanding:
         raise ValueError("fundamental_data 缺少 shares_outstanding，無法計算每股內在價值。")
+
+    if net_debt is None:
+        # data-contract §2.7 / §4.2: a missing net debt is never treated as 0. No per-share value.
+        return {
+            "intrinsic_value_per_share": None,
+            "unavailable_reason": "缺淨負債資料，DCF 每股價值無法判定（不以 0 代替）",
+            "free_cash_flows": free_cash_flows,
+            "net_debt": None,
+            "shares_outstanding": shares_outstanding,
+            "wacc": wacc,
+            "terminal_growth": terminal_growth,
+        }
 
     details = calculate_dcf_details(
         free_cash_flows=free_cash_flows,
@@ -425,17 +435,15 @@ def generate_charts(
     stock_name = fundamental_data["company"]
     stock_dates, stock_prices = stock_price_series(macro_df, fundamental_data)
     ratio_years, pe_list, pb_list = ratio_series(fundamental_data)
-    waterfall_components = ["五年 FCF 現值", "終端價值現值", "淨負債調整"]
-    waterfall_values = [
-        dcf_details["pv_fcf"],
-        dcf_details["pv_terminal"],
-        -dcf_details["net_debt"],
-    ]
-    return [
+    charts = [
         plot_stock_price(stock_dates, stock_prices, stock_name),
         plot_financial_ratios(ratio_years, pe_list, pb_list, stock_name),
-        plot_dcf_waterfall(waterfall_components, waterfall_values, stock_name),
     ]
+    if dcf_details.get("intrinsic_value_per_share") is not None:
+        waterfall_components = ["五年 FCF 現值", "終端價值現值", "淨負債調整"]
+        waterfall_values = [dcf_details["pv_fcf"], dcf_details["pv_terminal"], -dcf_details["net_debt"]]
+        charts.append(plot_dcf_waterfall(waterfall_components, waterfall_values, stock_name))
+    return charts
 
 
 def build_report_if_available(
@@ -481,7 +489,8 @@ def run_analysis(stock_code: str) -> dict[str, Any]:
     print(f"財務資料來源：{fundamental_data.get('data_source')}")
 
     dcf_details = calculate_intrinsic_value(fundamental_data)
-    print(f"每股內在價值：{dcf_details['intrinsic_value_per_share']:,.2f} 元/股")
+    value = dcf_details["intrinsic_value_per_share"]
+    print(f"每股內在價值：{value:,.2f} 元/股" if value is not None else f"每股內在價值：{dcf_details['unavailable_reason']}")
 
     chart_paths = generate_charts(macro_df, fundamental_data, dcf_details)
     for path in chart_paths:

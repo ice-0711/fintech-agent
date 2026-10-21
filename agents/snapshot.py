@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from . import tools_impl
+from .register_tools import TOOL_TIMEOUT_SECONDS, with_timeout
 
 ROOT = Path(__file__).resolve().parents[1]
 DEV_FIXTURES = ROOT / "fixtures" / "dev" / "case_fixtures.json"
@@ -46,9 +47,10 @@ class SnapshotToolbox:
                 if e.get("ticker") == self.ticker and _t(e["available_at"]) <= self.cutoff]
 
     def snapshot_view(self) -> dict[str, Any]:
-        """Snapshot dict for the deterministic review checks (agents/review_checks.py)."""
+        """Snapshot dict for the deterministic review checks (agents/review_checks.py).
+        Unreadable sources (paragraph null) become "" so no number can be found in them."""
         view = dict(self.case or {"ticker": self.ticker})
-        view["evidences"] = self._evidences()
+        view["evidences"] = [dict(e, paragraph=e.get("paragraph") or "") for e in self._evidences()]
         return view
 
     def search_evidence(self, ticker: str, query: str, cutoff: str, limit: int = 5) -> dict[str, Any]:
@@ -63,7 +65,8 @@ class SnapshotToolbox:
             "title": e.get("title", ""),
             "available_at": e["available_at"],
             "content_hash": e.get("content_hash"),
-            "abstract": e["paragraph"][:80],
+            "abstract": (e.get("paragraph") or "")[:80] or None,
+            **({"read_status": "unreadable"} if e.get("paragraph") is None else {}),
         } for e in self._evidences() if _t(e["available_at"]) <= limit_dt]
         if not rows:
             return {"status": "no_data", "tool": "search_evidence", "reason": "本快照於 cutoff 前無可得來源", "data": None}
@@ -72,6 +75,9 @@ class SnapshotToolbox:
     def read_evidence(self, evidence_version_id: str) -> dict[str, Any]:
         for e in self._evidences():
             if e["evidence_version_id"] == evidence_version_id:
+                if e.get("paragraph") is None:  # CASE-15; same shape as B's tools_impl
+                    return {"status": "unreadable", "tool": "read_evidence", "data": None,
+                            "reason": "來源正文不可讀（paragraph 為 null），不得補造內容"}
                 return {"status": "ok", "tool": "read_evidence", "data": {
                     "evidence_version_id": e["evidence_version_id"],
                     "paragraph": e["paragraph"][:1200],
@@ -116,5 +122,23 @@ class SnapshotToolbox:
     def calculate_metrics(self, operation: str, values: dict[str, Any], evidence_refs: list[str]) -> dict[str, Any]:
         return tools_impl.calculate_metrics(operation=operation, values=values, evidence_refs=evidence_refs)
 
+    def _simulated_timeout(self, name: str, args: dict[str, Any]) -> bool:
+        sim = (self.case or {}).get("tool_simulation") or {}
+        if sim.get("behavior") != "timeout" or sim.get("tool_name") != name:
+            return False
+        target = sim.get("evidence_version_id")
+        return target is None or args.get("evidence_version_id") == target
+
     def __call__(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
-        return getattr(self, name)(**args)
+        """Run with B's per-tool timeout (register_tools.with_timeout). A snapshot's
+        tool_simulation=timeout (CASE-26) is answered as that timeout would be, without
+        actually waiting; the elapsed limit is reported so it counts toward active time."""
+        if self._simulated_timeout(name, args):
+            raise SimulatedTimeout(f"{name} 逾時（>{TOOL_TIMEOUT_SECONDS:g} 秒，快照模擬）", TOOL_TIMEOUT_SECONDS)
+        return with_timeout(name, lambda **a: getattr(self, name)(**a))(args)
+
+
+class SimulatedTimeout(TimeoutError):
+    def __init__(self, message: str, seconds: float):
+        super().__init__(message)
+        self.seconds = seconds

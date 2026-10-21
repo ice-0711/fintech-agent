@@ -282,7 +282,7 @@
       valuation.innerHTML = `
         <div class="metric">
           <div class="label">${escapeHtml(data.company)}（${escapeHtml(data.stock_code)}）</div>
-          <div class="value">${Number(data.intrinsic_value).toLocaleString("zh-TW", { maximumFractionDigits: 2 })}</div>
+          <div class="value">${data.intrinsic_value == null ? (data.intrinsic_value_note || "無法判定") : Number(data.intrinsic_value).toLocaleString("zh-TW", { maximumFractionDigits: 2 })}</div>
           <div class="small">每股內在價值，單位：元 / 股</div>
         </div>
         <div class="flow">

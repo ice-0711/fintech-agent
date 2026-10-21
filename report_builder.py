@@ -153,11 +153,14 @@ def build_pdf_report(
     pdf.ln(5)
 
     add_section_title(pdf, "一、DCF 估值結論")
-    add_key_value(pdf, "每股內在價值", f"{dcf_details['intrinsic_value_per_share']:,.2f} 元/股")
-    add_key_value(pdf, "五年 FCF 現值", f"{dcf_details['pv_fcf']:,.2f} 億元")
-    add_key_value(pdf, "終端價值現值", f"{dcf_details['pv_terminal']:,.2f} 億元")
-    add_key_value(pdf, "企業價值", f"{dcf_details['enterprise_value']:,.2f} 億元")
-    add_key_value(pdf, "股權價值", f"{dcf_details['equity_value']:,.2f} 億元")
+    value = dcf_details.get("intrinsic_value_per_share")
+    add_key_value(pdf, "每股內在價值", f"{value:,.2f} 元/股" if value is not None
+                  else dcf_details.get("unavailable_reason", "無法判定"))
+    if value is not None:
+        add_key_value(pdf, "五年 FCF 現值", f"{dcf_details['pv_fcf']:,.2f} 億元")
+        add_key_value(pdf, "終端價值現值", f"{dcf_details['pv_terminal']:,.2f} 億元")
+        add_key_value(pdf, "企業價值", f"{dcf_details['enterprise_value']:,.2f} 億元")
+        add_key_value(pdf, "股權價值", f"{dcf_details['equity_value']:,.2f} 億元")
     pdf.ln(4)
 
     add_section_title(pdf, "二、財報分析摘要")

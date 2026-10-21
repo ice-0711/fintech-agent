@@ -26,7 +26,7 @@ from .budget import BudgetExceeded, BudgetGate, BudgetLimits, ProjectQuota
 from .provider import GeminiAdapter, _hash
 from .review_checks import check_draft
 from .review_contract import REVIEWER_PROMPT_VERSION, validate_review
-from .snapshot import SnapshotToolbox
+from .snapshot import SimulatedTimeout, SnapshotToolbox
 from .tools import args_hash, dispatch
 
 PROMPTS = Path(__file__).resolve().parent / "prompts"
@@ -195,13 +195,25 @@ class ResearchRun:
     def run_tool(self, role: str, call: Any) -> Any:
         name, args = call.name, dict(call.args or {})
         h = args_hash(args)
+        started, simulated = time.monotonic(), 0.0
+
+        def execute(tool: str, a: dict[str, Any]) -> dict[str, Any]:
+            nonlocal simulated
+            try:
+                return self.toolbox(tool, a)
+            except SimulatedTimeout as exc:
+                simulated = exc.seconds
+                raise
+
         try:
             self.gate.register_tool_call(name, h)
-            result = dispatch(role, name, args, job_cutoff=self.job["cutoff_at"], executor=self.toolbox)
+            result = dispatch(role, name, args, job_cutoff=self.job["cutoff_at"], executor=execute)
         except BudgetExceeded as exc:
             if exc.reason not in ("tool_limit", "duplicate_tool_call"):
                 raise
             result = {"status": "refused", "tool": name, "reason": str(exc), "data": None}
+        # Tool time counts toward the 180 s active-time cap (ch.02), including a simulated timeout.
+        self.gate.add_active_time(time.monotonic() - started + simulated)
         obs_id = f"obs-{len(self.observations) + 1}"
         body = {"obs_id": obs_id, **compact(result)}
         text = json.dumps(body, ensure_ascii=False)

@@ -79,6 +79,7 @@ def stock_payload(stock_code: str) -> dict[str, Any]:
         "risks": fundamental.get("risks") or [],
         "fcf_forecast": run_result["dcf"].get("free_cash_flows") or [],
         "intrinsic_value": run_result["dcf"]["intrinsic_value_per_share"],
+        "intrinsic_value_note": run_result["dcf"].get("unavailable_reason"),
         "wacc": run_result["dcf"].get("wacc"),
         "terminal_growth": run_result["dcf"].get("terminal_growth"),
         "charts": [output_url(path) for path in run_result["charts"]],
