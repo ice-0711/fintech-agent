@@ -1,7 +1,7 @@
 {
-  "snapshot_version": "v1.7-w04",
+  "snapshot_version": "v1.8-w06",
   "generated_by": "scripts/build_peer_snapshot.py",
-  "generated_at": "2026-10-20T20:39:55+08:00",
+  "generated_at": "2026-10-22T01:02:11+08:00",
   "verified_by": "Team Member B",
   "synthetic_fixture": false,
   "subject": "2454",
@@ -10,7 +10,7 @@
   "cutoff_at": "2026-09-30T17:30:00+08:00",
   "source_snapshot": {
     "file": "data/financial-snapshots.json",
-    "manifest_version": "v1.5-eps-source"
+    "manifest_version": "v1.6-tw-market"
   },
   "rule_constraints": [
     "最多 4 家公司（主體 2454 + 同業 2379、3034 + 產業參照 2330）",
@@ -55,9 +55,15 @@
       "revenue_yoy_quarter": 0.0121,
       "revenue_yoy_basis": "2026Q2 單季營收 ÷ 2025Q2 單季營收 − 1",
       "fcf_ttm_100m": 920.63,
-      "dcf_intrinsic_value": null,
-      "dcf_gap_pct": null,
-      "dcf_status": "WACC、g 待組長核定，未計算",
+      "dcf_intrinsic_value": 975.52,
+      "dcf_gap_pct": -0.8017,
+      "dcf_status": "已計算（WACC 9%、g 3%、5 年持平 TTM FCF；內在價值非目標價）",
+      "dcf_params": {
+        "wacc": 0.09,
+        "terminal_growth": 0.03,
+        "years": 5,
+        "fcf_basis": "flat_ttm"
+      },
       "financial_snapshot_id": "snap-2454-2026Q2",
       "financial_source_id": "src-finmind-2454-fs",
       "financial_content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
@@ -104,9 +110,15 @@
       "revenue_yoy_quarter": 0.1767,
       "revenue_yoy_basis": "2026Q2 單季營收 ÷ 2025Q2 單季營收 − 1",
       "fcf_ttm_100m": 168.21,
-      "dcf_intrinsic_value": null,
-      "dcf_gap_pct": null,
-      "dcf_status": "WACC、g 待組長核定，未計算",
+      "dcf_intrinsic_value": 497.48,
+      "dcf_gap_pct": -0.3454,
+      "dcf_status": "已計算（WACC 9%、g 3%、5 年持平 TTM FCF；內在價值非目標價）",
+      "dcf_params": {
+        "wacc": 0.09,
+        "terminal_growth": 0.03,
+        "years": 5,
+        "fcf_basis": "flat_ttm"
+      },
       "financial_snapshot_id": "snap-2379-2026Q2",
       "financial_source_id": "src-finmind-2379-fs",
       "financial_content_hash": "ea32d00d3021d4efd0c2fb0d7efeddbedfca0e6fdede3b01174742b5496416b7",
@@ -153,9 +165,15 @@
       "revenue_yoy_quarter": 0.0959,
       "revenue_yoy_basis": "2026Q2 單季營收 ÷ 2025Q2 單季營收 − 1",
       "fcf_ttm_100m": 167.49,
-      "dcf_intrinsic_value": null,
-      "dcf_gap_pct": null,
-      "dcf_status": "WACC、g 待組長核定，未計算",
+      "dcf_intrinsic_value": 502.88,
+      "dcf_gap_pct": -0.079,
+      "dcf_status": "已計算（WACC 9%、g 3%、5 年持平 TTM FCF；內在價值非目標價）",
+      "dcf_params": {
+        "wacc": 0.09,
+        "terminal_growth": 0.03,
+        "years": 5,
+        "fcf_basis": "flat_ttm"
+      },
       "financial_snapshot_id": "snap-3034-2026Q2",
       "financial_source_id": "src-finmind-3034-fs",
       "financial_content_hash": "da2177c4ec05c5ac85a497dacdf0295c492b0b8c532f35d205e96dce9c4ce26a",
@@ -202,9 +220,15 @@
       "revenue_yoy_quarter": 0.3605,
       "revenue_yoy_basis": "2026Q2 單季營收 ÷ 2025Q2 單季營收 − 1",
       "fcf_ttm_100m": 11435.56,
-      "dcf_intrinsic_value": null,
-      "dcf_gap_pct": null,
-      "dcf_status": "WACC、g 待組長核定，未計算",
+      "dcf_intrinsic_value": 751.06,
+      "dcf_gap_pct": -0.6972,
+      "dcf_status": "已計算（WACC 9%、g 3%、5 年持平 TTM FCF；內在價值非目標價）",
+      "dcf_params": {
+        "wacc": 0.09,
+        "terminal_growth": 0.03,
+        "years": 5,
+        "fcf_basis": "flat_ttm"
+      },
       "financial_snapshot_id": "snap-2330-2026Q2",
       "financial_source_id": "src-finmind-2330-fs",
       "financial_content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f",
