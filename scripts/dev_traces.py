@@ -70,7 +70,7 @@ def mock_script(case: dict) -> list:
 
 def run(store: JobStore, case: dict, client, model_id: str, quota: ProjectQuota, tag: str) -> dict:
     req = validate_job_request({"ticker": case["ticker"], "mode": "dual", "cutoff_at": case["cutoff_at"],
-                                "source_snapshot_id": case["source_snapshot_id"], "focus": case["title"],
+                                "source_snapshot_id": case["source_snapshot_id"], "focus": case.get("title") or case.get("variant"),
                                 "idempotency_key": f"{case['case_id']}-{tag}"})
     job, _ = store.create_job(req, model_id)
     handler = make_research_handler(client, model_id, quota)
@@ -154,7 +154,7 @@ def main() -> None:
         out["model_id"] = model_id
 
     for c in chosen:
-        entry = {"case_id": c["case_id"], "ticker": c["ticker"], "category": c["category"], "title": c["title"],
+        entry = {"case_id": c["case_id"], "ticker": c["ticker"], "category": c["category"], "title": c.get("title") or c.get("variant"),
                  "expected_behavior": c["expected_behavior"], "mock": mocks[c["case_id"]]}
         if c["case_id"] in live:
             entry["live"] = live[c["case_id"]]

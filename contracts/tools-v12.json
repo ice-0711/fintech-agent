@@ -174,7 +174,7 @@
     },
     {
       "name": "get_macro_snapshot",
-      "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS) available at cutoff.",
+      "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS, TAIEX) available at cutoff.",
       "parameters": {
         "type": "object",
         "additionalProperties": false,

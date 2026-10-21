@@ -30,9 +30,9 @@ PEER_COMPARATORS = ("2379", "3034", "2330")  # 2330 = industry reference, exclud
 INDUSTRY_REFERENCE = ("2330",)
 MAX_PEER_COMPANIES = 4
 PRICE_SESSIONS = (1, 5, 20)
-# Locked 2026-10-15 from B's approved snapshot (data/financial-snapshots.json → macro, FRED).
-# ch.02 also lists a Taiwan market indicator; add it here once B provides an approved series.
-MACRO_SERIES_WHITELIST: tuple[str, ...] = ("CPIAUCSL", "FEDFUNDS")
+# Locked from B's approved snapshot (data/financial-snapshots.json → macro): CPI and policy rate
+# (FRED, 2026-10-15) and the Taiwan market indicator TAIEX (snapshot v1.6-tw-market, 2026-10-21).
+MACRO_SERIES_WHITELIST: tuple[str, ...] = ("CPIAUCSL", "FEDFUNDS", "TAIEX")
 ALL_TICKERS = RESEARCH_TICKERS + COMPARISON_ONLY_TICKERS
 
 _TICKER = {"type": "string", "enum": list(RESEARCH_TICKERS)}
@@ -78,7 +78,7 @@ TOOL_DECLARATIONS: list[dict[str, Any]] = [
     },
     {
         "name": "get_macro_snapshot",
-        "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS) available at cutoff.",
+        "description": "Whitelisted macro series (CPIAUCSL, FEDFUNDS, TAIEX) available at cutoff.",
         "parameters": {
             "type": "object",
             "additionalProperties": False,

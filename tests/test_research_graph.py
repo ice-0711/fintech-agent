@@ -347,3 +347,12 @@ def test_cancel_api_requires_token(tmp_path, monkeypatch):
     assert c.post(f"/api/research/jobs/{job_id}/cancel").status_code == 401
     r = c.post(f"/api/research/jobs/{job_id}/cancel", headers={"Authorization": "Bearer t"})
     assert r.status_code == 200 and r.get_json()["job"]["status"] == "cancelled"
+
+
+def test_format_retry_never_takes_the_review_call(store):
+    q = {"ticker": "2330", "query": "q", "cutoff": CASE01["cutoff_at"], "limit": 1}
+    final, client, events = run_case(store, CASE01, [
+        fc_response("search_evidence", q), fc_response("read_evidence", {"evidence_version_id": "ev-dev-01-official"}),
+        fc_response("search_evidence", dict(q, query="毛利")), text_response("not json")])
+    assert final["calls_used"] == 4 and final["stop_reason"] == "researcher_insufficient"
+    assert "draft_invalid" in [e["event_type"] for e in events]

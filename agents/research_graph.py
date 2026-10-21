@@ -32,7 +32,7 @@ from .tools import args_hash, dispatch
 PROMPTS = Path(__file__).resolve().parent / "prompts"
 RESEARCHER_PROMPT = (PROMPTS / "researcher-v1.2.txt").read_text(encoding="utf-8")
 REVIEWER_PROMPT = (PROMPTS / "reviewer-v1.2.txt").read_text(encoding="utf-8")
-RESEARCHER_PROMPT_VERSION = "researcher-v1.2.0"
+RESEARCHER_PROMPT_VERSION = "researcher-v1.2.1"  # 2026-10-21 W06 dev calibration: read sources first, partial unknowns
 QUESTION = "截至 cutoff_at，總經、基本面與估值證據支持哪些觀察？有哪些反向證據、假設與待確認訊號？"
 DECISION_RANK = {"pass": 0, "revise": 1, "insufficient": 2}
 MAX_STR, MAX_LIST, MAX_RESULT_CHARS = 200, 5, 900
@@ -260,6 +260,55 @@ class ResearchRun:
         return rem["model_calls"] > 1  # reviewer: keep one call for the decision
 
     # -- nodes ---------------------------------------------------------------
+    def can_researcher_send_again(self) -> bool:
+        """Another Researcher send must not take the call reserved for review (dual mode)."""
+        used, lim = self.job.get("calls_used", 0), self.gate.limits
+        if used >= lim.max_calls - (1 if self.mode == "dual" else 0):
+            return False
+        if self.mode == "dual" and self.job["stage"] in ("research", "tools"):
+            return used < lim.initial_research_calls
+        return True
+
+    def reviewer_payload(self, draft: dict[str, Any]) -> str:
+        """Reviewer's first message, trimmed step by step until it leaves room under the input cap."""
+        job = self.job
+        cited = {r for c in draft.get("claims", []) for r in c.get("evidence_refs", [])}
+        cited |= {f.get("source_ref") for c in draft.get("claims", []) for f in c.get("facts", []) or []}
+        trusted = {"job_id": job["job_id"], "source_snapshot_id": job["source_snapshot_id"],
+                   "cutoff_at": job["cutoff_at"], "remaining_budget": self.remaining(),
+                   "draft_claims": draft.get("claims", []), "conflicts": draft.get("conflicts", []),
+                   "limitations": draft.get("limitations", []),
+                   "researcher_observations_note": "obs-* 是 Researcher 在本 job 依其權限（六工具，含 get_price_window、"
+                                                   "search_evidence）取得的工具結果，可作為引用；你不能重查股價或搜尋，"
+                                                   "需要新資料時以 required_evidence 退回 Researcher。",
+                   "researcher_observations": [
+                       {"obs_id": o["obs_id"], "tool_name": o["tool_name"], "status": o["status"],
+                        **({"data": o.get("digest")} if o["obs_id"] in cited else {})}
+                       for o in self.observations if o["role"] == "researcher"]}
+        adapter, cap = self.adapters["reviewer"], self.gate.limits.max_input_tokens - TOOL_HEADROOM
+
+        def text() -> str:
+            return "可信輸入：" + json.dumps(trusted, ensure_ascii=False)
+
+        def fits() -> bool:
+            content = [types.Content(role="user", parts=[types.Part.from_text(text=text())])]
+            return adapter.estimate_input("reviewer", content, REVIEWER_PROMPT) <= cap
+
+        trims = [
+            lambda: trusted["researcher_observations"].__setitem__(slice(None), [
+                o for o in trusted["researcher_observations"] if o["obs_id"] in cited or o["status"] != "ok"]),
+            lambda: [o.update(data=str(o.get("data", ""))[:80]) for o in trusted["researcher_observations"] if "data" in o],
+            lambda: trusted.update(limitations=trusted["limitations"][:3], conflicts=trusted["conflicts"][:3]),
+            lambda: [c.update(limitations=c.get("limitations", [])[:1]) for c in trusted["draft_claims"]],
+        ]
+        for trim in trims:
+            if fits():
+                break
+            trim()
+        if not fits():
+            self.event("reviewer", "payload_trimmed", {"still_over": True})
+        return text()
+
     def cancelled(self) -> bool:
         return self.lease.store.cancel_requested(self.job["job_id"])
 
@@ -302,7 +351,7 @@ class ResearchRun:
             self.r_contents.append(model_turn)
         if problems:
             self.event("researcher", "draft_invalid", {"problems": problems})
-            if self.format_retries["researcher"] < MAX_FORMAT_RETRIES and self.remaining()["model_calls"] > 1:
+            if self.format_retries["researcher"] < MAX_FORMAT_RETRIES and self.can_researcher_send_again():
                 self.format_retries["researcher"] += 1
                 self.r_contents.append(types.Content(role="user", parts=[types.Part.from_text(
                     text="上一則不是合格草稿（" + "；".join(problems) + "）。只輸出規定的 JSON 物件。")]))
@@ -336,21 +385,8 @@ class ResearchRun:
         job, draft = self.job, self.draft or {}
         claim_ids = [c["claim_id"] for c in draft.get("claims", [])]
         if not self.v_contents:
-            cited = {r for c in draft.get("claims", []) for r in c.get("evidence_refs", [])}
-            cited |= {f.get("source_ref") for c in draft.get("claims", []) for f in c.get("facts", []) or []}
-            trusted = {"job_id": job["job_id"], "source_snapshot_id": job["source_snapshot_id"],
-                       "cutoff_at": job["cutoff_at"], "remaining_budget": self.remaining(),
-                       "draft_claims": draft.get("claims", []), "conflicts": draft.get("conflicts", []),
-                       "limitations": draft.get("limitations", []),
-                       "researcher_observations_note": "obs-* 是 Researcher 在本 job 依其權限（六工具，含 get_price_window、"
-                                                       "search_evidence）取得的工具結果，可作為引用；你不能重查股價或搜尋，"
-                                                       "需要新資料時以 required_evidence 退回 Researcher。",
-                       "researcher_observations": [
-                           {"obs_id": o["obs_id"], "tool_name": o["tool_name"], "status": o["status"],
-                            **({"data": o.get("digest")} if o["obs_id"] in cited else {})}
-                           for o in self.observations if o["role"] == "researcher"]}
             self.v_contents.append(types.Content(role="user", parts=[types.Part.from_text(
-                text="可信輸入：" + json.dumps(trusted, ensure_ascii=False))]))
+                text=self.reviewer_payload(draft))]))
         self.fit_context("reviewer", self.v_contents, REVIEWER_PROMPT)
         resp = self.adapters["reviewer"].send("reviewer", self.v_contents, REVIEWER_PROMPT,
                                               allow_tools=self.tools_allowed("reviewer", self.v_contents, REVIEWER_PROMPT))
