@@ -1,0 +1,15 @@
+ticker,period,type,value_twd,source_url,note
+2454,2025Q3,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 114Q3 合併資產負債表未列長期借款科目；短期借款與 FinMind 相符
+2379,2025Q4,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 114Q4 合併資產負債表未列長期借款科目
+2379,2026Q1,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 115Q1 合併資產負債表未列長期借款科目
+2379,2026Q2,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 115Q2 合併資產負債表未列長期借款科目
+3034,2025Q2,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 114Q2 合併資產負債表未列長期借款科目
+3034,2025Q3,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 114Q3 合併資產負債表未列長期借款科目
+3034,2025Q4,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 114 年度合併資產負債表未列長期借款科目
+3034,2026Q1,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 115Q1 合併資產負債表未列長期借款科目
+3034,2026Q2,LongtermBorrowings,0,https://mops.twse.com.tw/mops/web/t05st01,MOPS 115Q2 合併資產負債表未列長期借款科目
+2317,2025Q2,NotesPayable,98062437000,https://mops.twse.com.tw/mops/web/t05st01,MOPS 115Q2合併資產負債表 114/06/30 應付短期票券 98,062,437千元
+2317,2025Q3,NotesPayable,104855613000,https://mops.twse.com.tw/mops/web/t05st01,MOPS 114Q3合併資產負債表 114/09/30 應付短期票券 104,855,613千元
+2317,2025Q4,NotesPayable,104793309000,https://mops.twse.com.tw/mops/web/t05st01,MOPS 114年度合併資產負債表 114/12/31 應付短期票券 104,793,309千元
+2317,2026Q1,NotesPayable,90058690000,https://mops.twse.com.tw/mops/web/t05st01,MOPS 115Q1合併資產負債表 115/03/31 應付短期票券 90,058,690千元
+2317,2026Q2,NotesPayable,93458760000,https://mops.twse.com.tw/mops/web/t05st01,MOPS 115Q2合併資產負債表 115/06/30 應付短期票券 93,458,760千元

@@ -1,0 +1,3 @@
+series_id,observation_date,value,unit,available_at,source
+CPIAUCSL,2026-06,332.568,Index 1982-1984=100,2026-07-14T08:30:00-04:00,FRED CPIAUCSL download; BLS release schedule
+FEDFUNDS,2026-06,3.63,%,2026-07-02T00:00:00-04:00,FRED FEDFUNDS download; H.15 release schedule (conservative)
