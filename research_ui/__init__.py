@@ -32,6 +32,7 @@ from typing import Any
 
 from flask import Blueprint, current_app, jsonify, render_template, request
 
+from agents.admin import is_admin
 from agents.contract import COMPARISON_ONLY_TICKERS, RESEARCH_TICKERS, ContractError
 
 from agents import tools_impl
@@ -275,6 +276,19 @@ def replay_detail(replay_id: str):
 
 @bp.post("/api/ui/jobs/<job_id>/approve")
 def approve_job(job_id: str):
-    """Human approval is W07 work and needs login; this UI never publishes."""
+    """Human approval is W07 work; this UI never publishes.
+
+    Visitors get 403 (not logged in). The logged-in lead (agents/admin.py) gets 409:
+    the publication step (immutable report version + Storage PDF) does not exist yet.
+    """
+    if is_admin():
+        return jsonify({"ok": False, "error": "publication_not_available",
+                        "message": "已登入，但核准發布（不可變報告版本與線上 PDF）在 W07 才實作，目前不會發布任何版本。"}), 409
     return jsonify({"ok": False, "error": "approval_requires_login",
-                    "message": "核准發布需要登入的核准人（W07 開放）。研究工作台目前不能發布任何版本。"}), 403
+                    "message": "核准發布只限登入的組長；發布流程在 W07 開放。研究工作台目前不能發布任何版本。"}), 403
+
+
+@bp.get("/api/ui/session")
+def ui_session():
+    """Whether the viewer is the logged-in lead. No secret, no token, only a boolean."""
+    return jsonify({"ok": True, "admin": is_admin()})

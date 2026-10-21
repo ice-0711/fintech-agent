@@ -4,7 +4,7 @@
 
 ## 1. 實際產物與連結
 
-分支 `codex/W05-A-review-risk`（基於 main `65656dc`），3 個 commit：
+分支 `codex/W05-A-review-risk`（rebase 到 main `189508c`，含組長 10/21 的單一管理員登入）：
 
 | commit | 內容 |
 |---|---|
@@ -31,8 +31,8 @@
 
 - 資料：B `data/financial-snapshots.json`（manifest v1.5-eps-source／v1.6-tw-market）、`data/v12-peer-snapshot.json` v1.7-w04；DCF 參數依 `handoff/decisions-2026-10.md`。
 - REPLAY：`agent/researcher-v12-traces.json`（commit 20d2e9a）、`agent/dev-v14-batch1.json`（49bafcd）、`agent/researcher-v12-traces-gemini-3.6-flash.json`。
-- 測試（2026-10-21，Python 3.13）：`pytest -q tests/test_research_ui.py tests/test_review_risk.py` → **66 passed**。
-- 全套 `pytest -q tests` → 206 passed、11 failed、2 xfailed。**11 個失敗都不是 A 的檔案，在 main `65656dc` 上就已失敗**：
+- 測試（2026-10-21，Python 3.13）：`pytest -q tests/test_research_ui.py tests/test_review_risk.py` → **67 passed**。
+- 全套 `pytest -q tests` → 209 passed、11 failed、2 xfailed。**11 個失敗都不是 A 的檔案，在 main `189508c` 上就已失敗**：
   - `tests/test_research_graph.py` 10 個：測試用的 CASE-01 證據 `ev-dev-01-official` 在 B 10/21 更新 `fixtures/dev/case_fixtures.json`（可得時間改為 08-11）後，對測試的 cutoff 不可得，模擬回應不夠用而 `pop from empty list` → 組長更新測試的 cutoff 或 fixture。
   - `tests/test_tool_fixtures.py::TR-14`：組長閘門已列，待 B。
 - 未執行：LIVE Gemini、Render、Supabase。
@@ -44,7 +44,7 @@
 | ±15%、風險用語、「DCF ≤ 0 → 無法判定」、120 天過期標準 | 需金融口徑核對 | B、D（`ui/v12-risk-state-cases.md` §3） |
 | CR-A04：每版草稿存進 `checkpoint["drafts"]` | graph 目前只留最新草稿 | 組長 |
 | CR-A05：review 事件存每輪 issues | REPLAY 早輪次細節缺 | 組長 |
-| 研究工作台接正式 job API | 授權方式未定 | 組長（10/26 前，閘門第 7 節） |
+| 研究工作台接正式 job API | 組長 10/21 已加 `/admin/login`；A 下一步讓登入的組長從工作台呼叫正式 API（W07） | A、組長 |
 | S06 真 PDF 畫面 | W07 | 組長 Storage＋A |
 
 ## 5. 給組長的交接短訊（草稿，未發送）

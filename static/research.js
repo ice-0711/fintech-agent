@@ -427,7 +427,7 @@
     try {
       await getJson(`/api/ui/jobs/${encodeURIComponent(currentJobId || currentReplayId || "none")}/approve`, { method: "POST" });
     } catch (err) {
-      note.textContent = err.status === 403 ? `沒有權限：${err.message}` : `核准失敗：${err.message}`;
+      note.textContent = err.status === 403 ? `沒有權限：${err.message}` : err.status === 409 ? err.message : `核准失敗：${err.message}`;
       note.className = "hint error";
     }
   }
