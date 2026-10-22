@@ -1,9 +1,9 @@
 # 資料與案例凍結紀錄（W06-B，cases-v1）
 
-- 產生時間：2026-10-22T01:49:46+08:00（`python scripts/build_freeze.py`）
+- 產生時間：2026-10-22T16:40:47+08:00（`python scripts/build_freeze.py`）
 - 預定簽出：2026-10-23
 - 案例摘要 hash（cases_digest）：`98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3`
-- 工具版本：tools-v12.0；契約 v1.1-w02；prompt v1.2；快照 v1.6-tw-market
+- 工具版本：tools-v12.0；契約 v1.2-w07；prompt v1.2；快照 v1.6-tw-market
 - 核對：`python scripts/build_freeze.py --verify`
 
 ## 一、30 案（10 開發 + 20 保留）
@@ -46,7 +46,7 @@
 ## 二、來源 hash
 
 - FinMind 原始檔 22 個（本機 22 個已重算核對），null hash 0 個
-- 人工檔 3 個；資料檔 13 個；工具程式 10 個；prompt 2 個
+- 人工檔 4 個；資料檔 13 個；工具程式 10 個；prompt 2 個
 - 完整清單見 `data/v12-frozen-manifest.json`
 
 ## 三、同業資料鎖定
@@ -88,9 +88,8 @@
 
 ## 六、待核定（不影響凍結，但影響結果解讀）
 
-- 股價可得時間：B 採 17:30，組長核定文字為 CASE-04 14:30，待統一（30 案 cutoff 均晚於兩者，不影響案例）
-- 開發案例版本：組長核定文字為 v1.4，B 現行為 v1.5（CASE-08 依附表改 2317）；live 執行須與凍結版本一致
-- CR-W05 snapshot.py 讀取保留集（保留集執行前）
+- CR-W06：agents/snapshot.py 保留集防護（無發布時間片段以 captured_at 判定、tool_simulation no_data、CASE-23／28 輸入），W10 保留集執行前需完成
+- 已核定（組長 2026-10-22）：股價可得時間全專案 17:30；開發案例 v1.5；F06 延後；2317 不做 FCF 正常化；snapshot.py 已讀保留集快照
 
 ## 七、簽核
 

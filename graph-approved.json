@@ -1,6 +1,6 @@
 {
   "graph_version": "graph-v1",
-  "approved_at": "2026-10-22T01:49:46+08:00",
+  "approved_at": "2026-10-22T16:40:47+08:00",
   "generated_by": "scripts/build_freeze.py",
   "conditional_feature": "F06（條件式）；本檔獨立保存，不屬於 30 案正式實驗輸入，不得改寫任何案例",
   "llm_usage": 0,

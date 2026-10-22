@@ -1,6 +1,6 @@
 {
   "manifest_version": "cases-v1",
-  "frozen_at": "2026-10-22T01:49:46+08:00",
+  "frozen_at": "2026-10-22T16:40:47+08:00",
   "planned_sign_date": "2026-10-23",
   "generated_by": "scripts/build_freeze.py",
   "hash_rule": "文字檔 sha256_lf（CRLF→LF 後計算）；data/raw 原始檔為原始位元組 sha256",
@@ -9,7 +9,7 @@
     "contract_version": "v1.2",
     "question_version": "macro-fundamental-valuation-v1",
     "prompt_version": "v1.2",
-    "tool_contract": "v1.1-w02",
+    "tool_contract": "v1.2-w07",
     "snapshot_manifest": "v1.6-tw-market",
     "snapshot_cutoff": "2026-09-30",
     "peer_snapshot": "v1.8-w06",
@@ -55,14 +55,14 @@
     {
       "path": "data/financial-snapshots.json",
       "present": true,
-      "sha256_lf": "f7a29e8b96c0e211c87a48c7083451f60ca7b4362a75e8571d17e0c74d1aa6d7",
-      "bytes": 51282
+      "sha256_lf": "eaae3aac9bf55da1373d47cec83bffc82a7d9c2d2f46e975407e4ace9959d411",
+      "bytes": 55265
     },
     {
       "path": "data/source-manifest.json",
       "present": true,
-      "sha256_lf": "e63628d39574a0b70768fa83d957e67217ccb0530f0ff80670b7a1b1b8cf9746",
-      "bytes": 18004
+      "sha256_lf": "e39784c065cfbb1793af9eaa4c429b1718d1e590d8c5d8be8ce7375e1ca2ab9f",
+      "bytes": 18455
     },
     {
       "path": "data/v12-peer-snapshot.json",
@@ -73,44 +73,44 @@
     {
       "path": "data/v12-finance-fact-sheet.md",
       "present": true,
-      "sha256_lf": "f91e48d51857bac0ac767837c8a24d1f216961da5462e2c1a7f619aa9d8bfd25",
-      "bytes": 12865
+      "sha256_lf": "5d6fd0d13d7f5e0439be74b3f36b7fc1df3e4274a3008e165df1615b85a168f5",
+      "bytes": 14555
     },
     {
       "path": "data/v12-financial-fixtures.json",
       "present": true,
-      "sha256_lf": "ec7e3841a2d2508ebab583f7dd2ec0491a235cbc95c15e378c7941665a0285a3",
+      "sha256_lf": "3774d355b6df6ee7a90c977b28bc7f0c03a1a2323cfa4a247a2e2094f15b4d70",
       "bytes": 37669
     },
     {
       "path": "data/tool-contracts.json",
       "present": true,
-      "sha256_lf": "5c9403b21c82975a0a879bb347e68a2d8ece2f19341d7c49181e0e980ba823c9",
-      "bytes": 16703
+      "sha256_lf": "d6c4756b224acfaef6bad9644051a2fa8364e8404faa5d53597a68fd0467b549",
+      "bytes": 18848
     },
     {
       "path": "data/tool-field-map.md",
       "present": true,
-      "sha256_lf": "75023769d5034636d27739f34365c3bd7be56290daa6811e4ddcb50e011516c5",
-      "bytes": 13655
+      "sha256_lf": "54e913dee63b5af6b4f3e5ac278c347baf8125456159944c8778042ba60af428",
+      "bytes": 14890
     },
     {
       "path": "data/v12-field-map.csv",
       "present": true,
-      "sha256_lf": "bdc59bb5f6afe49519016efa6c6ca7e09acc08bb0c361df2c95c8aabc159131c",
-      "bytes": 5066
+      "sha256_lf": "963d63203953f0eb85bb2f562f9024df9adcdbebbf872fe5419dd9be1750e35c",
+      "bytes": 5824
     },
     {
       "path": "data-contract.md",
       "present": true,
-      "sha256_lf": "95ab10ecf00163b544ad011bd81e338bbba912d395644609699e0a3d9e3278cb",
-      "bytes": 19848
+      "sha256_lf": "a46ab879b013cf3fa0f0aca64cd8416f74222109282b835a0e949d2f07aafeaf",
+      "bytes": 22973
     },
     {
       "path": "source-register.csv",
       "present": true,
-      "sha256_lf": "4c9c41b016e6a5a3480578cc1319298c70aca750dec59c122d5d626c88017840",
-      "bytes": 5716
+      "sha256_lf": "7b70f6be739677390b92b3e1b8ee50fd6adbc2cb5960f71272ca5ba510e62dc1",
+      "bytes": 7688
     },
     {
       "path": "graph-source-register.csv",
@@ -127,8 +127,8 @@
     {
       "path": "fixtures/tool-responses.json",
       "present": true,
-      "sha256_lf": "2b4c2a7e88d5c3b9ac2e62396da68818efa11c17e6a78877f0c51723690351f5",
-      "bytes": 35562
+      "sha256_lf": "72e5c52ea081c5340f65384a1e73a1963538cd879e31f44592871ab72019906a",
+      "bytes": 38556
     }
   ],
   "raw_files": [
@@ -349,6 +349,12 @@
       "present": true,
       "sha256_lf": "f89367150a991b6e6961d9195acbf8857d31b0bd518173eb6f37c8a424ecd361",
       "bytes": 286
+    },
+    {
+      "path": "data/manual/mops_control.csv",
+      "present": true,
+      "sha256_lf": "bee5773e26c33ec6f5acc900c694a8a0eb24298259b7ddf45bca1882a28641fe",
+      "bytes": 48
     }
   ],
   "tool_files": [
@@ -361,14 +367,14 @@
     {
       "path": "agents/tools_impl.py",
       "present": true,
-      "sha256_lf": "a368caf0e0abcc7ab34ef55bb2c7f21084b75d506e0e4b4e684cdc701b2e525d",
-      "bytes": 17288
+      "sha256_lf": "136d7bbfad1949af48f5cdc1e08c1278a24e6bf5379d497dbe7e4e54be34a8a5",
+      "bytes": 20730
     },
     {
       "path": "agents/calculator.py",
       "present": true,
-      "sha256_lf": "b3b52dc601ea1554a2f5fb3b3ffd456dce9830b671f6f44d7a2cce5cb87de667",
-      "bytes": 12034
+      "sha256_lf": "ea8889df073682736a9f861c39915d55214b3d4fe0ea8e62b0d4761c044067d4",
+      "bytes": 13510
     },
     {
       "path": "agents/register_tools.py",
@@ -379,8 +385,8 @@
     {
       "path": "agents/snapshot.py",
       "present": true,
-      "sha256_lf": "f9126e1701c34a2d79f87326755359b16360f7e68e8ea5e43ffa7e36fe434d28",
-      "bytes": 8207
+      "sha256_lf": "dc83a3ab98b73777a760da66a5404663d3c42a02fe591784514e518c30a291c7",
+      "bytes": 8571
     },
     {
       "path": "agents/contract.py",
@@ -397,8 +403,8 @@
     {
       "path": "agents/research_graph.py",
       "present": true,
-      "sha256_lf": "23db6c638d02dfc65d6431dca83ce75f63ae736ec59a03cc93af16ff368c715f",
-      "bytes": 29678
+      "sha256_lf": "8d8a02b2154d1abc96faee70ea51ecb6c6551924e96c86f0d5b2bafce89cc8c4",
+      "bytes": 31348
     },
     {
       "path": "valuation_agent/dcf_model.py",
@@ -417,8 +423,8 @@
     {
       "path": "agents/prompts/researcher-v1.2.txt",
       "present": true,
-      "sha256_lf": "e94edbe8dedc20a64015dece3478323ddb234a2aa61b70e113f1e5845e385061",
-      "bytes": 2614
+      "sha256_lf": "72d4ad36ca774c4a80d503d85658b9ef7095d6620741120d1bb8a8fda8310c08",
+      "bytes": 2840
     },
     {
       "path": "agents/prompts/reviewer-v1.2.txt",
@@ -437,8 +443,7 @@
     "淨負債口徑：應付短期票券年度路徑不計入、租賃負債不計入（組長 2026-10-21）"
   ],
   "pending_approvals": [
-    "股價可得時間：B 採 17:30，組長核定文字為 CASE-04 14:30，待統一（30 案 cutoff 均晚於兩者，不影響案例）",
-    "開發案例版本：組長核定文字為 v1.4，B 現行為 v1.5（CASE-08 依附表改 2317）；live 執行須與凍結版本一致",
-    "CR-W05 snapshot.py 讀取保留集（保留集執行前）"
+    "CR-W06：agents/snapshot.py 保留集防護（無發布時間片段以 captured_at 判定、tool_simulation no_data、CASE-23／28 輸入），W10 保留集執行前需完成",
+    "已核定（組長 2026-10-22）：股價可得時間全專案 17:30；開發案例 v1.5；F06 延後；2317 不做 FCF 正常化；snapshot.py 已讀保留集快照"
   ]
 }
