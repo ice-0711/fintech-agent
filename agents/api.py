@@ -95,3 +95,105 @@ def cancel_job(job_id: str):
     except KeyError:
         return jsonify({"ok": False, "error": "not_found"}), 404
     return jsonify({"ok": True, "job": public_job(job)})
+
+
+# ----- W07-L: report versions, human approval, publication ---------------------
+from flask import Response  # noqa: E402
+
+from .publication import LocalStorage, PublicationError, ReportStore  # noqa: E402
+
+
+def get_reports() -> ReportStore:
+    reports = current_app.extensions.get("report_store")
+    if reports is None:
+        root = Path(current_app.root_path) / "tmp"
+        reports = ReportStore(os.getenv("REPORT_DB_PATH") or str(root / "reports.sqlite3"),
+                              LocalStorage(os.getenv("REPORT_STORAGE_DIR") or str(root / "storage")))
+        current_app.extensions["report_store"] = reports
+    return reports
+
+
+def require_admin(view):
+    """Approval and publication need the logged-in lead; an API token is not enough."""
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if not is_admin():
+            return jsonify({"ok": False, "error": "請先以組長身分登入 /admin/login"}), 401
+        return view(*args, **kwargs)
+
+    return wrapper
+
+
+def public_version(v: dict) -> dict:
+    return {k: v.get(k) for k in ("report_version_id", "job_id", "version_no", "status", "report_hash", "pdf_hash",
+                                  "storage_key", "approved_by", "approved_at", "published_at", "failure")}
+
+
+@bp.post("/jobs/<job_id>/report")
+@require_token
+def create_report(job_id: str):
+    store = get_store()
+    job = store.get_job(job_id)
+    if job is None:
+        return jsonify({"ok": False, "error": "not_found"}), 404
+    try:
+        v = get_reports().create_version(job, store.list_events(job_id))
+    except PublicationError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 409
+    return jsonify({"ok": True, "version": public_version(v), "report": v["report"]})
+
+
+@bp.get("/reports/<rv_id>")
+@require_token
+def get_report(rv_id: str):
+    try:
+        v = get_reports().get(rv_id)
+    except KeyError:
+        return jsonify({"ok": False, "error": "not_found"}), 404
+    return jsonify({"ok": True, "version": public_version(v), "report": v["report"]})
+
+
+@bp.post("/reports/<rv_id>/approve")
+@require_admin
+def approve_report(rv_id: str):
+    seen = (request.get_json(silent=True) or {}).get("report_hash", "")
+    try:
+        v = get_reports().approve(rv_id, str(seen), approver="lead")
+    except KeyError:
+        return jsonify({"ok": False, "error": "not_found"}), 404
+    except PublicationError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 409
+    return jsonify({"ok": True, "version": public_version(v)})
+
+
+@bp.post("/reports/<rv_id>/publish")
+@require_admin
+def publish_report(rv_id: str):
+    try:
+        v = get_reports().publish(rv_id)
+    except KeyError:
+        return jsonify({"ok": False, "error": "not_found"}), 404
+    except PublicationError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 409
+    return jsonify({"ok": True, "version": public_version(v)})
+
+
+public_bp = Blueprint("public_reports", __name__, url_prefix="/reports")
+
+
+@public_bp.get("")
+def published_reports():
+    """Read-only list for visitors and A's dashboard (0 LLM calls)."""
+    return jsonify({"ok": True, "reports": get_reports().published()})
+
+
+@public_bp.get("/<rv_id>.pdf")
+def published_pdf(rv_id: str):
+    try:
+        data = get_reports().read_published_pdf(rv_id)
+    except KeyError:
+        return jsonify({"ok": False, "error": "not_found"}), 404
+    except PublicationError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    return Response(data, mimetype="application/pdf",
+                    headers={"Content-Disposition": f'inline; filename="{rv_id}.pdf"'})
