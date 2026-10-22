@@ -439,7 +439,7 @@
             "available_at": "2026-07-14T08:30:00-04:00",
             "available_at_basis": "official",
             "source_id": "fred_macro",
-            "content_hash": "f2d75625af2f84f48a3090b56fef0c71e888a9e7d2e9844a18b561d889c6be27",
+            "content_hash": "f89367150a991b6e6961d9195acbf8857d31b0bd518173eb6f37c8a424ecd361",
             "vintage": null,
             "vintage_missing_reason": "只有現行下載值，無歷史 vintage"
           },
@@ -452,7 +452,7 @@
             "available_at": "2026-07-02T00:00:00-04:00",
             "available_at_basis": "official",
             "source_id": "fred_macro",
-            "content_hash": "f2d75625af2f84f48a3090b56fef0c71e888a9e7d2e9844a18b561d889c6be27",
+            "content_hash": "f89367150a991b6e6961d9195acbf8857d31b0bd518173eb6f37c8a424ecd361",
             "vintage": null,
             "vintage_missing_reason": "只有現行下載值，無歷史 vintage"
           }

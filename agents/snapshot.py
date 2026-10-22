@@ -20,6 +20,7 @@ from .register_tools import TOOL_TIMEOUT_SECONDS, with_timeout
 
 ROOT = Path(__file__).resolve().parents[1]
 DEV_FIXTURES = ROOT / "fixtures" / "dev" / "case_fixtures.json"
+TEST_FIXTURES = ROOT / "fixtures" / "test" / "case_fixtures.json"  # sealed holdout (W10/W11 runs only)
 
 
 def _t(value: str) -> datetime:
@@ -27,9 +28,12 @@ def _t(value: str) -> datetime:
 
 
 def load_case_snapshot(snapshot_id: str) -> dict[str, Any] | None:
-    if not DEV_FIXTURES.exists():
+    """Dev snapshots (snap-dev-*) or sealed holdout snapshots (snap-test-*, CR-W05-holdout).
+    Which cases may run is decided by the runner: scripts/dev_traces.py refuses holdout ids."""
+    path = TEST_FIXTURES if snapshot_id.startswith("snap-test-") else DEV_FIXTURES
+    if not path.exists():
         return None
-    return json.loads(DEV_FIXTURES.read_text(encoding="utf-8")).get("snapshots", {}).get(snapshot_id)
+    return json.loads(path.read_text(encoding="utf-8")).get("snapshots", {}).get(snapshot_id)
 
 
 class SnapshotToolbox:

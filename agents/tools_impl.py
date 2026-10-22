@@ -90,7 +90,10 @@ def _raw_file(snap: dict[str, Any], dataset: str, ticker: str | None) -> dict[st
 
 @lru_cache(maxsize=1)
 def _macro_csv_hash() -> str | None:
-    return hashlib.sha256(MACRO_CSV.read_bytes()).hexdigest() if MACRO_CSV.exists() else None
+    """換行統一為 LF 後再算，Windows（CRLF）與 macOS/Linux（LF）得到相同 hash。（組長修正 2026-10-22）"""
+    if not MACRO_CSV.exists():
+        return None
+    return hashlib.sha256(MACRO_CSV.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def _effective_available(row: dict[str, Any]) -> tuple[datetime | None, str | None, str | None]:
