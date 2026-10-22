@@ -32,7 +32,7 @@ from .tools import args_hash, dispatch
 PROMPTS = Path(__file__).resolve().parent / "prompts"
 RESEARCHER_PROMPT = (PROMPTS / "researcher-v1.2.txt").read_text(encoding="utf-8")
 REVIEWER_PROMPT = (PROMPTS / "reviewer-v1.2.txt").read_text(encoding="utf-8")
-RESEARCHER_PROMPT_VERSION = "researcher-v1.2.1"  # 2026-10-21 W06 dev calibration: read sources first, partial unknowns
+RESEARCHER_PROMPT_VERSION = "researcher-v1.2.2"  # W06 dev calibration 10/21–10/22: sources first, partial unknowns, facts as in source, TTM quarters
 QUESTION = "截至 cutoff_at，總經、基本面與估值證據支持哪些觀察？有哪些反向證據、假設與待確認訊號？"
 DECISION_RANK = {"pass": 0, "revise": 1, "insufficient": 2}
 MAX_STR, MAX_LIST, MAX_RESULT_CHARS = 200, 5, 900
@@ -309,6 +309,45 @@ class ResearchRun:
             self.event("reviewer", "payload_trimmed", {"still_over": True})
         return text()
 
+    def revision_payload(self, draft: dict[str, Any], final: dict[str, Any]) -> str:
+        """Compact revision round input, trimmed until it leaves room for tool results."""
+        job = self.job
+        issues = sorted(final["issues"], key=lambda i: i["severity"] != "critical")
+        merged: dict[str, dict[str, Any]] = {}
+        for i in issues:  # one entry per claim, critical first
+            merged.setdefault(i["claim_id"], {"claim_id": i["claim_id"], "severity": i["severity"],
+                                              "reason": i["reason"], "required_evidence": i["required_evidence"]})
+        revision = {
+            "job_id": job["job_id"], "ticker": job["ticker"], "cutoff_at": job["cutoff_at"],
+            "source_snapshot_id": job["source_snapshot_id"], "remaining": self.remaining(),
+            "previous_draft": {k: draft.get(k) for k in ("claims", "conflicts", "unknowns", "limitations")},
+            "review_feedback": list(merged.values()),
+            "earlier_observations": [{"obs_id": o["obs_id"], "tool_name": o["tool_name"], "status": o["status"],
+                                      "digest": o.get("digest", "")[:160]} for o in self.observations],
+        }
+        adapter, cap = self.adapters["researcher"], self.gate.limits.max_input_tokens - TOOL_HEADROOM
+
+        def text() -> str:
+            return "修正輪可信輸入：" + json.dumps(revision, ensure_ascii=False)
+
+        def fits() -> bool:
+            content = [types.Content(role="user", parts=[types.Part.from_text(text=text())])]
+            return adapter.estimate_input("researcher", content, RESEARCHER_PROMPT) <= cap
+
+        trims = [
+            lambda: [f.update(reason=f["reason"][:80], required_evidence=f["required_evidence"][:100])
+                     for f in revision["review_feedback"]],
+            lambda: [o.update(digest=o["digest"][:60]) for o in revision["earlier_observations"]],
+            lambda: revision["previous_draft"].update(conflicts=[], unknowns=[], limitations=[]),
+            lambda: revision["review_feedback"].__setitem__(slice(4, None), []),
+            lambda: revision.update(earlier_observations=[o for o in revision["earlier_observations"] if o["status"] == "ok"]),
+        ]
+        for trim in trims:
+            if fits():
+                break
+            trim()
+        return text()
+
     def cancelled(self) -> bool:
         return self.lease.store.cancel_requested(self.job["job_id"])
 
@@ -435,17 +474,8 @@ class ResearchRun:
         self.gate.start_supplement_round()
         # Fresh, compact conversation for the revision round (the full history would not fit the
         # 3,000-token input cap): previous draft + concrete feedback + digests of earlier tool results.
-        revision = {
-            "job_id": job["job_id"], "ticker": job["ticker"], "cutoff_at": job["cutoff_at"],
-            "source_snapshot_id": job["source_snapshot_id"], "remaining": self.remaining(),
-            "previous_draft": {k: draft.get(k) for k in ("claims", "conflicts", "unknowns", "limitations")},
-            "review_feedback": [{k: i[k] for k in ("claim_id", "severity", "reason", "required_evidence")}
-                                for i in final["issues"]],
-            "earlier_observations": [{"obs_id": o["obs_id"], "tool_name": o["tool_name"], "status": o["status"],
-                                      "digest": o.get("digest", "")[:160]} for o in self.observations],
-        }
         self.r_contents = [types.Content(role="user", parts=[types.Part.from_text(
-            text="修正輪可信輸入：" + json.dumps(revision, ensure_ascii=False))])]
+            text=self.revision_payload(draft, final))])]
         self.save({"stage": "revision", "review": final}, "researcher")
         return {"next": "researcher"}
 
