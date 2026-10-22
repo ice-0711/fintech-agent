@@ -30,7 +30,8 @@ DCF_ASSUMPTIONS = {"wacc": 0.09, "terminal_growth": 0.03, "years": 5,
                    "fcf_basis": "5 年持平於 TTM FCF（基準情境）",
                    "source": "組長核定 2026-10-21；WACC 為程式預設，非個股風險估計"}
 METHOD_VERSION = f"ui-peer-v2 / calculate_metrics / {RISK_METHOD}"
-STALE_AFTER = timedelta(days=120)  # latest quarter older than this at cutoff → marked stale
+# B 2026-10-22: legal gap between filings reaches ~137 days (Q3 report 11/14 → annual 3/31), so 150 days.
+STALE_AFTER = timedelta(days=150)  # latest quarter older than this at cutoff → marked stale
 
 
 def _na(reason: str, snapshot_value: Any = None, **extra: Any) -> dict[str, Any]:
@@ -132,23 +133,40 @@ def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str) -> tupl
                   "wacc": DCF_ASSUMPTIONS["wacc"], "terminal_growth": DCF_ASSUMPTIONS["terminal_growth"],
                   "net_debt": m.get("net_debt"), "shares_outstanding": m.get("shares_outstanding_m")}
     dcf_per_share, sensitivity = None, None
-    if all(v is not None for v in dcf_inputs.values()):
+    fcf_positive = isinstance(fcf_ttm, (int, float)) and fcf_ttm > 0  # TTM FCF ≤ 0 → do not run DCF at all
+    if fcf_positive and all(v is not None for v in dcf_inputs.values()):
         r = _calc("dcf_scenario", dcf_inputs, refs)
         if r["status"] == "ok":
             dcf_per_share = r["data"]["intrinsic_value_per_share"]
             sensitivity = r["data"].get("sensitivity_matrix")
     valuation = valuation_status(dcf_per_share, price["value"] if price else None, dcf_inputs)
-    out["dcf_gap"] = ({"value": valuation["gap"], "na_reason": None, "source": "tool", "snapshot_value": snap.get("dcf_gap_pct"),
-                       "consistent": None, "dcf_per_share": dcf_per_share}
-                      if valuation["gap"] is not None else _na(valuation["reason"], snap.get("dcf_gap_pct")))
+    if valuation["gap"] is not None:
+        out["dcf_gap"] = _tool_value(valuation["gap"], snap.get("dcf_gap_pct"), tol=0.00005, dcf_per_share=dcf_per_share,
+                                     snapshot_dcf_per_share=snap.get("dcf_intrinsic_value"))
+        snap_dcf = snap.get("dcf_intrinsic_value")
+        if isinstance(snap_dcf, (int, float)) and abs(snap_dcf - dcf_per_share) > 0.01:
+            out["dcf_gap"]["consistent"] = False
+    else:
+        out["dcf_gap"] = _na(valuation["reason"], snap.get("dcf_gap_pct"))
 
     # data-quality checks (predefined list; see ui/v12-risk-state-cases.md)
     evidence = [_evidence(r) for r in refs]
+    ttm_periods = fin_data.get("ttm_periods") or []
+    unverified = [q["period"] for q in quarters if q["period"] in ttm_periods and q.get("eps_source") == "unverified"]
+    eps_ok = eps_ttm is not None and not unverified
+    eps_detail = ("不足 4 季" if eps_ttm is None else f"EPS 來源未驗證：{'、'.join(unverified)}") if not eps_ok else ""
+    net_debt, shares = m.get("net_debt"), m.get("shares_outstanding_m")
     checks = [
         Check("price_same_day", "同日收盤價", True, "pass" if price else "missing",
               "" if price else f"{price_as_of} 無收盤價"),
-        Check("eps_ttm_4q", "連續 4 季 EPS（TTM）", True, "pass" if eps_ttm is not None else "missing",
-              "" if eps_ttm is not None else "不足 4 季"),
+        Check("eps_ttm_4q", "連續 4 季 EPS（TTM）", True, "pass" if eps_ok else "missing", eps_detail),
+        Check("fcf_ttm_4q", "連續 4 季 FCF（TTM）", True, "pass" if fcf_ttm is not None else "missing",
+              "" if fcf_ttm is not None else "不足 4 季"),
+        Check("net_debt", "淨負債", True, "pass" if isinstance(net_debt, (int, float)) else "missing",
+              "" if isinstance(net_debt, (int, float)) else "缺值（不以 0 代替）"),
+        Check("shares_outstanding", "流通股數", True,
+              "pass" if isinstance(shares, (int, float)) and shares > 0 else "missing",
+              "" if isinstance(shares, (int, float)) and shares > 0 else "缺值或非正"),
         Check("fin_available_at", "財報可得時間", True,
               "pass" if fin_data.get("available_at") else ("time_unknown" if fin_data else "missing"),
               "" if fin_data.get("available_at") else "沒有可得時間"),

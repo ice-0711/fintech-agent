@@ -7,6 +7,7 @@ Pure functions, no I/O. Both outputs are *display rules of this project*:
   d ≤ −15 %  → above_model   「市價高於模型估值」
   otherwise  → near_model    「接近模型估值」
   any key input missing      → undeterminable 「無法判定」
+  TTM FCF ≤ 0                → undeterminable (checked before any DCF is run; B 2026-10-22)
   ±15 % is the project's display threshold, not a validated investment rule.
 
 * data_quality_risk: about the *data*, never about the share price.
@@ -23,7 +24,7 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable
 
 GAP_THRESHOLD = 0.15
-METHOD_VERSION = "valuation-gap-v1 (±15%) / data-quality-v1"
+METHOD_VERSION = "valuation-gap-v1.1 (±15%) / data-quality-v1.1"
 
 VALUATION_LABELS = {
     "below_model": "市價低於模型估值",
@@ -40,6 +41,7 @@ RISK_LABELS = {
 RISK_FOOTNOTE = "資料品質風險只代表既定資料檢查的結果；「低」不代表股價風險低。"
 VALUATION_FOOTNOTE = "±15% 是本專題的顯示門檻，不是經驗證的投資規則；DCF 結果取決於 WACC、g 與 FCF 假設。"
 
+FCF_NONPOSITIVE_REASON = "TTM FCF ≤ 0，5 年持平情境不適用"
 DCF_KEYS = ("free_cash_flows", "wacc", "terminal_growth", "net_debt", "shares_outstanding")
 DCF_KEY_NAMES = {"free_cash_flows": "FCF", "wacc": "WACC", "terminal_growth": "g",
                  "net_debt": "淨負債", "shares_outstanding": "流通股數"}
@@ -57,6 +59,12 @@ def valuation_status(dcf_per_share: float | None, price: float | None,
     if missing:
         return {"status": "undeterminable", "label": VALUATION_LABELS["undeterminable"], "gap": None,
                 "reason": f"缺 DCF 關鍵參數：{'、'.join(missing)}", "missing": missing}
+    fcfs = (dcf_inputs or {}).get("free_cash_flows")
+    if fcfs and _num(fcfs[0]) and fcfs[0] <= 0:
+        # B 2026-10-22: with a non-positive TTM FCF the 5-year flat base case does not apply, and a large
+        # net-cash position could still yield a meaningless positive DCF — so do not run it at all.
+        return {"status": "undeterminable", "label": VALUATION_LABELS["undeterminable"], "gap": None,
+                "reason": FCF_NONPOSITIVE_REASON, "missing": []}
     if not _num(price) or price <= 0:
         return {"status": "undeterminable", "label": VALUATION_LABELS["undeterminable"], "gap": None,
                 "reason": "沒有同日收盤價", "missing": ["同日收盤價"]}
