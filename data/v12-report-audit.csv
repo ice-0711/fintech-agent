@@ -1,0 +1,57 @@
+﻿audit_id,ticker,report_file,section,field,json_path,report_value,expected_value,unit,rule,result,note
+RA-001,2330,,數字,revenue_single_q,,,12703.8,億元 TWD,single_quarter；合併,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-002,2330,,數字,operating_income_single_q,,,7666.03,億元 TWD,single_quarter；合併,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-003,2330,,數字,net_income_single_q,,,7065.62,億元 TWD,single_quarter；母公司業主,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-004,2330,,數字,eps_single_q,,,27.25,元,single_quarter,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-005,2330,,數字,eps_ttm,,,86.28,元,四連續單季；不得單季×4,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-006,2330,,數字,fcf_ttm,,,11435.56,億元 TWD,CFO − 正值 CapEx 四季加總,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-007,2330,,數字,bvps,,,248.05,元,歸屬母公司權益 ÷ 流通股數,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-008,2330,,數字,net_debt,,,-22699.55,億元 TWD,不含租賃負債,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-009,2330,,數字,shares_outstanding_m,,,25932.3701,百萬股,發行 − 庫藏,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-010,2330,,數字,close_price,,,2480.0,元,未還原收盤；同一基準日,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-011,2330,,數字,pe_ttm,,,28.74,倍,收盤 ÷ TTM EPS；EPS≤0 為 NA,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-012,2330,,數字,pb_ratio,,,10.0,倍,收盤 ÷ BVPS,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-013,2330,,數字,dcf_per_share,,,751.06,元,同上,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-014,2330,,來源,citations_resolvable,,,通過,,每個引用的片段 ID 都能在快照解析，hash 相符,pending_report,
+RA-015,2330,,來源,no_post_cutoff_source,,,通過,,引用來源 available_at ≤ 報告 cutoff,pending_report,
+RA-016,2330,,來源,no_synthetic_or_known_fake,,,通過,,無 synthetic_fixture 與已知舊假數字,pending_report,
+RA-017,2330,,來源,pdf_equals_web,,,通過,,PDF 與網頁同一 report.json，數字逐欄一致,pending_report,
+RA-018,2317,,數字,revenue_single_q,,,25258.94,億元 TWD,single_quarter；合併,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-019,2317,,數字,operating_income_single_q,,,948.03,億元 TWD,single_quarter；合併,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-020,2317,,數字,net_income_single_q,,,599.74,億元 TWD,single_quarter；母公司業主,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-021,2317,,數字,eps_single_q,,,4.27,元,single_quarter,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-022,2317,,數字,eps_ttm,,,15.21,元,四連續單季；不得單季×4,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-023,2317,,數字,fcf_ttm,,,-416.44,億元 TWD,CFO − 正值 CapEx 四季加總,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-024,2317,,數字,bvps,,,136.02,元,歸屬母公司權益 ÷ 流通股數,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-025,2317,,數字,net_debt,,,2772.25,億元 TWD,不含租賃負債,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-026,2317,,數字,shares_outstanding_m,,,14027.1655,百萬股,發行 − 庫藏,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-027,2317,,數字,close_price,,,251.5,元,未還原收盤；同一基準日,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-028,2317,,數字,pe_ttm,,,16.54,倍,收盤 ÷ TTM EPS；EPS≤0 為 NA,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-029,2317,,數字,pb_ratio,,,1.85,倍,收盤 ÷ BVPS,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-030,2317,,數字,dcf_per_share,,,NA:無法判定（TTM FCF ≤ 0）,元,同上,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-031,2317,,來源,citations_resolvable,,,通過,,每個引用的片段 ID 都能在快照解析，hash 相符,pending_report,
+RA-032,2317,,來源,no_post_cutoff_source,,,通過,,引用來源 available_at ≤ 報告 cutoff,pending_report,
+RA-033,2317,,來源,no_synthetic_or_known_fake,,,通過,,無 synthetic_fixture 與已知舊假數字,pending_report,
+RA-034,2317,,來源,pdf_equals_web,,,通過,,PDF 與網頁同一 report.json，數字逐欄一致,pending_report,
+RA-035,2454,,數字,revenue_single_q,,,1521.83,億元 TWD,single_quarter；合併,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-036,2454,,數字,operating_income_single_q,,,228.68,億元 TWD,single_quarter；合併,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-037,2454,,數字,net_income_single_q,,,243.35,億元 TWD,single_quarter；母公司業主,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-038,2454,,數字,eps_single_q,,,15.28,元,single_quarter,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-039,2454,,數字,eps_ttm,,,60.69,元,四連續單季；不得單季×4,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-040,2454,,數字,fcf_ttm,,,920.63,億元 TWD,CFO − 正值 CapEx 四季加總,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-041,2454,,數字,bvps,,,265.77,元,歸屬母公司權益 ÷ 流通股數,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-042,2454,,數字,net_debt,,,-1717.81,億元 TWD,不含租賃負債,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-043,2454,,數字,shares_outstanding_m,,,1596.1013,百萬股,發行 − 庫藏,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-044,2454,,數字,close_price,,,4920.0,元,未還原收盤；同一基準日,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-045,2454,,數字,pe_ttm,,,81.07,倍,收盤 ÷ TTM EPS；EPS≤0 為 NA,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-046,2454,,數字,pb_ratio,,,18.51,倍,收盤 ÷ BVPS,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-047,2454,,數字,dcf_per_share,,,975.52,元,同上,pending_report,財報期 2026Q2；股價日 2026-09-30；cutoff 2026-09-30T17:30:00+08:00
+RA-048,2454,,來源,citations_resolvable,,,通過,,每個引用的片段 ID 都能在快照解析，hash 相符,pending_report,
+RA-049,2454,,來源,no_post_cutoff_source,,,通過,,引用來源 available_at ≤ 報告 cutoff,pending_report,
+RA-050,2454,,來源,no_synthetic_or_known_fake,,,通過,,無 synthetic_fixture 與已知舊假數字,pending_report,
+RA-051,2454,,來源,pdf_equals_web,,,通過,,PDF 與網頁同一 report.json，數字逐欄一致,pending_report,
+RA-052,2454,,比較,peer_avg_pe,,,23.23,,只 2379、3034；2330 為產業參照不入平均,pending_report,
+RA-053,2454,,比較,peer_avg_pb,,,6.29,,只 2379、3034；2330 為產業參照不入平均,pending_report,
+RA-054,2454,,比較,peer_avg_revenue_yoy,,,0.1363,,只 2379、3034；2330 為產業參照不入平均,pending_report,
+RA-055,2330,,比較,comparison_panel_absent,,,不應出現,,只 2454 套用固定比較組,pending_report,
+RA-056,2317,,比較,comparison_panel_absent,,,不應出現,,只 2454 套用固定比較組,pending_report,

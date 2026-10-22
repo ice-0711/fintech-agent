@@ -229,9 +229,8 @@ def build_frozen_manifest(now: str, cases_manifest: dict) -> dict:
         },
         "approved": ["DCF：WACC 9%、g 3%、5 年持平 FCF（組長 2026-10-21）",
                      "淨負債口徑：應付短期票券年度路徑不計入、租賃負債不計入（組長 2026-10-21）"],
-        "pending_approvals": ["股價可得時間：B 採 17:30，組長核定文字為 CASE-04 14:30，待統一（30 案 cutoff 均晚於兩者，不影響案例）",
-                              "開發案例版本：組長核定文字為 v1.4，B 現行為 v1.5（CASE-08 依附表改 2317）；live 執行須與凍結版本一致",
-                              "CR-W05 snapshot.py 讀取保留集（保留集執行前）"],
+        "pending_approvals": ["CR-W06：agents/snapshot.py 保留集防護（無發布時間片段以 captured_at 判定、tool_simulation no_data、CASE-23／28 輸入），W10 保留集執行前需完成",
+                              "已核定（組長 2026-10-22）：股價可得時間全專案 17:30；開發案例 v1.5；F06 延後；2317 不做 FCF 正常化；snapshot.py 已讀保留集快照"],
     }
 
 

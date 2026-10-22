@@ -4,7 +4,7 @@
   "generated_by": "scripts/build_w02_fixtures.py",
   "source_snapshot": {
     "file": "data/financial-snapshots.json",
-    "sha256": "848bf793cd02d2c88072aa0710e75d9b91d0ae5ce02248ffa263e014e5384c14"
+    "sha256": "eaae3aac9bf55da1373d47cec83bffc82a7d9c2d2f46e975407e4ace9959d411"
   },
   "status_enum": [
     "ok",
@@ -50,13 +50,13 @@
             "source_id": "src-2330-2026q2-announce",
             "evidence_version_id": "ev-2330-2026q2-01",
             "ticker": "2330",
-            "title": "台積公司公佈 2026 年第二季財務報告",
-            "published_at": "2026-07-16T14:00:00+08:00",
-            "captured_at": "2026-07-16T15:30:00+08:00",
-            "available_at": "2026-07-16T14:00:00+08:00",
+            "title": "台積公司2026年第二季每股盈餘新台幣27.25元",
+            "published_at": "2026-07-16T15:12:31+08:00",
+            "captured_at": "2026-10-22T13:27:00+08:00",
+            "available_at": "2026-07-16T15:12:31+08:00",
             "available_at_basis": "official",
-            "content_hash": "15df1f0d74d8ba451647b2906cc95fb4c4ffac59c78c914320f3d566261e5624",
-            "abstract": "台積公司 2026Q2 合併營收 12,703.8 億元，EPS 27.25 元，毛利率 67.7%。"
+            "content_hash": "ab2cc3c2111815f4f98217052828af85a99ab5a626da4e1c681d2ce64e5227c0",
+            "abstract": "台積公司今（16）日公佈2026年第二季財務報告，合併營收約新台幣1兆2,703億8千萬元，稅後純益約新台幣7,065億6千萬元，每股盈餘為新台幣27.25元（"
           }
         ]
       }
@@ -143,10 +143,10 @@
         "data": {
           "evidence_version_id": "ev-2330-2026q2-01",
           "source_id": "src-2330-2026q2-announce",
-          "paragraph": "台積公司 2026 年第二季合併營收約為新台幣 1 兆 2,703.8 億元，稅後純益約為新台幣 7,065.6 億元，每股盈餘為新台幣 27.25 元。毛利率為 67.7%，營業利益率為 60.3%。",
+          "paragraph": "台積公司今（16）日公佈2026年第二季財務報告，合併營收約新台幣1兆2,703億8千萬元，稅後純益約新台幣7,065億6千萬元，每股盈餘為新台幣27.25元（折合美國存託憑證每單位為4.31美元）。2026年第二季毛利率為67.7%，營業利益率為60.3%，稅後純益率則為55.6%。",
           "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2330&year=115&season=2",
-          "content_hash": "15df1f0d74d8ba451647b2906cc95fb4c4ffac59c78c914320f3d566261e5624",
-          "available_at": "2026-07-16T14:00:00+08:00",
+          "content_hash": "ab2cc3c2111815f4f98217052828af85a99ab5a626da4e1c681d2ce64e5227c0",
+          "available_at": "2026-07-16T15:12:31+08:00",
           "available_at_basis": "official"
         }
       }
@@ -1136,6 +1136,93 @@
         "data": null
       },
       "note": "CASE-26；由 dispatch 包成 tool_error，job 不得崩潰、不得發布未核實結果"
+    },
+    {
+      "fixture_id": "TR-32",
+      "tool": "read_evidence",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "evidence_version_id": "https://evil.example/ev"
+      },
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "read_evidence",
+        "reason": "evidence_version_id 格式不符（只接受英數與 . _ -，不接受網址、路徑或空白）",
+        "data": null
+      },
+      "note": "W08-B 未授權 ID 不通過工具；與 TR-07（格式正確但不存在 → no_data）區分"
+    },
+    {
+      "fixture_id": "TR-33",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "simple_return",
+        "values": {
+          "entry_price": 100.0,
+          "exit_price": 110.0,
+          "entry_price_basis": "raw",
+          "exit_price_basis": "adjusted"
+        },
+        "evidence_refs": [
+          "synthetic-price-a",
+          "synthetic-price-b"
+        ]
+      },
+      "synthetic_fixture": true,
+      "check_mode": "status_only",
+      "expected_response": {
+        "status": "invalid_input",
+        "tool": "calculate_metrics",
+        "reason": "價格調整口徑不一致（進場 raw、出場 adjusted），原始與調整價格不可混算報酬（NA）",
+        "data": null
+      },
+      "note": "手冊第 06 章：價格需同一調整口徑；對應保留類別『原始與調整價格混算報酬』"
+    },
+    {
+      "fixture_id": "TR-34",
+      "tool": "calculate_metrics",
+      "role": "researcher",
+      "job_cutoff": null,
+      "job_snapshot_id": null,
+      "input": {
+        "operation": "simple_return",
+        "values": {
+          "entry_price": 100.0,
+          "exit_price": 110.0,
+          "entry_price_basis": "raw",
+          "exit_price_basis": "raw"
+        },
+        "evidence_refs": [
+          "synthetic-price-a",
+          "synthetic-price-b"
+        ]
+      },
+      "synthetic_fixture": true,
+      "check_mode": "exact",
+      "expected_response": {
+        "status": "ok",
+        "tool": "calculate_metrics",
+        "reason": null,
+        "data": {
+          "result_value": 0.1,
+          "is_applicable": true,
+          "reason": null,
+          "price_basis": "raw",
+          "evidence_refs": [
+            "synthetic-price-a",
+            "synthetic-price-b"
+          ],
+          "operation": "simple_return"
+        }
+      },
+      "note": "合成驗算：同為未還原價，(110−100)÷100＝0.1"
     }
   ]
 }

@@ -44,6 +44,7 @@ MANUAL_SOURCE_ID = {
     "balance_overrides.csv": "mops_balance_overrides",
     "macro.csv": "fred_macro",
     "evidence.csv": "mops_announce",
+    "mops_control.csv": "mops_eps_direct",      # W07-B：新季別 MOPS 對帳值（營收、EPS）
 }
 
 
@@ -54,6 +55,11 @@ def die(msg: str) -> None:
 
 def sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
+
+
+def sha256_lf(b: bytes) -> str:
+    """文字檔換行統一為 LF 後計算（Windows CRLF 與 macOS/Linux LF 相同；與 build_freeze、tools_impl 一致）。"""
+    return hashlib.sha256(b.replace(b"\r\n", b"\n")).hexdigest()
 
 
 def main() -> None:
@@ -101,7 +107,8 @@ def main() -> None:
         manual_rows.append({
             "source_id": sid,
             "file": f"data/manual/{path.name}",
-            "content_hash": sha256_bytes(path.read_bytes()),
+            "content_hash": sha256_lf(path.read_bytes()),
+            "hash_basis": "sha256_lf",
             "modified_at": datetime.fromtimestamp(path.stat().st_mtime, TW).isoformat(timespec="seconds"),
             "note": "檔案修改時間，不代表原始資料取得時間",
         })
@@ -134,7 +141,7 @@ def main() -> None:
         "statement_basis": "consolidated",
         "snapshot": {
             "file": "data/financial-snapshots.json",
-            "content_hash": sha256_bytes(snap_bytes),
+            "content_hash": sha256_lf(snap_bytes),
             "manifest_version": snap.get("manifest_version"),
             "cutoff": snap.get("cutoff"),
             "generated_at": snap.get("generated_at"),

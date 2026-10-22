@@ -121,7 +121,7 @@
 | 台股市場總經指標 | 已知 | `TAIEX` 月底收盤（FinMind，`finmind_tw_market`），組長已加入白名單 |
 | DCF WACC、g | 已核定 | 9%、3%（2026-10-21） |
 
-## 八、F06 圖資料來源設定
+## 八、F06 圖資料來源設定（組長 2026-10-22 決定 F06 延後；圖資料獨立保存，不屬於正式實驗）
 
 | graph_id | 類型 | 核准輸入 | 上限 | LLM | 規則 |
 |---|---|---|---|---|---|
@@ -130,9 +130,20 @@
 
 來源文件登記見 `graph-source-register.csv`。
 
+## 八之一、前瞻快照與工具防護（W07-B，凍結工具前加入）
+
+| 項目 | 位置 | 規則 |
+|---|---|---|
+| 快照切換 | `agents/tools_impl.use_snapshot(path)`；環境變數 `FINTECH_SNAPSHOT_PATH` | 未設定時讀 `data/financial-snapshots.json`，與 W06 相同 |
+| 快照截止防護 | `agents/tools_impl._clamp()` | 快照有 `cutoff_at` 時，五個讀取工具以 min(請求 cutoff, cutoff_at) 判斷；`read_evidence` 不回傳晚於截止的片段 |
+| 片段 ID 白名單 | `agents/tools_impl.EVIDENCE_ID_RE` | 只接受英數與 `. _ -`、長度 ≤ 96；其他回 `invalid_input`（TR-32） |
+| 價格口徑 | `agents/calculator.calculate_simple_return` | 可選 `entry_price_basis`／`exit_price_basis`，raw 與 adjusted 混用回 NA（TR-33、TR-34） |
+| 前瞻快照產生 | `scripts/build_snapshot_finmind.py` V1.7 | 單季／累計自動判定、新季別依公告時間納入、前瞻檔不可覆寫（data-contract 第八節） |
+| 報告稽核 | `scripts/audit_report.py`（非 Agent 工具） | 引用可解析、hash、可得時間、數字重算、假資料、比較組；原文定位 `--find` |
+
 ## 九、待決事項（組長核定）
 
 1. DCF 參數：已核定（WACC 9%、g 3%、5 年持平 FCF，2026-10-21）。
-2. 股價可得時間：B 採 17:30；組長核定文字為 CASE-04 14:30，待統一。
+2. （已核定 2026-10-22）股價可得時間全專案統一為交易日 17:30。
 3. （已完成）台股市場總經指標：`TAIEX` 已由組長加入 `agents/tools.py` 白名單。
 4. `main.py` 舊路徑的 P/E、P/B 替代與淨負債補 0 是否修正或停用（CR）。

@@ -18,6 +18,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
+from contextlib import contextmanager
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
@@ -31,6 +34,12 @@ except ImportError:  # 以 agents/ 為工作目錄執行時
 CURRENT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = CURRENT_DIR.parent
 SNAPSHOT_PATH = PROJECT_ROOT / "data" / "financial-snapshots.json"
+# W07-B：前瞻研究改讀前瞻快照（例如 data/forward/financial-snapshots-2026-10-30.json），
+# 以環境變數指定，不覆蓋 30 案凍結快照；未設定時行為與 W06 完全相同。
+SNAPSHOT_ENV = "FINTECH_SNAPSHOT_PATH"
+_SNAPSHOT_OVERRIDE: list[Path] = []          # use_snapshot() 設定；優先於環境變數
+# 片段 ID 格式白名單（W08-B「未授權 ID 不通過工具」）：只允許英數與 . _ -，不接受網址、路徑或空白
+EVIDENCE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$")
 MACRO_CSV = PROJECT_ROOT / "data" / "manual" / "macro.csv"
 
 RESEARCH_TICKERS = ("2330", "2317", "2454")
@@ -73,10 +82,64 @@ def _parse_iso(value: str) -> datetime:
     return parsed
 
 
+def _resolve(path: str | Path) -> Path:
+    path = Path(path)
+    return path if path.is_absolute() else PROJECT_ROOT / path
+
+
+def _snapshot_path() -> Path:
+    """
+    取得工具要讀的快照檔，優先順序：use_snapshot() > 環境變數 FINTECH_SNAPSHOT_PATH > SNAPSHOT_PATH。
+    未設定任何覆寫時與 W06 凍結行為完全相同。
+    """
+    if _SNAPSHOT_OVERRIDE:
+        return _SNAPSHOT_OVERRIDE[-1]
+    override = os.environ.get(SNAPSHOT_ENV)
+    return _resolve(override) if override else SNAPSHOT_PATH
+
+
+@contextmanager
+def use_snapshot(path: str | Path):
+    """
+    在 with 區塊內讓六個工具改讀指定快照（例如前瞻批次），離開後還原。
+    用法：with tools_impl.use_snapshot("data/forward/financial-snapshots-2026-10-30.json"): run_job(...)
+    檔案不存在即拋 FileNotFoundError，避免靜默讀到空資料。
+    """
+    resolved = _resolve(path)
+    if not resolved.exists():
+        raise FileNotFoundError(f"快照不存在：{resolved}")
+    _SNAPSHOT_OVERRIDE.append(resolved)
+    try:
+        yield resolved
+    finally:
+        _SNAPSHOT_OVERRIDE.pop()
+
+
+def _snapshot_cutoff(snap: dict[str, Any]) -> datetime | None:
+    """
+    快照本身的截止時間（V1.7 起的快照有 cutoff_at，例如前瞻批次 2026-10-30T21:00+08:00）。
+    工具一律以 min(請求的 cutoff, 快照 cutoff_at) 判斷可得性，避免 cutoff 後資料回流 Agent。
+    30 案凍結快照沒有 cutoff_at，回傳 None，行為不變。
+    """
+    value = snap.get("cutoff_at")
+    if not value:
+        return None
+    try:
+        return _parse_iso(value)
+    except ValueError:
+        return None
+
+
+def _clamp(requested: datetime, snap: dict[str, Any]) -> datetime:
+    limit = _snapshot_cutoff(snap)
+    return requested if limit is None or requested <= limit else limit
+
+
 def _load_snapshots() -> dict[str, Any]:
-    if not SNAPSHOT_PATH.exists():
+    path = _snapshot_path()
+    if not path.exists():
         return {"evidences": [], "financials": {}, "macro": [], "prices": {}, "source_manifest": {}}
-    with open(SNAPSHOT_PATH, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -136,7 +199,9 @@ def search_evidence(*args: Any, **kwargs: Any) -> dict[str, Any]:
 
     words = [w for w in query.split() if w]
     rows = []
-    for ev in _load_snapshots().get("evidences", []):
+    snap = _load_snapshots()
+    cutoff_dt = _clamp(cutoff_dt, snap)
+    for ev in snap.get("evidences", []):
         if ev.get("ticker") != ticker:
             continue
         when, available_at, basis = _effective_available(ev)
@@ -169,10 +234,18 @@ def search_evidence(*args: Any, **kwargs: Any) -> dict[str, Any]:
 def read_evidence(*args: Any, **kwargs: Any) -> dict[str, Any]:
     tool = "read_evidence"
     evidence_version_id = _params(args, kwargs, ("evidence_version_id",)).get("evidence_version_id", "")
+    if not isinstance(evidence_version_id, str) or not EVIDENCE_ID_RE.match(evidence_version_id):
+        return _resp(tool, "invalid_input",
+                     reason="evidence_version_id 格式不符（只接受英數與 . _ -，不接受網址、路徑或空白）")
 
-    for ev in _load_snapshots().get("evidences", []):
+    snap = _load_snapshots()
+    limit = _snapshot_cutoff(snap)
+    for ev in snap.get("evidences", []):
         if ev.get("evidence_version_id") != evidence_version_id:
             continue
+        when, _, _ = _effective_available(ev)
+        if limit is not None and (when is None or when > limit):
+            return _resp(tool, "no_data", reason=f"{evidence_version_id} 晚於快照截止時間，不可讀取")
         paragraph = ev.get("paragraph")
         if paragraph is None:
             return _resp(tool, "unreadable", reason="來源正文不可讀（paragraph 為 null），不得補造內容")
@@ -225,6 +298,7 @@ def get_financial_snapshot(*args: Any, **kwargs: Any) -> dict[str, Any]:
         return _resp(tool, "invalid_input", reason=f"cutoff 格式錯誤：{exc}")
 
     snap = _load_snapshots()
+    cutoff_dt = _clamp(cutoff_dt, snap)
     company = snap.get("financials", {}).get(ticker)
     if not company:
         return _resp(tool, "no_data", reason=f"查無 {ticker} 財務資料")
@@ -298,7 +372,9 @@ def get_macro_snapshot(*args: Any, **kwargs: Any) -> dict[str, Any]:
         return _resp(tool, "invalid_input", reason=f"cutoff 格式錯誤：{exc}")
 
     rows = []
-    for m in _load_snapshots().get("macro", []):
+    snap = _load_snapshots()
+    cutoff_dt = _clamp(cutoff_dt, snap)
+    for m in snap.get("macro", []):
         if m.get("series_id") not in series_ids:
             continue
         when, available_at, basis = _effective_available(m)
@@ -342,6 +418,7 @@ def get_price_window(*args: Any, **kwargs: Any) -> dict[str, Any]:
         return _resp(tool, "invalid_input", reason="sessions 只限 1, 5, 20")
 
     snap = _load_snapshots()
+    end_dt = _clamp(end_dt, snap)
     rows = []
     for row in snap.get("prices", {}).get(ticker, []):
         available_at = row["trade_date"] + PRICE_AVAILABLE_TIME

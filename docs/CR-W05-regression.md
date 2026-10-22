@@ -47,3 +47,9 @@ B 的適配層與契約測試（`tests/test_adapter_tools.py`、`tests/test_tool
 根本建議：測試的 CASE01／CASE15／CASE26 直接從 `evaluation/dev-cases.json` 與 `fixtures/dev/case_fixtures.json` 載入，不要在測試檔寫死 ID、cutoff 與數字，之後資料更新就不會再壞。
 
 狀態：**未解決**（待組長修 `tests/test_research_graph.py`），B 已於 `data/v12-adapter-tests.md` 第五節記錄本次結果。
+
+## 五、2026-10-22 更新
+
+- 組長已加入 `pytest.ini`（`testpaths = tests`、`norecursedirs = evaluation .venv .git tmp`），全專案 `pytest -q` 不再收到 D 草稿。
+- TR-14（macro.csv content_hash 跨平台不一致）：組長已改為 LF 正規化後計算。
+- `tests/test_research_graph.py` 於 10/22 pull 後未更新，第四節 10 項待組長修正後重跑確認。

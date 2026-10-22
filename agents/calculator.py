@@ -26,11 +26,33 @@ def calculate_growth_rate(current: float | None, previous: float | None) -> dict
     return {"result_value": val, "is_applicable": True, "reason": None}
 
 
-def calculate_simple_return(entry_price: float | None, exit_price: float | None) -> dict[str, Any]:
+PRICE_BASES = ("raw", "adjusted")
+
+
+def calculate_simple_return(entry_price: float | None, exit_price: float | None,
+                            entry_price_basis: str | None = None,
+                            exit_price_basis: str | None = None) -> dict[str, Any]:
+    """
+    簡單報酬 = (出場價 − 進場價) ÷ 進場價。
+    W07-B：可選填 entry_price_basis／exit_price_basis（raw 未還原／adjusted 還原）；
+    兩者都填且不同 → NA（原始與調整價格不可混算，手冊第 06 章、CASE-24）。未填時行為與 W06 相同。
+    """
     if entry_price is None or exit_price is None or entry_price <= 0:
         return {"result_value": None, "is_applicable": False, "reason": "買進價格無效或非正數"}
+    for name, basis in (("entry_price_basis", entry_price_basis), ("exit_price_basis", exit_price_basis)):
+        if basis is not None and basis not in PRICE_BASES:
+            return {"result_value": None, "is_applicable": False,
+                    "reason": f"{name} 只能是 {PRICE_BASES}，收到 {basis}"}
+    if entry_price_basis and exit_price_basis and entry_price_basis != exit_price_basis:
+        return {"result_value": None, "is_applicable": False,
+                "reason": f"價格調整口徑不一致（進場 {entry_price_basis}、出場 {exit_price_basis}），原始與調整價格不可混算報酬（NA）"}
+    if exit_price <= 0:
+        return {"result_value": None, "is_applicable": False, "reason": "出場價格無效或非正數"}
     ret = round((exit_price - entry_price) / entry_price, 4)
-    return {"result_value": ret, "is_applicable": True, "reason": None}
+    out = {"result_value": ret, "is_applicable": True, "reason": None}
+    if entry_price_basis and exit_price_basis:
+        out["price_basis"] = entry_price_basis
+    return out
 
 
 def calculate_pe_ttm(price: float | None, eps_ttm: float | None) -> dict[str, Any]:
@@ -255,7 +277,8 @@ def execute_calculation(operation: str, values: dict[str, Any], evidence_refs: l
     if operation == "growth_rate":
         res = calculate_growth_rate(values.get("current"), values.get("previous"))
     elif operation == "simple_return":
-        res = calculate_simple_return(values.get("entry_price"), values.get("exit_price"))
+        res = calculate_simple_return(values.get("entry_price"), values.get("exit_price"),
+                                      values.get("entry_price_basis"), values.get("exit_price_basis"))
     elif operation == "pe_ttm":
         res = calculate_pe_ttm(values.get("price"), values.get("eps_ttm"))
     elif operation == "dcf_scenario":

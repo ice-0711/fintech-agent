@@ -116,7 +116,9 @@ def load_known_ids() -> tuple[set[str], set[str], set[str]]:
 
     # 人工整理檔（macro.csv 等）以整檔 sha256 作為來源 hash
     for manual in (ROOT / "data" / "manual").glob("*.csv"):
-        hashes.add(hashlib.sha256(manual.read_bytes()).hexdigest())
+        raw = manual.read_bytes()
+        hashes.add(hashlib.sha256(raw).hexdigest())
+        hashes.add(hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest())  # 與 tools_impl 的 LF 正規化一致
 
     if DEV_FIXTURES.exists():
         dev = json.loads(DEV_FIXTURES.read_text(encoding="utf-8"))

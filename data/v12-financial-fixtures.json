@@ -1,11 +1,11 @@
 {
   "fixture_version": "v1.4-w02",
   "generated_by": "scripts/build_w02_fixtures.py",
-  "generated_at": "2026-10-21T23:33:14+08:00",
+  "generated_at": "2026-10-22T15:48:47+08:00",
   "cutoff": "2026-09-30T17:30:00+08:00",
   "source_snapshot": {
     "file": "data/financial-snapshots.json",
-    "sha256": "848bf793cd02d2c88072aa0710e75d9b91d0ae5ce02248ffa263e014e5384c14",
+    "sha256": "eaae3aac9bf55da1373d47cec83bffc82a7d9c2d2f46e975407e4ace9959d411",
     "manifest_version": "v1.6-tw-market"
   },
   "note": "真實季度資料取自快照（synthetic_fixture=false）；synthetic_examples 為人工驗算例（synthetic_fixture=true，年度用 2099 以免與真實資料混淆），不得作為財務數字來源。",

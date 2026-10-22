@@ -71,7 +71,7 @@
 
 ## 四、已知資料問題（交 W04／W05 處理）
 
-1. `financial-snapshots.json` 證據片段的 `published_at` 尚未逐筆對照 MOPS 發言紀錄：
+1. （已解決 2026-10-22，見 `evidence-audit-w07.md` 第三節）5 個全域證據片段已改為 MOPS 重大訊息原文與發言時間。原問題如下：
    - `ev-2454-2026q2-01` 可得時間 15:00，早於 MOPS 董事會通過財報 18:41:57，且含 EPS；
      片段稅後純益 246.05 億與快照歸屬母公司淨利 243.35 億口徑不同。
    - `ev-2317-2026q2-01` 可得時間 08-05，早於財報公告 08-12（片段只有營收）。
@@ -92,10 +92,10 @@ pytest -q tests
 
 | 項目 | 命令 | 結果（請填） | 執行日期 | commit |
 |---|---|---|---|---|
-| 重建 manifest | `python scripts\build_source_manifest.py` | 成功（TAIEX 對應 finmind_tw_market） | 2026-10-21 | 待合併後填 |
-| 產生 fixture | `python scripts\build_w02_fixtures.py` | 成功（31 個工具樣本） | 2026-10-21 | 待合併後填 |
-| 來源與 cutoff 檢查 | `python scripts\check_sources.py` | 35 列、0 錯誤 | 2026-10-21 | 待合併後填 |
-| 適配層與契約測試 | `pytest -q tests\test_adapter_tools.py tests\test_tool_fixtures.py` | 48 passed | 2026-10-21 | 待合併後填 |
+| 重建 manifest | `python scripts\build_source_manifest.py` | 成功（TAIEX 對應 finmind_tw_market） | 2026-10-21 | fc6572f |
+| 產生 fixture | `python scripts\build_w02_fixtures.py` | 成功（31 個工具樣本） | 2026-10-21 | fc6572f |
+| 來源與 cutoff 檢查 | `python scripts\check_sources.py` | 35 列、0 錯誤 | 2026-10-21 | fc6572f |
+| 適配層與契約測試 | `pytest -q tests\test_adapter_tools.py tests\test_tool_fixtures.py` | 48 passed | 2026-10-21 | fc6572f |
 | 全套回歸 | `pytest -q tests` | 212 passed、10 failed（全在 `tests/test_research_graph.py`，寫死舊片段 ID 與 cutoff，見 `docs/CR-W05-regression.md` 第四節；B 的測試全過） | 2026-10-21 | 基準 origin/main e6b75ec |
 
 註：全專案 `pytest -q` 會收到 D 草稿區 `evaluation/d-drafts/W02-D/W03-D/test_adapter_tools.py`，與 `tests/test_adapter_tools.py` 同名，收集階段即中斷；回歸改以 `pytest -q tests` 執行，待組長於 pytest.ini 設 `testpaths = tests`。

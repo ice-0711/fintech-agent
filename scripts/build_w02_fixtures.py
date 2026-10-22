@@ -55,8 +55,9 @@ def sha256_file(path: Path) -> str:
 SNAP = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
 DEV_CASES = {c["case_id"]: c for c in json.loads((ROOT / "evaluation" / "dev-cases.json")
                                                   .read_text(encoding="utf-8"))["cases"]}
-SNAP_HASH = sha256_file(SNAPSHOT)
-MACRO_HASH = sha256_file(MACRO_CSV)
+SNAP_HASH = hashlib.sha256(SNAPSHOT.read_bytes().replace(b"\r\n", b"\n")).hexdigest()  # LF 正規化，跨平台一致
+# 與 agents/tools_impl._macro_csv_hash 一致：換行統一為 LF 後計算（組長 2026-10-22；Windows 與 Linux 相同）
+MACRO_HASH = hashlib.sha256(MACRO_CSV.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 RAW = SNAP["source_manifest"]["raw_files"]
 
 
@@ -511,6 +512,29 @@ def build_tool_responses(fin: dict[str, Any]) -> dict[str, Any]:
                   resp("read_evidence", "tool_error", reason="TimeoutError: read_evidence 逾時"),
                   job_cutoff=DEV_CASES["CASE-26"]["cutoff_at"], job_snapshot="snap-dev-case-26", synthetic=True,
                   check="status_only", note="CASE-26；由 dispatch 包成 tool_error，job 不得崩潰、不得發布未核實結果"))
+
+    # --- W07-B 凍結前補充（前瞻與安全；不計入 30 案）------------------------------
+    C.append(case("TR-32", "read_evidence", {"evidence_version_id": "https://evil.example/ev"},
+                  resp("read_evidence", "invalid_input",
+                       reason="evidence_version_id 格式不符（只接受英數與 . _ -，不接受網址、路徑或空白）"),
+                  synthetic=True, check="status_only", note="W08-B 未授權 ID 不通過工具；與 TR-07（格式正確但不存在 → no_data）區分"))
+    C.append(case("TR-33", "calculate_metrics",
+                  {"operation": "simple_return",
+                   "values": {"entry_price": 100.0, "exit_price": 110.0,
+                              "entry_price_basis": "raw", "exit_price_basis": "adjusted"},
+                   "evidence_refs": ["synthetic-price-a", "synthetic-price-b"]},
+                  resp("calculate_metrics", "invalid_input",
+                       reason="價格調整口徑不一致（進場 raw、出場 adjusted），原始與調整價格不可混算報酬（NA）"),
+                  synthetic=True, check="status_only", note="手冊第 06 章：價格需同一調整口徑；對應保留類別『原始與調整價格混算報酬』"))
+    C.append(case("TR-34", "calculate_metrics",
+                  {"operation": "simple_return",
+                   "values": {"entry_price": 100.0, "exit_price": 110.0,
+                              "entry_price_basis": "raw", "exit_price_basis": "raw"},
+                   "evidence_refs": ["synthetic-price-a", "synthetic-price-b"]},
+                  resp("calculate_metrics", "ok",
+                       {"result_value": 0.1, "is_applicable": True, "reason": None, "price_basis": "raw",
+                        "evidence_refs": ["synthetic-price-a", "synthetic-price-b"], "operation": "simple_return"}),
+                  synthetic=True, note="合成驗算：同為未還原價，(110−100)÷100＝0.1"))
 
     return {
         "fixture_version": FIXTURE_VERSION,

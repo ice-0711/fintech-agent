@@ -31,3 +31,8 @@ content_hash,string,None,sha256,—,不可缺,high,快照,已知,64 位小寫十
 available_at,string,UTC+08:00,ISO-8601,instant,不可缺,high,mops_announce / 規則,部分已知,財報＝MOPS 發言時間；股價＝交易日 17:30；官方時間未知者＝captured_at，不得早於擷取時間
 available_at_basis,string,None,None,—,不可缺,high,快照,已知,official / rule_close_1730 / captured_at_fallback
 captured_at,string,UTC+08:00,ISO-8601,instant,不可缺,medium,原始檔擷取紀錄,已知,資料實際取得時間；官方時間未知時兼作可得時間
+period_basis_source,object,None,None,—,不可缺（V1.7 起）,high,快照,已知,{amount, eps} 各為 finmind_single / finmind_ytd_converted / finmind_unverified_basis；累計轉單季須同年同口徑且有前季
+cutoff_at,string,UTC+08:00,ISO-8601,instant,前瞻快照必填,high,快照,已知,前瞻快照截止時間；工具以 min(請求 cutoff, cutoff_at) 判斷可得性；30 案快照無此欄
+snapshot_mode,string,None,None,—,V1.7 起必填,medium,快照,已知,frozen_experiment / forward
+entry_price_basis,string,None,None,—,選填,high,simple_return,已知,raw / adjusted；與 exit_price_basis 不同即 NA
+exit_price_basis,string,None,None,—,選填,high,simple_return,已知,raw / adjusted；與 entry_price_basis 不同即 NA

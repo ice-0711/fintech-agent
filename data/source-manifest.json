@@ -1,13 +1,13 @@
 {
   "manifest_version": "v1.3-w03",
   "generated_by": "scripts/build_source_manifest.py",
-  "generated_at": "2026-10-20T20:44:34+08:00",
+  "generated_at": "2026-10-22T15:48:47+08:00",
   "hash_algorithm": "sha256",
   "lock_status": "draft_w03（W06 凍結時鎖定）",
   "statement_basis": "consolidated",
   "snapshot": {
     "file": "data/financial-snapshots.json",
-    "content_hash": "47e140672d60dabefa0bc991dadf9469da0fdfc4d389098ea2b12a3676d3fa33",
+    "content_hash": "eaae3aac9bf55da1373d47cec83bffc82a7d9c2d2f46e975407e4ace9959d411",
     "manifest_version": "v1.6-tw-market",
     "cutoff": "2026-09-30",
     "generated_at": "2026-10-19T17:18:11+08:00"
@@ -348,22 +348,33 @@
     {
       "source_id": "mops_announce",
       "file": "data/manual/announce_times.csv",
-      "content_hash": "a05833987b4eece8c5caa3bae85d74e4a6fc96922aac380902601cdecb173c28",
+      "content_hash": "5a601ffc382f59041085e9fdf0633ad998d78c077e832ef35d8a213b95dd1b2f",
+      "hash_basis": "sha256_lf",
       "modified_at": "2026-10-17T03:44:14+08:00",
       "note": "檔案修改時間，不代表原始資料取得時間"
     },
     {
       "source_id": "mops_balance_overrides",
       "file": "data/manual/balance_overrides.csv",
-      "content_hash": "118e220fc01af0f1ebbb9e1f0f0b38b1da91094734b68dd0b2080ea984857878",
+      "content_hash": "3df96a96b810e80ebf854fb141011e765ac7b0e7ad77edfb9b41b9d489480bc7",
+      "hash_basis": "sha256_lf",
       "modified_at": "2026-10-18T02:27:33+08:00",
       "note": "檔案修改時間，不代表原始資料取得時間"
     },
     {
       "source_id": "fred_macro",
       "file": "data/manual/macro.csv",
-      "content_hash": "f2d75625af2f84f48a3090b56fef0c71e888a9e7d2e9844a18b561d889c6be27",
+      "content_hash": "f89367150a991b6e6961d9195acbf8857d31b0bd518173eb6f37c8a424ecd361",
+      "hash_basis": "sha256_lf",
       "modified_at": "2026-10-17T04:46:44+08:00",
+      "note": "檔案修改時間，不代表原始資料取得時間"
+    },
+    {
+      "source_id": "mops_eps_direct",
+      "file": "data/manual/mops_control.csv",
+      "content_hash": "bee5773e26c33ec6f5acc900c694a8a0eb24298259b7ddf45bca1882a28641fe",
+      "hash_basis": "sha256_lf",
+      "modified_at": "2026-10-22T14:01:38+08:00",
       "note": "檔案修改時間，不代表原始資料取得時間"
     }
   ],
@@ -372,11 +383,11 @@
       "evidence_version_id": "ev-2330-2026q2-01",
       "source_id": "src-2330-2026q2-announce",
       "ticker": "2330",
-      "published_at": "2026-07-16T14:00:00+08:00",
-      "available_at": "2026-07-16T14:00:00+08:00",
-      "captured_at": "2026-07-16T15:30:00+08:00",
+      "published_at": "2026-07-16T15:12:31+08:00",
+      "available_at": "2026-07-16T15:12:31+08:00",
+      "captured_at": "2026-10-22T13:27:00+08:00",
       "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2330&year=115&season=2",
-      "content_hash": "15df1f0d74d8ba451647b2906cc95fb4c4ffac59c78c914320f3d566261e5624",
+      "content_hash": "ab2cc3c2111815f4f98217052828af85a99ab5a626da4e1c681d2ce64e5227c0",
       "time_verified": false,
       "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
     },
@@ -384,11 +395,11 @@
       "evidence_version_id": "ev-2454-2026q2-01",
       "source_id": "src-2454-2026q2-announce",
       "ticker": "2454",
-      "published_at": "2026-07-31T15:00:00+08:00",
-      "available_at": "2026-07-31T15:00:00+08:00",
-      "captured_at": "2026-07-31T16:00:00+08:00",
+      "published_at": "2026-07-31T18:43:05+08:00",
+      "available_at": "2026-07-31T18:43:05+08:00",
+      "captured_at": "2026-10-22T13:29:00+08:00",
       "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2454&year=115&season=2",
-      "content_hash": "fc9403235d8a8d4aac188d83012bca78a5b8e337e6ca765c73c1254fb81b7e73",
+      "content_hash": "32075f583ea85c29af0f647073f14df99b341827a138ad963eaa5e0a4d1fb8d4",
       "time_verified": false,
       "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
     },
@@ -396,11 +407,11 @@
       "evidence_version_id": "ev-2317-2026q2-01",
       "source_id": "src-2317-2026q2-announce",
       "ticker": "2317",
-      "published_at": "2026-08-05T16:00:00+08:00",
-      "available_at": "2026-08-05T16:00:00+08:00",
-      "captured_at": "2026-08-05T17:30:00+08:00",
+      "published_at": "2026-08-12T14:15:01+08:00",
+      "available_at": "2026-08-12T14:15:01+08:00",
+      "captured_at": "2026-10-22T13:37:00+08:00",
       "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2317&year=115&season=2",
-      "content_hash": "6596852c22d0e05e80e2ea78c0b27ad012172f900db21dc8129b5d0c82dd3932",
+      "content_hash": "01dbdd9983f0664ce403130accd5c2392cd11138834a9a4eecb5e882f3ad79fa",
       "time_verified": false,
       "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
     },
@@ -408,11 +419,11 @@
       "evidence_version_id": "ev-2379-2026q2-01",
       "source_id": "src-2379-2026q2-announce",
       "ticker": "2379",
-      "published_at": "2026-08-05T16:00:00+08:00",
-      "available_at": "2026-08-05T16:00:00+08:00",
-      "captured_at": "2026-08-05T17:30:00+08:00",
+      "published_at": "2026-07-30T17:13:13+08:00",
+      "available_at": "2026-07-30T17:13:13+08:00",
+      "captured_at": "2026-10-22T13:56:00+08:00",
       "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2379&year=115&season=2",
-      "content_hash": "dd573f5f4156ee674e83f26b54602fa2bc0c27f1529222c589317903c3a51ba5",
+      "content_hash": "d55989f912c902f714684cb0128d93d78ef6bb6c9aabd4fdc17b35fe6b52d0b8",
       "time_verified": false,
       "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
     },
@@ -420,11 +431,11 @@
       "evidence_version_id": "ev-3034-2026q2-01",
       "source_id": "src-3034-2026q2-announce",
       "ticker": "3034",
-      "published_at": "2026-08-08T16:00:00+08:00",
-      "available_at": "2026-08-08T16:00:00+08:00",
-      "captured_at": "2026-08-08T17:30:00+08:00",
+      "published_at": "2026-08-04T16:30:51+08:00",
+      "available_at": "2026-08-04T16:30:51+08:00",
+      "captured_at": "2026-10-22T13:57:00+08:00",
       "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=3034&year=115&season=2",
-      "content_hash": "5f718b7671600579d4a63bdace58624153ca19dd2adf5ca8cde5438cf9b95f55",
+      "content_hash": "3fc38498e0bfd089fe75b90906101fed13bb83580aa000f071f97ff52f3f2e97",
       "time_verified": false,
       "note": "published_at 尚未逐筆對照 MOPS 發言紀錄核實"
     }
@@ -432,7 +443,7 @@
   "summary": {
     "raw_files": 22,
     "raw_files_present": 22,
-    "manual_files": 3,
+    "manual_files": 4,
     "evidences": 5,
     "null_hashes": 0
   }

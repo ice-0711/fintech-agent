@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scripts/build_snapshot_finmind.py  (組員 B) — V1.5 完整版
+scripts/build_snapshot_finmind.py  (組員 B) — V1.7（W07-B 前瞻快照版）
 
 從 FinMind 抓 5 檔股票的財報與股價，搭配人工填寫的公告時間、總經與負債覆寫，
 產生 data/financial-snapshots.json。
@@ -35,6 +35,18 @@ scripts/build_snapshot_finmind.py  (組員 B) — V1.5 完整版
   python scripts/build_snapshot_finmind.py --no-control        # 略過 MOPS 對帳（不建議）
   python scripts/build_snapshot_finmind.py --tw-market-only    # 沿用現有快照，只補台股加權指數
 
+前瞻快照（W07-B；每週五 21:00 由組長執行，B 先備妥人工輸入）：
+  python scripts/build_snapshot_finmind.py --cutoff 2026-10-30T21:00 ^
+      --out data/forward/financial-snapshots-2026-10-30.json ^
+      --evidence data/manual/forward/evidence-2026-10-30.csv
+  - 不可覆蓋 data/financial-snapshots.json（30 案凍結用）。
+  - 季別：基本 5 季 + FORWARD_PERIODS 中「announce_times.csv 有列且公告時間 ≤ cutoff」者（各公司可不同，輸出明示）。
+  - 損益表單季／累計自動判定：以 MOPS 對帳值（CONTROL 或 mops_control.csv）比對 FinMind 原值與
+    「原值 − 前季原值」，符合者採用；兩者皆不符即中止。FinMind 2026-10-20 起 2330 2026Q2 為 1–6 月累計，
+    本版會自動換算為單季並標 period_basis_source = finmind_ytd_converted。
+  - 股價保留 cutoff 前 20 個交易日（get_price_window 可用 1／5／20）。
+  - macro.csv、announce_times.csv 中晚於 cutoff 的列視為「尚未可得」略過，不會中止。
+
 人工輸入（必備）：
   data/manual/announce_times.csv
       ticker,period,available_at,source_url
@@ -49,6 +61,10 @@ scripts/build_snapshot_finmind.py  (組員 B) — V1.5 完整版
   data/manual/balance_overrides.csv
       ticker,period,type,value_twd,source_url,note
   僅在 FinMind 完全缺少該科目時使用；FinMind 已有值就會中止。
+
+  data/manual/mops_control.csv（V1.7 新增）
+      ticker,period,revenue_100m,eps,source_url,note
+  新季別（例如 2026Q3）的 MOPS 原文對帳值；有 eps 的季別 EPS 來源標 mops_direct，否則為 unverified（不得入 TTM）。
 """
 import argparse
 import csv
@@ -73,8 +89,9 @@ MANUAL_DIR = ROOT / "data" / "manual"
 OUT = ROOT / "data" / "financial-snapshots.json"
 ANNOUNCE_CSV = MANUAL_DIR / "announce_times.csv"
 MACRO_CSV = MANUAL_DIR / "macro.csv"
-EVIDENCE_CSV = MANUAL_DIR / "evidence.csv"
+EVIDENCE_CSV = MANUAL_DIR / "evidence.csv"          # 可由 --evidence 指定其他檔（前瞻快照必填）
 OVERRIDE_CSV = MANUAL_DIR / "balance_overrides.csv"
+CONTROL_CSV = MANUAL_DIR / "mops_control.csv"       # V1.7：新季別 MOPS 對帳值（可選）
 
 COMPANIES = {
     "2330": "台積電",
@@ -84,7 +101,13 @@ COMPANIES = {
     "3034": "聯詠科技",
 }
 TICKERS = list(COMPANIES)
-PERIODS = ["2025Q2", "2025Q3", "2025Q4", "2026Q1", "2026Q2"]   # 2025Q2 為 YoY 基期
+PERIODS = ["2025Q2", "2025Q3", "2025Q4", "2026Q1", "2026Q2"]   # 2025Q2 為 YoY 基期；每家必備
+FORWARD_PERIODS = ["2026Q3"]     # 前瞻用：僅在公告時間 ≤ cutoff 時納入（各公司可不同）
+ALL_PERIODS = PERIODS + FORWARD_PERIODS
+PERIODS_BY_TICKER = {}           # load_announce() 依 cutoff 決定
+FORWARD_N_SESSIONS = 20          # 前瞻模式保留的交易日數
+FORWARD_PRICE_LOOKBACK_DAYS = 45
+SNAPSHOT_MODE = "frozen_experiment"
 FS_START = "2025-01-01"          # 含 2025Q1，供現金流量差分使用
 PRICE_START = "2026-09-10"
 CUTOFF = "2026-09-30"
@@ -314,23 +337,72 @@ def single_quarter_cf(cf_w, period, name, ctx=""):
 # 人工輸入：公告時間、總經、證據、負債覆寫
 # ============================================================
 def load_announce():
+    """
+    讀公告時間並決定各公司納入的季別。
+    - PERIODS（基本 5 季）每家必備，且公告時間必須 ≤ cutoff，否則中止。
+    - FORWARD_PERIODS 只在有列且公告時間 ≤ cutoff 時納入；晚於 cutoff 視為尚未可得而略過（不中止）。
+    """
     out = {}
+    skipped = []
     for i, r in read_csv(ANNOUNCE_CSV, ["ticker", "period", "available_at", "source_url"]):
-        if r["ticker"] not in COMPANIES or r["period"] not in PERIODS:
+        if r["ticker"] not in COMPANIES or r["period"] not in ALL_PERIODS:
             continue
         where = f"announce_times.csv 第 {i} 列"
         if not r["available_at"]:
             die(f"{where} 缺 available_at")
         ts = parse_ts(r["available_at"], where)
-        if ts > CUTOFF_DT:
-            die(f"{where} 公告時間 {ts} 晚於 cutoff {CUTOFF}（防前視）")
         if ts.date() < period_end_date(r["period"]):
             die(f"{where} 公告時間早於期末日 {period_end(r['period'])}，請檢查")
+        if ts > CUTOFF_DT:
+            if r["period"] in PERIODS:
+                die(f"{where} 公告時間 {ts} 晚於 cutoff {CUTOFF_DT.isoformat()}（防前視）")
+            skipped.append((r["ticker"], r["period"]))
+            continue
+        if (r["ticker"], r["period"]) in out:
+            die(f"{where} 與前面列重複：{r['ticker']} {r['period']}")
         out[(r["ticker"], r["period"])] = ts
     missing = [(t, p) for t in TICKERS for p in PERIODS if (t, p) not in out]
     if missing:
         die(f"announce_times.csv 缺少 {len(missing)} 列，例如 {missing[:3]}")
+    for t in TICKERS:
+        PERIODS_BY_TICKER[t] = PERIODS + [p for p in FORWARD_PERIODS if (t, p) in out]
+    if skipped:
+        print(f"公告時間晚於 cutoff、視為尚未可得而略過：{skipped}")
+    extra = {t: ps[len(PERIODS):] for t, ps in PERIODS_BY_TICKER.items() if len(ps) > len(PERIODS)}
+    if extra:
+        print(f"納入前瞻季別（公告時間 ≤ cutoff）：{extra}")
     return out
+
+
+def load_mops_control():
+    """V1.7：讀 data/manual/mops_control.csv，併入 CONTROL；與程式內既有值衝突即中止。"""
+    if not CONTROL_CSV.exists():
+        return 0
+    n = 0
+    for i, r in read_csv(CONTROL_CSV, ["ticker", "period", "revenue_100m", "eps", "source_url", "note"]):
+        where = f"mops_control.csv 第 {i} 列"
+        if r["ticker"] not in COMPANIES or r["period"] not in ALL_PERIODS:
+            die(f"{where} ticker 或 period 不在範圍內")
+        if not r["source_url"].startswith("https://mops.twse.com.tw/"):
+            die(f"{where} source_url 必須是 MOPS 網址")
+        if not r["note"]:
+            die(f"{where} 必須填寫 note（報表名稱與欄位，例如 115Q3 合併綜合損益表本季欄）")
+        ctl = {}
+        for col, key in (("revenue_100m", "revenue"), ("eps", "eps")):
+            if r[col]:
+                try:
+                    ctl[key] = float(r[col])
+                except ValueError:
+                    die(f"{where} {col} 不是數字：'{r[col]}'")
+        if not ctl:
+            die(f"{where} revenue_100m 與 eps 至少填一項")
+        cur = CONTROL.setdefault((r["ticker"], r["period"]), {})
+        for k, v in ctl.items():
+            if k in cur and abs(cur[k] - v) > 1e-6:
+                die(f"{where} {k}={v} 與程式內既有對帳值 {cur[k]} 不同，請確認")
+            cur[k] = v
+        n += 1
+    return n
 
 
 def load_macro():
@@ -344,7 +416,8 @@ def load_macro():
             die(f"{where} {r['series_id']} 缺 available_at：請到 FRED 或 BLS 查發布日")
         ts = parse_ts(r["available_at"], where)
         if ts > CUTOFF_DT:
-            die(f"{where} 發布時間晚於 cutoff，不可使用")
+            print(f"  {where} {r['series_id']} {r['observation_date']} 發布時間晚於 cutoff，視為尚未可得而略過")
+            continue
         try:
             val = float(r["value"])
         except ValueError:
@@ -360,7 +433,7 @@ def load_macro():
         })
     have = {m["series_id"] for m in out}
     if have != MACRO_SERIES:
-        die(f"macro.csv 缺少序列：{sorted(MACRO_SERIES - have)}")
+        die(f"macro.csv 缺少 cutoff 前可得之序列：{sorted(MACRO_SERIES - have)}")
     return out
 
 
@@ -368,8 +441,12 @@ def load_evidence(old):
     if EVIDENCE_CSV.exists():
         out = []
         cols = list(EVIDENCE_COLS)
+        seen = set()
         for i, r in read_csv(EVIDENCE_CSV, cols):
-            where = f"evidence.csv 第 {i} 列"
+            where = f"{EVIDENCE_CSV.name} 第 {i} 列"
+            if r["evidence_version_id"] in seen:
+                die(f"{where} evidence_version_id 重複：{r['evidence_version_id']}")
+            seen.add(r["evidence_version_id"])
             if r["ticker"] not in COMPANIES:
                 die(f"{where} ticker 不在範圍內")
             if not r["paragraph"]:
@@ -405,7 +482,7 @@ def load_overrides():
     for i, r in read_csv(OVERRIDE_CSV,
                          ["ticker", "period", "type", "value_twd", "source_url", "note"]):
         where = f"balance_overrides.csv 第 {i} 列"
-        if r["ticker"] not in COMPANIES or r["period"] not in PERIODS:
+        if r["ticker"] not in COMPANIES or r["period"] not in ALL_PERIODS:
             continue
         if r["type"] not in allowed:
             die(f"{where} type 必須是 {allowed} 之一")
@@ -473,6 +550,82 @@ def debt_value(bs_w, p, name, ctx, ticker, overrides, used):
     return get(bs_w, p, name, ctx)
 
 
+def _close(a, b, rel=0.005, abs_tol=0.02):
+    return a is not None and b is not None and (abs(a - b) <= abs_tol or abs(a - b) <= rel * abs(b))
+
+
+def _basis_by_control(cur, prv, target, tol_fn):
+    """回傳 'single'／'ytd'／None（皆不符）。"""
+    if tol_fn(cur, target):
+        return "single"
+    if prv is not None and tol_fn(cur - prv, target):
+        return "ytd"
+    return None
+
+
+def detect_income_basis(ticker, p, fs_w, bs_w, ctx):
+    """
+    V1.7：判定 FinMind 損益表該季為單季或年初至今累計（YTD），金額與 EPS 分開判定
+    （FinMind 2026-10-20 起 2330 2026Q2 金額為 1–6 月累計、EPS 仍為單季）。
+    - Q1、Q4：沿用單季（2025Q4 另有全年減 1–9 月驗證）。
+    - EPS：有 MOPS EPS 對帳值時，比對「原值」與「原值 − 前季原值」；無則 unverified_basis。
+    - 金額（營收、營業利益、母公司淨利）：有 MOPS 營收對帳值時同上比對；
+      無營收對帳值但 EPS 已驗證時，以「母公司淨利 ÷ 流通股數 ≈ 單季 EPS（±3%）」交叉判定；
+      都無法判定時為 unverified_basis。任何已有對帳值卻兩種口徑都不符即中止。
+    回傳 {"amount": ..., "eps": ...}
+    """
+    q = int(p[-1])
+    if q in (1, 4):
+        return {"amount": "single", "eps": "single"}
+    prev = prev_period(p)
+    ctl = CONTROL.get((ticker, p), {})
+
+    eps_cur = get(fs_w, p, FS_TYPES["eps"], ctx)
+    eps_prv = fs_w.get(prev, {}).get(FS_TYPES["eps"])
+    if "eps" in ctl:
+        eps_basis = _basis_by_control(eps_cur, eps_prv, ctl["eps"], lambda a, b: abs(a - b) <= 0.02)
+        if eps_basis is None:
+            die(f"{ctx}{p} EPS 與 MOPS 對帳值 {ctl['eps']} 不符（FinMind 原值 {eps_cur}；"
+                f"原值 − {prev} = {None if eps_prv is None else round(eps_cur - eps_prv, 2)}）")
+    else:
+        eps_basis = "unverified_basis"
+
+    rev_cur = get(fs_w, p, FS_TYPES["revenue"], ctx) / 1e8
+    rev_prv = fs_w.get(prev, {}).get(FS_TYPES["revenue"])
+    rev_prv = None if rev_prv is None else rev_prv / 1e8
+    if "revenue" in ctl:
+        amount_basis = _basis_by_control(rev_cur, rev_prv, ctl["revenue"], _close)
+        if amount_basis is None:
+            die(f"{ctx}{p} 營收與 MOPS 對帳值 {ctl['revenue']} 不符（FinMind 原值 {round(rev_cur, 4)}；"
+                f"原值 − {prev} = {None if rev_prv is None else round(rev_cur - rev_prv, 4)}），"
+                "請檢查單位、累計或口徑")
+    elif eps_basis in ("single", "ytd"):
+        eps_single = eps_cur if eps_basis == "single" else eps_cur - eps_prv
+        shares = get(bs_w, p, BS_ORDINARY, ctx) / PAR_VALUE_TWD - get(bs_w, p, BS_TREASURY, ctx)
+        net_cur = get(fs_w, p, FS_TYPES["net_income"], ctx)
+        net_prv = fs_w.get(prev, {}).get(FS_TYPES["net_income"])
+        amount_basis = _basis_by_control(net_cur / shares, None if net_prv is None else net_prv / shares,
+                                         eps_single, lambda a, b: abs(a - b) <= 0.03 * abs(b) + 0.02)
+        if amount_basis is None:
+            die(f"{ctx}{p} 母公司淨利 ÷ 流通股數與已驗證單季 EPS {eps_single} 不符，無法判定單季或累計")
+    else:
+        amount_basis = "unverified_basis"
+
+    for kind, basis in (("金額", amount_basis), ("EPS", eps_basis)):
+        if basis == "ytd":
+            print(f"  {ctx}{p} FinMind 損益表{kind}為年初至今累計，已換算為單季（{p} − {prev}）")
+    return {"amount": amount_basis, "eps": eps_basis}
+
+
+def income_value(fs_w, p, name, basis, ctx, required=True):
+    """依判定結果取單季值；ytd 時以本季累計 − 前季累計。"""
+    cur = get(fs_w, p, name, ctx, required=required)
+    if basis != "ytd" or cur is None:
+        return cur
+    prv = get(fs_w, prev_period(p), name, ctx, required=required)
+    return None if prv is None else cur - prv
+
+
 def build_company(ticker, announce, overrides, use_control):
     ctx = f"[{ticker}] "
     fs, h1 = fetch("TaiwanStockFinancialStatements", ticker, FS_START, CUTOFF)
@@ -495,8 +648,10 @@ def build_company(ticker, announce, overrides, use_control):
 
     used_overrides = []
     quarters = []
-    for p in PERIODS:
+    for p in PERIODS_BY_TICKER.get(ticker, PERIODS):
         ts = announce[(ticker, p)]
+        basis = (detect_income_basis(ticker, p, fs_w, bs_w, ctx) if use_control
+                 else {"amount": "unverified_basis", "eps": "unverified_basis"})
 
         # ---- 發行股數：資產負債表普通股股本（元）÷ 10 元面額 ----
         ordinary_twd = get(bs_w, p, BS_ORDINARY, ctx)
@@ -513,10 +668,10 @@ def build_company(ticker, announce, overrides, use_control):
         shares_outstanding = shares_issued - treasury           # 股（流通在外）
 
         # ---- 損益 ----
-        revenue = get(fs_w, p, FS_TYPES["revenue"], ctx) / 1e8
-        op_raw = get(fs_w, p, FS_TYPES["operating_income"], ctx, required=False)
-        net = get(fs_w, p, FS_TYPES["net_income"], ctx) / 1e8
-        eps = get(fs_w, p, FS_TYPES["eps"], ctx)
+        revenue = income_value(fs_w, p, FS_TYPES["revenue"], basis["amount"], ctx) / 1e8
+        op_raw = income_value(fs_w, p, FS_TYPES["operating_income"], basis["amount"], ctx, required=False)
+        net = income_value(fs_w, p, FS_TYPES["net_income"], basis["amount"], ctx) / 1e8
+        eps = income_value(fs_w, p, FS_TYPES["eps"], basis["eps"], ctx)
         eps_source = eps_source_for(ticker, p, eps, use_control)
 
         # ---- 現金流量（累計差分為單季）----
@@ -535,6 +690,9 @@ def build_company(ticker, announce, overrides, use_control):
         quarters.append({
             "period": p,
             "period_basis": "single_quarter",
+            "period_basis_source": {k: {"single": "finmind_single", "ytd": "finmind_ytd_converted",
+                                        "unverified_basis": "finmind_unverified_basis"}[v]
+                                    for k, v in basis.items()},
             "available_at": ts.isoformat(timespec="seconds"),
             "revenue": round(revenue, 2),
             "operating_income": None if op_raw is None else round(op_raw / 1e8, 2),
@@ -559,7 +717,8 @@ def build_company(ticker, announce, overrides, use_control):
     for (t, p, name), _ in overrides.items():
         if t == ticker and name in debt_items and not any(
                 u["period"] == p and u["type"] == name for u in used_overrides):
-            die(f"{ctx}覆寫檔的 {p} {name} 未被使用，請檢查 period 或 type")
+            if p in PERIODS_BY_TICKER.get(ticker, PERIODS):
+                die(f"{ctx}覆寫檔的 {p} {name} 未被使用，請檢查 period 或 type")
 
     meta = {
         "debt_items": debt_items,
@@ -708,14 +867,29 @@ def main():
     ap.add_argument("--cutoff", help="前瞻快照用（組長 2026-10-21 加入）：YYYY-MM-DDTHH:MM（台北時間），"
                                      "例如 2026-10-30T21:00；預設沿用 2026-09-30")
     ap.add_argument("--out", help="輸出檔（相對 repo 根目錄）。指定 --cutoff 時必填，避免覆蓋實驗用的凍結快照")
+    ap.add_argument("--evidence", help="證據 CSV（相對 repo 根目錄）。前瞻快照必填，例如 "
+                                       "data/manual/forward/evidence-2026-10-30.csv")
     args = ap.parse_args()
 
-    global CUTOFF, CUTOFF_DT, OUT
+    global CUTOFF, CUTOFF_DT, OUT, EVIDENCE_CSV, PRICE_START, N_SESSIONS, SNAPSHOT_MODE
+    if args.evidence:
+        EVIDENCE_CSV = (ROOT / args.evidence).resolve()
+        if not EVIDENCE_CSV.exists():
+            die(f"找不到證據檔 {args.evidence}")
     if args.cutoff:
         if not args.out:
             die("指定 --cutoff 時必須同時指定 --out（不可覆蓋 data/financial-snapshots.json）")
+        if not args.evidence:
+            die("前瞻快照必須指定 --evidence（不可沿用 30 案用的證據）")
         CUTOFF_DT = datetime.fromisoformat(args.cutoff).replace(tzinfo=TZ)
         CUTOFF = CUTOFF_DT.date().isoformat()
+        out_path = (ROOT / args.out).resolve()
+        if out_path.exists():
+            die(f"前瞻快照 {args.out} 已存在，不可覆寫（前瞻時間不可回填、新增資料不覆寫舊 snapshot）；"
+                "如確需重建，另存新檔名並在 forward-batch 來源清單記錄原因")
+        PRICE_START = (CUTOFF_DT.date() - timedelta(days=FORWARD_PRICE_LOOKBACK_DAYS)).isoformat()
+        N_SESSIONS = FORWARD_N_SESSIONS
+        SNAPSHOT_MODE = "forward"
     if args.out:
         OUT = (ROOT / args.out).resolve()
         if OUT == (ROOT / "data" / "financial-snapshots.json").resolve() and args.cutoff:
@@ -732,6 +906,9 @@ def main():
     use_control = not args.no_control
 
     # 1) 讀取人工輸入（任何一項不合格都會在抓 FinMind 之前中止）
+    n_ctl = load_mops_control()
+    if n_ctl:
+        print(f"載入 mops_control.csv 對帳值 {n_ctl} 列")
     announce = load_announce()
     macro = load_macro()
     overrides = load_overrides()
@@ -777,9 +954,13 @@ def main():
 
     # 4) 組合輸出
     out = {
-        "manifest_version": "v1.6-tw-market",
+        "manifest_version": "v1.7-forward-ready",
         "generated_at": datetime.now(TZ).isoformat(timespec="seconds"),
         "cutoff": CUTOFF,
+        "cutoff_at": CUTOFF_DT.isoformat(timespec="seconds"),
+        "snapshot_mode": SNAPSHOT_MODE,
+        "periods_by_ticker": PERIODS_BY_TICKER,
+        "evidence_file": str(EVIDENCE_CSV.relative_to(ROOT)) if EVIDENCE_CSV.exists() else None,
         "source_manifest": {
             "provider": "FinMind（財報、股價、交易日、台股加權指數）；MOPS（公告時間、證據原文、負債覆寫、"
                         "對帳值，人工）；FRED（總經，人工）",
