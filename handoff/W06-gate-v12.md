@@ -12,7 +12,7 @@
 | 依 required_evidence 回 Researcher，最多 2 輪 | ✅ | 修正輪為精簡新對話（W05） |
 | cancel／timeout／lease 恢復，預算不歸零 | ✅ | cancel：test_cancel_*（2026-10-21 新增）；timeout：test_simulated_tool_timeout_*；lease：test_expired_lease_* |
 | 驗證失敗後不重複發布 | ✅ | test_finished_job_is_not_rerun_or_republished |
-| 10/23 前明列 F06 決定 | ⏳ 待組長 | 見第 4 節 |
+| 10/23 前明列 F06 決定 | ✅ 延後（10/22） | 見第 4 節 |
 
 ## 2. N01–N03、N07 核對（D 的驗收矩陣）
 
@@ -30,7 +30,7 @@
 - 計畫：10/23 live 結束、model 定案後，由組長凍結 prompt、工具、契約與 model 版本，並請 B 以 `build_freeze.py` 重新產生凍結紀錄。凍結後只修 bug，若影響實驗，依第 06 章另發版本。
 - 待 B：`data/manual/announce_times.csv`、`balance_overrides.csv`、`macro.csv` 未上傳，快照無法由他人重建。
 
-## 4. F06（2D 關聯圖）判定 — 待組長 10/23 決定
+## 4. F06（2D 關聯圖）判定 — **組長 2026-10-22 決定：延後**
 
 第 04 章：W06 的 Agent 閉環、F01/F02 基礎回歸、來源凍結任一未過，就登記 F06 延後。
 
@@ -41,7 +41,7 @@
 | 來源凍結 | 已失效，10/23 重做 |
 | 圖資料 | `graph-approved.json` 3 點 2 線 |
 
-**建議：登記 F06 延後**（轉後續版本）。C/E 仍完成已核實資料表與設計稿；不挪用正式實驗、PDF 或 12/11 定稿時段。
+**決定：F06 延後，轉後續版本**（組長 2026-10-22）。理由：W06 時 Agent 閉環尚在驗證、F01/F02 回歸與來源凍結未在 10/22 全過、核准圖資料僅 3 點 2 線。依第 04 章：C/E 仍完成已核實資料表與設計稿；N06 不驗收並與核心失敗分開記錄；不挪用正式實驗、PDF 或 12/11 定稿時段；成果不得說關聯圖已上線。
 
 ## 5. model 決定 — 待 10/23
 

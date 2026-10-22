@@ -41,3 +41,10 @@
 | CASE-26 工具逾時模擬 | 已修：快照層讀取 `tool_simulation`，並套用 B 的 15 秒逾時；工具時間計入 180 秒上限 |
 | `fundamental_uploader.py` | 目前為 insert（非 upsert），重跑會重複。待 Supabase 測試專案確認 `(stock_code, year)` 唯一索引後改為 upsert |
 | `report_downloader.py` 部署 | 排在 W08 部署驗收，先在測試專案驗證 |
+
+## 五、2026-10-22 追加核定
+
+| 項目 | 核定 |
+|---|---|
+| F06 2D 關聯圖 | **延後**，轉後續版本（理由見 W06-gate-v12.md 第 4 節）；N06 不驗收 |
+| 2317 FCF 正常化情境 | **不做**；2317 基準情境維持「TTM FCF 為負，DCF 無法判定」 |
