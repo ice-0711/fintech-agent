@@ -61,7 +61,7 @@
 
 ## 三、需組長修改（CR）
 
-`agents/snapshot.py` 為組長（W04-L）檔案，B 不直接修改。修正內容見 `docs/CR-W03-snapshot.diff`：
+`agents/snapshot.py` 為組長（W04-L）檔案，B 不直接修改。CR-01、CR-02 組長已併入現行 `agents/snapshot.py`（原 `docs/CR-W03-snapshot.diff` 已結案刪除）；CR-03 組長已修正（commit 3292570）：
 
 | CR | 問題 | 修正 |
 |---|---|---|
@@ -96,6 +96,7 @@ pytest -q tests
 | 產生 fixture | `python scripts\build_w02_fixtures.py` | 成功（31 個工具樣本） | 2026-10-21 | fc6572f |
 | 來源與 cutoff 檢查 | `python scripts\check_sources.py` | 35 列、0 錯誤 | 2026-10-21 | fc6572f |
 | 適配層與契約測試 | `pytest -q tests\test_adapter_tools.py tests\test_tool_fixtures.py` | 48 passed | 2026-10-21 | fc6572f |
-| 全套回歸 | `pytest -q tests` | 212 passed、10 failed（全在 `tests/test_research_graph.py`，寫死舊片段 ID 與 cutoff，見 `docs/CR-W05-regression.md` 第四節；B 的測試全過） | 2026-10-21 | 基準 origin/main e6b75ec |
+| 全套回歸 | `pytest -q tests` | 212 passed、10 failed（全在 `tests/test_research_graph.py`；B 的測試全過） | 2026-10-21 | 基準 origin/main e6b75ec |
+| 全套回歸 | `pytest -q tests` | 240 passed、11 failed：`test_research_graph` 10 項為 `tests/fixtures/agent_case_fixtures.json` 被 `.gitignore` 擋掉未進 repo（已放行，待組長推上）；`test_research_ui` 1 項為 A 的 fixture 主張需改 MOPS 原文寫法。B 的測試全過；`build_freeze.py --verify` 一致 | 2026-10-22 | 64f8f52 |
 
-註：全專案 `pytest -q` 會收到 D 草稿區 `evaluation/d-drafts/W02-D/W03-D/test_adapter_tools.py`，與 `tests/test_adapter_tools.py` 同名，收集階段即中斷；回歸改以 `pytest -q tests` 執行，待組長於 pytest.ini 設 `testpaths = tests`。
+註：全專案 `pytest -q` 會收到 D 草稿區 `evaluation/d-drafts/W02-D/W03-D/test_adapter_tools.py`，與 `tests/test_adapter_tools.py` 同名，收集階段即中斷；回歸改以 `pytest -q tests` 執行，組長已於 pytest.ini 設 `testpaths = tests`。
