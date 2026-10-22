@@ -197,3 +197,57 @@ def test_worker_interruption_resumes_without_resetting_budget(ui, clock):
     assert any(e["event_type"] == "lease_recovered" for e in after["events"])
     assert after["job"]["calls_used"] >= before["calls_used"] and after["job"]["status"] == "succeeded"
     assert [d["version"] for d in after["job"]["review_view"]["drafts"]] == [1, 2]  # no step repeated
+
+
+# ----- B's answers of 2026-10-22 -----------------------------------------------------------
+def test_nonpositive_ttm_fcf_is_undeterminable_before_any_dcf():
+    from research_ui.risk import FCF_NONPOSITIVE_REASON
+
+    # even a positive DCF (large net cash) must not produce a status when TTM FCF ≤ 0
+    out = valuation_status(500.0, 100.0, {**FULL, "free_cash_flows": [-416.44] * 5, "net_debt": -99999})
+    assert out["status"] == "undeterminable" and out["reason"] == FCF_NONPOSITIVE_REASON
+    assert valuation_status(500.0, 100.0, {**FULL, "free_cash_flows": [0] * 5})["status"] == "undeterminable"
+
+
+def test_2317_shows_undeterminable_not_a_negative_dcf(ui):
+    row = next(r for r in ui.get("/api/ui/published").get_json()["reports"] if r["ticker"] == "2317")
+    assert row["valuation"]["status"] == "undeterminable" and row["valuation"]["dcf_per_share"] is None
+    assert row["valuation"]["reason"] == "TTM FCF ≤ 0，5 年持平情境不適用"
+    from research_ui.comparison import company_row
+
+    r = company_row("2317")
+    assert r["price"]["value"] == 251.5 and r["valuation"]["sensitivity"] is None
+    assert r["metrics"]["fcf_ttm"]["value"] == -416.44
+
+
+def test_dcf_matches_b_peer_snapshot_v18(ui):
+    for r in ui.get("/api/ui/comparison/2454").get_json()["rows"]:
+        gap = r["metrics"]["dcf_gap"]
+        assert gap["snapshot_value"] is not None and gap["consistent"] is True
+        assert gap["dcf_per_share"] == gap["snapshot_dcf_per_share"]
+
+
+def test_key_checks_cover_valuation_inputs_and_150_day_freshness(ui):
+    from research_ui import comparison
+
+    assert comparison.STALE_AFTER.days == 150
+    row = ui.get("/api/ui/comparison/2454").get_json()["rows"][0]
+    key = {c["check_id"] for c in row["data_quality"]["checks"] if c["key"]}
+    assert {"fcf_ttm_4q", "net_debt", "shares_outstanding", "eps_ttm_4q"} <= key
+    assert not next(c for c in row["data_quality"]["checks"] if c["check_id"] == "bvps")["key"]
+
+
+def test_unverified_eps_quarter_counts_as_missing(monkeypatch):
+    from research_ui import comparison
+
+    real = comparison._quarters
+
+    def mark(ticker, cutoff):
+        qs = [dict(q) for q in real(ticker, cutoff)]
+        qs[-2]["eps_source"] = "unverified"
+        return qs
+
+    monkeypatch.setattr(comparison, "_quarters", mark)
+    row = comparison.company_row("2454")
+    eps = next(c for c in row["data_quality"]["checks"] if c["check_id"] == "eps_ttm_4q")
+    assert eps["result"] == "missing" and "未驗證" in eps["detail"] and row["data_quality"]["level"] == "high"

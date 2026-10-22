@@ -1,5 +1,5 @@
 {
-  "fixture_version": "ui-fixture-v12.1",
+  "fixture_version": "ui-fixture-v12.2",
   "synthetic_fixture": true,
   "fixture_note": "W05-A 介面測試用：報告文字與發布欄位是 FIXTURE，不是 Agent 產出、也不是人工核准的研究。主張裡的數字逐字取自 B 的快照片段（data/financial-snapshots.json v1.5）；估值狀態與資料品質風險由伺服器依同一快照即時計算，不寫在這個檔案裡。",
   "generated_at": "2026-10-21T15:00:00+08:00",
@@ -158,10 +158,11 @@
         },
         {
           "claim_id": "c2",
-          "kind": "unknown",
-          "text": "近四季自由現金流為負，基準 DCF（FCF 持平）不適用，估值差距無法判定。",
+          "kind": "inference",
+          "text": "近四季自由現金流合計為負（−416.44 億元），主因是營運資金佔用，同期稅前淨利仍為正，不是本業虧損；在 FCF 持平的基準 DCF 下不適用，估值差距無法判定。",
           "evidence_refs": [],
           "limitations": [
+            "數字來自 get_financial_snapshot（fcf_ttm），快照沒有現金流量表原文片段",
             "需要成長情境或其他估值方法，超出本期範圍"
           ]
         }
