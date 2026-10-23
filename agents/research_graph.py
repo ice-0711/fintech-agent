@@ -222,9 +222,10 @@ class ResearchRun:
                     "reason": result.get("reason"), "data": text[:MAX_RESULT_CHARS] + "…(截斷)"}
         obs = {"obs_id": obs_id, "role": role, "tool_name": name, "args_hash": h, "status": result.get("status"),
                "reason": result.get("reason"), "output_hash": _hash(json.dumps(result, sort_keys=True, ensure_ascii=False))[:16],
-               "digest": digest(result)}
+               "digest": digest(result), "brief": digest(result, 500)}
         self.observations.append(obs)
-        self.event(role, "tool_call", {k: v for k, v in obs.items() if k not in ("role", "tool_name", "digest")}, tool_name=name)
+        self.event(role, "tool_call", {k: v for k, v in obs.items() if k not in ("role", "tool_name", "digest", "brief")},
+                   tool_name=name)
         return types.Part.from_function_response(name=name, response=body)
 
     def fit_context(self, role: str, contents: list[Any], system: str) -> None:
@@ -348,6 +349,27 @@ class ResearchRun:
             trim()
         return text()
 
+    def final_turn_contents(self, role: str, head: str, system: str) -> list[Any]:
+        """Text-only last turn: one compact message (no tool history, no tool declarations) with
+        what the role has already read, trimmed to fit the input cap."""
+        obs = [o for o in self.observations if role == "researcher" or o["role"] == "reviewer"]
+        briefs = [{"obs_id": o["obs_id"], "tool_name": o["tool_name"], "status": o["status"],
+                   "data": o.get("brief") or o.get("digest", "")} for o in obs]
+        tail = ("現在不能再呼叫工具。請只依上面已取得的資料輸出規定的 JSON 草稿；不足就 status=insufficient。"
+                if role == "researcher" else "現在不能再呼叫工具。請只依上面資料輸出規定的覆核 JSON。")
+        adapter, cap = self.adapters[role], self.gate.limits.max_input_tokens
+
+        def build() -> list[Any]:
+            text = head + "\n已取得的工具結果：" + json.dumps(briefs, ensure_ascii=False) + "\n" + tail
+            return [types.Content(role="user", parts=[types.Part.from_text(text=text)])]
+
+        limit = 500
+        while adapter.estimate_input(role, build(), system, declare_tools=False) > cap and limit > 60:
+            limit = limit // 2
+            for b in briefs:
+                b["data"] = str(b["data"])[:limit]
+        return build()
+
     def cancelled(self) -> bool:
         return self.lease.store.cancel_requested(self.job["job_id"])
 
@@ -364,9 +386,10 @@ class ResearchRun:
         self.fit_context("researcher", self.r_contents, RESEARCHER_PROMPT)
         allow = self.tools_allowed("researcher", self.r_contents, RESEARCHER_PROMPT)
         if not allow:
-            self.r_contents.append(types.Content(role="user", parts=[types.Part.from_text(
-                text="現在不能再呼叫工具：請依已取得的結果直接輸出規定的 JSON 草稿（不足就 status=insufficient）。")]))
-        resp = self.adapters["researcher"].send("researcher", self.r_contents, RESEARCHER_PROMPT, allow_tools=allow)
+            first = self.r_contents[0].parts[0].text if self.r_contents and self.r_contents[0].parts else ""
+            self.r_contents = self.final_turn_contents("researcher", first, RESEARCHER_PROMPT)
+        resp = self.adapters["researcher"].send("researcher", self.r_contents, RESEARCHER_PROMPT,
+                                                allow_tools=allow, declare_tools=allow)
         model_turn = resp.candidates[0].content if resp.candidates else None
         calls = resp.function_calls or []
         if calls and not allow:
@@ -427,11 +450,14 @@ class ResearchRun:
             self.v_contents.append(types.Content(role="user", parts=[types.Part.from_text(
                 text=self.reviewer_payload(draft))]))
         self.fit_context("reviewer", self.v_contents, REVIEWER_PROMPT)
+        allow = self.tools_allowed("reviewer", self.v_contents, REVIEWER_PROMPT)
+        if not allow:
+            self.v_contents = self.final_turn_contents("reviewer", self.reviewer_payload(draft), REVIEWER_PROMPT)
         resp = self.adapters["reviewer"].send("reviewer", self.v_contents, REVIEWER_PROMPT,
-                                              allow_tools=self.tools_allowed("reviewer", self.v_contents, REVIEWER_PROMPT))
+                                              allow_tools=allow, declare_tools=allow)
         model_turn = resp.candidates[0].content if resp.candidates else None
         calls = resp.function_calls or []
-        if calls and not self.tools_allowed("reviewer", self.v_contents, REVIEWER_PROMPT):
+        if calls and not allow:
             self.event("reviewer", "tools_refused", {"requested": [c.name for c in calls]})
             review = {"decision": "insufficient", "issues": [], "checked_refs": [], "checked_metric_ids": [],
                       "decision_summary": "Reviewer 在必須下結論的回合仍要求工具，不能視為已核實"}

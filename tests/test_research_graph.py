@@ -110,9 +110,10 @@ def test_fourth_research_call_must_return_a_draft(store):
         fc_response("search_evidence", q), fc_response("read_evidence", {"evidence_version_id": "ev-dev-01-official"}),
         fc_response("search_evidence", dict(q, query="毛利")), text_response(draft(GOOD_CLAIMS)), text_response(PASS),
     ])
-    modes = [c["config"].tool_config for c in client.calls]
-    assert modes[:3] == [None, None, None]
-    assert modes[3].function_calling_config.mode == types.FunctionCallingConfigMode.NONE
+    assert all(c["config"].tools for c in client.calls[:3])
+    last = client.calls[3]
+    assert last["config"].tools is None  # no tools declared: the model can only answer in text
+    assert len(last["contents"]) == 1 and "不能再呼叫工具" in last["contents"][0].parts[0].text
     assert final["status"] == "succeeded" and final["calls_used"] == 5
 
 
@@ -270,9 +271,7 @@ def test_parallel_calls_beyond_two_are_skipped(store):
                                                                   total_token_count=110))
     final, client, events = run_case(store, CASE01, [many, text_response(draft(GOOD_CLAIMS)), text_response(PASS)])
     assert final["tool_calls_used"] == 2 and tools_used(events) == ["get_financial_snapshot", "read_evidence"]
-    tool_turn = [c for c in client.calls[1]["contents"] if c.parts and c.parts[0].function_response][-1]
-    skipped = tool_turn.parts[2].function_response.response
-    assert skipped["status"] == "skipped"
+    assert "calls_skipped" in [e["event_type"] for e in events]
 
 
 CASE15 = {"ticker": "2454", "cutoff_at": "2026-08-05T17:00:00+08:00", "source_snapshot_id": "snap-dev-case-15"}
@@ -356,3 +355,16 @@ def test_format_retry_never_takes_the_review_call(store):
         fc_response("search_evidence", dict(q, query="毛利")), text_response("not json")])
     assert final["calls_used"] == 4 and final["stop_reason"] == "researcher_insufficient"
     assert "draft_invalid" in [e["event_type"] for e in events]
+
+
+
+def test_reviewer_final_turn_has_no_tools_so_a_good_draft_gets_a_decision(store):
+    """10/23 live CASE-01: flash-lite asked for tools on the reviewer's text-only turn; now no tools are declared."""
+    rd = {"evidence_version_id": "ev-dev-01-official"}
+    final, client, events = run_case(store, CASE01, [
+        fc_response("read_evidence", rd), text_response(draft(GOOD_CLAIMS)),
+        fc_response("read_evidence", rd), fc_response("get_financial_snapshot", {"ticker": "2330", "cutoff": CASE01["cutoff_at"]}),
+        text_response(PASS)])  # the reviewer's forced last turn: no tools declared, it answers
+    reviewer_calls = [c for c in client.calls if c["config"].system_instruction.startswith("你是多智能體投資分析系統的 Reviewer")]
+    assert reviewer_calls[-1]["config"].tools is None
+    assert final["status"] == "succeeded" and final["calls_used"] <= 8

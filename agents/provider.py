@@ -100,7 +100,7 @@ class GeminiAdapter:
     def job_id(self) -> str:
         return self.gate.job["job_id"]
 
-    def build_config(self, role: str, system_instruction: str, allow_tools: bool = True):
+    def build_config(self, role: str, system_instruction: str, allow_tools: bool = True, declare_tools: bool = True):
         """allow_tools=False keeps the declarations (same prompt) but forces a text answer,
         e.g. the last research call must return a draft so call 5 stays free for review."""
         from google.genai import types
@@ -113,9 +113,11 @@ class GeminiAdapter:
         ]
         return types.GenerateContentConfig(
             system_instruction=system_instruction,
-            tools=[types.Tool(function_declarations=declarations)],
+            # declare_tools=False: no tools at all, so the model can only answer in text (final turns;
+            # flash-lite ignored mode=NONE on 10/23 live CASE-01).
+            tools=[types.Tool(function_declarations=declarations)] if declare_tools else None,
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-            tool_config=None if allow_tools else types.ToolConfig(
+            tool_config=None if (allow_tools or not declare_tools) else types.ToolConfig(
                 function_calling_config=types.FunctionCallingConfig(mode=types.FunctionCallingConfigMode.NONE)),
             max_output_tokens=self.gate.limits.max_output_tokens,
             temperature=0,
@@ -123,26 +125,28 @@ class GeminiAdapter:
         )
 
     @staticmethod
-    def prompt_text(role: str, contents: list[Any], system_instruction: str) -> str:
+    def prompt_text(role: str, contents: list[Any], system_instruction: str, declare_tools: bool = True) -> str:
         """Text we estimate and hash. Tool declarations are billed as input too
-        (live check 2026-09-28: ~500 tokens), so they are included."""
-        tools_json = json.dumps([t for t in TOOL_DECLARATIONS if t["name"] in ROLE_TOOLS[role]], ensure_ascii=False)
+        (live check 2026-09-28: ~500 tokens), so they are included when declared."""
+        tools_json = json.dumps([t for t in TOOL_DECLARATIONS if t["name"] in ROLE_TOOLS[role]],
+                                ensure_ascii=False) if declare_tools else ""
         return system_instruction + "\n" + tools_json + "\n" + json.dumps(
             [c.model_dump(mode="json", exclude_none=True) if hasattr(c, "model_dump") else c for c in contents],
             ensure_ascii=False,
         )
 
-    def estimate_input(self, role: str, contents: list[Any], system_instruction: str) -> int:
-        return estimate_tokens(self.prompt_text(role, contents, system_instruction))
+    def estimate_input(self, role: str, contents: list[Any], system_instruction: str, declare_tools: bool = True) -> int:
+        return estimate_tokens(self.prompt_text(role, contents, system_instruction, declare_tools))
 
-    def send(self, role: str, contents: list[Any], system_instruction: str, allow_tools: bool = True) -> Any:
+    def send(self, role: str, contents: list[Any], system_instruction: str, allow_tools: bool = True,
+             declare_tools: bool = True) -> Any:
         """One logical request = up to 1 + max_retries HTTP sends, all counted."""
 
         import httpx
         from google.genai import errors
 
-        config = self.build_config(role, system_instruction, allow_tools)
-        prompt_text = self.prompt_text(role, contents, system_instruction)
+        config = self.build_config(role, system_instruction, allow_tools, declare_tools)
+        prompt_text = self.prompt_text(role, contents, system_instruction, declare_tools)
         prompt_hash = _hash(prompt_text)
         for attempt in range(self.gate.limits.max_retries + 1):
             self.heartbeat()  # renew the 60 s lease before a send that may take up to 45 s
