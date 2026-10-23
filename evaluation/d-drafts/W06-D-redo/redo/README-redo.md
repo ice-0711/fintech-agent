@@ -29,3 +29,9 @@ dev-drafts-v2-results.json：最後一次執行結果。
 2. agents/review_checks.py 在凍結清單內。上面兩點修補如果要採用，需要組長或 B 決定，並依凍結規則重凍結；我沒有改它。
 3. 我沒有確認 research_graph 是否已經在上游攔截 paragraph 為 null 的情況（組長說 CASE-15 已改為回傳 status unreadable），所以不能說 repo 現況一定會當掉。
 4. 舊的 W04 草稿（dev_drafts.json）用的案例包含 CASE-07、13、14、20、25，這些在最終分組是保留案。舊草稿的內容是依 B 當時的開發檔手寫的，不是讀保留集，但不應再當開發校準使用，請以本次 v2 為準。舊測試對新快照有 20 項失敗，原因就是案例分組已變。
+
+---
+修訂紀錄（2026-10-23，依 B 交叉評分 docs/B-review-W06-D-redo.md）
+1. CASE-18-good 的 limitations 原本寫了 ev-dev-18-late 的 available_at（晚於 cutoff），Agent 實際不會知道這個片段，屬於洩漏 cutoff 後資訊。已改為「截至 cutoff 查無 2026Q2 財報公告，無可用數字」。重跑 run_v2.py 仍為 10/10 符合預期。
+2. 先前 README 寫「不確定 research_graph 是否擋 paragraph 為 null」。B 查證：snapshot_view 會把 null 正文轉成空字串，管線中不會當掉；repo 現行檢查唯一的缺口是 CASE-11-flawed（basis unspecified）。unreadable_source 規則因此屬選用。
+3. 是否採用 basis_unspecified 由組長決定（agents/review_checks.py 在凍結清單內）。D 不修改凍結檔案。
