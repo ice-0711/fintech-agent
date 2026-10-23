@@ -1,0 +1,83 @@
+{
+ "fixture_version": "agent-tests-1",
+ "note": "Frozen copy of two W04-B dev snapshots (commit 4f4a728) so agent tests do not change when B updates fixtures/dev. CASE-15/26 added from B v1.4 (2026-10-21).",
+ "snapshots": {
+  "snap-dev-case-01": {
+   "ticker": "2330",
+   "synthetic_fixture": false,
+   "evidences": [
+    {
+     "evidence_version_id": "ev-dev-01-official",
+     "title": "台積公司 2026 年第二季財務報告",
+     "paragraph": "台積公司 2026 年第二季合併營收約為新台幣 6,735 億元，稅後純益約為新台幣 2,478 億元，毛利率為 53.2%，營業利益率為 42.5%。",
+     "available_at": "2026-07-16T14:00:00+08:00",
+     "content_hash": "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2"
+    }
+   ]
+  },
+  "snap-dev-case-13": {
+   "ticker": "2317",
+   "synthetic_fixture": true,
+   "perturbation_note": "刻意移除 capital_expenditure (CapEx)，使其為 null",
+   "financial_snapshot": {
+    "ticker": "2317",
+    "period": "2026Q2",
+    "operating_cash_flow": 450.0,
+    "capital_expenditure": null,
+    "free_cash_flow": null,
+    "missing_reason": "CapEx 欄位缺失，無法計算自由現金流",
+    "available_at": "2026-08-05T16:00:00+08:00"
+   }
+  },
+  "snap-dev-case-15": {
+   "ticker": "2454",
+   "synthetic_fixture": true,
+   "perturbation": {
+    "type": "unreadable_source",
+    "location": [
+     {
+      "evidence_version_id": "ev-dev-15-unreadable",
+      "field": "paragraph",
+      "detail": "paragraph 為 null（正文不可讀，模擬）"
+     }
+    ],
+    "note": "關鍵來源正文不可讀（模擬）"
+   },
+   "evidences": [
+    {
+     "evidence_version_id": "ev-dev-15-unreadable",
+     "title": "聯發科 2026Q2 法說會簡報（正文不可讀，模擬）",
+     "paragraph": null,
+     "read_status": "unreadable",
+     "available_at": "2026-07-31T18:41:57+08:00",
+     "available_at_basis": "synthetic_fixture_time",
+     "source_url": null,
+     "source_ref": "合成擾動，非真實檔案",
+     "content_hash": null,
+     "synthetic_fixture": true
+    }
+   ]
+  },
+  "snap-dev-case-26": {
+   "ticker": "2317",
+   "synthetic_fixture": true,
+   "tool_simulation": {
+    "tool_name": "read_evidence",
+    "evidence_version_id": "ev-2317-2026q2-consolidated",
+    "behavior": "timeout",
+    "timeout_seconds": 30
+   },
+   "perturbation": {
+    "type": "tool_timeout",
+    "location": [
+     {
+      "tool": "read_evidence",
+      "field": "tool_simulation",
+      "detail": "read_evidence 故意 timeout 30 秒"
+     }
+    ],
+    "note": "工具異常：read_evidence 故意 timeout"
+   }
+  }
+ }
+}
