@@ -38,6 +38,7 @@ def main() -> None:
     conn = sqlite3.connect(ROOT / args.db)
     conn.row_factory = sqlite3.Row
     rows = []
+    modes_seen = {json.loads(r[0])["mode"] for r in conn.execute("select data from research_jobs")}
     for job_row in conn.execute("select job_id, data from research_jobs order by created_at"):
         job = json.loads(job_row["data"])
         case = dev.get(job["source_snapshot_id"])
@@ -54,8 +55,10 @@ def main() -> None:
         leased = next((e["created_at"] for e in events if e["event_type"] in ("lease_acquired", "lease_recovered")), None)
         created, updated = datetime.fromisoformat(job["created_at"]), datetime.fromisoformat(job["updated_at"])
         prompts = sorted({c.get("prompt_version") for c in calls if c.get("prompt_version")})
-        notes = ["由組長自 job 紀錄匯出（scripts/export_dev_runs.py），待 D 核對",
-                 "只跑 dual 模式；single 未跑、workflow 模式尚未實作"]
+        notes = ["由組長自 job 紀錄匯出（scripts/export_dev_runs.py），待 D 核對"]
+        missing = sorted({"single", "dual", "workflow"} - modes_seen)
+        if missing:
+            notes.append(f"本批未跑模式：{','.join(missing)}")
         if None in tin:
             notes.append("部分發送無 usage 回傳，tokens_in 為已知值合計")
         rows.append({

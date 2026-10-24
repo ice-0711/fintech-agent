@@ -68,10 +68,10 @@ def mock_script(case: dict) -> list:
                                   "evidence_refs": [], "limitations": ["CapEx null"]}], status="insufficient"))]
 
 
-def run(store: JobStore, case: dict, client, model_id: str, quota: ProjectQuota, tag: str) -> dict:
-    req = validate_job_request({"ticker": case["ticker"], "mode": "dual", "cutoff_at": case["cutoff_at"],
+def run(store: JobStore, case: dict, client, model_id: str, quota: ProjectQuota, tag: str, mode: str = "dual") -> dict:
+    req = validate_job_request({"ticker": case["ticker"], "mode": mode, "cutoff_at": case["cutoff_at"],
                                 "source_snapshot_id": case["source_snapshot_id"], "focus": case.get("title") or case.get("variant"),
-                                "idempotency_key": f"{case['case_id']}-{tag}"})
+                                "idempotency_key": f"{case['case_id']}-{mode}-{tag}" if mode != "dual" else f"{case['case_id']}-{tag}"})
     job, _ = store.create_job(req, model_id)
     handler = make_research_handler(client, model_id, quota)
     final = run_once(store, f"dev-{tag}", handler)
@@ -110,6 +110,7 @@ def main() -> None:
     ap.add_argument("--cases", default=",".join(CASES))
     ap.add_argument("--out", help="output file name under agent/ (default researcher-v12-traces.json)")
     ap.add_argument("--db", help="reuse this tmp/ sqlite file so the daily job cap J spans several runs")
+    ap.add_argument("--modes", default="dual", help="comma list of single,dual,workflow; each case runs once per mode")
     ap.add_argument("--model", help="compare another model listed in quota-baseline.json gemini_alternatives_checked")
     args = ap.parse_args()
     cases = load_cases()
@@ -117,6 +118,9 @@ def main() -> None:
     if unknown:
         sys.exit(f"{unknown} 不在開發集 evaluation/dev-cases.json（保留集不得用於開發）")
     chosen = [cases[c] for c in args.cases.split(",")]
+    modes = args.modes.split(",")
+    if any(m not in ("single", "dual", "workflow") for m in modes):
+        sys.exit(f"--modes 只接受 single,dual,workflow：{args.modes}")
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=ROOT).stdout.strip()
     out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "commit": commit,
            "prompt_versions": {"researcher": RESEARCHER_PROMPT_VERSION, "reviewer": REVIEWER_PROMPT_VERSION},
@@ -146,18 +150,23 @@ def main() -> None:
         stamp = datetime.now().strftime("%Y%m%d%H%M")
         store = JobStore(ROOT / "tmp" / (args.db or f"dev_runs-{stamp}.sqlite3"))  # fresh DB unless --db
         client = make_client()
-        for i, c in enumerate(chosen):
+        runs = [(c, m) for c in chosen for m in modes]
+        for i, (c, m) in enumerate(runs):
             if i:
-                time.sleep(60)  # stay under 80 % of RPM between cases
-            live[c["case_id"]] = run(store, c, client, model_id, quota, f"live-{stamp}")
-            print(c["case_id"], live[c["case_id"]]["status"], live[c["case_id"]]["path"], flush=True)
+                time.sleep(60)  # stay under 80 % of RPM between jobs
+            result = run(store, c, client, model_id, quota, f"live-{stamp}", m)
+            live.setdefault(c["case_id"], {})[m] = result
+            print(c["case_id"], m, result["status"], result["path"], flush=True)
         out["model_id"] = model_id
 
     for c in chosen:
         entry = {"case_id": c["case_id"], "ticker": c["ticker"], "category": c["category"], "title": c.get("title") or c.get("variant"),
                  "expected_behavior": c["expected_behavior"], "mock": mocks[c["case_id"]]}
         if c["case_id"] in live:
-            entry["live"] = live[c["case_id"]]
+            if modes == ["dual"]:
+                entry["live"] = live[c["case_id"]]["dual"]
+            else:
+                entry["live_by_mode"] = live[c["case_id"]]
         out["cases"].append(entry)
     out_path = OUT.with_name(args.out) if args.out else (
         OUT if not args.model else OUT.with_name(f"researcher-v12-traces-{args.model}.json"))
