@@ -4,7 +4,7 @@
  "snapshots": {
   "snap-dev-case-01": {
    "ticker": "2330",
-   "synthetic_fixture": false,
+   "synthetic_fixture": true,
    "evidences": [
     {
      "evidence_version_id": "ev-dev-01-official",

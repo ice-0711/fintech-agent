@@ -56,3 +56,16 @@
 | model | 維持 `gemini-3.5-flash-lite` |
 | 凍結 | 10/23 凍結案例／資料／評分規則；prompt 與 Agent 程式 10/26 live 再驗一次後鎖定（W09 前） |
 | 備案 | Reviewer 仍無法完成覆核時，thinking_level minimal → low，只用開發集驗證 |
+
+## 七、2026-10-24 核定（回覆 B 10/24 待決事項）
+
+| 項目 | 核定 |
+|---|---|
+| 第一段凍結（案例、資料、B 工具、D 評分規則） | **可以凍結**。B 重新產生凍結紀錄，D 簽核後組長在 `data-freeze.md` 第七節簽核。第二段檔案清單維持 B 所列 |
+| CASE-26 測不到逾時 | 不改快照（避免 cases-v2）；結果註明「此案未觸發逾時」，逾時處理以離線測試為證 |
+| 覆核規則 basis_unspecified | 採用（來源 basis = unspecified 時列 critical）；10/26 與 workflow 模式一起合併，三模式校準開跑前生效 |
+| CR-W06 保留集防護（`agents/snapshot.py`） | 10/26 合併（不等 W10），連同 B 的測試檔 |
+| Supabase 寫入方式（data-contract 待決第 4 項） | 加 `(stock_code, year)` 唯一索引，改為資料庫層級 upsert；W07 先在 Supabase 測試專案上做，不動正式庫 |
+| 年度 PER 來源（data-contract 待決第 12 項） | 保留；輸出標明「年度 PER（12/31 股價 ÷ 年度 EPS）」，不得與 F02 P/E 直接比較 |
+| `tests/fixtures/agent_case_fixtures.json` snap-dev-case-01 | 改標 `synthetic_fixture: true`（6,735 億為早期合成數字） |
+
