@@ -111,4 +111,4 @@
 |---|---|---|---|
 | B（產出） | 黃意棠 | 2026-10-25 | check_cases／check_sources 0 錯誤；--verify 一致；cases_digest 98af84030d45 |
 | D（核對標準主張與擾動） |  |  |  |
-| 組長（核准凍結） |  |  |  |
+| 組長（核准凍結） | 組長 | 2026-10-25 | 核准第一段凍結（cases-v1，cases_digest 98af84030d45；組長本機 --verify 一致）；第二段 W09 前以 --lock-agent 鎖定 |
