@@ -1,6 +1,6 @@
 # 資料與案例凍結紀錄（W06-B，cases-v1）
 
-- 產生時間：2026-10-22T16:40:47+08:00（`python scripts/build_freeze.py`）
+- 產生時間：2026-10-25T10:46:33+08:00（`python scripts/build_freeze.py`）
 - 預定簽出：2026-10-23
 - 案例摘要 hash（cases_digest）：`98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3`
 - 工具版本：tools-v12.0；契約 v1.2-w07；prompt v1.2；快照 v1.6-tw-market
@@ -46,7 +46,8 @@
 ## 二、來源 hash
 
 - FinMind 原始檔 22 個（本機 22 個已重算核對），null hash 0 個
-- 人工檔 4 個；資料檔 13 個；工具程式 10 個；prompt 2 個
+- 人工檔 4 個；資料檔 13 個；B 工具程式 4 個；評分規則 2 個（以上第一段）
+- Agent 程式 7 個；prompt 2 個（第二段，未鎖定，W09 前（10/26 開發集 live 再驗後）鎖定）
 - 完整清單見 `data/v12-frozen-manifest.json`
 
 ## 三、同業資料鎖定
@@ -62,6 +63,10 @@
 
 ## 五、禁止改寫清單（凍結後）
 
+兩段凍結（組長 2026-10-23）：第一段 10/23 凍結，`--verify` 嚴格核對；第二段 prompt 與 Agent 程式於 10/26 開發集 live 再驗後、W09 前鎖定，鎖定前 `--verify` 只列出變動。
+
+**第一段（10/23 起不得改寫）**
+
 - `evaluation/dev-cases.json`
 - `fixtures/dev/case_fixtures.json`
 - `evaluation/test-cases-sealed.json`
@@ -71,16 +76,22 @@
 - `data/raw/finmind/*`
 - `data/manual/*.csv`
 - `data/v12-peer-snapshot.json`
-- `agents/tools.py`
 - `agents/tools_impl.py`
 - `agents/calculator.py`
 - `agents/register_tools.py`
+- `valuation_agent/dcf_model.py`
+- `evaluation/d-drafts/rubric-v1-final.md`
+- `evaluation/d-drafts/protocol-v1.md`
+
+**第二段（W09 前鎖定；只用開發集調整，保留集不動）**
+
+- `agents/tools.py`
 - `agents/snapshot.py`
 - `agents/contract.py`
 - `agents/review_checks.py`
-- `agents/research_graph.py`
-- `valuation_agent/dcf_model.py`
 - `agents/review_contract.py`
+- `agents/research_graph.py`
+- `agents/provider.py`
 - `agents/prompts/researcher-v1.2.txt`
 - `agents/prompts/reviewer-v1.2.txt`
 
@@ -88,8 +99,11 @@
 
 ## 六、待核定（不影響凍結，但影響結果解讀）
 
-- CR-W06：agents/snapshot.py 保留集防護（無發布時間片段以 captured_at 判定、tool_simulation no_data、CASE-23／28 輸入），W10 保留集執行前需完成
-- 已核定（組長 2026-10-22）：股價可得時間全專案 17:30；開發案例 v1.5；F06 延後；2317 不做 FCF 正常化；snapshot.py 已讀保留集快照
+- 第二段（prompt 與 Agent 程式）W09 前鎖定；組長宣布後 B 執行 build_freeze.py --lock-agent
+- CR-W06（agents/snapshot.py 保留集防護）與 tests/test_snapshot_holdout_guard.py：組長 10/26 合併，W10 保留集執行前生效；屬第二段
+- 審查規則 basis_unspecified：組長 10/26 與 workflow 模式一併合併，三模式校準開跑前生效；屬第二段
+- CASE-26：不改快照；live 結果註明「此案未觸發逾時」，逾時路徑以離線測試（tests/test_tool_fixtures.py TR-31、test_timeout_becomes_tool_error）為證
+- Supabase (stock_code, year) 唯一索引與 upsert：組長 W07 先於測試專案執行（年度路徑，不影響 30 案）
 
 ## 七、簽核
 

@@ -1,6 +1,6 @@
 {
   "manifest_version": "cases-v1",
-  "frozen_at": "2026-10-22T16:40:47+08:00",
+  "frozen_at": "2026-10-25T10:46:33+08:00",
   "planned_sign_date": "2026-10-23",
   "generated_by": "scripts/build_freeze.py",
   "hash_rule": "文字檔 sha256_lf（CRLF→LF 後計算）；data/raw 原始檔為原始位元組 sha256",
@@ -103,8 +103,8 @@
     {
       "path": "data-contract.md",
       "present": true,
-      "sha256_lf": "a46ab879b013cf3fa0f0aca64cd8416f74222109282b835a0e949d2f07aafeaf",
-      "bytes": 22973
+      "sha256_lf": "361481814adfbe833752499dca310c41249fc083277ae66a06cf7945a1337e19",
+      "bytes": 23522
     },
     {
       "path": "source-register.csv",
@@ -357,13 +357,31 @@
       "bytes": 48
     }
   ],
-  "tool_files": [
-    {
-      "path": "agents/tools.py",
-      "present": true,
-      "sha256_lf": "bf3a3e807f4c8ff788ad32c781dd4803e6c9fd40adde230b0a8d91c20b10c202",
-      "bytes": 17423
+  "freeze_stages": {
+    "stage1": {
+      "frozen_at": "2026-10-25T10:46:33+08:00",
+      "groups": [
+        "data_files",
+        "tool_files",
+        "rubric_files",
+        "manual_files",
+        "raw_files",
+        "cases"
+      ],
+      "rule": "案例、分組、資料、B 工具、評分規則；--verify 嚴格核對"
     },
+    "stage2": {
+      "groups": [
+        "agent_files",
+        "prompt_files"
+      ],
+      "locked": false,
+      "locked_at": null,
+      "deadline": "W09 前（10/26 開發集 live 再驗後）",
+      "rule": "prompt 與 Agent 程式；鎖定前 hash 僅供參照，--verify 只列變動"
+    }
+  },
+  "tool_files": [
     {
       "path": "agents/tools_impl.py",
       "present": true,
@@ -381,6 +399,34 @@
       "present": true,
       "sha256_lf": "6468cf193c3d19c6f6a408cd11ee1c8a4793eafb52c85b549635633156a0bfd1",
       "bytes": 2636
+    },
+    {
+      "path": "valuation_agent/dcf_model.py",
+      "present": true,
+      "sha256_lf": "5e12d02892cf7facda748414da40bf6aa5234bb253d69893ebaddd46f89ef0e9",
+      "bytes": 4121
+    }
+  ],
+  "rubric_files": [
+    {
+      "path": "evaluation/d-drafts/rubric-v1-final.md",
+      "present": true,
+      "sha256_lf": "f299909680f00670650587ce79d173ce1dbdd750dee2ed56435bc58727344f06",
+      "bytes": 5757
+    },
+    {
+      "path": "evaluation/d-drafts/protocol-v1.md",
+      "present": true,
+      "sha256_lf": "535bf2307698bb9eebb520ee2c3978f2bc0b45e0cf76585626c02d161151f161",
+      "bytes": 9034
+    }
+  ],
+  "agent_files": [
+    {
+      "path": "agents/tools.py",
+      "present": true,
+      "sha256_lf": "bf3a3e807f4c8ff788ad32c781dd4803e6c9fd40adde230b0a8d91c20b10c202",
+      "bytes": 17423
     },
     {
       "path": "agents/snapshot.py",
@@ -401,22 +447,22 @@
       "bytes": 17957
     },
     {
-      "path": "agents/research_graph.py",
-      "present": true,
-      "sha256_lf": "8d8a02b2154d1abc96faee70ea51ecb6c6551924e96c86f0d5b2bafce89cc8c4",
-      "bytes": 31348
-    },
-    {
-      "path": "valuation_agent/dcf_model.py",
-      "present": true,
-      "sha256_lf": "5e12d02892cf7facda748414da40bf6aa5234bb253d69893ebaddd46f89ef0e9",
-      "bytes": 4121
-    },
-    {
       "path": "agents/review_contract.py",
       "present": true,
       "sha256_lf": "ce000c603d2a46ec5a4f04750db683d6c44defff276937e425c64103e28a0959",
       "bytes": 7338
+    },
+    {
+      "path": "agents/research_graph.py",
+      "present": true,
+      "sha256_lf": "14d0729817c61fcf364817c5b455a70fa2b5dfbbd02bb9bb93b9e4b223a3a1cd",
+      "bytes": 32951
+    },
+    {
+      "path": "agents/provider.py",
+      "present": true,
+      "sha256_lf": "2aa8dca024880aa27bf3326c152df5471407a240585c9a7fc821cef4d6787789",
+      "bytes": 12188
     }
   ],
   "prompt_files": [
@@ -440,10 +486,16 @@
   },
   "approved": [
     "DCF：WACC 9%、g 3%、5 年持平 FCF（組長 2026-10-21）",
-    "淨負債口徑：應付短期票券年度路徑不計入、租賃負債不計入（組長 2026-10-21）"
+    "淨負債口徑：應付短期票券年度路徑不計入、租賃負債不計入（組長 2026-10-21）",
+    "股價可得時間全專案 17:30；開發案例 v1.5；F06 延後；2317 不做 FCF 正常化（組長 2026-10-22）",
+    "model 維持 gemini-3.5-flash-lite；兩段凍結（組長 2026-10-23）",
+    "第一段凍結、第二段檔案清單；CASE-26 不改快照；basis_unspecified 採用；CR-W06 10/26 合併；Supabase (stock_code, year) 唯一索引與 upsert；年度 PER 保留並標明口徑（組長 2026-10-25）"
   ],
   "pending_approvals": [
-    "CR-W06：agents/snapshot.py 保留集防護（無發布時間片段以 captured_at 判定、tool_simulation no_data、CASE-23／28 輸入），W10 保留集執行前需完成",
-    "已核定（組長 2026-10-22）：股價可得時間全專案 17:30；開發案例 v1.5；F06 延後；2317 不做 FCF 正常化；snapshot.py 已讀保留集快照"
+    "第二段（prompt 與 Agent 程式）W09 前鎖定；組長宣布後 B 執行 build_freeze.py --lock-agent",
+    "CR-W06（agents/snapshot.py 保留集防護）與 tests/test_snapshot_holdout_guard.py：組長 10/26 合併，W10 保留集執行前生效；屬第二段",
+    "審查規則 basis_unspecified：組長 10/26 與 workflow 模式一併合併，三模式校準開跑前生效；屬第二段",
+    "CASE-26：不改快照；live 結果註明「此案未觸發逾時」，逾時路徑以離線測試（tests/test_tool_fixtures.py TR-31、test_timeout_becomes_tool_error）為證",
+    "Supabase (stock_code, year) 唯一索引與 upsert：組長 W07 先於測試專案執行（年度路徑，不影響 30 案）"
   ]
 }

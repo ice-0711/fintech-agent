@@ -259,10 +259,14 @@ def build_frozen_manifest(now: str, cases_manifest: dict) -> dict:
         "approved": ["DCF：WACC 9%、g 3%、5 年持平 FCF（組長 2026-10-21）",
                      "淨負債口徑：應付短期票券年度路徑不計入、租賃負債不計入（組長 2026-10-21）",
                      "股價可得時間全專案 17:30；開發案例 v1.5；F06 延後；2317 不做 FCF 正常化（組長 2026-10-22）",
-                     "model 維持 gemini-3.5-flash-lite；兩段凍結（組長 2026-10-23）"],
-        "pending_approvals": ["CR-W06：agents/snapshot.py 保留集防護（無發布時間片段以 captured_at 判定、tool_simulation no_data、CASE-23／28 輸入），W10 保留集執行前需完成；屬第二段",
-                              "審查規則 basis_unspecified（CASE-11-flawed 目前可通過審查，docs/B-review-W06-D-redo.md）；屬第二段",
-                              "CASE-26 live 測不到逾時：snap-dev-case-26 無可搜尋證據，模型不會讀取目標來源；修正需開發快照改版（cases-v2）"],
+                     "model 維持 gemini-3.5-flash-lite；兩段凍結（組長 2026-10-23）",
+                     "第一段凍結、第二段檔案清單；CASE-26 不改快照；basis_unspecified 採用；CR-W06 10/26 合併；"
+                     "Supabase (stock_code, year) 唯一索引與 upsert；年度 PER 保留並標明口徑（組長 2026-10-25）"],
+        "pending_approvals": ["第二段（prompt 與 Agent 程式）W09 前鎖定；組長宣布後 B 執行 build_freeze.py --lock-agent",
+                              "CR-W06（agents/snapshot.py 保留集防護）與 tests/test_snapshot_holdout_guard.py：組長 10/26 合併，W10 保留集執行前生效；屬第二段",
+                              "審查規則 basis_unspecified：組長 10/26 與 workflow 模式一併合併，三模式校準開跑前生效；屬第二段",
+                              "CASE-26：不改快照；live 結果註明「此案未觸發逾時」，逾時路徑以離線測試（tests/test_tool_fixtures.py TR-31、test_timeout_becomes_tool_error）為證",
+                              "Supabase (stock_code, year) 唯一索引與 upsert：組長 W07 先於測試專案執行（年度路徑，不影響 30 案）"],
     }
 
 
