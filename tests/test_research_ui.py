@@ -17,6 +17,9 @@ def make_app(tmp_path, clock=None, mock=True):
     app = Flask(__name__, root_path=str(ROOT), template_folder="templates", static_folder="static")
     app.add_url_rule("/", "index", lambda: "home")
     app.config.update(RESEARCH_UI_MOCK=mock, RESEARCH_UI_MOCK_DB=str(tmp_path / "ui.sqlite3"), RESEARCH_UI_CLOCK=clock)
+    from agents.publication import LocalStorage, ReportStore
+
+    app.extensions["report_store"] = ReportStore(tmp_path / "reports.sqlite3", LocalStorage(tmp_path / "storage"))
     app.register_blueprint(bp)
     return app
 

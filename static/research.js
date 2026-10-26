@@ -39,7 +39,19 @@
     if (!v) return "未提供";
     return v.gap !== null && v.gap !== undefined ? `${v.label}（差距 ${pct(v.gap)}）` : `${v.label}${v.reason ? `：${v.reason}` : ""}`;
   }
-  const PDF_TEXT = { not_available: "線上 PDF 尚未提供（W07）", published: "可下載", pdf_failed: "PDF 產製失敗" };
+  const PDF_TEXT = { not_available: "線上 PDF 尚未提供", published: "可預覽／下載", pdf_failed: "PDF 產製失敗" };
+  function labelBadge(r) {
+    if (r.synthetic_fixture) return badge("FIXTURE", "b-fixture");
+    return r.run_label === "MOCK" ? badge("MOCK 測試報告", "b-fixture") : badge("LIVE", "b-run");
+  }
+  function pdfLinks(r) {
+    if (!r.pdf_url) return "";
+    return `<a class="btn-link" href="${esc(r.pdf_url)}" target="_blank" rel="noopener">預覽 PDF</a>
+      <a class="btn-link" href="${esc(r.download_url)}" download>下載 PDF</a>`;
+  }
+  // JSON responses come back with sorted keys ("10.0%" before "8.0%"); order WACC / g numerically.
+  function numKeys(o) { return Object.keys(o).sort((a, b) => parseFloat(a) - parseFloat(b)); }
+  function num(v, nd = 2) { return v === null || v === undefined ? "NA" : Number(v).toLocaleString("zh-TW", { minimumFractionDigits: nd, maximumFractionDigits: nd }); }
   const OUTCOME_TEXT = { succeeded: null, insufficient_evidence: ["研究結果：資料不足", "b-warn"] };
 
   function esc(value) {
@@ -137,10 +149,10 @@
       return `<article class="report-card" data-report="${esc(r.report_version_id)}">
         <header>
           <b>${esc(r.ticker)} ${esc(r.company)}</b>
-          <span class="tags">${r.synthetic_fixture ? badge("FIXTURE", "b-fixture") : ""}${badge("已發布", "b-ok")}${favs.includes(r.ticker) ? badge("★ 收藏", "b-run") : ""}</span>
+          <span class="tags">${labelBadge(r)}${badge("已發布", "b-ok")}${favs.includes(r.ticker) ? badge("★ 收藏", "b-run") : ""}</span>
         </header>
         <div class="meta">
-          <span>版本 <b class="mono">${esc(r.report_version_id)}</b></span>
+          <span>版本 <b class="mono">${esc(r.report_version_id)}</b>${r.version_no ? `（第 ${esc(r.version_no)} 版）` : ""}</span>
           <span>發布 <b>${fmtTime(r.published_at)}</b></span>
           <span>資料截止 <b>${fmtTime(r.cutoff_at)}</b></span>
           <span>財報期 <b>${esc(r.financial_period || "NA（無可用財報）")}</b></span>
@@ -154,7 +166,7 @@
           ${r.snapshot_stale ? badge("快照過期", "b-warn") : ""}
         </div>
         ${dq && dq.level !== "low" && dq.reasons && dq.reasons.length ? `<div class="hint" style="margin:0">${esc(dq.reasons.join("；"))}</div>` : ""}
-        <div class="actions"><button type="button" class="ghost" data-open-report="${esc(r.report_version_id)}">開啟報告</button></div>
+        <div class="actions"><button type="button" class="ghost" data-open-report="${esc(r.report_version_id)}">開啟報告</button>${pdfLinks(r)}</div>
       </article>`;
     }).join("");
   }
@@ -415,18 +427,42 @@
       ${view.drafts_complete ? "" : `<p class="footnote">這份紀錄只保存最後一版草稿，較早版本無法比較（已向組長提出 CR-A04：每一版草稿都存進 checkpoint）。</p>`}
       <div class="approve">
         <button type="button" id="approveBtn" ${canApprove ? "" : "disabled"}>核准發布</button>
-        <span class="hint" id="approveNote">${canApprove ? "覆核通過不等於發布；發布需要登入的核准人。" : "覆核尚未通過，不能核准。"}</span>
+        <span class="hint" id="approveNote">${canApprove ? "覆核通過不等於發布；發布需要登入的組長：先建立版本、確認 hash，再核准發布。" : "覆核尚未通過，不能核准。"}</span>
       </div>`;
     const btn = $("#approveBtn");
     if (btn) btn.addEventListener("click", approve);
     panel.querySelectorAll(".vtab").forEach(t => t.addEventListener("click", () => { reviewState.version = Number(t.dataset.version); renderReview(reviewState.view); }));
   }
 
+  /* W07: the lead freezes the job into a report version, checks its hash, then approves + publishes. */
+  let pendingVersion = null;
   async function approve() {
     const note = $("#approveNote");
+    const btn = $("#approveBtn");
+    const jobId = currentJobId || currentReplayId || "none";
+    note.className = "hint";
     try {
-      await getJson(`/api/ui/jobs/${encodeURIComponent(currentJobId || currentReplayId || "none")}/approve`, { method: "POST" });
+      if (!pendingVersion || pendingVersion.jobId !== jobId) {
+        const body = await getJson(`/api/ui/jobs/${encodeURIComponent(jobId)}/report`, { method: "POST" });
+        pendingVersion = { jobId, ...body.version, run_label: body.run_label };
+        note.innerHTML = `已建立報告版本 <span class="mono">${esc(pendingVersion.report_version_id)}</span>（第 ${esc(pendingVersion.version_no)} 版，${esc(body.run_label)}），
+          hash <span class="mono">${esc(pendingVersion.report_hash.slice(0, 16))}…</span>。確認內容後再按一次即核准並發布（未核准前不公開）。`;
+        btn.textContent = "確認此 hash 並發布";
+        return;
+      }
+      btn.disabled = true;
+      note.textContent = "核准並產生 PDF 中…";
+      const body = await getJson(`/api/ui/jobs/${encodeURIComponent(jobId)}/approve`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report_version_id: pendingVersion.report_version_id, report_hash: pendingVersion.report_hash })
+      });
+      pendingVersion = null;
+      note.innerHTML = `已發布第 ${esc(body.version.version_no)} 版。${pdfLinks(body.version)}
+        <button type="button" class="ghost" data-open-report="${esc(body.version.report_version_id)}">開啟報告</button>`;
+      btn.textContent = "已發布";
+      loadPublished();
     } catch (err) {
+      if (btn) btn.disabled = false;
       note.textContent = err.status === 403 ? `沒有權限：${err.message}` : err.status === 409 ? err.message : `核准失敗：${err.message}`;
       note.className = "hint error";
     }
@@ -506,7 +542,7 @@
     $("#reportPanel").innerHTML = `
       <div class="actions">
         <b style="font-size:16px">${esc(r.ticker)} ${esc(r.company)}</b>
-        ${r.synthetic_fixture ? badge("FIXTURE", "b-fixture") : ""}${badge("已發布", "b-ok")}${riskBadge(dq)}
+        ${labelBadge(r)}${badge("已發布", "b-ok")}${riskBadge(dq)}
         ${outcome ? badge(outcome[0], outcome[1]) : ""}${r.snapshot_stale ? badge("快照過期", "b-warn") : ""}
       </div>
       <p class="hint">${esc(r.question)}</p>
@@ -516,9 +552,13 @@
         <dt>財報期</dt><dd>${esc(r.financial_period || "NA（無可用財報）")}</dd>
         <dt>來源更新</dt><dd>${fmtTime(r.data_updated_at)}${r.snapshot_stale ? "（快照過期，可能非最新）" : ""}</dd>
         <dt>快照</dt><dd class="mono">${esc(r.source_snapshot_id)}</dd>
-        <dt>模型／prompt</dt><dd>${esc(r.model_id || "無（FIXTURE，非 Agent 產出）")}・${esc(r.prompt_version)}</dd>
-        <dt>PDF</dt><dd>${esc(PDF_TEXT[r.pdf_status] || "未提供")}</dd>
+        <dt>模型／prompt</dt><dd>${esc(r.model_id || (r.synthetic_fixture ? "無（FIXTURE，非 Agent 產出）" : "無（MOCK 不呼叫模型）"))}・${esc(r.prompt_version)}</dd>
+        <dt>PDF</dt><dd>${esc(PDF_TEXT[r.pdf_status] || "未提供")} ${pdfLinks(r)}</dd>
+        ${r.report_hash ? `<dt>報告 hash</dt><dd class="mono">${esc(r.report_hash.slice(0, 16))}…</dd>` : ""}
       </dl>
+      ${r.run_label === "MOCK" ? `<p class="hint warn-line">MOCK 測試報告：模型決策為預錄腳本，工具結果為真實快照輸出；不是研究結論。</p>` : ""}
+      ${r.pdf_url ? `<details class="pdf-preview"><summary class="hint" style="cursor:pointer">在頁面內預覽 PDF（手機請用「預覽 PDF」或「下載 PDF」）</summary>
+        <iframe title="PDF 預覽" data-src="${esc(r.pdf_url)}" loading="lazy"></iframe></details>` : ""}
       <div class="status-pair">
         <div><div class="sub" style="margin-top:0">估值狀態</div>${badge(v.label || "無法判定", VAL_CLS[v.status] || "b-neutral")}
           <p class="hint">${v.gap !== null && v.gap !== undefined ? `DCF 每股 ${esc(v.dcf_per_share)} 元，與同日收盤價差距 ${pct(v.gap)}。` : esc(v.reason || "")}</p>
@@ -539,8 +579,40 @@
       }).join("")}</div>
       <div class="sub">反向證據</div>${list(r.counter_evidence)}
       <div class="sub">下一個確認訊號</div>${list(r.next_signals)}
+      ${r.tables ? reportTables(r) : ""}
       <div class="sub">方法與資料限制</div>${list(r.limitations)}
-      <p class="footnote">「無來源」的主張不能當作事實；刪除線的來源 ID 表示快照中找不到該片段。</p>`;
+      ${r.history && r.history.length ? `<div class="sub">歷史版本（只列已發布）</div><ul class="plain">${r.history.map(h =>
+        `<li><b>第 ${esc(h.version_no)} 版</b>・${fmtTime(h.published_at)}・<span class="mono">${esc(h.report_hash.slice(0, 12))}…</span>
+          ${h.report_version_id === r.report_version_id ? badge("目前", "b-ok") : `<button type="button" class="ghost" data-open-report="${esc(h.report_version_id)}">開啟</button>`}
+          <a class="btn-link" href="${esc(h.download_url)}" download>下載</a></li>`).join("")}</ul>` : ""}
+      ${r.disclaimer ? `<p class="footnote"><b>${esc(r.disclaimer)}</b></p>` : ""}
+      <p class="footnote">「無來源」的主張不能當作事實；刪除線的來源 ID 表示快照中找不到該片段。${r.tables ? "網頁與 PDF 由同一份核准 JSON 產生。" : ""}</p>`;
+    const det = $("#reportPanel .pdf-preview");
+    if (det) det.addEventListener("toggle", () => { const f = det.querySelector("iframe"); if (det.open && !f.src) f.src = f.dataset.src; });
+  }
+
+  const EPS_SRC = { mops_direct: "MOPS", finmind_quarterly: "FinMind", unverified: "未驗證" };
+  function reportTables(r) {
+    const t = r.tables;
+    const q = t.quarters && t.quarters.length ? `<div class="sens-wrap"><table class="cmp-table sens-table data-table"><thead><tr><th>財報期</th><th>營收</th><th>營業利益</th><th>淨利</th><th>EPS（來源）</th><th>FCF</th><th>可得時間</th></tr></thead>
+      <tbody>${t.quarters.map(x => `<tr><th>${esc(x.period)}</th><td>${num(x.revenue)}</td><td>${num(x.operating_income)}</td><td>${num(x.net_income)}</td><td>${num(x.eps)}（${esc(EPS_SRC[x.eps_source] || x.eps_source || "—")}）</td><td>${num(x.free_cash_flow)}</td><td>${fmtTime(x.available_at)}</td></tr>`).join("")}</tbody></table></div>
+      <p class="footnote">單位：億元；EPS 元。TTM（${esc((t.ttm && t.ttm.periods || []).join("、"))}）：EPS ${num(t.ttm && t.ttm.eps_ttm)} 元；FCF ${num(t.ttm && t.ttm.fcf_ttm)} 億元。單季數字不是年度數字。</p>`
+      : `<p class="hint">NA：${esc(t.quarters_na_reason || "無季度資料")}</p>`;
+    const a = t.dcf_assumptions || {};
+    const d = t.dcf_detail;
+    const sens = t.sensitivity ? (() => {
+      const ws = numKeys(t.sensitivity), gs = numKeys(t.sensitivity[ws[0]]);
+      return `<div class="sens-wrap"><table class="cmp-table sens-table"><thead><tr><th>WACC＼g</th>${gs.map(g => `<th>${esc(g)}</th>`).join("")}</tr></thead>
+        <tbody>${ws.map(w => `<tr><th>${esc(w)}</th>${gs.map(g => `<td>${num(t.sensitivity[w][g])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    })() : "";
+    const peer = t.peer_comparison ? `<div class="sens-wrap"><table class="cmp-table sens-table data-table"><thead><tr><th>公司</th><th>財報期／收盤</th><th>P/E</th><th>P/B</th><th>單季營收 YoY</th><th>FCF TTM</th><th>DCF 差距</th><th>估值狀態</th></tr></thead>
+      <tbody>${t.peer_comparison.rows.map(x => { const m = x.metrics; const role = ROLE[x.role] || [x.role, "b-neutral"]; return `<tr class="${x.role === "industry_reference" ? "ref-row" : ""}"><th>${esc(x.ticker)} ${esc(x.name)}<br>${badge(role[0], role[1])}</th><td>${esc(x.financial_period)}<br>${num(x.price && x.price.value)}</td><td>${num(m.pe_ttm.value)}</td><td>${num(m.pb.value)}</td><td>${m.revenue_yoy_quarter.value === null ? "NA" : pct(m.revenue_yoy_quarter.value)}</td><td>${num(m.fcf_ttm.value, 1)}</td><td>${m.dcf_gap.value === null ? "NA" : pct(m.dcf_gap.value)}</td><td>${esc(x.valuation.label)}</td></tr>`; }).join("")}</tbody></table></div>`
+      : `<p class="hint">同業比較不適用：${esc(t.peer_na_reason || "—")}</p>`;
+    return `${t.scope_note ? `<p class="hint warn-line">${esc(t.scope_note)}</p>` : ""}
+      <div class="sub">季度資料</div>${q}
+      <div class="sub">DCF 假設與敏感度</div>
+      <p class="hint">WACC ${a.wacc != null ? pct(a.wacc) : "NA"}、g ${a.terminal_growth != null ? pct(a.terminal_growth) : "NA"}、${esc(a.fcf_basis || "")}。${d ? `5 年 FCF 現值 ${num(d.pv_fcf_total)}；終端價值現值 ${num(d.pv_terminal)}；企業價值 ${num(d.enterprise_value)}；淨負債 ${num(d.net_debt)}；股東權益 ${num(d.equity_value)}（億元）。` : ""}</p>${sens}
+      <div class="sub">同業比較</div>${peer}`;
   }
 
   /* ---------------- W04: peer comparison ---------------- */
@@ -570,7 +642,7 @@
     const s = d.rows.find(r => r.role === "subject");
     const m = s && s.valuation && s.valuation.sensitivity;
     if (!m) return "";
-    const ws = Object.keys(m), gs = Object.keys(m[ws[0]]);
+    const ws = numKeys(m), gs = numKeys(m[ws[0]]);
     return `<details class="sens"><summary class="hint" style="cursor:pointer">2454 DCF 敏感度（每股元；WACC × g）</summary>
       <div class="sens-wrap"><table class="cmp-table sens-table"><thead><tr><th>WACC＼g</th>${gs.map(g => `<th>${esc(g)}</th>`).join("")}</tr></thead>
       <tbody>${ws.map(w => `<tr><th>${esc(w)}</th>${gs.map(g => `<td>${m[w][g] === null ? "NA" : esc(m[w][g])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>

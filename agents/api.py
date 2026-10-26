@@ -100,15 +100,17 @@ def cancel_job(job_id: str):
 # ----- W07-L: report versions, human approval, publication ---------------------
 from flask import Response  # noqa: E402
 
-from .publication import LocalStorage, PublicationError, ReportStore  # noqa: E402
+from .publication import PublicationError, ReportStore  # noqa: E402
 
 
 def get_reports() -> ReportStore:
     reports = current_app.extensions.get("report_store")
     if reports is None:
         root = Path(current_app.root_path) / "tmp"
+        from research_ui.storage_supabase import storage_from_env  # noqa: PLC0415  (W07-A: Supabase when configured)
+
         reports = ReportStore(os.getenv("REPORT_DB_PATH") or str(root / "reports.sqlite3"),
-                              LocalStorage(os.getenv("REPORT_STORAGE_DIR") or str(root / "storage")))
+                              storage_from_env(os.getenv("REPORT_STORAGE_DIR") or str(root / "storage")))
         current_app.extensions["report_store"] = reports
     return reports
 

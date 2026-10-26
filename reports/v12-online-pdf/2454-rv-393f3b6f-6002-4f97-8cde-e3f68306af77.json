@@ -1,0 +1,679 @@
+{
+ "job_id": "88d38109-d8f3-420a-bcbf-e6163086efc8",
+ "ticker": "2454",
+ "cutoff_at": "2026-09-30T09:30:00+00:00",
+ "source_snapshot_id": "fin-snap:v1.6-tw-market",
+ "question_version": "macro-fundamental-valuation-v1",
+ "mode": "dual",
+ "model_id": null,
+ "prompt_versions": [],
+ "claims": [
+  {
+   "claim_id": "c1",
+   "kind": "fact",
+   "evidence_refs": [
+    "ev-2454-2026q2-01"
+   ],
+   "limitations": [],
+   "text": "2026Q2 單季每股盈餘 15.28 元。"
+  },
+  {
+   "claim_id": "c2",
+   "kind": "fact",
+   "evidence_refs": [
+    "ev-2454-2026q2-01"
+   ],
+   "limitations": [
+    "TTM 期間 2025Q3–2026Q2"
+   ],
+   "text": "近四季 EPS 合計（TTM）為 60.69 元（2025Q3–2026Q2）。"
+  },
+  {
+   "claim_id": "c3",
+   "kind": "unknown",
+   "evidence_refs": [],
+   "limitations": [],
+   "text": "快照沒有 2026Q3 營收，無法判斷第三季動能。"
+  }
+ ],
+ "macro_observations": [],
+ "fundamental_observations": [],
+ "valuation_scenarios": [],
+ "positive_channels": [],
+ "negative_channels": [],
+ "conflicts": [],
+ "unknowns": [
+  "2026Q3 營收"
+ ],
+ "next_signals": [],
+ "limitations": [],
+ "review": {
+  "decision": "pass",
+  "checked_refs": [
+   "ev-2454-2026q2-01"
+  ],
+  "checked_metric_ids": null,
+  "decision_summary": "c2 已改為可由工具重現的 TTM"
+ },
+ "budget": {
+  "calls_used": 5,
+  "tool_calls_used": 4,
+  "tokens_observed": 0,
+  "supplement_rounds": 1
+ },
+ "disclaimer": "本報告為研究觀察，非投資建議；不含買賣評級、目標價或漲跌機率。",
+ "run_label": "MOCK",
+ "data": {
+  "scope": "global_snapshot",
+  "scope_note": null,
+  "company": "聯發科",
+  "financial_period": "2026Q2",
+  "available_at": "2026-07-31T18:41:57+08:00",
+  "price": {
+   "value": 4920.0,
+   "trade_date": "2026-09-30",
+   "basis": "raw_close",
+   "available_at": "2026-09-30T17:30:00+08:00"
+  },
+  "price_window": [
+   {
+    "trade_date": "2026-09-22",
+    "close_price": 5180.0,
+    "available_at": "2026-09-22T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-23",
+    "close_price": 5185.0,
+    "available_at": "2026-09-23T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-24",
+    "close_price": 5285.0,
+    "available_at": "2026-09-24T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-29",
+    "close_price": 4910.0,
+    "available_at": "2026-09-29T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-30",
+    "close_price": 4920.0,
+    "available_at": "2026-09-30T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   }
+  ],
+  "price_window_na_reason": null,
+  "ttm": {
+   "periods": [
+    "2025Q3",
+    "2025Q4",
+    "2026Q1",
+    "2026Q2"
+   ],
+   "eps_ttm": 60.69,
+   "fcf_ttm": 920.63
+  },
+  "quarters": [
+   {
+    "period": "2025Q2",
+    "period_basis": "single_quarter",
+    "revenue": 1503.69,
+    "operating_income": 293.79,
+    "net_income": 278.48,
+    "eps": 17.5,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 411.95,
+    "available_at": "2025-07-30T18:19:17+08:00"
+   },
+   {
+    "period": "2025Q3",
+    "period_basis": "single_quarter",
+    "revenue": 1420.97,
+    "operating_income": 221.88,
+    "net_income": 252.21,
+    "eps": 15.84,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 364.06,
+    "available_at": "2025-10-31T17:10:18+08:00"
+   },
+   {
+    "period": "2025Q4",
+    "period_basis": "single_quarter",
+    "revenue": 1501.88,
+    "operating_income": 218.5,
+    "net_income": 229.25,
+    "eps": 14.4,
+    "eps_source": "finmind_quarterly",
+    "free_cash_flow": 598.78,
+    "available_at": "2026-02-26T17:08:56+08:00"
+   },
+   {
+    "period": "2026Q1",
+    "period_basis": "single_quarter",
+    "revenue": 1491.51,
+    "operating_income": 228.91,
+    "net_income": 241.54,
+    "eps": 15.17,
+    "eps_source": "mops_direct",
+    "free_cash_flow": -219.17,
+    "available_at": "2026-04-30T17:58:34+08:00"
+   },
+   {
+    "period": "2026Q2",
+    "period_basis": "single_quarter",
+    "revenue": 1521.83,
+    "operating_income": 228.68,
+    "net_income": 243.35,
+    "eps": 15.28,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 176.96,
+    "available_at": "2026-07-31T18:41:57+08:00"
+   }
+  ],
+  "quarters_na_reason": null,
+  "metrics": {
+   "pe_ttm": {
+    "value": 81.07,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 81.07,
+    "consistent": true,
+    "eps_ttm": 60.69
+   },
+   "pb": {
+    "value": 18.51,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 18.51,
+    "consistent": true,
+    "bvps": 265.77
+   },
+   "revenue_yoy_quarter": {
+    "value": 0.0121,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 0.0121,
+    "consistent": true,
+    "base_period": "2025Q2"
+   },
+   "fcf_ttm": {
+    "value": 920.63,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 920.63,
+    "consistent": true,
+    "unit": "億元"
+   },
+   "dcf_gap": {
+    "value": -0.8017,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": -0.8017,
+    "consistent": true,
+    "dcf_per_share": 975.52,
+    "snapshot_dcf_per_share": 975.52
+   }
+  },
+  "valuation": {
+   "status": "above_model",
+   "label": "市價高於模型估值",
+   "gap": -0.8017,
+   "reason": null,
+   "missing": [],
+   "dcf_per_share": 975.52,
+   "sensitivity": {
+    "8.0%": {
+     "2.5%": 1069.51,
+     "3.0%": 1146.6,
+     "3.5%": 1240.81
+    },
+    "9.0%": {
+     "2.5%": 923.14,
+     "3.0%": 975.52,
+     "3.5%": 1037.44
+    },
+    "10.0%": {
+     "2.5%": 815.75,
+     "3.0%": 853.27,
+     "3.5%": 896.56
+    }
+   },
+   "dcf_detail": {
+    "pv_fcf_total": 3580.93,
+    "terminal_value": 15804.15,
+    "pv_terminal": 10271.61,
+    "enterprise_value": 13852.54,
+    "equity_value": 15570.35,
+    "net_debt": -1717.81,
+    "shares_outstanding_m": 1596.1013,
+    "fcf_ttm": 920.63,
+    "unit": "億元；股數百萬股"
+   }
+  },
+  "data_quality": {
+   "level": "low",
+   "label": "資料品質風險：低",
+   "reasons": [
+    "既定資料檢查全部通過"
+   ],
+   "checks": [
+    {
+     "check_id": "price_same_day",
+     "label": "同日收盤價",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "eps_ttm_4q",
+     "label": "連續 4 季 EPS（TTM）",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "fcf_ttm_4q",
+     "label": "連續 4 季 FCF（TTM）",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "net_debt",
+     "label": "淨負債",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "shares_outstanding",
+     "label": "流通股數",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "fin_available_at",
+     "label": "財報可得時間",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "source_traceable",
+     "label": "來源片段可追溯",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "bvps",
+     "label": "每股淨值 BVPS",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "yoy_base",
+     "label": "去年同季營收",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "snapshot_consistent",
+     "label": "工具值與 B 快照一致",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "freshness",
+     "label": "財報新鮮度",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    }
+   ]
+  },
+  "peer_comparison": {
+   "price_as_of": "2026-09-30",
+   "cutoff_at": "2026-09-30T17:30:00+08:00",
+   "snapshot_version": "v1.8-w06",
+   "method_version": "ui-peer-v2 / calculate_metrics / valuation-gap-v1.1 (±15%) / data-quality-v1.1",
+   "periods_consistent": true,
+   "peer_stats": {
+    "basis": "只用 role=peer、與主體同財報期、且可由工具重現者；2330 產業參照與主體一律排除",
+    "pe_ttm": {
+     "value": 23.23,
+     "n": 2,
+     "na_reason": null
+    },
+    "pb": {
+     "value": 6.29,
+     "n": 2,
+     "na_reason": null
+    },
+    "revenue_yoy_quarter": {
+     "value": 0.1363,
+     "n": 2,
+     "na_reason": null
+    },
+    "snapshot_values": {
+     "pe_ttm": 23.23,
+     "pb": 6.29,
+     "revenue_yoy_quarter": 0.1363
+    },
+    "excluded": [
+     "2454",
+     "2330"
+    ]
+   },
+   "data_status": "B 標示為真實資料（synthetic_fixture=false），待 D 覆核",
+   "rows": [
+    {
+     "ticker": "2454",
+     "name": "聯發科",
+     "role": "subject",
+     "financial_period": "2026Q2",
+     "price": {
+      "value": 4920.0,
+      "trade_date": "2026-09-30",
+      "basis": "raw_close",
+      "available_at": "2026-09-30T17:30:00+08:00"
+     },
+     "metrics": {
+      "pe_ttm": {
+       "value": 81.07,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 81.07,
+       "consistent": true,
+       "eps_ttm": 60.69
+      },
+      "pb": {
+       "value": 18.51,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 18.51,
+       "consistent": true,
+       "bvps": 265.77
+      },
+      "revenue_yoy_quarter": {
+       "value": 0.0121,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 0.0121,
+       "consistent": true,
+       "base_period": "2025Q2"
+      },
+      "fcf_ttm": {
+       "value": 920.63,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 920.63,
+       "consistent": true,
+       "unit": "億元"
+      },
+      "dcf_gap": {
+       "value": -0.8017,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": -0.8017,
+       "consistent": true,
+       "dcf_per_share": 975.52,
+       "snapshot_dcf_per_share": 975.52
+      }
+     },
+     "include_in_peer_stats": false,
+     "valuation": {
+      "status": "above_model",
+      "label": "市價高於模型估值",
+      "gap": -0.8017,
+      "reason": null
+     },
+     "data_quality": {
+      "level": "low",
+      "label": "資料品質風險：低"
+     }
+    },
+    {
+     "ticker": "2379",
+     "name": "瑞昱",
+     "role": "peer",
+     "financial_period": "2026Q2",
+     "price": {
+      "value": 760.0,
+      "trade_date": "2026-09-30",
+      "basis": "raw_close",
+      "available_at": "2026-09-30T17:30:00+08:00"
+     },
+     "metrics": {
+      "pe_ttm": {
+       "value": 27.41,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 27.41,
+       "consistent": true,
+       "eps_ttm": 27.73
+      },
+      "pb": {
+       "value": 7.77,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 7.77,
+       "consistent": true,
+       "bvps": 97.83
+      },
+      "revenue_yoy_quarter": {
+       "value": 0.1767,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 0.1767,
+       "consistent": true,
+       "base_period": "2025Q2"
+      },
+      "fcf_ttm": {
+       "value": 168.21,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 168.21,
+       "consistent": true,
+       "unit": "億元"
+      },
+      "dcf_gap": {
+       "value": -0.3454,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": -0.3454,
+       "consistent": true,
+       "dcf_per_share": 497.48,
+       "snapshot_dcf_per_share": 497.48
+      }
+     },
+     "include_in_peer_stats": true,
+     "valuation": {
+      "status": "above_model",
+      "label": "市價高於模型估值",
+      "gap": -0.3454,
+      "reason": null
+     },
+     "data_quality": {
+      "level": "low",
+      "label": "資料品質風險：低"
+     }
+    },
+    {
+     "ticker": "3034",
+     "name": "聯詠",
+     "role": "peer",
+     "financial_period": "2026Q2",
+     "price": {
+      "value": 546.0,
+      "trade_date": "2026-09-30",
+      "basis": "raw_close",
+      "available_at": "2026-09-30T17:30:00+08:00"
+     },
+     "metrics": {
+      "pe_ttm": {
+       "value": 19.04,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 19.04,
+       "consistent": true,
+       "eps_ttm": 28.67
+      },
+      "pb": {
+       "value": 4.82,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 4.82,
+       "consistent": true,
+       "bvps": 113.33
+      },
+      "revenue_yoy_quarter": {
+       "value": 0.0959,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 0.0959,
+       "consistent": true,
+       "base_period": "2025Q2"
+      },
+      "fcf_ttm": {
+       "value": 167.49,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 167.49,
+       "consistent": true,
+       "unit": "億元"
+      },
+      "dcf_gap": {
+       "value": -0.079,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": -0.079,
+       "consistent": true,
+       "dcf_per_share": 502.88,
+       "snapshot_dcf_per_share": 502.88
+      }
+     },
+     "include_in_peer_stats": true,
+     "valuation": {
+      "status": "near_model",
+      "label": "接近模型估值",
+      "gap": -0.079,
+      "reason": null
+     },
+     "data_quality": {
+      "level": "low",
+      "label": "資料品質風險：低"
+     }
+    },
+    {
+     "ticker": "2330",
+     "name": "台積電",
+     "role": "industry_reference",
+     "financial_period": "2026Q2",
+     "price": {
+      "value": 2480.0,
+      "trade_date": "2026-09-30",
+      "basis": "raw_close",
+      "available_at": "2026-09-30T17:30:00+08:00"
+     },
+     "metrics": {
+      "pe_ttm": {
+       "value": 28.74,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 28.74,
+       "consistent": true,
+       "eps_ttm": 86.28
+      },
+      "pb": {
+       "value": 10.0,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 10.0,
+       "consistent": true,
+       "bvps": 248.05
+      },
+      "revenue_yoy_quarter": {
+       "value": 0.3605,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 0.3605,
+       "consistent": true,
+       "base_period": "2025Q2"
+      },
+      "fcf_ttm": {
+       "value": 11435.56,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": 11435.56,
+       "consistent": true,
+       "unit": "億元"
+      },
+      "dcf_gap": {
+       "value": -0.6972,
+       "na_reason": null,
+       "source": "tool",
+       "snapshot_value": -0.6972,
+       "consistent": true,
+       "dcf_per_share": 751.06,
+       "snapshot_dcf_per_share": 751.06
+      }
+     },
+     "include_in_peer_stats": false,
+     "valuation": {
+      "status": "above_model",
+      "label": "市價高於模型估值",
+      "gap": -0.6972,
+      "reason": null
+     },
+     "data_quality": {
+      "level": "low",
+      "label": "資料品質風險：低"
+     }
+    }
+   ]
+  },
+  "peer_na_reason": null,
+  "sources": [
+   {
+    "id": "ev-2454-2026q2-01",
+    "resolved": true,
+    "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2454&year=115&season=2",
+    "available_at": "2026-07-31T18:43:05+08:00",
+    "content_hash": "32075f583ea85c29af0f647073f14df99b341827a138ad963eaa5e0a4d1fb8d4",
+    "hash_match": true,
+    "excerpt": "聯發科技公佈2026年第二季合併財務報告 本季合併營收為新台幣1,521億8仟3佰萬元，較前季增加2.0%，較去年同期增加1.2% 本季合併毛利率為46.2%，較前季減少0.1個百分點，較去年同期減少2.9個百分點 本季合併營業利益為新台幣228億6仟8佰萬元，較前季減少0.1%，較去年同期減少22.2% 本季合併本期淨利為新台幣246億5佰萬元，較前季增加0.9%，較去年同期減少12.3%；每股…"
+   }
+  ],
+  "method": {
+   "data_version": "report-data-v1",
+   "risk_method": "valuation-gap-v1.1 (±15%) / data-quality-v1.1",
+   "tools_version": "tools-v12",
+   "dcf_assumptions": {
+    "wacc": 0.09,
+    "terminal_growth": 0.03,
+    "years": 5,
+    "fcf_basis": "5 年持平於 TTM FCF（基準情境）",
+    "source": "組長核定 2026-10-21；WACC 為程式預設，非個股風險估計"
+   },
+   "valuation_footnote": "±15% 是本專題的顯示門檻，不是經驗證的投資規則；DCF 結果取決於 WACC、g 與 FCF 假設。",
+   "risk_footnote": "資料品質風險只代表既定資料檢查的結果；「低」不代表股價風險低。",
+   "limitations": [
+    "所有數字由工具從資料快照計算，沒有 LLM 改寫；缺值以 NA 加原因呈現，不以 0 代替。",
+    "DCF 基準情境假設 FCF 5 年持平於 TTM FCF、不成長；WACC 9%、g 3% 是組長核定的程式預設，不是個股風險估計。因此模型值普遍低於市價，這是假設造成的，不代表股價高估。",
+    "價格為未還原收盤價；收盤價自交易日 17:30（台北）起才視為可得。",
+    "季度數字為單季，不是年度數字；TTM 為最近四季加總；FCF = 營業現金流 − 正值資本支出。",
+    "同業比較只適用 2454，且只在報告資料截止與同業快照相同時呈現，不混用不同時點。"
+   ]
+  }
+ }
+}

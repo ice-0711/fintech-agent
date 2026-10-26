@@ -132,13 +132,17 @@ def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str) -> tupl
     dcf_inputs = {"free_cash_flows": [fcf_ttm] * DCF_ASSUMPTIONS["years"] if fcf_ttm is not None else None,
                   "wacc": DCF_ASSUMPTIONS["wacc"], "terminal_growth": DCF_ASSUMPTIONS["terminal_growth"],
                   "net_debt": m.get("net_debt"), "shares_outstanding": m.get("shares_outstanding_m")}
-    dcf_per_share, sensitivity = None, None
+    dcf_per_share, sensitivity, dcf_detail = None, None, None
     fcf_positive = isinstance(fcf_ttm, (int, float)) and fcf_ttm > 0  # TTM FCF ≤ 0 → do not run DCF at all
     if fcf_positive and all(v is not None for v in dcf_inputs.values()):
         r = _calc("dcf_scenario", dcf_inputs, refs)
         if r["status"] == "ok":
             dcf_per_share = r["data"]["intrinsic_value_per_share"]
             sensitivity = r["data"].get("sensitivity_matrix")
+            dcf_detail = {k: r["data"].get(k) for k in ("pv_fcf_total", "terminal_value", "pv_terminal",
+                                                         "enterprise_value", "equity_value")}
+            dcf_detail.update(net_debt=m.get("net_debt"), shares_outstanding_m=m.get("shares_outstanding_m"),
+                              fcf_ttm=fcf_ttm, unit="億元；股數百萬股")
     valuation = valuation_status(dcf_per_share, price["value"] if price else None, dcf_inputs)
     if valuation["gap"] is not None:
         out["dcf_gap"] = _tool_value(valuation["gap"], snap.get("dcf_gap_pct"), tol=0.00005, dcf_per_share=dcf_per_share,
@@ -207,7 +211,7 @@ def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str) -> tupl
         "ttm_periods": fin_data.get("ttm_periods"),
         "price": price,
         "metrics": out,
-        "valuation": {**valuation, "dcf_per_share": dcf_per_share, "sensitivity": sensitivity},
+        "valuation": {**valuation, "dcf_per_share": dcf_per_share, "sensitivity": sensitivity, "dcf_detail": dcf_detail},
         "data_quality": risk,
         "evidence": evidence,
         "include_in_peer_stats": role == "peer",
@@ -267,6 +271,29 @@ def company_row(code: str) -> dict[str, Any]:
     snap = dict(peer["companies"].get(code) or {"role": "research"})
     row, _ = _row(code, snap, peer["price_as_of"], peer["cutoff_at"])
     return row
+
+
+def company_row_at(code: str, cutoff: str) -> dict[str, Any]:
+    """Tool-derived row at any cutoff (report data). B's peer snapshot values are used for the
+    consistency check only when the snapshot has the same cutoff; otherwise there is nothing to compare."""
+    peer = json.loads(PEER_SNAPSHOT.read_text(encoding="utf-8"))
+    window = tools_impl.get_price_window(code, cutoff, 1)
+    closes = (window.get("data") or {}).get("closes") or []
+    price_as_of = closes[-1]["trade_date"] if window.get("status") == "ok" and closes else cutoff[:10]
+    same = tools_impl._parse_iso(peer["cutoff_at"]) == tools_impl._parse_iso(cutoff)
+    base = peer["companies"].get(code) or {}
+    snap = dict(base) if same else {"name": base.get("name")}
+    snap.setdefault("role", base.get("role") or "research")
+    row, _ = _row(code, snap, price_as_of, cutoff)
+    row["price_as_of"] = price_as_of
+    row["compared_with_peer_snapshot"] = same
+    return row
+
+
+def quarters_table(code: str, cutoff: str, limit: int = 5) -> list[dict[str, Any]]:
+    keep = ("period", "period_basis", "revenue", "operating_income", "net_income", "eps", "eps_source",
+            "free_cash_flow", "available_at")
+    return [{k: q.get(k) for k in keep} for q in _quarters(code, cutoff)[-limit:]]
 
 
 def referenced_evidence_ids() -> set[str]:

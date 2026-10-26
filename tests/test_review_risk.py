@@ -153,14 +153,15 @@ def test_approval_is_refused_without_login(ui):
     assert ui.get("/api/ui/session").get_json() == {"ok": True, "admin": False}
 
 
-def test_logged_in_lead_still_cannot_publish_before_w07(tmp_path, clock):
+def test_logged_in_lead_needs_a_version_and_hash_before_publishing(tmp_path, clock):
     app = make_app(tmp_path, clock)
     app.secret_key = "test"
     client = app.test_client()
     with client.session_transaction() as sess:
         sess["admin"] = True
     resp = client.post("/api/ui/jobs/anything/approve")
-    assert resp.status_code == 409 and resp.get_json()["error"] == "publication_not_available"
+    assert resp.status_code == 409 and resp.get_json()["error"] == "version_required"
+    assert client.post("/api/ui/jobs/anything/report").status_code == 404  # not a MOCK job (replays cannot publish)
     assert client.get("/api/ui/session").get_json()["admin"] is True
 
 

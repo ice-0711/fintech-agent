@@ -1,0 +1,379 @@
+{
+ "job_id": "51a7eaf7-912e-4ca8-b20b-d74a50525f8f",
+ "ticker": "2330",
+ "cutoff_at": "2026-09-30T09:30:00+00:00",
+ "source_snapshot_id": "fin-snap:v1.6-tw-market",
+ "question_version": "macro-fundamental-valuation-v1",
+ "mode": "dual",
+ "model_id": null,
+ "prompt_versions": [],
+ "claims": [
+  {
+   "claim_id": "c1",
+   "kind": "fact",
+   "evidence_refs": [
+    "ev-2330-2026q2-01"
+   ],
+   "limitations": [],
+   "text": "2026Q2 單季每股盈餘 27.25 元。"
+  },
+  {
+   "claim_id": "c2",
+   "kind": "fact",
+   "evidence_refs": [
+    "ev-2330-2026q2-01"
+   ],
+   "limitations": [
+    "TTM 期間 2025Q3–2026Q2"
+   ],
+   "text": "近四季 EPS 合計（TTM）為 86.28 元（2025Q3–2026Q2）。"
+  },
+  {
+   "claim_id": "c3",
+   "kind": "unknown",
+   "evidence_refs": [],
+   "limitations": [],
+   "text": "快照沒有 2026Q3 營收，無法判斷第三季動能。"
+  }
+ ],
+ "macro_observations": [],
+ "fundamental_observations": [],
+ "valuation_scenarios": [],
+ "positive_channels": [],
+ "negative_channels": [],
+ "conflicts": [],
+ "unknowns": [
+  "2026Q3 營收"
+ ],
+ "next_signals": [],
+ "limitations": [],
+ "review": {
+  "decision": "pass",
+  "checked_refs": [
+   "ev-2330-2026q2-01"
+  ],
+  "checked_metric_ids": null,
+  "decision_summary": "c2 已改為可由工具重現的 TTM"
+ },
+ "budget": {
+  "calls_used": 5,
+  "tool_calls_used": 4,
+  "tokens_observed": 0,
+  "supplement_rounds": 1
+ },
+ "disclaimer": "本報告為研究觀察，非投資建議；不含買賣評級、目標價或漲跌機率。",
+ "run_label": "MOCK",
+ "data": {
+  "scope": "global_snapshot",
+  "scope_note": null,
+  "company": "台積電",
+  "financial_period": "2026Q2",
+  "available_at": "2026-08-11T18:46:58+08:00",
+  "price": {
+   "value": 2480.0,
+   "trade_date": "2026-09-30",
+   "basis": "raw_close",
+   "available_at": "2026-09-30T17:30:00+08:00"
+  },
+  "price_window": [
+   {
+    "trade_date": "2026-09-22",
+    "close_price": 2460.0,
+    "available_at": "2026-09-22T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-23",
+    "close_price": 2500.0,
+    "available_at": "2026-09-23T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-24",
+    "close_price": 2475.0,
+    "available_at": "2026-09-24T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-29",
+    "close_price": 2475.0,
+    "available_at": "2026-09-29T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-30",
+    "close_price": 2480.0,
+    "available_at": "2026-09-30T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   }
+  ],
+  "price_window_na_reason": null,
+  "ttm": {
+   "periods": [
+    "2025Q3",
+    "2025Q4",
+    "2026Q1",
+    "2026Q2"
+   ],
+   "eps_ttm": 86.28,
+   "fcf_ttm": 11435.56
+  },
+  "quarters": [
+   {
+    "period": "2025Q2",
+    "period_basis": "single_quarter",
+    "revenue": 9337.92,
+    "operating_income": 4634.24,
+    "net_income": 3982.73,
+    "eps": 15.36,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 1998.38,
+    "available_at": "2025-08-12T18:20:44+08:00"
+   },
+   {
+    "period": "2025Q3",
+    "period_basis": "single_quarter",
+    "revenue": 9899.18,
+    "operating_income": 5006.85,
+    "net_income": 4523.01,
+    "eps": 17.44,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 1393.77,
+    "available_at": "2025-11-11T18:17:55+08:00"
+   },
+   {
+    "period": "2025Q4",
+    "period_basis": "single_quarter",
+    "revenue": 10460.9,
+    "operating_income": 5649.02,
+    "net_income": 5057.44,
+    "eps": 19.51,
+    "eps_source": "finmind_quarterly",
+    "free_cash_flow": 3686.03,
+    "available_at": "2026-02-10T18:16:19+08:00"
+   },
+   {
+    "period": "2026Q1",
+    "period_basis": "single_quarter",
+    "revenue": 11341.03,
+    "operating_income": 6589.66,
+    "net_income": 5724.8,
+    "eps": 22.08,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 3482.13,
+    "available_at": "2026-05-12T18:33:04+08:00"
+   },
+   {
+    "period": "2026Q2",
+    "period_basis": "single_quarter",
+    "revenue": 12703.8,
+    "operating_income": 7666.03,
+    "net_income": 7065.62,
+    "eps": 27.25,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 2873.63,
+    "available_at": "2026-08-11T18:46:58+08:00"
+   }
+  ],
+  "quarters_na_reason": null,
+  "metrics": {
+   "pe_ttm": {
+    "value": 28.74,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 28.74,
+    "consistent": true,
+    "eps_ttm": 86.28
+   },
+   "pb": {
+    "value": 10.0,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 10.0,
+    "consistent": true,
+    "bvps": 248.05
+   },
+   "revenue_yoy_quarter": {
+    "value": 0.3605,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 0.3605,
+    "consistent": true,
+    "base_period": "2025Q2"
+   },
+   "fcf_ttm": {
+    "value": 11435.56,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": 11435.56,
+    "consistent": true,
+    "unit": "億元"
+   },
+   "dcf_gap": {
+    "value": -0.6972,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": -0.6972,
+    "consistent": true,
+    "dcf_per_share": 751.06,
+    "snapshot_dcf_per_share": 751.06
+   }
+  },
+  "valuation": {
+   "status": "above_model",
+   "label": "市價高於模型估值",
+   "gap": -0.6972,
+   "reason": null,
+   "missing": [],
+   "dcf_per_share": 751.06,
+   "sensitivity": {
+    "8.0%": {
+     "2.5%": 822.92,
+     "3.0%": 881.85,
+     "3.5%": 953.88
+    },
+    "9.0%": {
+     "2.5%": 711.01,
+     "3.0%": 751.06,
+     "3.5%": 798.4
+    },
+    "10.0%": {
+     "2.5%": 628.91,
+     "3.0%": 657.59,
+     "3.5%": 690.69
+    }
+   },
+   "dcf_detail": {
+    "pv_fcf_total": 44480.34,
+    "terminal_value": 196310.45,
+    "pv_terminal": 127588.32,
+    "enterprise_value": 172068.66,
+    "equity_value": 194768.21,
+    "net_debt": -22699.55,
+    "shares_outstanding_m": 25932.3701,
+    "fcf_ttm": 11435.56,
+    "unit": "億元；股數百萬股"
+   }
+  },
+  "data_quality": {
+   "level": "low",
+   "label": "資料品質風險：低",
+   "reasons": [
+    "既定資料檢查全部通過"
+   ],
+   "checks": [
+    {
+     "check_id": "price_same_day",
+     "label": "同日收盤價",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "eps_ttm_4q",
+     "label": "連續 4 季 EPS（TTM）",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "fcf_ttm_4q",
+     "label": "連續 4 季 FCF（TTM）",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "net_debt",
+     "label": "淨負債",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "shares_outstanding",
+     "label": "流通股數",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "fin_available_at",
+     "label": "財報可得時間",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "source_traceable",
+     "label": "來源片段可追溯",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "bvps",
+     "label": "每股淨值 BVPS",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "yoy_base",
+     "label": "去年同季營收",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "snapshot_consistent",
+     "label": "工具值與 B 快照一致",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "freshness",
+     "label": "財報新鮮度",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    }
+   ]
+  },
+  "peer_comparison": null,
+  "peer_na_reason": "同業比較只適用 2454",
+  "sources": [
+   {
+    "id": "ev-2330-2026q2-01",
+    "resolved": true,
+    "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2330&year=115&season=2",
+    "available_at": "2026-07-16T15:12:31+08:00",
+    "content_hash": "ab2cc3c2111815f4f98217052828af85a99ab5a626da4e1c681d2ce64e5227c0",
+    "hash_match": true,
+    "excerpt": "台積公司今（16）日公佈2026年第二季財務報告，合併營收約新台幣1兆2,703億8千萬元，稅後純益約新台幣7,065億6千萬元，每股盈餘為新台幣27.25元（折合美國存託憑證每單位為4.31美元）。2026年第二季毛利率為67.7%，營業利益率為60.3%，稅後純益率則為55.6%。"
+   }
+  ],
+  "method": {
+   "data_version": "report-data-v1",
+   "risk_method": "valuation-gap-v1.1 (±15%) / data-quality-v1.1",
+   "tools_version": "tools-v12",
+   "dcf_assumptions": {
+    "wacc": 0.09,
+    "terminal_growth": 0.03,
+    "years": 5,
+    "fcf_basis": "5 年持平於 TTM FCF（基準情境）",
+    "source": "組長核定 2026-10-21；WACC 為程式預設，非個股風險估計"
+   },
+   "valuation_footnote": "±15% 是本專題的顯示門檻，不是經驗證的投資規則；DCF 結果取決於 WACC、g 與 FCF 假設。",
+   "risk_footnote": "資料品質風險只代表既定資料檢查的結果；「低」不代表股價風險低。",
+   "limitations": [
+    "所有數字由工具從資料快照計算，沒有 LLM 改寫；缺值以 NA 加原因呈現，不以 0 代替。",
+    "DCF 基準情境假設 FCF 5 年持平於 TTM FCF、不成長；WACC 9%、g 3% 是組長核定的程式預設，不是個股風險估計。因此模型值普遍低於市價，這是假設造成的，不代表股價高估。",
+    "價格為未還原收盤價；收盤價自交易日 17:30（台北）起才視為可得。",
+    "季度數字為單季，不是年度數字；TTM 為最近四季加總；FCF = 營業現金流 − 正值資本支出。",
+    "同業比較只適用 2454，且只在報告資料截止與同業快照相同時呈現，不混用不同時點。"
+   ]
+  }
+ }
+}

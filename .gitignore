@@ -63,3 +63,6 @@ data/raw/
 *.tmp
 _backup/
 !tests/**/*.json
+# W07-A：三份驗收 PDF 與其核准 JSON（驗收證據；永久版本在 Storage，不是這個資料夾）
+!reports/v12-online-pdf/*.pdf
+!reports/v12-online-pdf/*.json
