@@ -115,11 +115,31 @@ def build_report_json(job: dict[str, Any], events: list[dict[str, Any]]) -> dict
         "review": {k: review.get(k) for k in ("decision", "checked_refs", "checked_metric_ids", "decision_summary")},
         "budget": {k: job.get(k) for k in ("calls_used", "tool_calls_used", "tokens_observed", "supplement_rounds")},
         "disclaimer": "本報告為研究觀察，非投資建議；不含買賣評級、目標價或漲跌機率。",
+        # W07-A hook: MOCK label + deterministic F05 tables (quarters, DCF, peers, sources) frozen at
+        # version time, so the website and the PDF read the same approved JSON. No LLM, no network.
+        "run_label": "MOCK" if any(e["event_type"] == "mock_scenario" or (e.get("detail") or {}).get("mock")
+                                   for e in events) else "LIVE",
+        "data": _report_data(job),
     }
+
+
+def _report_data(job: dict[str, Any]) -> dict[str, Any] | None:
+    from research_ui.report_data import build_report_data  # noqa: PLC0415  (A, W07-A)
+
+    try:
+        return build_report_data(job)
+    except Exception as exc:  # noqa: BLE001 - never block a version; show the gap instead of numbers
+        return {"scope": "unavailable", "scope_note": f"資料表讀取失敗，本版不呈現季度、DCF 與同業表：{str(exc)[:160]}",
+                "quarters": None, "quarters_na_reason": "資料表讀取失敗", "peer_comparison": None,
+                "peer_na_reason": "資料表讀取失敗", "sources": [], "method": {}}
 
 
 def render_pdf(report: dict[str, Any], version: dict[str, Any]) -> bytes:
     """PDF from the approved JSON only (reuses report_builder's fpdf2 class and CJK font)."""
+    if report.get("data") is not None:  # W07-A: full F05 layout from the same JSON
+        from research_ui.report_pdf import render_report_pdf  # noqa: PLC0415
+
+        return render_report_pdf(report, version)
     from report_builder import PDF_FONT_FAMILY, ReportPDF, clean_text, register_pdf_fonts  # noqa: PLC0415
 
     pdf = ReportPDF()

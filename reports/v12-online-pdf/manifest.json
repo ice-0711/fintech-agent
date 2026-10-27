@@ -1,0 +1,56 @@
+{
+ "cutoff_at": "2026-09-30T17:30:00+08:00",
+ "versions": [
+  {
+   "report_version_id": "rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9",
+   "job_id": "51a7eaf7-912e-4ca8-b20b-d74a50525f8f",
+   "version_no": 1,
+   "status": "published",
+   "report_hash": "36e86bc4dbc67da6398c431d28ea1817136ce678f0db40aa7a4c8c4210441073",
+   "pdf_hash": "5071400a0f76654df86e3a0429559711a0c79d0f717cd6ae6bb24dea7c996693",
+   "storage_key": "reports/2330/rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.pdf",
+   "approved_by": "lead (W07-A acceptance script)",
+   "approved_at": "2026-10-26T02:25:32+00:00",
+   "published_at": "2026-10-26T02:25:35+00:00",
+   "ticker": "2330",
+   "pdf_file": "2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.pdf",
+   "json_file": "2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json",
+   "pdf_bytes": 407656,
+   "run_label": "MOCK"
+  },
+  {
+   "report_version_id": "rv-8e567646-9803-49d1-9399-d396c14bf029",
+   "job_id": "f107a430-66da-4652-825b-3cfcae3f9162",
+   "version_no": 1,
+   "status": "published",
+   "report_hash": "e3b3d50fc885234d604c1621809f914c1c04e0779ddcc2df14662081817f36c5",
+   "pdf_hash": "8b4cd30871e663673e42b9c1c4756a8013aab577b9ad234dc5b8367d8b499fde",
+   "storage_key": "reports/2317/rv-8e567646-9803-49d1-9399-d396c14bf029.pdf",
+   "approved_by": "lead (W07-A acceptance script)",
+   "approved_at": "2026-10-26T02:25:35+00:00",
+   "published_at": "2026-10-26T02:25:36+00:00",
+   "ticker": "2317",
+   "pdf_file": "2317-rv-8e567646-9803-49d1-9399-d396c14bf029.pdf",
+   "json_file": "2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json",
+   "pdf_bytes": 239699,
+   "run_label": "MOCK"
+  },
+  {
+   "report_version_id": "rv-393f3b6f-6002-4f97-8cde-e3f68306af77",
+   "job_id": "88d38109-d8f3-420a-bcbf-e6163086efc8",
+   "version_no": 1,
+   "status": "published",
+   "report_hash": "d9c6f14f5c7eeebe99f6496a8d441e73e03864af581055b91e6da5b713ecb6da",
+   "pdf_hash": "7b2928eb8afeb687cc1678209ac3fee13e9c5a7a0c7db23ee5af05d037e21dbf",
+   "storage_key": "reports/2454/rv-393f3b6f-6002-4f97-8cde-e3f68306af77.pdf",
+   "approved_by": "lead (W07-A acceptance script)",
+   "approved_at": "2026-10-26T02:25:37+00:00",
+   "published_at": "2026-10-26T02:25:39+00:00",
+   "ticker": "2454",
+   "pdf_file": "2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.pdf",
+   "json_file": "2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json",
+   "pdf_bytes": 402395,
+   "run_label": "MOCK"
+  }
+ ]
+}

@@ -246,3 +246,14 @@ button.danger { background: var(--panel); color: var(--danger); border: 1px soli
   .report-card .meta { grid-template-columns: 1fr; }
   .meter { grid-template-columns: 78px minmax(0,1fr) 54px; }
 }
+
+/* W07-A: online PDF preview / download, report data tables */
+.btn-link { display: inline-flex; align-items: center; min-height: 34px; padding: 0 12px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--panel); color: var(--blue-deep); font-size: 13px; font-weight: 600; text-decoration: none; }
+.btn-link:hover { border-color: var(--blue); }
+.warn-line { padding: 8px 10px; border: 1px solid var(--gold); border-radius: 8px; background: var(--gold-soft); color: #6d4610; }
+.pdf-preview iframe { width: 100%; height: 70vh; min-height: 420px; margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; }
+.data-table th, .data-table td { white-space: nowrap; }
+@media (max-width: 640px) { .pdf-preview { display: none; } .btn-link { min-height: 40px; } }
+.data-table { width: 100%; }
+.data-table th:first-child, .data-table td:last-child { text-align: left; }

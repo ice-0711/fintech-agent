@@ -1,0 +1,351 @@
+{
+ "job_id": "f107a430-66da-4652-825b-3cfcae3f9162",
+ "ticker": "2317",
+ "cutoff_at": "2026-09-30T09:30:00+00:00",
+ "source_snapshot_id": "fin-snap:v1.6-tw-market",
+ "question_version": "macro-fundamental-valuation-v1",
+ "mode": "dual",
+ "model_id": null,
+ "prompt_versions": [],
+ "claims": [
+  {
+   "claim_id": "c1",
+   "kind": "fact",
+   "evidence_refs": [
+    "ev-2317-2026q2-01"
+   ],
+   "limitations": [],
+   "text": "2026Q2 單季每股盈餘 4.27 元。"
+  },
+  {
+   "claim_id": "c2",
+   "kind": "fact",
+   "evidence_refs": [
+    "ev-2317-2026q2-01"
+   ],
+   "limitations": [
+    "TTM 期間 2025Q3–2026Q2"
+   ],
+   "text": "近四季 EPS 合計（TTM）為 15.21 元（2025Q3–2026Q2）。"
+  },
+  {
+   "claim_id": "c3",
+   "kind": "unknown",
+   "evidence_refs": [],
+   "limitations": [],
+   "text": "快照沒有 2026Q3 營收，無法判斷第三季動能。"
+  }
+ ],
+ "macro_observations": [],
+ "fundamental_observations": [],
+ "valuation_scenarios": [],
+ "positive_channels": [],
+ "negative_channels": [],
+ "conflicts": [],
+ "unknowns": [
+  "2026Q3 營收"
+ ],
+ "next_signals": [],
+ "limitations": [],
+ "review": {
+  "decision": "pass",
+  "checked_refs": [
+   "ev-2317-2026q2-01"
+  ],
+  "checked_metric_ids": null,
+  "decision_summary": "c2 已改為可由工具重現的 TTM"
+ },
+ "budget": {
+  "calls_used": 5,
+  "tool_calls_used": 4,
+  "tokens_observed": 0,
+  "supplement_rounds": 1
+ },
+ "disclaimer": "本報告為研究觀察，非投資建議；不含買賣評級、目標價或漲跌機率。",
+ "run_label": "MOCK",
+ "data": {
+  "scope": "global_snapshot",
+  "scope_note": null,
+  "company": "鴻海",
+  "financial_period": "2026Q2",
+  "available_at": "2026-08-12T14:15:01+08:00",
+  "price": {
+   "value": 251.5,
+   "trade_date": "2026-09-30",
+   "basis": "raw_close",
+   "available_at": "2026-09-30T17:30:00+08:00"
+  },
+  "price_window": [
+   {
+    "trade_date": "2026-09-22",
+    "close_price": 253.0,
+    "available_at": "2026-09-22T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-23",
+    "close_price": 256.0,
+    "available_at": "2026-09-23T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-24",
+    "close_price": 250.5,
+    "available_at": "2026-09-24T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-29",
+    "close_price": 250.5,
+    "available_at": "2026-09-29T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   },
+   {
+    "trade_date": "2026-09-30",
+    "close_price": 251.5,
+    "available_at": "2026-09-30T17:30:00+08:00",
+    "available_at_basis": "rule_close_1730"
+   }
+  ],
+  "price_window_na_reason": null,
+  "ttm": {
+   "periods": [
+    "2025Q3",
+    "2025Q4",
+    "2026Q1",
+    "2026Q2"
+   ],
+   "eps_ttm": 15.21,
+   "fcf_ttm": -416.44
+  },
+  "quarters": [
+   {
+    "period": "2025Q2",
+    "period_basis": "single_quarter",
+    "revenue": 17934.68,
+    "operating_income": 565.96,
+    "net_income": 443.61,
+    "eps": 3.19,
+    "eps_source": "mops_direct",
+    "free_cash_flow": 396.24,
+    "available_at": "2025-08-14T14:15:05+08:00"
+   },
+   {
+    "period": "2025Q3",
+    "period_basis": "single_quarter",
+    "revenue": 20589.49,
+    "operating_income": 705.36,
+    "net_income": 576.73,
+    "eps": 4.15,
+    "eps_source": "mops_direct",
+    "free_cash_flow": -1070.6,
+    "available_at": "2025-11-12T14:16:10+08:00"
+   },
+   {
+    "period": "2025Q4",
+    "period_basis": "single_quarter",
+    "revenue": 26063.72,
+    "operating_income": 855.91,
+    "net_income": 452.12,
+    "eps": 3.23,
+    "eps_source": "finmind_quarterly",
+    "free_cash_flow": 2154.24,
+    "available_at": "2026-03-16T14:15:14+08:00"
+   },
+   {
+    "period": "2026Q1",
+    "period_basis": "single_quarter",
+    "revenue": 21195.33,
+    "operating_income": 756.49,
+    "net_income": 499.19,
+    "eps": 3.56,
+    "eps_source": "mops_direct",
+    "free_cash_flow": -325.57,
+    "available_at": "2026-05-14T14:15:12+08:00"
+   },
+   {
+    "period": "2026Q2",
+    "period_basis": "single_quarter",
+    "revenue": 25258.94,
+    "operating_income": 948.03,
+    "net_income": 599.74,
+    "eps": 4.27,
+    "eps_source": "mops_direct",
+    "free_cash_flow": -1174.51,
+    "available_at": "2026-08-12T14:15:01+08:00"
+   }
+  ],
+  "quarters_na_reason": null,
+  "metrics": {
+   "pe_ttm": {
+    "value": 16.54,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": null,
+    "consistent": null,
+    "eps_ttm": 15.21
+   },
+   "pb": {
+    "value": 1.85,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": null,
+    "consistent": null,
+    "bvps": 136.02
+   },
+   "revenue_yoy_quarter": {
+    "value": 0.4084,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": null,
+    "consistent": null,
+    "base_period": "2025Q2"
+   },
+   "fcf_ttm": {
+    "value": -416.44,
+    "na_reason": null,
+    "source": "tool",
+    "snapshot_value": null,
+    "consistent": null,
+    "unit": "億元"
+   },
+   "dcf_gap": {
+    "value": null,
+    "na_reason": "TTM FCF ≤ 0，5 年持平情境不適用",
+    "source": "none",
+    "snapshot_value": null,
+    "consistent": null
+   }
+  },
+  "valuation": {
+   "status": "undeterminable",
+   "label": "無法判定",
+   "gap": null,
+   "reason": "TTM FCF ≤ 0，5 年持平情境不適用",
+   "missing": [],
+   "dcf_per_share": null,
+   "sensitivity": null,
+   "dcf_detail": null
+  },
+  "data_quality": {
+   "level": "low",
+   "label": "資料品質風險：低",
+   "reasons": [
+    "既定資料檢查全部通過"
+   ],
+   "checks": [
+    {
+     "check_id": "price_same_day",
+     "label": "同日收盤價",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "eps_ttm_4q",
+     "label": "連續 4 季 EPS（TTM）",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "fcf_ttm_4q",
+     "label": "連續 4 季 FCF（TTM）",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "net_debt",
+     "label": "淨負債",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "shares_outstanding",
+     "label": "流通股數",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "fin_available_at",
+     "label": "財報可得時間",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "source_traceable",
+     "label": "來源片段可追溯",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "bvps",
+     "label": "每股淨值 BVPS",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "yoy_base",
+     "label": "去年同季營收",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "snapshot_consistent",
+     "label": "工具值與 B 快照一致",
+     "key": true,
+     "result": "pass",
+     "detail": ""
+    },
+    {
+     "check_id": "freshness",
+     "label": "財報新鮮度",
+     "key": false,
+     "result": "pass",
+     "detail": ""
+    }
+   ]
+  },
+  "peer_comparison": null,
+  "peer_na_reason": "同業比較只適用 2454",
+  "sources": [
+   {
+    "id": "ev-2317-2026q2-01",
+    "resolved": true,
+    "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2317&year=115&season=2",
+    "available_at": "2026-08-12T14:15:01+08:00",
+    "content_hash": "01dbdd9983f0664ce403130accd5c2392cd11138834a9a4eecb5e882f3ad79fa",
+    "hash_match": true,
+    "excerpt": "3.財務報告或年度自結財務資訊報導期間起訖日期(XXX/XX/XX~XXX/XX/XX):115/1/1~115/6/30 4.1月1日累計至本期止營業收入(仟元):4,645,427,824 9.1月1日累計至本期止歸屬於母公司業主淨利(損) (仟元):109,893,220 10.1月1日累計至本期止基本每股盈餘(損失) (元):7.84"
+   }
+  ],
+  "method": {
+   "data_version": "report-data-v1",
+   "risk_method": "valuation-gap-v1.1 (±15%) / data-quality-v1.1",
+   "tools_version": "tools-v12",
+   "dcf_assumptions": {
+    "wacc": 0.09,
+    "terminal_growth": 0.03,
+    "years": 5,
+    "fcf_basis": "5 年持平於 TTM FCF（基準情境）",
+    "source": "組長核定 2026-10-21；WACC 為程式預設，非個股風險估計"
+   },
+   "valuation_footnote": "±15% 是本專題的顯示門檻，不是經驗證的投資規則；DCF 結果取決於 WACC、g 與 FCF 假設。",
+   "risk_footnote": "資料品質風險只代表既定資料檢查的結果；「低」不代表股價風險低。",
+   "limitations": [
+    "所有數字由工具從資料快照計算，沒有 LLM 改寫；缺值以 NA 加原因呈現，不以 0 代替。",
+    "DCF 基準情境假設 FCF 5 年持平於 TTM FCF、不成長；WACC 9%、g 3% 是組長核定的程式預設，不是個股風險估計。因此模型值普遍低於市價，這是假設造成的，不代表股價高估。",
+    "價格為未還原收盤價；收盤價自交易日 17:30（台北）起才視為可得。",
+    "季度數字為單季，不是年度數字；TTM 為最近四季加總；FCF = 營業現金流 − 正值資本支出。",
+    "同業比較只適用 2454，且只在報告資料截止與同業快照相同時呈現，不混用不同時點。"
+   ]
+  }
+ }
+}

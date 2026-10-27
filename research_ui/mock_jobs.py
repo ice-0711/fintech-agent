@@ -76,14 +76,14 @@ def _steps(scenario: str, ticker: str) -> list[dict[str, Any]]:
                 {"role": "researcher", "event_type": "tool_call", "call": _tool("read_evidence", evidence_version_id=ev),
                  "changes": {"calls_used": 2, "tool_calls_used": 2, "active_seconds": 10.0}},
                 {"role": "researcher", "event_type": "draft", "detail": {
-                    "summary": "草稿狀態 insufficient：公告片段只有營收，現金流與 EPS 沒有原文可引用",
+                    "summary": "草稿狀態 insufficient：公告原文只有 1–6 月累計營收、淨利與 EPS，沒有現金流量表可引用",
                     "decision_summary": "可引用的原文不足以支持估值主張，停止並列出缺口"},
                  "draft": {"status": "insufficient", "decision_summary": "可引用的原文不足以支持估值主張",
-                           "claims": [{"claim_id": "c1", "kind": "fact", "text": "2026Q2 合併營收為 2 兆 5,259 億元。",
-                                       "evidence_refs": [ev], "limitations": ["片段只有營收"]},
+                           "claims": [{"claim_id": "c1", "kind": "fact", "text": "115年1月1日至6月30日累計營業收入4,645,427,824仟元（第二季單季須減第1季換算）。",
+                                       "evidence_refs": [ev], "limitations": ["原文是累計數，不是第二季單季"]},
                                       {"claim_id": "c2", "kind": "unknown", "text": "缺 2026Q2 現金流量表原文，無法核實自由現金流與 DCF。",
                                        "evidence_refs": [], "limitations": []}],
-                           "unknowns": ["現金流量表原文", "EPS 原文"], "limitations": ["不產生估值結論"]},
+                           "unknowns": ["現金流量表原文"], "limitations": ["不產生估值結論"]},
                  "changes": {"calls_used": 3, "active_seconds": 12.0}},
                 {"role": "researcher", "event_type": "stop", "detail": {
                     "summary": "資料不足，停止並保留限制，不產生評級"},
