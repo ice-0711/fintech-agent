@@ -27,7 +27,7 @@ from .provider import GeminiAdapter, _hash
 from .review_checks import check_draft
 from .review_contract import REVIEWER_PROMPT_VERSION, validate_review
 from .snapshot import SimulatedTimeout, SnapshotToolbox
-from .tools import args_hash, dispatch
+from .tools import MACRO_SERIES_WHITELIST, args_hash, dispatch
 
 PROMPTS = Path(__file__).resolve().parent / "prompts"
 RESEARCHER_PROMPT = (PROMPTS / "researcher-v1.2.txt").read_text(encoding="utf-8")
@@ -153,6 +153,7 @@ class ResearchRun:
         self.format_retries: dict[str, int] = cp.get("format_retries", {"researcher": 0, "reviewer": 0})
         self.resume_next: str = cp.get("next", "researcher")
         self.final: dict[str, Any] | None = None
+        self.last_result: dict[str, Any] = {}
 
     # -- persistence ---------------------------------------------------------
     @property
@@ -214,6 +215,7 @@ class ResearchRun:
             result = {"status": "refused", "tool": name, "reason": str(exc), "data": None}
         # Tool time counts toward the 180 s active-time cap (ch.02), including a simulated timeout.
         self.gate.add_active_time(time.monotonic() - started + simulated)
+        self.last_result = result
         obs_id = f"obs-{len(self.observations) + 1}"
         body = {"obs_id": obs_id, **compact(result)}
         text = json.dumps(body, ensure_ascii=False)
@@ -505,6 +507,46 @@ class ResearchRun:
         self.save({"stage": "revision", "review": final}, "researcher")
         return {"next": "researcher"}
 
+    def workflow_node(self, state: GraphState) -> GraphState:
+        """Fixed-pipeline baseline (ch.06 Workflow): code runs the same tools in the same order for every
+        job — the snapshot's first five sources, the financial, macro and price snapshots — then the model
+        writes the draft in one send with no tools and no review."""
+        if self.cancelled():
+            return self.finish("cancelled", "cancel_requested")
+        job = self.job
+        if not self.observations:  # on resume the tools already ran (checkpoint), never rerun them
+            call = lambda name, args: types.FunctionCall(name=name, args=args)  # noqa: E731
+            cut, t = job["cutoff_at"], job["ticker"]
+            self.run_tool("researcher", call("search_evidence", {"ticker": t, "query": QUESTION[:200], "cutoff": cut, "limit": 5}))
+            found = self.last_result
+            for row in (found.get("data") or [])[:5] if found.get("status") == "ok" else []:
+                self.run_tool("researcher", call("read_evidence", {"evidence_version_id": row["evidence_version_id"]}))
+            self.run_tool("researcher", call("get_financial_snapshot", {"ticker": t, "cutoff": cut}))
+            self.run_tool("researcher", call("get_macro_snapshot", {"cutoff": cut, "series_ids": list(MACRO_SERIES_WHITELIST)}))
+            self.run_tool("researcher", call("get_price_window", {"ticker": t, "end_at": cut, "sessions": 1}))
+            self.save({}, "workflow")
+        trusted = {"job_id": job["job_id"], "ticker": job["ticker"], "cutoff_at": job["cutoff_at"],
+                   "source_snapshot_id": job["source_snapshot_id"], "question_version": job["question_version"],
+                   "question": QUESTION, "focus": job.get("focus"), "mode": "workflow（固定流程：工具已由程式執行，只撰稿一次）"}
+        self.r_contents = self.final_turn_contents("researcher", "可信輸入：" + json.dumps(trusted, ensure_ascii=False),
+                                                   RESEARCHER_PROMPT)
+        resp = self.adapters["researcher"].send("researcher", self.r_contents, RESEARCHER_PROMPT,
+                                                allow_tools=False, declare_tools=False)
+        if resp.candidates and resp.candidates[0].content is not None:
+            self.r_contents.append(resp.candidates[0].content)
+        draft = parse_json_object(resp.text)
+        problems = draft_problems(draft) if not resp.function_calls else ["固定流程回合要求呼叫工具"]
+        if problems:  # one send only: no format retry in the baseline
+            self.event("researcher", "draft_invalid", {"problems": problems})
+            draft = {"status": "insufficient", "claims": [], "limitations": ["固定流程未產出合格草稿：" + "；".join(problems)]}
+        draft.update({"ticker": job["ticker"], "snapshot_id": job["source_snapshot_id"], "as_of": job["cutoff_at"]})
+        self.draft = draft
+        self.event("researcher", "draft", {"status": draft["status"], "claims": len(draft.get("claims", [])),
+                                           "decision_summary": str(draft.get("decision_summary", ""))[:120]})
+        if draft["status"] == "insufficient":
+            return self.finish("insufficient_evidence", "researcher_insufficient" if not problems else "workflow_invalid_draft")
+        return self.finish("succeeded", "workflow_draft_without_review")
+
     def finish(self, status: str, reason: str, review: dict[str, Any] | None = None) -> GraphState:
         self.final = {"status": status, "stage": "finished", "stop_reason": reason, "draft": self.draft,
                       "review": review, "publication_status": "draft"}  # never published here (W07 human approval)
@@ -516,11 +558,16 @@ class ResearchRun:
         graph = StateGraph(GraphState)
         graph.add_node("researcher", self.researcher_node)
         graph.add_node("reviewer", self.reviewer_node)
-        route = {"researcher": "researcher", "reviewer": "reviewer", "end": END}
+        graph.add_node("workflow", self.workflow_node)
+        route = {"researcher": "researcher", "reviewer": "reviewer", "workflow": "workflow", "end": END}
         graph.add_conditional_edges(START, lambda s: s["next"], route)
         graph.add_conditional_edges("researcher", lambda s: s["next"], route)
         graph.add_conditional_edges("reviewer", lambda s: s["next"], route)
-        start = self.resume_next if self.resume_next in ("researcher", "reviewer") else "researcher"
+        graph.add_conditional_edges("workflow", lambda s: s["next"], route)
+        if self.mode == "workflow":
+            start = "workflow"
+        else:
+            start = self.resume_next if self.resume_next in ("researcher", "reviewer") else "researcher"
         graph.compile().invoke({"next": start}, {"recursion_limit": 40})
         if self.final is None:
             raise RuntimeError("graph ended without a final state")
@@ -533,10 +580,9 @@ def make_research_handler(client: Any, model_id: str, quota: ProjectQuota, *, th
 
     def handler(lease: Any) -> dict[str, Any]:
         job = lease.job
-        if job["mode"] == "workflow":
-            raise ValueError("workflow 模式（固定流程基線）尚未實作，排在實驗前（W09）")
+        initial = {"single": 8, "dual": 4, "workflow": 1}[job["mode"]]  # workflow: one drafting send only
         gate = BudgetGate(store=lease.store, job=job, persist=lease.save, quota=quota,
-                          limits=BudgetLimits(initial_research_calls=8 if job["mode"] == "single" else 4))
+                          limits=BudgetLimits(initial_research_calls=initial))
 
         def adapter(version: str) -> GeminiAdapter:
             return GeminiAdapter(client, model_id, gate, prompt_version=version, thinking_level=thinking_level,

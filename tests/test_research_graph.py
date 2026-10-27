@@ -368,3 +368,34 @@ def test_reviewer_final_turn_has_no_tools_so_a_good_draft_gets_a_decision(store)
     reviewer_calls = [c for c in client.calls if c["config"].system_instruction.startswith("你是多智能體投資分析系統的 Reviewer")]
     assert reviewer_calls[-1]["config"].tools is None
     assert final["status"] == "succeeded" and final["calls_used"] <= 8
+
+
+# ----- W07-L: workflow (fixed-pipeline) baseline ---------------------------------
+def test_workflow_runs_fixed_tools_then_one_send_without_review(store):
+    final, client, events = run_case(store, CASE01, [text_response(draft(GOOD_CLAIMS))], mode="workflow")
+    assert final["status"] == "succeeded" and final["stop_reason"] == "workflow_draft_without_review"
+    assert final["calls_used"] == 1 and final["review"] is None and final["publication_status"] == "draft"
+    tools = tools_used(events)
+    assert tools[0] == "search_evidence" and tools[-3:] == ["get_financial_snapshot", "get_macro_snapshot", "get_price_window"]
+    assert set(tools[1:-3]) <= {"read_evidence"} and 1 <= len(tools[1:-3]) <= 5  # the snapshot's first five sources
+    assert final["tool_calls_used"] == len(tools) <= 10
+    assert not any(e["role"] == "reviewer" for e in events)
+
+
+def test_workflow_same_tool_path_for_every_job(store):
+    paths = []
+    for i in range(2):
+        case = dict(CASE01, focus=f"不同焦點 {i}")
+        job, _ = store.create_job(validate_job_request(job_request(idempotency_key=f"wf-{i}", mode="workflow", **case)), MODEL)
+        run_once(store, "w1", make_research_handler(FakeClient([text_response(draft([], status="insufficient"))]),
+                                                    MODEL, QUOTA, sleep=lambda s: None))
+        paths.append(tools_used(store.list_events(job["job_id"])))
+    assert paths[0] == paths[1]  # code, not the model, chooses the tools
+
+
+def test_workflow_tool_request_is_not_executed(store):
+    final, client, events = run_case(store, CASE01, [
+        fc_response("search_evidence", {"ticker": "2330", "query": "x", "cutoff": CASE01["cutoff_at"], "limit": 1})],
+        mode="workflow")
+    assert final["status"] == "insufficient_evidence" and final["stop_reason"] == "workflow_invalid_draft"
+    assert final["calls_used"] == 1
