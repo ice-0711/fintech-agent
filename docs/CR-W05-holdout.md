@@ -12,9 +12,9 @@ B 已依固定分配表重建 20 個保留案例（`evaluation/test-cases-sealed
 
 保留集封存後若需修改，請重跑 `python scripts/build_holdout_cases.py` 並以 `python scripts/check_cases.py` 驗證，再由 D 與組長確認新的 SEAL hash。
 
-## 狀態（2026-10-22）
+## 狀態（2026-10-28 更新）
 
 - 第 1 項：**已完成**（組長 10/22，`load_case_snapshot()` 依 `snap-test-` 前綴讀 `fixtures/test/case_fixtures.json`）。
-- 第 2、4 項：**未完成**，B 以合成快照驗證會出錯（無發布時間片段使 `_t(None)` 例外、`behavior = no_data` 未處理），建議修改見 `docs/CR-W06-snapshot-holdout.md`。
+- 第 2、4 項：**已完成**（組長 10/26 合併 CR-W06：`agents/snapshot.py` 的 `_avail()` 以 `captured_at` 判定、`_simulated_no_data()` 處理 `behavior = no_data`；測試 `tests/test_snapshot_holdout_guard.py`）。CR-W06 文件已結案刪除，內容可由 git 歷史查回。
 - 第 3 項：現行程式原樣回傳 null，符合要求。
-- 第 5 項：由組長／D 的 W09 runner 決定。
+- 第 5 項：**仍待**組長／D 的 W09 runner 決定 CASE-23 `task_input`、CASE-28 `draft_under_review` 如何放入研究題目；`expected_*` 不得進 prompt。本檔保留到此項完成。
