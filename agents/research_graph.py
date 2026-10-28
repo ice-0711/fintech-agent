@@ -472,6 +472,14 @@ class ResearchRun:
             return {"next": "reviewer"}
 
         review = parse_json_object(resp.text)
+        if review is not None:
+            # decision_summary is only a label for the decision; an over-long or missing one must not throw away
+            # a review whose decision and issues are valid (10/28 live: both dual cases lost their review to it).
+            summ = review.get("decision_summary")
+            if not isinstance(summ, str) or len(summ) > 120:
+                review["decision_summary"] = (summ[:119] + "…") if isinstance(summ, str) else "（Reviewer 未提供摘要）"
+                self.event("reviewer", "review_normalized", {"field": "decision_summary",
+                                                              "original_length": len(summ) if isinstance(summ, str) else None})
         errors = validate_review(review, claim_ids) if review is not None else ["不是 JSON 物件"]
         if model_turn is not None:
             self.v_contents.append(model_turn)

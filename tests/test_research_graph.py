@@ -399,3 +399,17 @@ def test_workflow_tool_request_is_not_executed(store):
         mode="workflow")
     assert final["status"] == "insufficient_evidence" and final["stop_reason"] == "workflow_invalid_draft"
     assert final["calls_used"] == 1
+
+
+def test_overlong_review_summary_is_trimmed_not_discarded(store):
+    long_pass = json.dumps({"decision": "pass", "issues": [], "checked_refs": ["ev-dev-01-official"],
+                            "checked_metric_ids": [], "decision_summary": "引用與數字已逐項核對。" * 20}, ensure_ascii=False)
+    final, client, events = run_case(store, CASE01, [
+        fc_response("search_evidence", {"ticker": "2330", "query": "營收", "cutoff": CASE01["cutoff_at"], "limit": 3}),
+        fc_response("read_evidence", {"evidence_version_id": "ev-dev-01-official"}),
+        text_response(draft(GOOD_CLAIMS)),
+        text_response(long_pass),
+    ])
+    assert final["stop_reason"] == "review_pass" and final["calls_used"] == 4  # no retry spent on the summary
+    assert len(final["review"]["decision_summary"]) <= 120
+    assert any(e["event_type"] == "review_normalized" for e in events)

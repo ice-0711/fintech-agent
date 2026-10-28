@@ -45,3 +45,10 @@
 ## 待 W04 注意（不在本週範圍）
 
 - 研究員一開始的輸入就約 1,000 token（實際）／1,700（預估），3,000 輸入上限在多輪補查時可能偏緊；預估約高估 1.7 倍，W04 可依累積的 live usage 校準係數，須經組長核准並保持不少算。
+
+## 2026-10-28 換 API key（原專案失去免費層）
+
+- 10/27 22:40 校準第 1 天：原 `.env` key 所屬專案回 403「The Gemini API free tier is not available for this project」。該 job 記為 failed（2 次發送，0 費用），其餘 5 個未執行。
+- 10/28 組長在 AI Studio 核對：原 key 不在「Default Gemini Project」（gen-lang-client-0059508299）。組長自行把 `.env` 換成該專案的 key（結尾 ioqw；Claude 未讀取 key 值）。
+- 新專案仍為 Free tier；gemini-3.5-flash-lite 上限 RPM 15／TPM 250K／RPD 500，與 `quota-baseline.json` 相同，J=6 不變。測試請求成功。
+- 未開通付費，維持 10/23「不換付費」決定。
