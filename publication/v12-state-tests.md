@@ -46,8 +46,13 @@
 
 10/10 通過。PDF 107,483 bytes（< 5 MB）。演練結束後已刪除演練用的版本列與 PDF，測試專案不留假資料。
 
+### Render 線上（2026-10-28 20:51，commit 4208ee6）
+
+設好四個 `REPORT_*` 變數後重新部署：`/`、`/reports`、`/api/ui/published`、`/admin/login` 都回 200。`/reports` 會實際查詢 Supabase 測試資料庫，可證明 Render 連得上。第一次部署 `/reports` 回 500，原因是 Render 裝到不相容的 `scramp`（`pg8000` 的相依套件），已在 `requirements.txt` 固定為 `scramp==1.4.17` 後修好。
+
 ## 四、尚未完成
 
+- **Render 上的組長登入**：還沒設 `ADMIN_PASSWORD`、`FLASK_SECRET_KEY`，線上核准要等 W08 設定。
 - **Render 部署驗收（W08）**：Render 目前依 `requirements.txt` 建置（已加入 `pg8000`）；Agent 執行所需套件在 `requirements-agent.txt`，W08 部署時再一起切換。手機實測下載也排在部署後。
 - **job 紀錄仍在 SQLite**：Render 重新部署會遺失 job（報告版本與 PDF 不受影響）。Supabase job store 排在後續處理。
 - **正式專案**：W08 部署驗收通過後，才決定是否把 migration 套用到正式專案。
