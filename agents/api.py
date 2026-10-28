@@ -109,7 +109,8 @@ def get_reports() -> ReportStore:
         root = Path(current_app.root_path) / "tmp"
         from research_ui.storage_supabase import storage_from_env  # noqa: PLC0415  (W07-A: Supabase when configured)
 
-        reports = ReportStore(os.getenv("REPORT_DB_PATH") or str(root / "reports.sqlite3"),
+        # REPORT_DB_URL (postgresql://, Supabase) keeps versions across redeploys; else a local SQLite file.
+        reports = ReportStore(os.getenv("REPORT_DB_URL") or os.getenv("REPORT_DB_PATH") or str(root / "reports.sqlite3"),
                               storage_from_env(os.getenv("REPORT_STORAGE_DIR") or str(root / "storage")))
         current_app.extensions["report_store"] = reports
     return reports

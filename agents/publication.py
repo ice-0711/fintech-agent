@@ -192,20 +192,71 @@ def render_pdf(report: dict[str, Any], version: dict[str, Any]) -> bytes:
     return data
 
 
+class _SQLite:
+    def __init__(self, path: str | Path):
+        self._conn = sqlite3.connect(str(path), check_same_thread=False, isolation_level=None)
+        self._conn.row_factory = sqlite3.Row
+        self._conn.executescript(SCHEMA)
+
+    def rows(self, sql: str, params: tuple = ()) -> list[dict[str, Any]]:
+        return [dict(r) for r in self._conn.execute(sql, params).fetchall()]
+
+    def run(self, sql: str, params: tuple = ()) -> None:
+        self._conn.execute(sql, params)
+
+
+class _Postgres:
+    """Supabase Postgres (W07): same table and SQL as SQLite, so versions survive a Render redeploy.
+    The table comes from supabase_migrations/20261028_report_versions_store.sql (not created here).
+    One short connection per statement through the session pooler, TLS verified with Supabase's root CA."""
+
+    CA_FILE = Path(__file__).resolve().parents[1] / "certs" / "supabase-prod-ca-2021.crt"
+
+    def __init__(self, url: str):
+        from urllib.parse import unquote, urlparse  # noqa: PLC0415
+
+        u = urlparse(url)
+        self._args = {"user": u.username, "password": unquote(u.password or ""), "host": u.hostname,
+                      "port": u.port or 5432, "database": (u.path or "/postgres").lstrip("/") or "postgres"}
+
+    def rows(self, sql: str, params: tuple = ()) -> list[dict[str, Any]]:
+        import ssl  # noqa: PLC0415
+
+        import pg8000.dbapi  # noqa: PLC0415
+
+        conn = pg8000.dbapi.connect(**self._args, ssl_context=ssl.create_default_context(cafile=str(self.CA_FILE)),
+                                    timeout=20)
+        try:
+            cur = conn.cursor()
+            cur.execute(sql.replace("?", "%s"), params)
+            cols = [d[0] for d in cur.description] if cur.description else []
+            out = [dict(zip(cols, r)) for r in cur.fetchall()] if cols else []
+            conn.commit()
+            return out
+        finally:
+            conn.close()
+
+    def run(self, sql: str, params: tuple = ()) -> None:
+        self.rows(sql, params)
+
+
+def open_report_db(target: str | Path) -> _SQLite | _Postgres:
+    """`postgresql://…` → Supabase Postgres; anything else is a local SQLite file path."""
+    return _Postgres(str(target)) if str(target).startswith(("postgresql://", "postgres://")) else _SQLite(target)
+
+
 class ReportStore:
     def __init__(self, path: str | Path, storage: Storage,
                  renderer: Callable[[dict[str, Any], dict[str, Any]], bytes] = render_pdf):
         self.storage, self.renderer = storage, renderer
         self._lock = threading.Lock()
-        self._conn = sqlite3.connect(str(path), check_same_thread=False, isolation_level=None)
-        self._conn.row_factory = sqlite3.Row
-        self._conn.executescript(SCHEMA)
+        self._db = open_report_db(path)
 
     def _row(self, rv_id: str) -> dict[str, Any]:
-        row = self._conn.execute("select * from report_versions where report_version_id = ?", (rv_id,)).fetchone()
-        if row is None:
+        rows = self._db.rows("select * from report_versions where report_version_id = ?", (rv_id,))
+        if not rows:
             raise KeyError(rv_id)
-        out = dict(row)
+        out = dict(rows[0])
         out["report"] = json.loads(out.pop("report_json"))
         return out
 
@@ -218,13 +269,14 @@ class ReportStore:
         report = build_report_json(job, events)
         digest = canonical_hash(report)
         with self._lock:
-            latest = self._conn.execute(
+            found = self._db.rows(
                 "select report_version_id, report_hash, version_no from report_versions where job_id = ? "
-                "order by version_no desc limit 1", (job["job_id"],)).fetchone()
+                "order by version_no desc limit 1", (job["job_id"],))
+            latest = found[0] if found else None
             if latest and latest["report_hash"] == digest:
                 return self._row(latest["report_version_id"])  # same content → same version (idempotent)
             rv_id = f"rv-{uuid.uuid4()}"
-            self._conn.execute(
+            self._db.run(
                 "insert into report_versions (report_version_id, job_id, version_no, status, report_json, report_hash,"
                 " created_at) values (?, ?, ?, 'draft', ?, ?, ?)",
                 (rv_id, job["job_id"], (latest["version_no"] if latest else 0) + 1,
@@ -238,11 +290,11 @@ class ReportStore:
                 raise PublicationError(f"版本狀態為 {v['status']}，只有 draft 可以核准")
             if seen_hash != v["report_hash"]:
                 raise PublicationError("hash 與目前版本不符：請重新檢視最新內容再核准")
-            newest = self._conn.execute("select max(version_no) from report_versions where job_id = ?",
-                                        (v["job_id"],)).fetchone()[0]
+            newest = self._db.rows("select max(version_no) as n from report_versions where job_id = ?",
+                                   (v["job_id"],))[0]["n"]
             if v["version_no"] != newest:
                 raise PublicationError("已有更新的版本，舊版本不能核准")
-            self._conn.execute("update report_versions set status = 'approved', approved_by = ?, approved_at = ? "
+            self._db.run("update report_versions set status = 'approved', approved_by = ?, approved_at = ? "
                                "where report_version_id = ? and status = 'draft'", (approver, utc_now_iso(), rv_id))
         return self._row(rv_id)
 
@@ -264,22 +316,22 @@ class ReportStore:
                 raise PublicationError("Storage 讀回的 PDF hash 不符")
         except Exception as exc:  # noqa: BLE001 - record and leave for an admin retry
             with self._lock:
-                self._conn.execute("update report_versions set status = 'pdf_failed', failure = ? "
+                self._db.run("update report_versions set status = 'pdf_failed', failure = ? "
                                    "where report_version_id = ? and status != 'published'", (str(exc)[:300], rv_id))
             raise PublicationError(f"PDF 產生或儲存失敗，狀態 pdf_failed：{exc}") from exc
         with self._lock:
-            self._conn.execute(
+            self._db.run(
                 "update report_versions set status = 'published', pdf_hash = ?, storage_key = ?, published_at = ?, "
                 "failure = null where report_version_id = ? and status in ('approved', 'pdf_failed')",
                 (pdf_hash, key, utc_now_iso(), rv_id))
         return self._row(rv_id)
 
     def published(self) -> list[dict[str, Any]]:
-        rows = self._conn.execute(
-            "select report_version_id from report_versions where status = 'published' order by published_at desc").fetchall()
+        rows = self._db.rows(
+            "select report_version_id from report_versions where status = 'published' order by published_at desc")
         out = []
         for r in rows:
-            v = self._row(r[0])
+            v = self._row(r["report_version_id"])
             out.append({"report_version_id": v["report_version_id"], "ticker": v["report"]["ticker"],
                         "cutoff_at": v["report"]["cutoff_at"], "published_at": v["published_at"],
                         "publication_status": v["status"], "review_decision": v["report"]["review"]["decision"],

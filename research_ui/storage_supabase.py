@@ -41,8 +41,11 @@ class SupabaseStorage:
 
 
 def storage_from_env(local_root: str | Path):
-    url, key, bucket = (os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY"),
-                        os.getenv("REPORT_STORAGE_BUCKET"))
+    # REPORT_SUPABASE_* (lead, 10/28) lets reports live in another project than the old site's SUPABASE_URL
+    # (on Render that is production; W07 reports go to the test project). Falls back to A's original names.
+    url = os.getenv("REPORT_SUPABASE_URL") or os.getenv("SUPABASE_URL")
+    key = os.getenv("REPORT_SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_SERVICE_KEY")
+    bucket = os.getenv("REPORT_STORAGE_BUCKET")
     if url and key and bucket:
         from supabase import create_client  # noqa: PLC0415
 

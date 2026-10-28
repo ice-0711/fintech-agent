@@ -9,3 +9,4 @@ requests
 PyMuPDF
 FinMind
 fredapi
+pg8000==1.31.5

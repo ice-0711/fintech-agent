@@ -91,8 +91,8 @@ def test_tampered_content_is_not_published(reports):
     v = reports.create_version(JOB, EVENTS)
     reports.approve(v["report_version_id"], v["report_hash"], "lead")
     bad = dict(v["report"], claims=[{"claim_id": "c1", "text": "竄改"}])
-    reports._conn.execute("update report_versions set report_json = ? where report_version_id = ?",
-                          (json.dumps(bad, ensure_ascii=False), v["report_version_id"]))
+    reports._db.run("update report_versions set report_json = ? where report_version_id = ?",
+                    (json.dumps(bad, ensure_ascii=False), v["report_version_id"]))
     with pytest.raises(PublicationError, match="hash"):
         reports.publish(v["report_version_id"])
 
