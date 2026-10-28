@@ -22,7 +22,7 @@ from .comparison import DCF_ASSUMPTIONS, build_comparison, company_row_at, quart
 from .risk import METHOD_VERSION as RISK_METHOD
 from .risk import RISK_FOOTNOTE, VALUATION_FOOTNOTE
 
-DATA_VERSION = "report-data-v1"
+DATA_VERSION = "report-data-v1.1"  # v1.1: snapshot_id citations resolve to the financial-snapshot tool result
 EXCERPT_CHARS = 200
 METHOD_LIMITATIONS = [
     "所有數字由工具從資料快照計算，沒有 LLM 改寫；缺值以 NA 加原因呈現，不以 0 代替。",
@@ -34,9 +34,36 @@ METHOD_LIMITATIONS = [
 ]
 
 
-def _sources(toolbox: SnapshotToolbox, refs: list[str]) -> list[dict[str, Any]]:
+def _fmt(v: Any) -> str:
+    return "NA" if v is None else f"{v:,.2f}".rstrip("0").rstrip(".") if isinstance(v, float) else str(v)
+
+
+def _snapshot_source(toolbox: SnapshotToolbox, ref: str, ticker: str, cutoff: str) -> dict[str, Any] | None:
+    """A claim may cite the financial-snapshot tool result by its snapshot_id (B, W07 audit). The 'excerpt'
+    is the tool's own values for that snapshot, so a reader can check every number the claim uses."""
+    r = toolbox("get_financial_snapshot", {"ticker": ticker, "cutoff": cutoff})
+    d = r.get("data") if r.get("status") == "ok" else None
+    if not d or d.get("snapshot_id") != ref:
+        return None
+    m = d.get("metrics") or {}
+    periods = d.get("ttm_periods") or []
+    span = f"{periods[0]}–{periods[-1]}" if periods else "NA"
+    basis = {"single_quarter": "單季", "cumulative": "累計"}.get(d.get("period_basis"), d.get("period_basis") or "NA")
+    excerpt = (f"財報快照 {ref}（{d.get('latest_period')}，{basis}；金額單位億元）：單季 EPS {_fmt(m.get('eps_single_q'))} 元；"
+               f"近四季 EPS 合計（TTM）{_fmt(m.get('eps_ttm'))} 元（{span}）；單季營收 {_fmt(m.get('revenue_single_q'))}；"
+               f"TTM FCF {_fmt(m.get('fcf_ttm'))}。")
+    return {"id": ref, "resolved": True, "kind": "financial_snapshot", "source_id": d.get("source_id"),
+            "source_url": None, "available_at": d.get("available_at"), "content_hash": d.get("content_hash"),
+            "hash_match": None, "hash_note": "原始財報檔的 sha256（工具結果，不是公告片段）", "excerpt": excerpt}
+
+
+def _sources(toolbox: SnapshotToolbox, refs: list[str], ticker: str, cutoff: str) -> list[dict[str, Any]]:
     out = []
     for ref in dict.fromkeys(refs):
+        snap = _snapshot_source(toolbox, ref, ticker, cutoff) if ref.startswith("snap-") else None
+        if snap is not None:
+            out.append(snap)
+            continue
         r = toolbox("read_evidence", {"evidence_version_id": ref})
         if r.get("status") != "ok":
             out.append({"id": ref, "resolved": False,
@@ -45,7 +72,7 @@ def _sources(toolbox: SnapshotToolbox, refs: list[str]) -> list[dict[str, Any]]:
             continue
         d = r["data"]
         para = d.get("paragraph") or ""
-        out.append({"id": ref, "resolved": True, "source_url": d.get("source_url"),
+        out.append({"id": ref, "resolved": True, "kind": "evidence", "source_url": d.get("source_url"),
                     "available_at": d.get("available_at"), "content_hash": d.get("content_hash"),
                     "hash_match": hashlib.sha256(para.encode("utf-8")).hexdigest() == d.get("content_hash"),
                     "excerpt": para[:EXCERPT_CHARS] + ("…" if len(para) > EXCERPT_CHARS else "")})
@@ -80,7 +107,7 @@ def build_report_data(job: dict[str, Any]) -> dict[str, Any]:
             "data_quality": {"level": "unassessed", "label": "資料品質風險：未評估",
                              "reasons": ["案例快照不跑資料品質檢查"], "checks": []},
             "peer_comparison": None, "peer_na_reason": "案例快照不含同業資料",
-            "sources": _sources(toolbox, refs),
+            "sources": _sources(toolbox, refs, ticker, cutoff),
             "method": method,
         }
 
@@ -117,6 +144,6 @@ def build_report_data(job: dict[str, Any]) -> dict[str, Any]:
         "valuation": row["valuation"],
         "data_quality": {k: row["data_quality"][k] for k in ("level", "label", "reasons", "checks")},
         "peer_comparison": peer, "peer_na_reason": peer_reason,
-        "sources": _sources(toolbox, refs + [e["id"] for e in row["evidence"]]),
+        "sources": _sources(toolbox, refs + [e["id"] for e in row["evidence"]], ticker, cutoff),
         "method": method,
     }

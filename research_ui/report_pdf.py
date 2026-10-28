@@ -56,6 +56,16 @@ def _pct(v: Any) -> str:
     return "NA" if v is None else f"{v * 100:.1f}%"
 
 
+def _price_text(price: Any) -> str:
+    """The close the valuation gap uses (B's W07 audit: it was only visible in the chart)."""
+    if isinstance(price, list):
+        price = price[-1] if price else None
+    if not isinstance(price, dict):
+        return "NA（沒有同日收盤價）"
+    value = price.get("value", price.get("close_price"))
+    return f"{price.get('trade_date')} 收盤 {_num(value)} 元（未還原；交易日 17:30 起可得）"
+
+
 class _Doc:
     def __init__(self) -> None:
         from report_builder import PDF_FONT_FAMILY, ReportPDF, register_pdf_fonts  # noqa: PLC0415
@@ -175,6 +185,7 @@ def render_report_pdf(report: dict[str, Any], version: dict[str, Any]) -> bytes:
     gap = f"（DCF 每股 {_num(v.get('dcf_per_share'))} 元，與同日收盤價差距 {_pct(v.get('gap'))}）" if v.get("gap") is not None \
         else f"：{v.get('reason') or ''}"
     d.text(f"估值狀態：{v.get('label') or '無法判定'}{gap}", 10.5, True)
+    d.text(f"基準收盤價：{_price_text(data.get('price'))}", 9.5)
     d.text(f"{dq.get('label') or '資料品質風險：未評估'}　{'；'.join(dq.get('reasons') or [])}", 10.5, True,
            RED if dq.get("level") == "high" else INK)
     d.text((data.get("method") or {}).get("valuation_footnote", ""), 8.5, color=MUTED)
@@ -270,7 +281,11 @@ def render_report_pdf(report: dict[str, Any], version: dict[str, Any]) -> bytes:
     # ---- sources
     d.heading("來源")
     for s in data.get("sources") or []:
-        if s.get("resolved"):
+        if s.get("resolved") and s.get("kind") == "financial_snapshot":
+            d.text(f"{s['id']}　財報快照（工具結果）　可得 {_tw(s.get('available_at'))}　原始檔 {s.get('source_id')}　"
+                   f"sha256 {str(s.get('content_hash'))[:16]}…", 8.5, True)
+            d.text(s.get("excerpt"), 8.5, color=MUTED)
+        elif s.get("resolved"):
             d.text(f"{s['id']}　可得 {_tw(s.get('available_at'))}　sha256 {str(s.get('content_hash'))[:16]}…"
                    f"{'（相符）' if s.get('hash_match') else '（不符，待 B 核對）'}", 8.5, True)
             d.text(s.get("excerpt"), 8.5, color=MUTED)

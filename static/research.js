@@ -561,7 +561,7 @@
         <iframe title="PDF 預覽" data-src="${esc(r.pdf_url)}" loading="lazy"></iframe></details>` : ""}
       <div class="status-pair">
         <div><div class="sub" style="margin-top:0">估值狀態</div>${badge(v.label || "無法判定", VAL_CLS[v.status] || "b-neutral")}
-          <p class="hint">${v.gap !== null && v.gap !== undefined ? `DCF 每股 ${esc(v.dcf_per_share)} 元，與同日收盤價差距 ${pct(v.gap)}。` : esc(v.reason || "")}</p>
+          <p class="hint">${v.gap !== null && v.gap !== undefined ? `DCF 每股 ${esc(v.dcf_per_share)} 元，與同日收盤價差距 ${pct(v.gap)}。` : esc(v.reason || "")}${r.tables && r.tables.price && r.tables.price.value != null ? `基準收盤價：${esc(r.tables.price.trade_date)} 收盤 ${num(r.tables.price.value)} 元（未還原）。` : ""}</p>
           <p class="footnote">±15% 是本專題的顯示門檻，不是經驗證的投資規則；DCF 取決於 WACC、g 與 FCF 假設。</p></div>
         <div><div class="sub" style="margin-top:0">資料品質</div>${riskBadge(dq)}
           <p class="hint">${esc((dq.reasons || []).join("；"))}</p>
@@ -698,20 +698,22 @@
     try {
       const q = reportId ? `?report=${encodeURIComponent(reportId)}` : "";
       const { evidence: e } = await getJson(`/api/ui/evidence/${encodeURIComponent(id)}${q}`);
+      const isSnap = e.kind === "financial_snapshot";
       $("#drawerBody").innerHTML = `
-        <div class="actions">${e.synthetic_fixture ? badge("FIXTURE", "b-fixture") : ""}${e.hash_match ? badge("hash 吻合", "b-ok") : badge("hash 不符・待 B 核對", "b-bad")}${e.cutoff_check ? badge(e.cutoff_check, e.cutoff_check.startsWith("cutoff 前") ? "b-ok" : "b-bad") : ""}</div>
+        <div class="actions">${e.synthetic_fixture ? badge("FIXTURE", "b-fixture") : ""}${isSnap ? badge("財報快照・工具結果", "b-run") : e.hash_match ? badge("hash 吻合", "b-ok") : badge("hash 不符・待 B 核對", "b-bad")}${e.cutoff_check ? badge(e.cutoff_check, e.cutoff_check.startsWith("cutoff 前") ? "b-ok" : "b-bad") : ""}</div>
         <dl class="kv">
           <dt>來源版本</dt><dd class="mono">${esc(e.evidence_version_id)}</dd>
           <dt>可得時間</dt><dd>${fmtTime(e.available_at)}</dd>
-          <dt>原始來源</dt><dd><a href="${esc(e.source_url)}" target="_blank" rel="noopener noreferrer">${esc(e.source_url)}</a></dd>
+          <dt>原始來源</dt><dd>${isSnap ? `財報檔 <span class="mono">${esc(e.source_id)}</span>` : `<a href="${esc(e.source_url)}" target="_blank" rel="noopener noreferrer">${esc(e.source_url)}</a>`}</dd>
         </dl>
         <div class="quote">${esc(e.paragraph)}</div>
         <dl class="kv">
           <dt>記錄 hash</dt><dd class="mono">${esc(e.content_hash)}</dd>
-          <dt>重算 hash</dt><dd class="mono">${esc(e.computed_hash)}</dd>
+          ${isSnap ? "" : `<dt>重算 hash</dt><dd class="mono">${esc(e.computed_hash)}</dd>`}
           <dt>算法</dt><dd>${esc(e.hash_algorithm)}</dd>
         </dl>
-        <p class="footnote">片段取自不可變快照（read_evidence），不是即時網頁；原始來源連結目前是 MOPS 查詢頁，需 B 補精確連結。</p>`;
+        <p class="footnote">${isSnap ? "這是財報快照工具（get_financial_snapshot）在資料截止時的結果，凍結在核准報告裡；TTM 等數字由工具計算，不在公告原文中。"
+          : "片段取自不可變快照（read_evidence），不是即時網頁；原始來源連結目前是 MOPS 查詢頁，需 B 補精確連結。"}</p>`;
     } catch (err) {
       const msg = err.body && err.body.error === "no_data" ? "快照中沒有這個來源片段 → 「無來源」。引用它的主張不能當作事實。"
         : err.body && err.body.error === "not_referenced" ? "這個 ID 不是已發布報告或比較面板引用的來源（例如搜尋結果的 source_id），所以不開放。"

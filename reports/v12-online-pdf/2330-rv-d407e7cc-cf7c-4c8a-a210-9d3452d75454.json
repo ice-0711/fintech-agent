@@ -1,5 +1,5 @@
 {
- "job_id": "51a7eaf7-912e-4ca8-b20b-d74a50525f8f",
+ "job_id": "3307fd8d-9b69-482d-80af-7610f475d489",
  "ticker": "2330",
  "cutoff_at": "2026-09-30T09:30:00+00:00",
  "source_snapshot_id": "fin-snap:v1.6-tw-market",
@@ -12,6 +12,7 @@
    "claim_id": "c1",
    "kind": "fact",
    "evidence_refs": [
+    "snap-2330-2026Q2",
     "ev-2330-2026q2-01"
    ],
    "limitations": [],
@@ -21,10 +22,11 @@
    "claim_id": "c2",
    "kind": "fact",
    "evidence_refs": [
-    "ev-2330-2026q2-01"
+    "snap-2330-2026Q2"
    ],
    "limitations": [
-    "TTM 期間 2025Q3–2026Q2"
+    "TTM 期間 2025Q3–2026Q2",
+    "TTM 由財報快照工具以連續四個單季加總；公告原文只有單季或累計數字"
    ],
    "text": "近四季 EPS 合計（TTM）為 86.28 元（2025Q3–2026Q2）。"
   },
@@ -50,6 +52,7 @@
  "review": {
   "decision": "pass",
   "checked_refs": [
+   "snap-2330-2026Q2",
    "ev-2330-2026q2-01"
   ],
   "checked_metric_ids": null,
@@ -345,8 +348,21 @@
   "peer_na_reason": "同業比較只適用 2454",
   "sources": [
    {
+    "id": "snap-2330-2026Q2",
+    "resolved": true,
+    "kind": "financial_snapshot",
+    "source_id": "src-finmind-2330-fs",
+    "source_url": null,
+    "available_at": "2026-08-11T18:46:58+08:00",
+    "content_hash": "0093eb920786693367fea701e668e54d1115d722287ef7824b367ecdae94cc8f",
+    "hash_match": null,
+    "hash_note": "原始財報檔的 sha256（工具結果，不是公告片段）",
+    "excerpt": "財報快照 snap-2330-2026Q2（2026Q2，單季；金額單位億元）：單季 EPS 27.25 元；近四季 EPS 合計（TTM）86.28 元（2025Q3–2026Q2）；單季營收 12,703.8；TTM FCF 11,435.56。"
+   },
+   {
     "id": "ev-2330-2026q2-01",
     "resolved": true,
+    "kind": "evidence",
     "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2330&year=115&season=2",
     "available_at": "2026-07-16T15:12:31+08:00",
     "content_hash": "ab2cc3c2111815f4f98217052828af85a99ab5a626da4e1c681d2ce64e5227c0",
@@ -355,7 +371,7 @@
    }
   ],
   "method": {
-   "data_version": "report-data-v1",
+   "data_version": "report-data-v1.1",
    "risk_method": "valuation-gap-v1.1 (±15%) / data-quality-v1.1",
    "tools_version": "tools-v12",
    "dcf_assumptions": {

@@ -134,25 +134,35 @@ def _revise_then_pass(ticker: str, plan: dict[str, Any], fin: dict[str, Any]) ->
 
     Numbers come from B's snapshot (fact sheet V1.7); tests assert they equal the tool outputs.
     The deliberate error in draft v1 (single-quarter EPS presented as TTM) is a labelled test case.
+
+    Citations (B's W07 audit, 10/26): a fact cites what actually contains its numbers. Single-quarter EPS
+    and TTM come from the financial-snapshot tool result, so they cite its snapshot_id (e.g. snap-2317-2026Q2);
+    the announcement fragment is cited too only when its text contains the number (2317's fragment is a
+    Jan–Jun cumulative figure, EPS 7.84, so it is not cited for the single-quarter 4.27).
     """
 
     fin_data = (tools_impl.get_financial_snapshot(ticker, "2026-09-30T17:30:00+08:00").get("data") or {})
     m = fin_data.get("metrics") or {}
     ev = f"ev-{ticker}-2026q2-01"
+    snap = fin_data.get("snapshot_id") or f"snap-{ticker}-{fin_data.get('latest_period')}"
     single_eps, ttm_eps, periods = m.get("eps_single_q"), m.get("eps_ttm"), fin_data.get("ttm_periods") or []
     span = f"{periods[0]}–{periods[-1]}" if periods else "近四季"
-    c1 = {"claim_id": "c1", "kind": "fact", "evidence_refs": [ev], "limitations": [],
+    paragraph = (tools_impl.read_evidence(ev).get("data") or {}).get("paragraph") or ""
+    c1_refs = [snap] + ([ev] if single_eps is not None and str(single_eps) in paragraph else [])
+    checked = list(dict.fromkeys(c1_refs + [snap]))
+    c1 = {"claim_id": "c1", "kind": "fact", "evidence_refs": c1_refs, "limitations": [],
           "text": f"{fin_data.get('latest_period')} 單季每股盈餘 {single_eps} 元。"}
     v1 = {"status": "draft", "decision_summary": "讀取最新季財報與公告片段後撰稿",
           "claims": [c1,
-                     {"claim_id": "c2", "kind": "fact", "evidence_refs": [ev], "limitations": [],
+                     {"claim_id": "c2", "kind": "fact", "evidence_refs": [snap], "limitations": [],
                       "text": f"TTM EPS 為 {single_eps} 元。（測試案例：故意把單季 EPS 當成 TTM）"},
                      {"claim_id": "c3", "kind": "unknown", "evidence_refs": [], "limitations": [],
                       "text": "快照沒有 2026Q3 營收，無法判斷第三季動能。"}],
           "unknowns": ["2026Q3 營收"], "limitations": []}
     v2 = {"status": "draft", "decision_summary": "依覆核意見改用連續四季 EPS",
           "claims": [c1,
-                     {"claim_id": "c2", "kind": "fact", "evidence_refs": [ev], "limitations": [f"TTM 期間 {span}"],
+                     {"claim_id": "c2", "kind": "fact", "evidence_refs": [snap],
+                      "limitations": [f"TTM 期間 {span}", "TTM 由財報快照工具以連續四個單季加總；公告原文只有單季或累計數字"],
                       "text": f"近四季 EPS 合計（TTM）為 {ttm_eps} 元（{span}）。"},
                      v1["claims"][2]],
           "unknowns": ["2026Q3 營收"], "limitations": []}
@@ -162,21 +172,21 @@ def _revise_then_pass(ticker: str, plan: dict[str, Any], fin: dict[str, Any]) ->
     issue_c3 = {"claim_id": "c3", "severity": "minor", "reason": "未知項目可再列出下一個確認訊號",
                 "required_evidence": "在 next_signals 寫明 2026Q3 營收公告"}
     round1 = {"round": 1,
-              "model": {"decision": "revise", "issues": [issue_c2, issue_c3], "checked_refs": [ev],
+              "model": {"decision": "revise", "issues": [issue_c2, issue_c3], "checked_refs": checked,
                         "decision_summary": "c2 期間口徑錯誤，需補查連續四季 EPS"},
-              "rules": {"decision": "revise", "issues": [issue_c2], "checked_refs": [ev]},
-              "final": {"decision": "revise", "issues": [issue_c2, issue_c3], "checked_refs": [ev],
+              "rules": {"decision": "revise", "issues": [issue_c2], "checked_refs": checked},
+              "final": {"decision": "revise", "issues": [issue_c2, issue_c3], "checked_refs": checked,
                         "decision_summary": "c2 期間口徑錯誤，需補查連續四季 EPS"}}
     round2 = {"round": 2,
-              "model": {"decision": "pass", "issues": [], "checked_refs": [ev], "decision_summary": "c2 已改為可由工具重現的 TTM"},
-              "rules": {"decision": "pass", "issues": [], "checked_refs": [ev]},
-              "final": {"decision": "pass", "issues": [], "checked_refs": [ev], "decision_summary": "c2 已改為可由工具重現的 TTM"}}
+              "model": {"decision": "pass", "issues": [], "checked_refs": checked, "decision_summary": "c2 已改為可由工具重現的 TTM"},
+              "rules": {"decision": "pass", "issues": [], "checked_refs": checked},
+              "final": {"decision": "pass", "issues": [], "checked_refs": checked, "decision_summary": "c2 已改為可由工具重現的 TTM"}}
     return [
         plan,
         {**fin, "changes": {"stage": "tools", "tool_calls_used": 1, "active_seconds": 6.0}},
         {"role": "researcher", "event_type": "tool_call", "call": _tool("read_evidence", evidence_version_id=ev),
          "changes": {"tool_calls_used": 2, "active_seconds": 8.0}},
-        {"role": "researcher", "event_type": "draft", "detail": {"summary": "草稿 v1：3 項主張", "evidence_refs": [ev]},
+        {"role": "researcher", "event_type": "draft", "detail": {"summary": "草稿 v1：3 項主張", "evidence_refs": checked},
          "draft": v1, "changes": {"stage": "review", "calls_used": 2, "active_seconds": 14.0}},
         {"role": "reviewer", "event_type": "tool_call", "call": _tool("read_evidence", evidence_version_id=ev),
          "changes": {"tool_calls_used": 3, "active_seconds": 16.0}},

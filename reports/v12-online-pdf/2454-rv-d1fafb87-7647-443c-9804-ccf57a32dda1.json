@@ -1,5 +1,5 @@
 {
- "job_id": "88d38109-d8f3-420a-bcbf-e6163086efc8",
+ "job_id": "4549d120-790c-4559-9163-7ec5b4144ef6",
  "ticker": "2454",
  "cutoff_at": "2026-09-30T09:30:00+00:00",
  "source_snapshot_id": "fin-snap:v1.6-tw-market",
@@ -12,6 +12,7 @@
    "claim_id": "c1",
    "kind": "fact",
    "evidence_refs": [
+    "snap-2454-2026Q2",
     "ev-2454-2026q2-01"
    ],
    "limitations": [],
@@ -21,10 +22,11 @@
    "claim_id": "c2",
    "kind": "fact",
    "evidence_refs": [
-    "ev-2454-2026q2-01"
+    "snap-2454-2026Q2"
    ],
    "limitations": [
-    "TTM 期間 2025Q3–2026Q2"
+    "TTM 期間 2025Q3–2026Q2",
+    "TTM 由財報快照工具以連續四個單季加總；公告原文只有單季或累計數字"
    ],
    "text": "近四季 EPS 合計（TTM）為 60.69 元（2025Q3–2026Q2）。"
   },
@@ -50,6 +52,7 @@
  "review": {
   "decision": "pass",
   "checked_refs": [
+   "snap-2454-2026Q2",
    "ev-2454-2026q2-01"
   ],
   "checked_metric_ids": null,
@@ -645,8 +648,21 @@
   "peer_na_reason": null,
   "sources": [
    {
+    "id": "snap-2454-2026Q2",
+    "resolved": true,
+    "kind": "financial_snapshot",
+    "source_id": "src-finmind-2454-fs",
+    "source_url": null,
+    "available_at": "2026-07-31T18:41:57+08:00",
+    "content_hash": "ae1668d47b4210b0c102239c6e3418d7b0d6aa5c9822d96884661e95c80f18fa",
+    "hash_match": null,
+    "hash_note": "原始財報檔的 sha256（工具結果，不是公告片段）",
+    "excerpt": "財報快照 snap-2454-2026Q2（2026Q2，單季；金額單位億元）：單季 EPS 15.28 元；近四季 EPS 合計（TTM）60.69 元（2025Q3–2026Q2）；單季營收 1,521.83；TTM FCF 920.63。"
+   },
+   {
     "id": "ev-2454-2026q2-01",
     "resolved": true,
+    "kind": "evidence",
     "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2454&year=115&season=2",
     "available_at": "2026-07-31T18:43:05+08:00",
     "content_hash": "32075f583ea85c29af0f647073f14df99b341827a138ad963eaa5e0a4d1fb8d4",
@@ -655,7 +671,7 @@
    }
   ],
   "method": {
-   "data_version": "report-data-v1",
+   "data_version": "report-data-v1.1",
    "risk_method": "valuation-gap-v1.1 (±15%) / data-quality-v1.1",
    "tools_version": "tools-v12",
    "dcf_assumptions": {

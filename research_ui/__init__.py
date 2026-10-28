@@ -339,6 +339,16 @@ def evidence_detail(ev_id: str):
         return jsonify({"ok": False, "error": "not_referenced", "message": "只開放已發布報告或比較面板引用的來源"}), 404
     rv_id = request.args.get("report")
     real = _real_version(rv_id) if rv_id else None
+    snap = next((x for x in ((real or {}).get("report", {}).get("data") or {}).get("sources") or []
+                 if x.get("id") == ev_id and x.get("kind") == "financial_snapshot"), None)
+    if snap is not None:  # a cited financial-snapshot tool result, exactly as frozen in the approved JSON
+        after = tools_impl._parse_iso(snap["available_at"]) > tools_impl._parse_iso(real["report"]["cutoff_at"])
+        return jsonify({"ok": True, "evidence": {
+            "evidence_version_id": ev_id, "kind": "financial_snapshot", "paragraph": snap["excerpt"],
+            "source_id": snap.get("source_id"), "source_url": None, "available_at": snap["available_at"],
+            "content_hash": snap.get("content_hash"), "computed_hash": None, "hash_match": None,
+            "hash_algorithm": snap.get("hash_note"),
+            "cutoff_check": "cutoff 後才可得，不可引用" if after else "cutoff 前可得", "synthetic_fixture": False}})
     if real is not None:  # the exact snapshot of that report (case snapshots included)
         rep = real["report"]
         out = SnapshotToolbox(rep["ticker"], rep["source_snapshot_id"], rep["cutoff_at"]).read_evidence(ev_id)
