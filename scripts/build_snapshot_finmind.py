@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scripts/build_snapshot_finmind.py  (組員 B) — V1.7（W07-B 前瞻快照版）
+scripts/build_snapshot_finmind.py  (組員 B) — V1.8（W07-B 前瞻快照版；前瞻人工檔與 30 案凍結檔分開）
 
 從 FinMind 抓 5 檔股票的財報與股價，搭配人工填寫的公告時間、總經與負債覆寫，
 產生 data/financial-snapshots.json。
@@ -38,8 +38,16 @@ scripts/build_snapshot_finmind.py  (組員 B) — V1.7（W07-B 前瞻快照版�
 前瞻快照（W07-B；每週五 21:00 由組長執行，B 先備妥人工輸入）：
   python scripts/build_snapshot_finmind.py --cutoff 2026-10-30T21:00 ^
       --out data/forward/financial-snapshots-2026-10-30.json ^
-      --evidence data/manual/forward/evidence-2026-10-30.csv
+      --evidence data/manual/forward/evidence-2026-10-30.csv ^
+      --macro data/manual/forward/macro-2026-10-30.csv ^
+      --announce-extra data/manual/forward/announce-2026-10-30.csv ^
+      --control data/manual/forward/mops-control-2026-10-30.csv
   - 不可覆蓋 data/financial-snapshots.json（30 案凍結用）。
+  - V1.8：data/manual/*.csv 已於 2026-10-25 第一段凍結，前瞻批次不得修改。前瞻新增的總經、
+    新季別公告時間、新季別 MOPS 對帳值改放 data/manual/forward/，以 --macro／--announce-extra／
+    --control 指定（後兩者可省略：沒有新季別公告時不用給）。
+    --announce-extra 只能放 FORWARD_PERIODS（例如 2026Q3）的列；基本 5 季仍讀凍結的 announce_times.csv。
+    輸出 manual_inputs 記錄實際使用的人工檔與 sha256_lf，前瞻快照可重現。
   - 季別：基本 5 季 + FORWARD_PERIODS 中「announce_times.csv 有列且公告時間 ≤ cutoff」者（各公司可不同，輸出明示）。
   - 損益表單季／累計自動判定：以 MOPS 對帳值（CONTROL 或 mops_control.csv）比對 FinMind 原值與
     「原值 − 前季原值」，符合者採用；兩者皆不符即中止。FinMind 2026-10-20 起 2330 2026Q2 為 1–6 月累計，
@@ -91,7 +99,8 @@ ANNOUNCE_CSV = MANUAL_DIR / "announce_times.csv"
 MACRO_CSV = MANUAL_DIR / "macro.csv"
 EVIDENCE_CSV = MANUAL_DIR / "evidence.csv"          # 可由 --evidence 指定其他檔（前瞻快照必填）
 OVERRIDE_CSV = MANUAL_DIR / "balance_overrides.csv"
-CONTROL_CSV = MANUAL_DIR / "mops_control.csv"       # V1.7：新季別 MOPS 對帳值（可選）
+CONTROL_CSV = MANUAL_DIR / "mops_control.csv"       # V1.7：新季別 MOPS 對帳值（可選）；前瞻用 --control 指定
+ANNOUNCE_EXTRA_CSV = None                           # V1.8：前瞻新季別公告時間（--announce-extra）
 
 COMPANIES = {
     "2330": "台積電",
@@ -214,6 +223,17 @@ RAW_LOG = []
 # ============================================================
 # 共用工具
 # ============================================================
+def manual_inputs():
+    """V1.8：記錄實際讀取的人工檔與 sha256_lf（CRLF→LF 後計算），前瞻快照可重現。"""
+    files = [ANNOUNCE_CSV, ANNOUNCE_EXTRA_CSV, MACRO_CSV, CONTROL_CSV, OVERRIDE_CSV, EVIDENCE_CSV]
+    out = {}
+    for p in files:
+        if p is not None and p.exists():
+            out[str(p.relative_to(ROOT)).replace("\\", "/")] = hashlib.sha256(
+                p.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    return out
+
+
 def die(msg):
     sys.exit(f"[中止] {msg}")
 
@@ -344,10 +364,20 @@ def load_announce():
     """
     out = {}
     skipped = []
-    for i, r in read_csv(ANNOUNCE_CSV, ["ticker", "period", "available_at", "source_url"]):
+    cols = ["ticker", "period", "available_at", "source_url"]
+    rows = [(ANNOUNCE_CSV.name, i, r) for i, r in read_csv(ANNOUNCE_CSV, cols)]
+    if ANNOUNCE_EXTRA_CSV is not None:
+        for i, r in read_csv(ANNOUNCE_EXTRA_CSV, cols):
+            if r["period"] not in FORWARD_PERIODS:
+                die(f"{ANNOUNCE_EXTRA_CSV.name} 第 {i} 列：只能放前瞻季別 {FORWARD_PERIODS}，"
+                    f"收到 {r['period']}（基本季別讀凍結的 announce_times.csv）")
+            if not r["source_url"].startswith("https://mops.twse.com.tw/"):
+                die(f"{ANNOUNCE_EXTRA_CSV.name} 第 {i} 列 source_url 必須是 MOPS 網址")
+            rows.append((ANNOUNCE_EXTRA_CSV.name, i, r))
+    for fname, i, r in rows:
         if r["ticker"] not in COMPANIES or r["period"] not in ALL_PERIODS:
             continue
-        where = f"announce_times.csv 第 {i} 列"
+        where = f"{fname} 第 {i} 列"
         if not r["available_at"]:
             die(f"{where} 缺 available_at")
         ts = parse_ts(r["available_at"], where)
@@ -380,7 +410,7 @@ def load_mops_control():
         return 0
     n = 0
     for i, r in read_csv(CONTROL_CSV, ["ticker", "period", "revenue_100m", "eps", "source_url", "note"]):
-        where = f"mops_control.csv 第 {i} 列"
+        where = f"{CONTROL_CSV.name} 第 {i} 列"
         if r["ticker"] not in COMPANIES or r["period"] not in ALL_PERIODS:
             die(f"{where} ticker 或 period 不在範圍內")
         if not r["source_url"].startswith("https://mops.twse.com.tw/"):
@@ -409,7 +439,7 @@ def load_macro():
     out = []
     for i, r in read_csv(MACRO_CSV, ["series_id", "observation_date", "value",
                                      "unit", "available_at", "source"]):
-        where = f"macro.csv 第 {i} 列"
+        where = f"{MACRO_CSV.name} 第 {i} 列"
         if r["series_id"] not in MACRO_SERIES:
             die(f"{where} series_id 必須是 {sorted(MACRO_SERIES)} 之一")
         if not r["available_at"]:
@@ -433,7 +463,7 @@ def load_macro():
         })
     have = {m["series_id"] for m in out}
     if have != MACRO_SERIES:
-        die(f"macro.csv 缺少 cutoff 前可得之序列：{sorted(MACRO_SERIES - have)}")
+        die(f"{MACRO_CSV.name} 缺少 cutoff 前可得之序列：{sorted(MACRO_SERIES - have)}")
     return out
 
 
@@ -451,9 +481,17 @@ def load_evidence(old):
                 die(f"{where} ticker 不在範圍內")
             if not r["paragraph"]:
                 die(f"{where} paragraph 為空")
-            ts = parse_ts(r["available_at"], where)
-            if ts > CUTOFF_DT:
-                die(f"{where} available_at 晚於 cutoff")
+            if r["available_at"]:
+                ts = parse_ts(r["available_at"], where)
+                if ts > CUTOFF_DT:
+                    die(f"{where} available_at 晚於 cutoff")
+            elif r["captured_at"]:
+                # V1.8：官方發布時間不明（例如 MOPS 每月營收頁）→ 以擷取時間判定，且必須早於 cutoff
+                ts = parse_ts(r["captured_at"], where)
+                if ts > CUTOFF_DT:
+                    die(f"{where} 無 available_at，captured_at 晚於 cutoff，不可用")
+            else:
+                die(f"{where} available_at 與 captured_at 皆空，視為不可得，請移除該列或補時間")
             e = {c: r[c] for c in cols}
             e["content_hash"] = sha256_text(r["paragraph"])
             out.append(e)
@@ -869,9 +907,31 @@ def main():
     ap.add_argument("--out", help="輸出檔（相對 repo 根目錄）。指定 --cutoff 時必填，避免覆蓋實驗用的凍結快照")
     ap.add_argument("--evidence", help="證據 CSV（相對 repo 根目錄）。前瞻快照必填，例如 "
                                        "data/manual/forward/evidence-2026-10-30.csv")
+    ap.add_argument("--macro", help="V1.8 前瞻總經 CSV（前瞻快照必填，不可為凍結的 data/manual/macro.csv）")
+    ap.add_argument("--announce-extra", help="V1.8 前瞻新季別公告時間 CSV（可省略）")
+    ap.add_argument("--control", help="V1.8 前瞻新季別 MOPS 對帳值 CSV（可省略；取代 data/manual/mops_control.csv）")
     args = ap.parse_args()
 
     global CUTOFF, CUTOFF_DT, OUT, EVIDENCE_CSV, PRICE_START, N_SESSIONS, SNAPSHOT_MODE
+    global MACRO_CSV, ANNOUNCE_EXTRA_CSV, CONTROL_CSV
+    frozen_manual = {(MANUAL_DIR / n).resolve() for n in
+                     ("macro.csv", "announce_times.csv", "mops_control.csv", "balance_overrides.csv", "evidence.csv")}
+    for opt, val in (("--macro", args.macro), ("--announce-extra", args.announce_extra), ("--control", args.control)):
+        if val is None:
+            continue
+        p = (ROOT / val).resolve()
+        if not p.exists():
+            die(f"找不到 {opt} 指定的檔案 {val}")
+        if p in frozen_manual:
+            die(f"{opt} 不可指定 data/manual/ 下已凍結的人工檔（{val}）；前瞻檔請放 data/manual/forward/")
+        if not args.cutoff:
+            die(f"{opt} 只用於前瞻快照，必須同時指定 --cutoff")
+    if args.macro:
+        MACRO_CSV = (ROOT / args.macro).resolve()
+    if args.announce_extra:
+        ANNOUNCE_EXTRA_CSV = (ROOT / args.announce_extra).resolve()
+    if args.control:
+        CONTROL_CSV = (ROOT / args.control).resolve()
     if args.evidence:
         EVIDENCE_CSV = (ROOT / args.evidence).resolve()
         if not EVIDENCE_CSV.exists():
@@ -881,6 +941,8 @@ def main():
             die("指定 --cutoff 時必須同時指定 --out（不可覆蓋 data/financial-snapshots.json）")
         if not args.evidence:
             die("前瞻快照必須指定 --evidence（不可沿用 30 案用的證據）")
+        if not args.macro:
+            die("前瞻快照必須指定 --macro（data/manual/macro.csv 已凍結，前瞻總經放 data/manual/forward/）")
         CUTOFF_DT = datetime.fromisoformat(args.cutoff).replace(tzinfo=TZ)
         CUTOFF = CUTOFF_DT.date().isoformat()
         out_path = (ROOT / args.out).resolve()
@@ -954,13 +1016,14 @@ def main():
 
     # 4) 組合輸出
     out = {
-        "manifest_version": "v1.7-forward-ready",
+        "manifest_version": "v1.8-forward-inputs",
         "generated_at": datetime.now(TZ).isoformat(timespec="seconds"),
         "cutoff": CUTOFF,
         "cutoff_at": CUTOFF_DT.isoformat(timespec="seconds"),
         "snapshot_mode": SNAPSHOT_MODE,
         "periods_by_ticker": PERIODS_BY_TICKER,
         "evidence_file": str(EVIDENCE_CSV.relative_to(ROOT)) if EVIDENCE_CSV.exists() else None,
+        "manual_inputs": manual_inputs(),
         "source_manifest": {
             "provider": "FinMind（財報、股價、交易日、台股加權指數）；MOPS（公告時間、證據原文、負債覆寫、"
                         "對帳值，人工）；FRED（總經，人工）",

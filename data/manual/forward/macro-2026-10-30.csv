@@ -1,0 +1,8 @@
+series_id,observation_date,value,unit,available_at,source
+CPIAUCSL,2025-09,324.245,Index 1982-1984=100,2025-10-24T08:30:00-04:00,FRED CPIAUCSL download 2026-10-28; BLS 2025-09 CPI rescheduled release (bls.gov/bls/092025-cpi-reschedule-notice.htm); value is current vintage after 2026 seasonal revision
+CPIAUCSL,2026-07,332.813,Index 1982-1984=100,2026-08-12T08:30:00-04:00,FRED CPIAUCSL download 2026-10-28; BLS 2026 release schedule
+CPIAUCSL,2026-08,334.131,Index 1982-1984=100,2026-09-11T08:30:00-04:00,FRED CPIAUCSL download 2026-10-28; BLS 2026 release schedule
+CPIAUCSL,2026-09,336.298,Index 1982-1984=100,2026-10-14T08:30:00-04:00,FRED CPIAUCSL download 2026-10-28; BLS 2026 release schedule
+FEDFUNDS,2026-07,3.63,%,2026-08-04T00:00:00-04:00,"FRED FEDFUNDS download 2026-10-28; H.15 monthly average, conservative = day after first business day of next month (same rule as data/manual/macro.csv)"
+FEDFUNDS,2026-08,3.63,%,2026-09-02T00:00:00-04:00,"FRED FEDFUNDS download 2026-10-28; H.15 monthly average, conservative = day after first business day of next month"
+FEDFUNDS,2026-09,3.75,%,2026-10-02T00:00:00-04:00,"FRED FEDFUNDS download 2026-10-28; H.15 monthly average, conservative = day after first business day of next month"

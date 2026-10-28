@@ -55,3 +55,42 @@ RA-053,2454,,比較,peer_avg_pb,,,6.29,,只 2379、3034；2330 為產業參照�
 RA-054,2454,,比較,peer_avg_revenue_yoy,,,0.1363,,只 2379、3034；2330 為產業參照不入平均,pending_report,
 RA-055,2330,,比較,comparison_panel_absent,,,不應出現,,只 2454 套用固定比較組,pending_report,
 RA-056,2317,,比較,comparison_panel_absent,,,不應出現,,只 2454 套用固定比較組,pending_report,
+W7A-001,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,cutoff = 2026-09-30 17:30 台北,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,2026-09-30T09:30:00+00:00
+W7A-002,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,快照版本與凍結快照一致,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,fin-snap:v1.6-tw-market
+W7A-003,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,標示 MOCK,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-004,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,無已知舊假數字,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,[]
+W7A-005,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,季度表 5 季逐欄＝快照,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-006,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,價格窗 5 日＝快照收盤、17:30 可得,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,[]
+W7A-007,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,基準日收盤價,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,251.5
+W7A-008,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,TTM EPS／FCF 重算一致,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,15.21/15.21; -416.44/-416.44
+W7A-009,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,2317 DCF 為無法判定（TTM FCF<0）,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,undeterminable / TTM FCF ≤ 0，5 年持平情境不適用
+W7A-010,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,來源 1 筆可解析、hash 與時間＝快照,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-011,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）,事實主張的數字都在引用原文中,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,fail,"c1 原文找不到 ['4.27']：2026Q2 單季每股盈餘 4.27 元。 | c2 原文找不到 ['15.21', '2025']：近四季 EPS 合計（TTM）為 15.21 元（2025Q3–2026Q2）。"
+W7A-012,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,cutoff = 2026-09-30 17:30 台北,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,2026-09-30T09:30:00+00:00
+W7A-013,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,快照版本與凍結快照一致,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,fin-snap:v1.6-tw-market
+W7A-014,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,標示 MOCK,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-015,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,無已知舊假數字,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,[]
+W7A-016,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,季度表 5 季逐欄＝快照,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-017,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,價格窗 5 日＝快照收盤、17:30 可得,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,[]
+W7A-018,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,基準日收盤價,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,2480.0
+W7A-019,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,TTM EPS／FCF 重算一致,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,86.28/86.28; 11435.56/11435.56
+W7A-020,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,DCF 每股＝同業快照／事實清冊,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,751.06 vs 751.06
+W7A-021,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,來源 1 筆可解析、hash 與時間＝快照,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-022,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）,事實主張的數字都在引用原文中,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,fail,"c2 原文找不到 ['86.28', '2025']：近四季 EPS 合計（TTM）為 86.28 元（2025Q3–2026Q2）。"
+W7A-023,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,cutoff = 2026-09-30 17:30 台北,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,2026-09-30T09:30:00+00:00
+W7A-024,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,快照版本與凍結快照一致,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,fin-snap:v1.6-tw-market
+W7A-025,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,標示 MOCK,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-026,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,無已知舊假數字,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,[]
+W7A-027,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,季度表 5 季逐欄＝快照,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-028,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,價格窗 5 日＝快照收盤、17:30 可得,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,[]
+W7A-029,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,基準日收盤價,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,4920.0
+W7A-030,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,TTM EPS／FCF 重算一致,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,60.69/60.69; 920.63/920.63
+W7A-031,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,DCF 每股＝同業快照／事實清冊,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,975.52 vs 975.52
+W7A-032,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,敏感度表＝事實清冊（WACC 8%、9%）,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-033,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,DCF 淨負債與股數＝2026Q2 快照,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-034,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,同業平均 P/E、P/B、YoY,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,23.23/23.23；6.29/6.29
+W7A-035,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,同業表 4 家逐欄＝同業快照（2330 不入平均）,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-036,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,來源 1 筆可解析、hash 與時間＝快照,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,pass,
+W7A-037,2454,reports/v12-online-pdf/2454-rv-393f3b6f-6002-4f97-8cde-e3f68306af77.json,W07-A 驗收報告（MOCK）,事實主張的數字都在引用原文中,,,凍結快照 v1.6-tw-market／同業快照 v1.8-w06／事實清冊 V1.9,,逐欄重算比對,fail,"c2 原文找不到 ['60.69', '2025']：近四季 EPS 合計（TTM）為 60.69 元（2025Q3–2026Q2）。"
+W7A-038,2317,reports/v12-online-pdf/2317-rv-8e567646-9803-49d1-9399-d396c14bf029.json,W07-A 驗收報告（MOCK）PDF,PDF 基準日收盤價文字,,,,元,PDF 文字可核對,warn,251.5 元只出現在股價圖（圖片），PDF 文字中沒有；讀者無法核對估值差距所用價格
+W7A-039,2330,reports/v12-online-pdf/2330-rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9.json,W07-A 驗收報告（MOCK）PDF,PDF 基準日收盤價文字,,,,元,PDF 文字可核對,warn,"2,480 元只出現在股價圖（圖片），PDF 文字中沒有；估值差距 -69.7% 依此計算，建議表頭印出"

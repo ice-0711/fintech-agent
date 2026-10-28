@@ -1,221 +1,283 @@
 {
-  "batch_id": "forward-batch-1",
-  "version": "v0.2-draft-2026-10-22",
-  "prepared_by": "Team Member B",
-  "status": "draft：10/30 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
-  "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；截止時間與來源可得時間同存；資料不足照收錄，不補造方向。",
-  "signal_cutoff_at": "2026-10-30T21:00:00+08:00",
-  "research_tickers": [
-    "2330",
-    "2317",
-    "2454"
+ "batch_id": "forward-batch-1",
+ "version": "v0.3-draft-2026-10-25",
+ "prepared_by": "Team Member B",
+ "status": "draft：10/30 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
+ "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；截止時間與來源可得時間同存；資料不足照收錄，不補造方向。",
+ "signal_cutoff_at": "2026-10-30T21:00:00+08:00",
+ "research_tickers": [
+  "2330",
+  "2317",
+  "2454"
+ ],
+ "comparison_only": {
+  "subject": "2454",
+  "peers": [
+   "2379",
+   "3034"
   ],
-  "comparison_only": {
-    "subject": "2454",
-    "peers": [
-      "2379",
-      "3034"
-    ],
-    "industry_reference": "2330",
-    "note": "只 2454 套用固定比較組；2379、3034 只跑確定性比較工具，不建 LLM 任務"
+  "industry_reference": "2330",
+  "note": "只 2454 套用固定比較組；2379、3034 只跑確定性比較工具，不建 LLM 任務"
+ },
+ "snapshot": {
+  "file": "data/forward/financial-snapshots-2026-10-30.json",
+  "builder": "scripts/build_snapshot_finmind.py V1.8",
+  "command": "python scripts\\build_snapshot_finmind.py --cutoff 2026-10-30T21:00 --out data/forward/financial-snapshots-2026-10-30.json --evidence data/manual/forward/evidence-2026-10-30.csv --macro data/manual/forward/macro-2026-10-30.csv [--announce-extra data/manual/forward/announce-2026-10-30.csv] [--control data/manual/forward/mops-control-2026-10-30.csv]",
+  "run_by": "組長（10/30 21:00 後執行）；B 於 10/30 21:00 前備妥人工輸入",
+  "tools_read_by": "環境變數 FINTECH_SNAPSHOT_PATH=data/forward/financial-snapshots-2026-10-30.json（agents/tools_impl.py W07 版）",
+  "must_not_overwrite": [
+   "data/financial-snapshots.json",
+   "fixtures/dev/",
+   "fixtures/test/"
+  ],
+  "freeze_after_run": "產生後記錄 sha256 與 captured_at 於本檔 snapshot.frozen；之後不得重抓覆蓋（FinMind 會事後修訂，見 2330 2026Q2 於 10/20 改為累計之先例）",
+  "frozen": {
+   "sha256": null,
+   "generated_at": null,
+   "raw_files": null
   },
-  "snapshot": {
-    "file": "data/forward/financial-snapshots-2026-10-30.json",
-    "builder": "scripts/build_snapshot_finmind.py V1.7",
-    "command": "python scripts\\build_snapshot_finmind.py --cutoff 2026-10-30T21:00 --out data/forward/financial-snapshots-2026-10-30.json --evidence data/manual/forward/evidence-2026-10-30.csv",
-    "run_by": "組長（10/30 21:00 後執行）；B 於 10/30 21:00 前備妥人工輸入",
-    "tools_read_by": "環境變數 FINTECH_SNAPSHOT_PATH=data/forward/financial-snapshots-2026-10-30.json（agents/tools_impl.py W07 版）",
-    "must_not_overwrite": [
-      "data/financial-snapshots.json",
-      "fixtures/dev/",
-      "fixtures/test/"
-    ],
-    "freeze_after_run": "產生後記錄 sha256 與 captured_at 於本檔 snapshot.frozen；之後不得重抓覆蓋（FinMind 會事後修訂，見 2330 2026Q2 於 10/20 改為累計之先例）",
-    "frozen": {
-      "sha256": null,
-      "generated_at": null,
-      "raw_files": null
-    }
+  "frozen_inputs_rule": "data/manual/*.csv 已於 2026-10-25 第一段凍結（cases-v1），前瞻批次不得修改；前瞻新增的總經、新季別公告時間、新季別 MOPS 對帳值放 data/manual/forward/，由 V1.8 的 --macro／--announce-extra／--control 指定；[] 內兩項只在有 2026Q3 董事會通過財報早於 cutoff 時才給。快照輸出 manual_inputs 記錄實際使用之人工檔 sha256_lf"
+ },
+ "financial_sources": [
+  {
+   "ticker": "2330",
+   "source_id": "src-finmind-2330-fs",
+   "control": "MOPS 合併綜合損益表／資產負債表",
+   "expected_latest_period": "2026Q2",
+   "expected_available_at": "2026-08-11T18:46:58+08:00",
+   "q3_note": "2026Q3 財報預期 11 月董事會通過，cutoff 前不可得；10/15 法說會數字只能作為證據段落，不可寫入財報快照",
+   "status": "to_verify_on_2026-10-30"
   },
-  "financial_sources": [
-    {
-      "ticker": "2330",
-      "source_id": "src-finmind-2330-fs",
-      "control": "MOPS 合併綜合損益表／資產負債表",
-      "expected_latest_period": "2026Q2",
-      "expected_available_at": "2026-08-11T18:46:58+08:00",
-      "q3_note": "2026Q3 財報預期 11 月董事會通過，cutoff 前不可得；10/15 法說會數字只能作為證據段落，不可寫入財報快照",
-      "status": "to_verify_on_2026-10-30"
-    },
-    {
-      "ticker": "2317",
-      "source_id": "src-finmind-2317-fs",
-      "control": "MOPS 合併綜合損益表／資產負債表",
-      "expected_latest_period": "2026Q2",
-      "expected_available_at": "2026-08-12T14:15:01+08:00",
-      "q3_note": "2026Q3 財報預期 11 月中，cutoff 前不可得",
-      "status": "to_verify_on_2026-10-30"
-    },
-    {
-      "ticker": "2454",
-      "source_id": "src-finmind-2454-fs",
-      "control": "MOPS 合併綜合損益表／資產負債表",
-      "expected_latest_period": "2026Q2 或 2026Q3",
-      "expected_available_at": "2026Q2：2026-07-31T18:41:57+08:00；2026Q3：待查",
-      "q3_note": "2025Q3 董事會通過為 2025-10-31 17:10；2026Q3 可能在 10/30 前後。若 MOPS「財務報告業經董事會決議通過」發言時間 ≤ 10/30 21:00，須在 announce_times.csv 加列，並在 mops_control.csv 填 115Q3 營收與 EPS（本季欄），否則 2026Q3 不納入",
-      "status": "to_verify_on_2026-10-30"
-    },
-    {
-      "ticker": "2379",
-      "role": "peer",
-      "expected_latest_period": "2026Q2 或 2026Q3",
-      "status": "to_verify_on_2026-10-30",
-      "q3_note": "2025Q3 為 2025-10-29 18:10 公告；若 2026Q3 早於 cutoff，比照 2454 加列"
-    },
-    {
-      "ticker": "3034",
-      "role": "peer",
-      "expected_latest_period": "2026Q2 或 2026Q3",
-      "status": "to_verify_on_2026-10-30",
-      "q3_note": "2025Q3 為 2025-11-04 公告；預期 cutoff 前不可得，仍需確認"
-    }
-  ],
-  "evidence_candidates": [
-    {
-      "ticker": "2330",
-      "candidate": "115 年 9 月營收（MOPS 每月營收）",
-      "official_channel": "MOPS 營運概況→每月營收",
-      "expected_published": "2026-10-10 前",
-      "evidence_version_id": "ev-fwd1-2330-rev-202609",
-      "status": "to_collect"
-    },
-    {
-      "ticker": "2330",
-      "candidate": "2026Q3 法人說明會資料（2026-10-15）",
-      "official_channel": "MOPS 法人說明會一覽表／公司 IR",
-      "expected_published": "2026-10-15",
-      "evidence_version_id": "ev-fwd1-2330-call-2026q3",
-      "note": "法說會為公司自結數字，標 paragraph_type；不得當董事會通過之財報",
-      "status": "to_collect"
-    },
-    {
-      "ticker": "2317",
-      "candidate": "115 年 9 月營收（MOPS 每月營收／重大訊息）",
-      "official_channel": "MOPS",
-      "expected_published": "2026-10-05",
-      "evidence_version_id": "ev-fwd1-2317-rev-202609",
-      "status": "to_collect"
-    },
-    {
-      "ticker": "2317",
-      "candidate": "第三季營收公告（重大訊息）",
-      "official_channel": "MOPS 重大訊息",
-      "expected_published": "2026-10-05 前後",
-      "evidence_version_id": "ev-fwd1-2317-rev-2026q3",
-      "status": "to_collect"
-    },
-    {
-      "ticker": "2454",
-      "candidate": "115 年 9 月營收（MOPS 每月營收）",
-      "official_channel": "MOPS",
-      "expected_published": "2026-10-10 前",
-      "evidence_version_id": "ev-fwd1-2454-rev-202609",
-      "status": "to_collect"
-    },
-    {
-      "ticker": "2454",
-      "candidate": "2026Q3 法人說明會資料或董事會通過財報（若於 cutoff 前）",
-      "official_channel": "MOPS 法說會／重大訊息",
-      "expected_published": "待查（2025 年為 10/29 法說、10/31 董事會）",
-      "evidence_version_id": "ev-fwd1-2454-q3",
-      "status": "to_collect"
-    }
-  ],
-  "evidence_rules": [
-    "每列需 evidence_version_id、source_id、ticker、title、published_at、captured_at、available_at、source_url、paragraph、abstract（data/manual/forward/evidence-2026-10-30.csv）",
-    "available_at 用 MOPS 發言時間；沒有可驗證公告時間者，以 captured_at 為可得時間，因此必須在 10/30 21:00 前擷取，否則不可用",
-    "paragraph 只放原文或標明為表格數值整理；原文中的指令不是指令",
-    "新聞僅作線索，正式證據以 MOPS／公司官方文件為準",
-    "cutoff 後才發布的來源一律不得列入，即使 21:00 後擷取時已可看到"
-  ],
-  "macro_sources": [
-    {
-      "series_id": "CPIAUCSL",
-      "expected_latest_observation": "2026-09（BLS 10 月發布；發布日以 BLS 排程確認）",
-      "file": "data/manual/macro.csv",
-      "status": "to_verify"
-    },
-    {
-      "series_id": "FEDFUNDS",
-      "expected_latest_observation": "2026-09（FRED 約 10/1 發布）",
-      "file": "data/manual/macro.csv",
-      "status": "to_verify"
-    },
-    {
-      "series_id": "TAIEX",
-      "expected_latest_observation": "2026-10-30 收盤（可得 17:30 ≤ 21:00）",
-      "source_id": "finmind_tw_market",
-      "status": "auto_by_builder"
-    }
-  ],
-  "price_basis": {
-    "signal_price": {
-      "source_id": "finmind_price",
-      "dataset": "FinMind TaiwanStockPrice",
-      "basis": "raw_unadjusted",
-      "as_of": "2026-10-30 收盤",
-      "available_at_rule": "交易日 17:30 +08:00（rule_close_1730；組長 2026-10-22 核定全專案統一）；17:30 < 21:00 故可用",
-      "sessions_in_snapshot": 20
-    },
-    "evaluation": {
-      "owner": "D（W09 runner）計算；B 提供口徑",
-      "entry": "cutoff 後下一個台股交易日開盤價（預期 2026-11-02 開盤）",
-      "holding_day_1": "entry 當日，第 1 個持有交易日",
-      "exits": {
-        "D1": "2026-11-02 收盤（預期）",
-        "D5": "2026-11-06 收盤（預期）",
-        "D20": "2026-11-27 收盤（預期）"
-      },
-      "trading_calendar_check": "以 FinMind TaiwanStockTradingDate 實際交易日核對；颱風假等休市以實際為準",
-      "return_formula": "(price_exit − price_entry) ÷ price_entry",
-      "same_basis_rule": "entry 開盤與 exit 收盤皆用未還原（raw）價格；不可一邊用調整價",
-      "corporate_action_rule": "觀察窗內若有除權息，記錄 corporate_action_in_window 與除權息日，不自行還原；是否另列或標 NA 由 D 依手冊決定（B 建議：保留 raw 報酬並註記）",
-      "na_rules": [
-        "停牌、缺開盤或缺收盤 → NA",
-        "觀察窗未滿 → NA",
-        "12/11 截取時仍未成熟 → NA",
-        "無方向訊號者只展示路徑，不計方向命中"
-      ],
-      "no_trading": "不下單、不計交易成本、不承諾獲利；9 份為小樣本觀察"
-    }
+  {
+   "ticker": "2317",
+   "source_id": "src-finmind-2317-fs",
+   "control": "MOPS 合併綜合損益表／資產負債表",
+   "expected_latest_period": "2026Q2",
+   "expected_available_at": "2026-08-12T14:15:01+08:00",
+   "q3_note": "2026Q3 財報預期 11 月中，cutoff 前不可得",
+   "status": "to_verify_on_2026-10-30"
   },
-  "later_batches": {
-    "forward-batch-2": {
-      "signal_cutoff_at": "2026-11-06T21:00:00+08:00",
-      "entry": "2026-11-09 開盤（預期）",
-      "D5": "2026-11-13",
-      "D20": "2026-12-04"
-    },
-    "forward-batch-3": {
-      "signal_cutoff_at": "2026-11-13T21:00:00+08:00",
-      "entry": "2026-11-16 開盤（預期）",
-      "D5": "2026-11-20",
-      "D20": "2026-12-11（與截取日同日，收盤 17:30 前截取則 NA）",
-      "note": "批次 3 觀察窗可能涵蓋 2330 季配息除息日，需依 corporate_action_rule 註記"
-    }
+  {
+   "ticker": "2454",
+   "source_id": "src-finmind-2454-fs",
+   "control": "MOPS 合併綜合損益表／資產負債表",
+   "expected_latest_period": "2026Q2 或 2026Q3",
+   "expected_available_at": "2026Q2：2026-07-31T18:41:57+08:00；2026Q3：待查",
+   "q3_note": "2025Q3 董事會通過為 2025-10-31 17:10；2026Q3 可能在 10/30 前後。若 MOPS「財務報告業經董事會決議通過」發言時間 ≤ 10/30 21:00，須在 data/manual/forward/announce-2026-10-30.csv 加列，並在 data/manual/forward/mops-control-2026-10-30.csv 填 115Q3 營收與 EPS（本季欄），否則 2026Q3 不納入。2454 於 2026-10-30 召開第三季法說會（公司公告），當日須查第31款「財務報告業經董事會決議通過」發言時間；法說資料本身只作證據段落",
+   "status": "to_verify_on_2026-10-30"
   },
-  "checklist_2026_10_30": [
-    "17:30 後：確認 10/30 為交易日、五檔收盤存在",
-    "查 MOPS：2454、2379、3034 是否已公告 2026Q3 董事會通過財報（記發言時間）",
-    "若已公告：announce_times.csv 加列；mops_control.csv 填 115Q3 本季營收（億元）與 EPS",
-    "21:00 前：完成 evidence-2026-10-30.csv 擷取（captured_at 必須 ≤ 21:00 的來源要先抓）",
-    "更新 macro.csv（CPIAUCSL、FEDFUNDS 最新觀察值與發布時間）",
-    "21:00 後：組長執行 builder；B 記錄 sha256、generated_at、raw_files 到 snapshot.frozen"
-  ],
-  "decisions_applied": [
-    "股價可得時間全專案 17:30（組長 10/22）",
-    "開發案例 v1.5（組長 10/22）",
-    "F06 延後，前瞻不產生關係圖資料（組長 10/22）",
-    "2317 不做 FCF 正常化，前瞻報告沿用「TTM FCF 為負則 DCF 無法判定」（組長 10/22）"
-  ]
+  {
+   "ticker": "2379",
+   "role": "peer",
+   "expected_latest_period": "2026Q2 或 2026Q3",
+   "status": "to_verify_on_2026-10-30",
+   "q3_note": "2025Q3 為 2025-10-29 18:10 公告；若 2026Q3 早於 cutoff，比照 2454 加列"
+  },
+  {
+   "ticker": "3034",
+   "role": "peer",
+   "expected_latest_period": "2026Q2 或 2026Q3",
+   "status": "to_verify_on_2026-10-30",
+   "q3_note": "2025Q3 為 2025-11-04 公告；預期 cutoff 前不可得，仍需確認"
+  }
+ ],
+ "evidence_candidates": [
+  {
+   "ticker": "2330",
+   "candidate": "115 年 9 月營收（MOPS 每月營收）",
+   "official_channel": "MOPS 營運概況→每月營收",
+   "expected_published": "2026-10-10 前",
+   "evidence_version_id": "ev-fwd1-2330-rev-202609",
+   "status": "collected_2026-10-26",
+   "source_id": "mops_material_info"
+  },
+  {
+   "ticker": "2330",
+   "candidate": "2026Q3 法人說明會資料（2026-10-15）",
+   "official_channel": "MOPS 法人說明會一覽表／公司 IR",
+   "expected_published": "2026-10-15",
+   "evidence_version_id": "ev-fwd1-2330-call-2026q3",
+   "note": "法說會為公司自結數字，標 paragraph_type；不得當董事會通過之財報",
+   "status": "collected_2026-10-26",
+   "source_id": "mops_material_info"
+  },
+  {
+   "ticker": "2317",
+   "candidate": "115 年 9 月營收（MOPS 每月營收／重大訊息）",
+   "official_channel": "MOPS",
+   "expected_published": "2026-10-05",
+   "evidence_version_id": "ev-fwd1-2317-rev-202609",
+   "status": "collected_2026-10-28",
+   "note": "MOPS 重大訊息 10 月清單無月營收公告（2026-10-28 查）；改由 MOPS 營運概況→每月營收（mops_monthly_revenue）取得，available_at 依申報時間，無則以 captured_at"
+  },
+  {
+   "ticker": "2317",
+   "candidate": "第三季營收公告（重大訊息）",
+   "official_channel": "MOPS 重大訊息",
+   "expected_published": "2026-10-05 前後",
+   "evidence_version_id": "ev-fwd1-2317-rev-2026q3",
+   "status": "merged_into ev-fwd1-2317-rev-202609",
+   "note": "MOPS 每月營收表已含 7、8、9 月；第三季月營收合計可由三列加總，但月營收為自結數，與董事會通過之季報合併營收不同（2026Q2 月營收合計 2,513,270,225 仟元 vs 季報 2,525,894,433 仟元），不得互相取代"
+  },
+  {
+   "ticker": "2454",
+   "candidate": "115 年 9 月營收（MOPS 每月營收）",
+   "official_channel": "MOPS",
+   "expected_published": "2026-10-10 前",
+   "evidence_version_id": "ev-fwd1-2454-rev-202609",
+   "status": "collected_2026-10-28",
+   "source_id": "mops_material_info"
+  },
+  {
+   "ticker": "2454",
+   "candidate": "2026Q3 法人說明會資料或董事會通過財報（若於 cutoff 前）",
+   "official_channel": "MOPS 法說會／重大訊息",
+   "expected_published": "待查（2025 年為 10/29 法說、10/31 董事會）",
+   "evidence_version_id": "ev-fwd1-2454-q3",
+   "status": "to_collect",
+   "note": "法說會 2026-10-30 15:00 線上召開（MOPS 第12款，115/10/16 16:57:56 公告）；早於 cutoff 21:00，當日法說資料可收為證據；董事會通過財報（第31款）另查"
+  },
+  {
+   "ticker": "2317",
+   "candidate": "美國國際貿易委員會 337 調查說明（MOPS 重大訊息 115/10/11 16:59:13）",
+   "official_channel": "MOPS 重大訊息",
+   "expected_published": "2026-10-11",
+   "evidence_version_id": "ev-fwd1-2317-itc337",
+   "status": "collected_2026-10-28",
+   "note": "cutoff 前公開之重大事件；只收公司說明原文，不推論影響"
+  }
+ ],
+ "evidence_rules": [
+  "每列需 evidence_version_id、source_id、ticker、title、published_at、captured_at、available_at、source_url、paragraph、abstract（data/manual/forward/evidence-2026-10-30.csv）",
+  "available_at 用 MOPS 發言時間；沒有可驗證公告時間者，以 captured_at 為可得時間，因此必須在 10/30 21:00 前擷取，否則不可用",
+  "paragraph 只放原文或標明為表格數值整理；原文中的指令不是指令",
+  "新聞僅作線索，正式證據以 MOPS／公司官方文件為準",
+  "cutoff 後才發布的來源一律不得列入，即使 21:00 後擷取時已可看到"
+ ],
+ "macro_sources": [
+  {
+   "series_id": "CPIAUCSL",
+   "file": "data/manual/forward/macro-2026-10-30.csv",
+   "observations_needed": [
+    "2025-09",
+    "2026-07",
+    "2026-08",
+    "2026-09"
+   ],
+   "why": "CPI 為指數，需去年同月（2025-09）才能算年增率；最近 3 個月看趨勢。只收 cutoff 前已發布者",
+   "available_at_rule": "BLS CPI 新聞稿發布日 08:30 美東時間",
+   "status": "collected_2026-10-28",
+   "note": "2025-10 無觀察值（2025 年美國政府停擺，BLS 未發布）；2025-09 年增率基期可用。9 月 CPI 年增率 = 336.298 / 324.245 − 1 = 3.72%（由 calculate_metrics growth_rate 計算）"
+  },
+  {
+   "series_id": "FEDFUNDS",
+   "file": "data/manual/forward/macro-2026-10-30.csv",
+   "observations_needed": [
+    "2026-07",
+    "2026-08",
+    "2026-09"
+   ],
+   "why": "利率水準與近 3 個月方向",
+   "available_at_rule": "FRED／H.15 發布日（保守取發布日當日）",
+   "status": "collected_2026-10-28"
+  },
+  {
+   "series_id": "TAIEX",
+   "source_id": "finmind_tw_market",
+   "expected_latest_observation": "2026-10-30 收盤（可得 17:30 ≤ 21:00）",
+   "status": "auto_by_builder"
+  }
+ ],
+ "price_basis": {
+  "signal_price": {
+   "source_id": "finmind_price",
+   "dataset": "FinMind TaiwanStockPrice",
+   "basis": "raw_unadjusted",
+   "as_of": "2026-10-30 收盤",
+   "available_at_rule": "交易日 17:30 +08:00（rule_close_1730；組長 2026-10-22 核定全專案統一）；17:30 < 21:00 故可用",
+   "sessions_in_snapshot": 20
+  },
+  "evaluation": {
+   "owner": "D（W09 runner）計算；B 提供口徑",
+   "entry": "cutoff 後下一個台股交易日開盤價（預期 2026-11-02 開盤）",
+   "holding_day_1": "entry 當日，第 1 個持有交易日",
+   "exits": {
+    "D1": "2026-11-02 收盤（預期）",
+    "D5": "2026-11-06 收盤（預期）",
+    "D20": "2026-11-27 收盤（預期）"
+   },
+   "trading_calendar_check": "以 FinMind TaiwanStockTradingDate 實際交易日核對；颱風假等休市以實際為準",
+   "return_formula": "(price_exit − price_entry) ÷ price_entry",
+   "same_basis_rule": "entry 開盤與 exit 收盤皆用未還原（raw）價格；不可一邊用調整價",
+   "corporate_action_rule": "觀察窗內若有除權息，記錄 corporate_action_in_window 與除權息日，不自行還原；是否另列或標 NA 由 D 依手冊決定（B 建議：保留 raw 報酬並註記）",
+   "na_rules": [
+    "停牌、缺開盤或缺收盤 → NA",
+    "觀察窗未滿 → NA",
+    "12/11 截取時仍未成熟 → NA",
+    "無方向訊號者只展示路徑，不計方向命中"
+   ],
+   "no_trading": "不下單、不計交易成本、不承諾獲利；9 份為小樣本觀察"
+  }
+ },
+ "later_batches": {
+  "forward-batch-2": {
+   "signal_cutoff_at": "2026-11-06T21:00:00+08:00",
+   "entry": "2026-11-09 開盤（預期）",
+   "D5": "2026-11-13",
+   "D20": "2026-12-04"
+  },
+  "forward-batch-3": {
+   "signal_cutoff_at": "2026-11-13T21:00:00+08:00",
+   "entry": "2026-11-16 開盤（預期）",
+   "D5": "2026-11-20",
+   "D20": "2026-12-11（與截取日同日，收盤 17:30 前截取則 NA）",
+   "note": "批次 3 觀察窗可能涵蓋 2330 季配息除息日，需依 corporate_action_rule 註記"
+  }
+ },
+ "checklist_2026_10_30": [
+  "10/29 前：完成 data/manual/forward/evidence-2026-10-30.csv（2330 9 月營收與 10/15 法說、2317 9 月／第三季營收、2454 9 月營收；MOPS 原文與發言時間）",
+  "10/29 前：完成 data/manual/forward/macro-2026-10-30.csv（CPIAUCSL 2025-09、2026-07～09；FEDFUNDS 2026-07～09；含發布時間）",
+  "10/30 17:30 後：確認 10/30 為交易日、五檔收盤存在",
+  "10/30 21:00 前：查 MOPS 2454、2379、3034 是否已公告 2026Q3 董事會通過財報（記發言時間，精確到秒）",
+  "若早於 21:00 已公告：announce-2026-10-30.csv 加列；mops-control-2026-10-30.csv 填 115Q3 本季營收（億元）與 EPS；2454 法說資料加入證據檔",
+  "不得修改 data/manual/*.csv（第一段凍結）；改完跑 python scripts/build_freeze.py --verify 確認仍一致",
+  "21:00 後：組長執行 builder（上方 command）；B 記錄 sha256、generated_at、raw_files、manual_inputs 到 snapshot.frozen"
+ ],
+ "decisions_applied": [
+  "股價可得時間全專案 17:30（組長 10/22）",
+  "開發案例 v1.5（組長 10/22）",
+  "F06 延後，前瞻不產生關係圖資料（組長 10/22）",
+  "2317 不做 FCF 正常化，前瞻報告沿用「TTM FCF 為負則 DCF 無法判定」（組長 10/22）",
+  "2026-10-25 組長核定第一段凍結：前瞻人工檔改放 data/manual/forward/（builder V1.8）"
+ ],
+ "corporate_actions": [
+  {
+   "ticker": "2330",
+   "event": "115年第二季現金股利除息",
+   "cash_dividend_per_share_twd": 7.0,
+   "ex_dividend_trading_date": "2026-12-10",
+   "record_date": "2026-12-16",
+   "announced_at": "2026-08-11T19:01:29+08:00",
+   "source": "MOPS 重大訊息第14款（115/08/11 19:01:29）",
+   "source_url": "https://mops.twse.com.tw/mops/#/web/t05st01",
+   "affects": {
+    "forward-batch-1": "否（D20 預期 2026-11-27）",
+    "forward-batch-2": "否（D20 預期 2026-12-04）",
+    "forward-batch-3": "是：D20 預期 2026-12-11，除息日 12/10 落在觀察窗內；依 corporate_action_rule 記錄 corporate_action_in_window，raw 報酬照算並註記"
+   },
+   "checked_at": "2026-10-26"
+  },
+  {
+   "ticker": "2317",
+   "event": "無",
+   "status": "2026-10-28 查 TWSE 除權除息預告表：未列",
+   "recheck": "第 2、3 批前再查一次"
+  },
+  {
+   "ticker": "2454",
+   "event": "無",
+   "status": "2026-10-28 查 TWSE 除權除息預告表：未列",
+   "recheck": "第 2、3 批前再查一次"
+  }
+ ]
 }
