@@ -28,7 +28,7 @@
     {"id": "CASE-18-good", "case_id": "CASE-18", "variant": "good", "expected_decision": "insufficient", "expected_critical_claims": ["c1"],
      "note": "關鍵證據公告時間晚於 cutoff，不得引用；標 unknown 並說明",
      "draft": {"claims": [
-       {"claim_id": "c1", "kind": "unknown", "text": "聯發科 2026Q2 財報在 cutoff（2026-07-20）之後才公告，cutoff 時點無可用數字", "evidence_refs": [], "facts": [],
+       {"claim_id": "c1", "kind": "unknown", "text": "截至 cutoff（2026-07-20）聯發科尚未公告 2026Q2 財報，無可用數字", "evidence_refs": [], "facts": [],
         "limitations": ["截至 cutoff 查無 2026Q2 財報公告，無可用數字", "下一確認訊號：2026Q2 財報公告後重新研究"]}], "conflicts": []}},
     {"id": "CASE-18-flawed", "case_id": "CASE-18", "variant": "flawed", "expected_decision": "revise", "expected_critical_claims": ["c1"],
      "note": "引用 cutoff 之後才公告的數字（前視）",

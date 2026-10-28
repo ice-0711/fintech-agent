@@ -35,3 +35,7 @@ dev-drafts-v2-results.json：最後一次執行結果。
 1. CASE-18-good 的 limitations 原本寫了 ev-dev-18-late 的 available_at（晚於 cutoff），Agent 實際不會知道這個片段，屬於洩漏 cutoff 後資訊。已改為「截至 cutoff 查無 2026Q2 財報公告，無可用數字」。重跑 run_v2.py 仍為 10/10 符合預期。
 2. 先前 README 寫「不確定 research_graph 是否擋 paragraph 為 null」。B 查證：snapshot_view 會把 null 正文轉成空字串，管線中不會當掉；repo 現行檢查唯一的缺口是 CASE-11-flawed（basis unspecified）。unreadable_source 規則因此屬選用。
 3. 是否採用 basis_unspecified 由組長決定（agents/review_checks.py 在凍結清單內）。D 不修改凍結檔案。
+
+修訂紀錄（2026-10-28，依 B 10/24 群組意見）
+1. CASE-18-good 的 c1 主張原本寫「2026Q2 財報在 cutoff（2026-07-20）之後才公告」，「之後才公告」也是 cutoff 之後才會知道的事。已改為「截至 cutoff（2026-07-20）聯發科尚未公告 2026Q2 財報，無可用數字」。
+2. 以 PR 與目前 main 的開發快照各重跑 run_v2.py，皆為 10/10 符合預期；dev-drafts-v2-results.json 內容與前次相同。
