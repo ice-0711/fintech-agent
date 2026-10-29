@@ -1,8 +1,20 @@
 # W07-A｜線上研究 PDF 驗收紀錄（layout report）
 
-- 任務 ID：W07-A｜日期 2026-10-26｜負責：A（陳柏臣）｜驗收人：組長（**尚未驗收**）
+- 任務 ID：W07-A｜日期 2026-10-26；**2026-10-29 依 B 稽核修正（第 0 節），三份 PDF 重新產生**｜負責：A（陳柏臣）｜驗收人：組長（**尚未驗收**）
 - 分支：`codex/W07-A-online-pdf`（含 `codex/A-fixture-mops-text` 的 a80e436，見第 6 節）
 - 依據：手冊第 04 章 F05、W07-A 步驟 1–4；組長 10/21、10/22 核定（`handoff/decisions-2026-10.md`）
+
+## 0. 2026-10-29 修正（B 的 W07 稽核，`evidence-audit-w07.md` 第七節）
+
+| B 指出的問題 | 修正 | 程式 |
+|---|---|---|
+| 問題 1（fail）：c2「近四季 EPS 合計（TTM）」3 份都引用 2026Q2 公告片段，但片段沒有 TTM；2317 c1「單季 EPS 4.27」引用的公告是 1–6 月累計（EPS 7.84），沒有 4.27 | MOCK 腳本改為引用財報快照 `snapshot_id`（如 `snap-2317-2026Q2`）。c1 只有在公告原文真的寫了該 EPS 時才同時引用公告（2330 27.25、2454 15.28 有；2317 沒有，只引用快照）。c2 只引用快照，並加限制「TTM 由財報快照工具以連續四個單季加總；公告原文只有單季或累計數字」 | `research_ui/mock_jobs.py` |
+| 同上：快照 ID 要能被讀者核對 | 報告 JSON 的來源清單把 `snap-*` 解析為「財報快照（工具結果）」：可得時間、原始財報檔 ID、sha256，以及工具在資料截止時的數值（單季 EPS、TTM EPS 與期間、單季營收、TTM FCF）。網站來源抽屜與 PDF 來源段都顯示，標示「工具結果，不是公告片段」 | `research_ui/report_data.py`（report-data-v1.1）、`report_pdf.py`、`__init__.py`、`research.js` |
+| 問題 2（warn）：基準日收盤價只在圖上 | PDF 估值段新增「基準收盤價：2026-09-30 收盤 X 元（未還原；交易日 17:30 起可得）」；網站估值說明同步顯示 | `report_pdf.py`、`research.js` |
+
+新增測試 4 項（`tests/test_online_pdf.py`）：3 檔每一條事實主張的每個數字，都必須出現在它引用的來源文字中（同 B 的檢查方法）；2317 c1 只能引用 `snap-2317-2026Q2`；PDF 印出基準收盤價。`pytest -q tests` → 281 passed。
+
+**請組長注意**：B 也問到 Reviewer 的確定性規則（`agents/review_checks.py`）沒有攔下這類引用錯誤，原 3 份 MOCK 都是 pass。這是組長的檔案，A 沒有修改。
 
 ## 1. 這次做了什麼
 
@@ -19,9 +31,11 @@
 
 | 股票 | 版本 | 報告 hash（前 16） | PDF hash（前 16） | Storage key |
 |---|---|---|---|---|
-| 2330 | `rv-b0062cc2-0f9f-4d09-ace2-f4fe9997bbf9` | 36e86bc4dbc67da6 | 5071400a0f76654d | reports/2330/rv-b0062cc2-….pdf |
-| 2317 | `rv-8e567646-9803-49d1-9399-d396c14bf029` | e3b3d50fc885234d | 8b4cd30871e66367 | reports/2317/rv-8e567646-….pdf |
-| 2454 | `rv-393f3b6f-6002-4f97-8cde-e3f68306af77` | d9c6f14f5c7eeebe | 7b2928eb8afeb687 | reports/2454/rv-393f3b6f-….pdf |
+| 2330 | `rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454` | f46a0c5f35c7579e | 585953fcf537426b | reports/2330/rv-d407e7cc-….pdf |
+| 2317 | `rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7` | b8be13bc34f0ab35 | ddb9599b22859456 | reports/2317/rv-915bb95c-….pdf |
+| 2454 | `rv-d1fafb87-7647-443c-9804-ccf57a32dda1` | 0b614a2ab361568a | a7eee608b596b976 | reports/2454/rv-d1fafb87-….pdf |
+
+10/26 的舊版本（rv-b0062cc2、rv-8e567646、rv-393f3b6f）已被取代，留在 git 歷史；B 的 `data/v12-report-audit.csv` W7A 列指向舊檔，需 B 以新檔重核。
 
 檔案：`reports/v12-online-pdf/`（PDF、核准 JSON、`manifest.json`、每頁縮圖 `pages/`）。
 
@@ -29,9 +43,9 @@
 
 | 股票 | 頁數 | 大小 | 內嵌字型 | 連結 | 圖 | JSON 關鍵項目在 PDF 內 | PDF hash | 結果 |
 |---|---|---|---|---|---|---|---|---|
-| 2330 | 3 | 398 KB | NotoSansCJKTC（子集） | 1 | 2 | 18/18 | 相符 | 通過 |
-| 2317 | 2 | 234 KB | NotoSansCJKTC（子集） | 1 | 1 | 17/17 | 相符 | 通過 |
-| 2454 | 3 | 393 KB | NotoSansCJKTC（子集） | 1 | 2 | 22/22 | 相符 | 通過 |
+| 2330 | 3 | 401 KB | NotoSansCJKTC（子集） | 1 | 2 | 19/19 | 相符 | 通過 |
+| 2317 | 3 | 238 KB | NotoSansCJKTC（子集） | 1 | 1 | 18/18 | 相符 | 通過 |
+| 2454 | 3 | 397 KB | NotoSansCJKTC（子集） | 1 | 2 | 23/23 | 相符 | 通過 |
 
 「關鍵項目」= 每一條主張、每一條限制、估值狀態、資料品質風險、免責聲明、每季營收、DCF 每股、每個來源 ID、每家同業。全部在 PDF 文字中找得到 → 沒有被截斷的關鍵風險。上限：≤ 10 頁、≤ 5 MB（超過時 `render_report_pdf` 直接拒絕，測試 `test_pdf_over_page_limit_is_refused`）。
 
@@ -60,16 +74,16 @@ F05 必要內容對照（以 2454 為例）：
 |---|---|---|
 | 已發布清單出現 3 份真實版本（標 MOCK）＋FIXTURE 範例（標 FIXTURE） | ✓ | ✓ |
 | 報告詳情顯示同一份 JSON 的季度表、DCF、同業表、歷史版本 | ✓ | ✓（表格在框內左右捲動） |
-| 「下載 PDF」觸發下載，檔名 `2454-v1-rv-….pdf`，402,395 bytes，檔頭 `%PDF-`，與驗收副本同大小 | ✓ | ✓ |
+| 「下載 PDF」觸發下載，檔名 `2454-v1-rv-….pdf`，406,022 bytes，檔頭 `%PDF-`，與驗收副本同大小 | ✓ | ✓ |
 | `/reports/<rv>.pdf` 預覽：200、`application/pdf`、inline | ✓ | — |
 | 頁面錯誤、橫向捲動 | 無 | 無 |
 | 不存在的版本下載 → 404 | ✓ | ✓ |
 
-截圖：`design/w07/W07-published-list-{1440,390}.png`、`design/w07/W07-report-2454-{1440,390}.png`。
+截圖：`design/w07/W07-published-list-{1440,390}.png`、`design/w07/W07-report-2454-{1440,390}.png`、`design/w07/W07-source-snapshot-2317-390.png`（財報快照來源抽屜）。
 
 **限制**：手機測試是桌面 Chromium 的手機模擬，不是實機 iOS Safari／Android Chrome；請組長在部署後用手機實測一次下載。
 
-## 5. 安全與發布規則（測試：`tests/test_online_pdf.py`，10 項）
+## 5. 安全與發布規則（測試：`tests/test_online_pdf.py`，14 項）
 
 - 草稿版本不出現在公開清單、詳情、下載（404）；訪客核准 403。
 - 組長核准必須帶「看過的 hash」；hash 不符 409，不發布。
@@ -81,9 +95,8 @@ F05 必要內容對照（以 2454 為例）：
 
 | 項目 | 狀態 | 需要誰 |
 |---|---|---|
-| Supabase Storage 實測 | adapter 只用假 client 測過；**未連真實專案** | 組長建立測試專案與私有 bucket，在 Render 設 `SUPABASE_URL`、`SUPABASE_SERVICE_KEY`、`REPORT_STORAGE_BUCKET` |
-| 「公開下載不用本機」 | 程式已支援；**在設好 Supabase 前，Render 上仍是本機資料夾，重新部署會遺失** | 同上 |
-| 報告版本資料庫 | `ReportStore` 仍是 SQLite；Render 重新部署也會遺失版本紀錄 | 組長決定（Supabase table 或 Render disk） |
+| Supabase Storage／版本資料庫 | 組長 10/28 已在 W07-L 接上 Supabase 測試專案的 Postgres 與私有 Storage（commit 64be502、7ce57a4，變數改名為 `REPORT_SUPABASE_*`）。A 沒有另外連線重測 | 組長（已處理，A 只記錄） |
 | LIVE（真實模型）報告 | 研究入口仍只開 MOCK（組長 10/05 決定）；目前三份都是 MOCK 標示 | 組長決定何時開 LIVE |
 | 實機手機 | 只有模擬 | 組長部署後實測 |
-| 分支依賴 | 本分支含 a80e436（FIXTURE 改 MOPS 原文）；若 `codex/A-fixture-mops-text` 先合併，這個 commit 會自動略過 | 組長合併順序 |
+| 10/29 新版重核 | 三份 PDF 版本 ID 已換新；`data/v12-report-audit.csv` 的 W7A 列需以新檔重跑 | B |
+| Reviewer 確定性規則 | 是否檢查「事實數字須出現在引用來源或工具結果」 | 組長（`agents/review_checks.py`） |

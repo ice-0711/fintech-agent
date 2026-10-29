@@ -128,8 +128,11 @@ def test_evidence_drawer_opens_sources_of_real_published_reports(lead, clock):
     _, client = lead
     _, v = publish(client, clock, "2454", key="ev")
     report = client.get(f"/api/ui/reports/{v['report_version_id']}").get_json()["report"]
-    ref = report["claims"][0]["evidence"][0]["id"]
-    ev = client.get(f"/api/ui/evidence/{ref}?report={v['report_version_id']}").get_json()["evidence"]
+    refs = [e["id"] for e in report["claims"][0]["evidence"]]
+    assert refs == ["snap-2454-2026Q2", "ev-2454-2026q2-01"]  # tool result + the announcement that also states 15.28
+    get = lambda ref: client.get(f"/api/ui/evidence/{ref}?report={v['report_version_id']}").get_json()["evidence"]  # noqa: E731
+    snap, ev = get(refs[0]), get(refs[1])
+    assert snap["kind"] == "financial_snapshot" and "15.28" in snap["paragraph"] and snap["cutoff_check"] == "cutoff 前可得"
     assert ev["hash_match"] and ev["cutoff_check"] == "cutoff 前可得" and ev["synthetic_fixture"] is False
 
 
@@ -193,3 +196,33 @@ def test_public_reads_make_no_llm_calls(lead, clock, monkeypatch):
     visitor.get(f"/api/ui/reports/{v['report_version_id']}")
     visitor.get(f"/api/ui/reports/{v['report_version_id']}/download")
     assert calls == []
+
+
+@pytest.mark.parametrize("ticker", ["2330", "2317", "2454"])
+def test_every_fact_number_is_in_what_the_claim_cites(lead, clock, ticker):
+    """B's W07 audit (10/26): a fact's numbers must appear in its cited source — the announcement fragment
+    or the financial-snapshot tool result (snapshot_id) — never only in an uncited tool output."""
+    import re
+
+    _, client = lead
+    _, v = publish(client, clock, ticker, key=f"cite-{ticker}")
+    rv = v["report_version_id"]
+    report = client.get(f"/api/ui/reports/{rv}").get_json()["report"]
+    for claim in report["claims"]:
+        if claim["kind"] != "fact":
+            continue
+        assert claim["evidence"] and all(e["exists"] for e in claim["evidence"]), claim
+        text = "".join(client.get(f"/api/ui/evidence/{e['id']}?report={rv}").get_json()["evidence"]["paragraph"]
+                       for e in claim["evidence"])
+        for number in re.findall(r"\d[\d,]*\.?\d*", claim["text"]):
+            assert number.rstrip(".") in text, f"{ticker} {claim['claim_id']}: {number} not in cited source"
+    if ticker == "2317":  # the Jan–Jun cumulative announcement (EPS 7.84) must not back the single-quarter 4.27
+        c1 = next(c for c in report["claims"] if c["claim_id"] == "c1")
+        assert [e["id"] for e in c1["evidence"]] == ["snap-2317-2026Q2"]
+
+
+def test_pdf_prints_the_close_used_for_the_gap(lead, clock):
+    _, client = lead
+    _, v = publish(client, clock, "2330", key="price")
+    _, text = pdf_text(client.get(f"/api/ui/reports/{v['report_version_id']}/download").data)
+    assert "基準收盤價：2026-09-30 收盤 2,480.00 元" in text and "財報快照（工具結果）" in text

@@ -1,5 +1,5 @@
 {
- "job_id": "f107a430-66da-4652-825b-3cfcae3f9162",
+ "job_id": "f73101b9-c472-4809-b98b-575ef79aa653",
  "ticker": "2317",
  "cutoff_at": "2026-09-30T09:30:00+00:00",
  "source_snapshot_id": "fin-snap:v1.6-tw-market",
@@ -12,7 +12,7 @@
    "claim_id": "c1",
    "kind": "fact",
    "evidence_refs": [
-    "ev-2317-2026q2-01"
+    "snap-2317-2026Q2"
    ],
    "limitations": [],
    "text": "2026Q2 單季每股盈餘 4.27 元。"
@@ -21,10 +21,11 @@
    "claim_id": "c2",
    "kind": "fact",
    "evidence_refs": [
-    "ev-2317-2026q2-01"
+    "snap-2317-2026Q2"
    ],
    "limitations": [
-    "TTM 期間 2025Q3–2026Q2"
+    "TTM 期間 2025Q3–2026Q2",
+    "TTM 由財報快照工具以連續四個單季加總；公告原文只有單季或累計數字"
    ],
    "text": "近四季 EPS 合計（TTM）為 15.21 元（2025Q3–2026Q2）。"
   },
@@ -50,7 +51,7 @@
  "review": {
   "decision": "pass",
   "checked_refs": [
-   "ev-2317-2026q2-01"
+   "snap-2317-2026Q2"
   ],
   "checked_metric_ids": null,
   "decision_summary": "c2 已改為可由工具重現的 TTM"
@@ -317,8 +318,21 @@
   "peer_na_reason": "同業比較只適用 2454",
   "sources": [
    {
+    "id": "snap-2317-2026Q2",
+    "resolved": true,
+    "kind": "financial_snapshot",
+    "source_id": "src-finmind-2317-fs",
+    "source_url": null,
+    "available_at": "2026-08-12T14:15:01+08:00",
+    "content_hash": "73b542e821487e66d758bd0f848b362134b300ff222c1d3fa86dfc718b5225c0",
+    "hash_match": null,
+    "hash_note": "原始財報檔的 sha256（工具結果，不是公告片段）",
+    "excerpt": "財報快照 snap-2317-2026Q2（2026Q2，單季；金額單位億元）：單季 EPS 4.27 元；近四季 EPS 合計（TTM）15.21 元（2025Q3–2026Q2）；單季營收 25,258.94；TTM FCF -416.44。"
+   },
+   {
     "id": "ev-2317-2026q2-01",
     "resolved": true,
+    "kind": "evidence",
     "source_url": "https://mops.twse.com.tw/mops/web/t05st01?step=1&colorchg=1&co_id=2317&year=115&season=2",
     "available_at": "2026-08-12T14:15:01+08:00",
     "content_hash": "01dbdd9983f0664ce403130accd5c2392cd11138834a9a4eecb5e882f3ad79fa",
@@ -327,7 +341,7 @@
    }
   ],
   "method": {
-   "data_version": "report-data-v1",
+   "data_version": "report-data-v1.1",
    "risk_method": "valuation-gap-v1.1 (±15%) / data-quality-v1.1",
    "tools_version": "tools-v12",
    "dcf_assumptions": {
