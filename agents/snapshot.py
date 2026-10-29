@@ -41,6 +41,19 @@ def _available_by(e: dict[str, Any], limit: datetime) -> bool:
     return when is not None and _t(when) <= limit
 
 
+def _numbers(value: Any) -> list[float]:
+    """Every numeric leaf in a tool result (bools and date-like strings are skipped)."""
+    if isinstance(value, bool) or value is None:
+        return []
+    if isinstance(value, (int, float)):
+        return [float(value)]
+    if isinstance(value, dict):
+        return [n for v in value.values() for n in _numbers(v)]
+    if isinstance(value, (list, tuple)):
+        return [n for v in value for n in _numbers(v)]
+    return []
+
+
 def load_case_snapshot(snapshot_id: str) -> dict[str, Any] | None:
     """Dev snapshots (snap-dev-*) or sealed holdout snapshots (snap-test-*, CR-W05-holdout).
     Which cases may run is decided by the runner: scripts/dev_traces.py refuses holdout ids."""
@@ -69,6 +82,17 @@ class SnapshotToolbox:
         Unreadable sources (paragraph null) become "" so no number can be found in them."""
         view = dict(self.case or {"ticker": self.ticker})
         view["evidences"] = [dict(e, paragraph=e.get("paragraph") or "") for e in self._evidences()]
+        # Numbers the financial/price tools return for this job (10/29): a fact citing the snapshot_id must match one.
+        nums: list[float] = []
+        for call in (lambda: self.get_financial_snapshot(self.ticker, self.cutoff.isoformat()),
+                     lambda: self.get_price_window(self.ticker, self.cutoff.isoformat(), 1)):
+            try:
+                result = call()
+            except Exception:  # noqa: BLE001 - a tool failure just means no numbers from it
+                continue
+            if result.get("status") == "ok":
+                nums.extend(_numbers(result.get("data")))
+        view["tool_numbers"] = nums
         return view
 
     def search_evidence(self, ticker: str, query: str, cutoff: str, limit: int = 5) -> dict[str, Any]:

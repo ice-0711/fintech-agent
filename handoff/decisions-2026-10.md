@@ -69,3 +69,10 @@
 | 年度 PER 來源（data-contract 待決第 12 項） | 保留；輸出標明「年度 PER（12/31 股價 ÷ 年度 EPS）」，不得與 F02 P/E 直接比較 |
 | `tests/fixtures/agent_case_fixtures.json` snap-dev-case-01 | 改標 `synthetic_fixture: true`（6,735 億為早期合成數字） |
 
+
+## 八、2026-10-29 核定
+
+| 項目 | 核定 |
+|---|---|
+| 覆核規則：數字必須出現在引用來源（B 10/28 提出） | 採用。事實主張的數字若引用財報快照（`snap-…`）、工具結果（`obs-…`），或未填 source_ref，也要在快照工具數值、工具結果或引用原文中找得到，否則列 critical；允許常見單位換算（千元／萬／億／百分比）與依主張位數的四捨五入。算出來的數字（ytd 還原、有 operation／derived_inputs、P/E）由原有重算規則檢查。屬第二段（`agents/review_checks.py`、`agents/snapshot.py`），10/29 16:30 校準第 2 天前生效；第 1 天 dual 於第 6 天重跑，故校準的 dual 全部使用同一套規則 |
+| 前瞻方向命中：零報酬（D 10/29 請登記） | 觀察期報酬恰為 0 記 `zero_return`，不計入方向命中率的分子與分母；報告另列筆數並註明「零報酬不判方向」。與 `scripts/forward_eval.py` 現行做法一致 |

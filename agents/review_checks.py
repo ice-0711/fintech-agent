@@ -51,6 +51,34 @@ def paragraph_contains(paragraph: str, value: float) -> bool:
     return False
 
 
+UNIT_SCALES = (1, 100, 0.01, 1e3, 1e-3, 1e4, 1e-4, 1e5, 1e-5, 1e6, 1e-6, 1e8, 1e-8)  # %、千元、萬、億、百萬
+NUM_RE = re.compile(r"-?\d[\d,]*\.?\d*")
+
+
+def numbers_in(text: str) -> list[float]:
+    out = []
+    for m in NUM_RE.findall(text or ""):
+        try:
+            out.append(float(m.replace(",", "")))
+        except ValueError:
+            pass
+    return out
+
+
+def value_matches(value: float, candidates: list[float]) -> bool:
+    """value 等於某個候選數字，允許常見單位換算，以及依主張本身位數的四捨五入
+    （例：1,270,380,250 千元 ≈ 12,703.8 億元；但 EPS 86 ≠ 86.28）。"""
+    v = float(value)
+    text = format(v, ".10g")
+    decimals = len(text.split(".")[1]) if "." in text and "e" not in text else 0
+    tol = max(1e-9, min(0.5 * 10 ** -decimals, 0.001 * abs(v)))
+    for n in candidates:
+        for s in UNIT_SCALES:
+            if abs(n * s - v) <= tol:
+                return True
+    return False
+
+
 def currency_before(paragraph: str, value: float) -> str | None:
     """找出緊接在這個數字前面的幣別標記（正規化成 USD 或 TWD）；找不到回 None。"""
     for s in num_variants(value):
@@ -156,6 +184,29 @@ def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, r
             metric_ids.append(metric)
             src, val = f.get("source_ref"), f.get("value")
             ev = evid.get(src)
+            # --- 引用快照或工具結果的數字也必須查得到（B 10/28 提出，組長 10/29 核定）---
+            # 公告原文（ev）由下面的 not_supported 檢查；算出來的數字（derived_*、operation、pe_ttm）另有重算規則。
+            computed = f.get("derived_from") or f.get("operation") or f.get("derived_inputs") or metric == "pe_ttm"
+            if ev is None and isinstance(val, (int, float)) and not isinstance(val, bool) and not computed:
+                srcs = [src] if src else list(refs)
+                unknown = src and src != snapshot_id and src not in obs and src not in evid
+                if unknown:
+                    if src not in refs:  # a ref that is missing is already reported once as ref_missing above
+                        issues.append(_iss(cid, "critical", f"{metric} 的 source_ref {src} 不存在於本快照或工具結果",
+                                       f"改用本快照的 evidence_version_id、{snapshot_id} 或工具結果編號，並核對 {cid} 的數值", "source_ref_missing"))
+                elif srcs and all(r == snapshot_id or r in obs or r in evid for r in srcs):  # unknown refs: ref_missing
+                    pool: list[float] = []
+                    for r in srcs:
+                        if r == snapshot_id:
+                            pool += list(snapshot.get("tool_numbers") or [])
+                        elif r in obs:
+                            pool += numbers_in(str(obs[r].get("brief") or obs[r].get("digest") or ""))
+                        elif r in evid:
+                            pool += numbers_in(evid[r].get("paragraph", ""))
+                    if not value_matches(val, pool):
+                        where = "、".join(srcs)
+                        issues.append(_iss(cid, "critical", f"{metric}={val} 在引用的 {where} 裡找不到，來源不支持這個數字",
+                                           f"get_financial_snapshot 或 read_evidence 重新取得 {cid} 的 {metric}，數值照來源填寫", "not_supported"))
             # --- 來源是否支持數字 ---
             if ev is not None and val is not None:
                 if not paragraph_contains(ev["paragraph"], val):
