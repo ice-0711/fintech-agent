@@ -1,0 +1,29 @@
+開發 10 案核對表（D 用，草稿，未經 B 驗收）
+
+範圍：evaluation/dev-cases.json（v1.5）與 fixtures/dev/case_fixtures.json。只核對開發案。保留 20 案由 D 本人核對，沒有放進 AI 的輸入。
+方法：python3 check_cases_d.py <repo 目錄> 做結構核對，再由人工補算數字。
+「OK」只代表文件之間對得上，不代表標準答案正確；對照 MOPS 原文要 D 自己做。
+
+一、程式核對結果（10 案）
+擾動位置都存在於快照：CASE-08、11、15、18、19、22、26（工具擾動）、29 皆 OK。
+CASE-18：擾動來源的 available_at（2026-07-31T18:41:57）確實晚於 cutoff（2026-07-20T17:00）。
+非擾動來源沒有晚於 cutoff 的。
+合成旗標：10 案都一致。
+程式標「需人工確認」的 6 項，下一節已手算確認，都是單位與格式造成的誤報，不是資料錯。
+
+二、人工手算確認（英文計算）
+CASE-01 營收：1,270,380,250 thousand TWD = 1,270,380,250,000 TWD = 1.2704 trillion = 12,703.8 hundred-million. 標準主張「1 兆 2,703.8 億元」一致。
+CASE-01 毛利率：來源 67.72%；標準主張 67.7%，四捨五入一致。
+CASE-04 P/E：2,480 / 86.28 = 28.7436 ≈ 28.74，標準主張 28.74 一致。價格 2,480 在 price_snapshot（2026-09-30），不在 evidence 段落裡，這是案例設計（價格由工具核算）。
+CASE-08、11 營收：2,525,894,433 thousand TWD = 2.5259 trillion = 25,258.94 hundred-million，標準主張「2 兆 5,258.94 億元」一致。
+CASE-22：27.25 在來源段落；TTM 86.28 在 financial_snapshot；27.25 + 其他三季 = TTM 的逐季加總我沒有重算，請 D 對照 ttm_quarters。
+
+三、需要 D 自己或 B 確認的事（我無法代為確認）
+1. 來源段落的數字與 MOPS 原表是否一致（我連不到 MOPS）。事實清冊第九節說 8 項已核對，我只重現了腳本，沒有核對原文。
+2. CASE-26：test_focus 與 allow_insufficient 的關係。decisions 檔核定 CASE-26 的工具逾時已修；D 先前草稿的預期決定（insufficient）與 B 的 allow_insufficient 設定是否衝突，仍待 B 確認。
+3. CASE-11：組長核定「測試口徑識別，不寫個體數字」。標準主張只要求合併口徑；個體口徑沒有可用來源，預期要 insufficient 說明。這個解讀請 B 確認。
+4. CASE-04 available_at：B 採 17:30，組長核定文字是 14:30，data-freeze.md 第六節已列待統一，不影響 30 案 cutoff。
+5. 保留 20 案：同樣的核對（擾動位置、標準主張、cutoff）要 D 自己做；check_cases_d.py 可以對保留案跑，但要由 D 本人在自己電腦上執行並自己看結果，我不處理。
+
+四、簽核
+這張表不是簽核。簽核是 data-freeze.md 第七節，由 D 親自簽，且以 10/23 組長 live 結束後 B 重新凍結的版本為準。

@@ -1,0 +1,124 @@
+[
+ {
+  "id": "CASE-11-good",
+  "expected": "pass",
+  "got": "pass",
+  "expected_critical": [],
+  "got_critical": [],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-11-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-15-good",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-15-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-18-good",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-18-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-22-good",
+  "expected": "pass",
+  "got": "pass",
+  "expected_critical": [],
+  "got_critical": [],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-22-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-29-good",
+  "expected": "insufficient",
+  "got": "insufficient",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ },
+ {
+  "id": "CASE-29-flawed",
+  "expected": "revise",
+  "got": "revise",
+  "expected_critical": [
+   "c1"
+  ],
+  "got_critical": [
+   "c1"
+  ],
+  "schema_errors": [],
+  "match": true
+ }
+]
