@@ -1,0 +1,566 @@
+{
+  "batch_id": "forward-batch-1",
+  "signal_cutoff_at": "2026-10-30T21:00:00+08:00",
+  "snapshot_sha256": "3ec3d8a09028d6f8d58bab6e71b613902572a23cee888f25d6b4b731552e5cca",
+  "commit": "76a6469",
+  "model_id": "gemini-3.5-flash-lite",
+  "prompt_versions": {
+    "researcher": "researcher-v1.2.2",
+    "reviewer": "reviewer-v1.2.1"
+  },
+  "generated_at": "2026-10-31T11:17:38+00:00",
+  "published": false,
+  "reports": [
+    {
+      "signal_id": "fwd1-2330",
+      "ticker": "2330",
+      "direction": "none",
+      "job_id": "3e38c2a9-19a0-48a7-9996-a9504cdfcad8",
+      "status": "insufficient_evidence",
+      "stop_reason": "researcher_insufficient",
+      "path": [
+        "researcher:search_evidence→ok",
+        "researcher:get_financial_snapshot→ok"
+      ],
+      "steps": [
+        {
+          "seq": 3,
+          "role": "researcher",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 1,
+          "prompt_version": "researcher-v1.2.2",
+          "input_estimate": 2184,
+          "estimate_under_actual": false,
+          "prompt_tokens": 1866,
+          "total_tokens": 2104
+        },
+        {
+          "seq": 4,
+          "role": "researcher",
+          "event": "tool_call",
+          "tool": "search_evidence",
+          "status": "ok",
+          "reason": null
+        },
+        {
+          "seq": 5,
+          "role": "researcher",
+          "event": "tool_call",
+          "tool": "get_financial_snapshot",
+          "status": "ok",
+          "reason": null
+        },
+        {
+          "seq": 6,
+          "role": "researcher",
+          "event": "calls_skipped",
+          "tool": null
+        },
+        {
+          "seq": 7,
+          "role": "researcher",
+          "event": "context_digested",
+          "tool": null
+        },
+        {
+          "seq": 8,
+          "role": "researcher",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 2,
+          "prompt_version": "researcher-v1.2.2",
+          "input_estimate": 1760,
+          "estimate_under_actual": false,
+          "prompt_tokens": 1627,
+          "total_tokens": 2114
+        },
+        {
+          "seq": 9,
+          "role": "researcher",
+          "event": "draft",
+          "tool": null,
+          "status": "insufficient"
+        },
+        {
+          "seq": 10,
+          "role": "reviewer",
+          "event": "rules_check",
+          "tool": null,
+          "rules_decision": "insufficient",
+          "critical": [
+            "c1",
+            "c1"
+          ]
+        }
+      ],
+      "draft": {
+        "status": "insufficient",
+        "decision_summary": "已取得2026年9月營收與2026Q2財報快照，但缺乏完整2026Q3財務報表與估值資料，研究焦點尚有不足。",
+        "ticker": "2330",
+        "snapshot_id": "snap-fwd1-3ec3d8a09028",
+        "as_of": "2026-10-30T13:00:00+00:00",
+        "claims": [
+          {
+            "claim_id": "c1",
+            "kind": "fact",
+            "text": "台積公司2026年9月合併營收約5,118.57億元，月減0.6%、年增54.6%；1–9月累計約38,987.27億元，年增41.1%。",
+            "evidence_refs": [
+              "ev-fwd1-2330-rev-202609"
+            ],
+            "facts": [
+              {
+                "metric": "revenue",
+                "value": 511857000000,
+                "unit": "元",
+                "currency": "TWD",
+                "period": "2026-09",
+                "period_basis": "single_month",
+                "source_ref": "ev-fwd1-2330-rev-202609"
+              }
+            ],
+            "limitations": [
+              "僅有單月營收數字，缺乏完整Q3資產負債表與綜合損益表詳細細項"
+            ]
+          }
+        ],
+        "macro_observations": [],
+        "fundamental_observations": [],
+        "valuation_scenarios": [],
+        "positive_channels": [],
+        "negative_channels": [],
+        "conflicts": [],
+        "unknowns": [
+          "2026Q3完整財務報表數據",
+          "估值相關市價與本益比資料"
+        ],
+        "next_signals": [],
+        "limitations": [
+          "工具額度用盡或無法再呼叫工具，導致無法取得完整估值與Q3財報數據"
+        ],
+        "source_refs": [
+          "ev-fwd1-2330-rev-202609"
+        ]
+      },
+      "review": {
+        "decision": "insufficient",
+        "issues": [
+          {
+            "claim_id": "c1",
+            "severity": "critical",
+            "reason": "revenue=511857000000 在 ev-fwd1-2330-rev-202609 的原文裡找不到，來源不支持這個數字",
+            "required_evidence": "read_evidence(ev-fwd1-2330-rev-202609)，逐字核對 c1 的 revenue 數值"
+          },
+          {
+            "claim_id": "c1",
+            "severity": "minor",
+            "reason": "證據之間的「營收」數字不同（{'ev-fwd1-2330-rev-202609': 5118.0, 'ev-fwd1-2330-call-2026q3': 50.9}），草稿沒有在 conflicts 說明",
+            "required_evidence": "read_evidence(ev-fwd1-2330-rev-202609) 與 read_evidence(ev-fwd1-2330-call-2026q3)，把差異與採信理由寫進 conflicts"
+          },
+          {
+            "claim_id": "c1",
+            "severity": "critical",
+            "reason": "還有 critical 問題但沒有剩餘預算可以補查，不可宣稱已核實",
+            "required_evidence": "退回 Researcher：預算不足，需保留限制並停止，不可跳過覆核發布"
+          }
+        ],
+        "checked_refs": [
+          "ev-fwd1-2330-rev-202609"
+        ],
+        "checked_metric_ids": [
+          "revenue"
+        ],
+        "decision_summary": "關鍵資料缺失或預算不足，無法核實；保留限制，不放行。"
+      },
+      "budget": {
+        "calls_used": 2,
+        "tool_calls_used": 2,
+        "tokens_observed": 4218,
+        "supplement_rounds": 0,
+        "active_seconds": 3.248
+      }
+    },
+    {
+      "signal_id": "fwd1-2317",
+      "ticker": "2317",
+      "direction": "none",
+      "job_id": "81194b4d-5c7e-4838-9b8e-2ecd12351856",
+      "status": "succeeded",
+      "stop_reason": "review_pass",
+      "path": [
+        "researcher:search_evidence→ok",
+        "researcher:get_macro_snapshot→ok",
+        "reviewer:read_evidence→ok"
+      ],
+      "steps": [
+        {
+          "seq": 3,
+          "role": "researcher",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 1,
+          "prompt_version": "researcher-v1.2.2",
+          "input_estimate": 2184,
+          "estimate_under_actual": false,
+          "prompt_tokens": 1867,
+          "total_tokens": 2117
+        },
+        {
+          "seq": 4,
+          "role": "researcher",
+          "event": "tool_call",
+          "tool": "search_evidence",
+          "status": "ok",
+          "reason": null
+        },
+        {
+          "seq": 5,
+          "role": "researcher",
+          "event": "tool_call",
+          "tool": "get_macro_snapshot",
+          "status": "ok",
+          "reason": null
+        },
+        {
+          "seq": 6,
+          "role": "researcher",
+          "event": "calls_skipped",
+          "tool": null
+        },
+        {
+          "seq": 7,
+          "role": "researcher",
+          "event": "context_digested",
+          "tool": null
+        },
+        {
+          "seq": 8,
+          "role": "researcher",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 2,
+          "prompt_version": "researcher-v1.2.2",
+          "input_estimate": 1778,
+          "estimate_under_actual": false,
+          "prompt_tokens": 1619,
+          "total_tokens": 2732
+        },
+        {
+          "seq": 9,
+          "role": "researcher",
+          "event": "draft",
+          "tool": null,
+          "status": "draft"
+        },
+        {
+          "seq": 10,
+          "role": "reviewer",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 3,
+          "prompt_version": "reviewer-v1.2.1",
+          "input_estimate": 2345,
+          "estimate_under_actual": false,
+          "prompt_tokens": 2108,
+          "total_tokens": 2146
+        },
+        {
+          "seq": 11,
+          "role": "reviewer",
+          "event": "tool_call",
+          "tool": "read_evidence",
+          "status": "ok",
+          "reason": null
+        },
+        {
+          "seq": 12,
+          "role": "reviewer",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 4,
+          "prompt_version": "reviewer-v1.2.1",
+          "input_estimate": 1945,
+          "estimate_under_actual": false,
+          "prompt_tokens": 1870,
+          "total_tokens": 2047
+        },
+        {
+          "seq": 13,
+          "role": "reviewer",
+          "event": "review",
+          "tool": null,
+          "final_decision": "pass",
+          "model_decision": "pass",
+          "rules_decision": "pass",
+          "critical": []
+        }
+      ],
+      "draft": {
+        "status": "draft",
+        "decision_summary": "依現有快照證據顯示，2317於2026年9月單月合併營收年增38.42%，1-9月累計營收年增39.53%，顯示基本面具成長動能。",
+        "ticker": "2317",
+        "snapshot_id": "snap-fwd1-3ec3d8a09028",
+        "as_of": "2026-10-30T13:00:00+00:00",
+        "claims": [
+          {
+            "claim_id": "c1",
+            "kind": "fact",
+            "text": "鴻海2026年9月合併營業收入為1,158,633,235仟元，較去年同期增加38.42%。",
+            "evidence_refs": [
+              "ev-fwd1-2317-rev-202609"
+            ],
+            "facts": [
+              {
+                "metric": "monthly_revenue",
+                "value": 1158633235,
+                "unit": "仟元",
+                "currency": "NTD",
+                "period": "2026-09",
+                "period_basis": "single_month",
+                "source_ref": "ev-fwd1-2317-rev-202609"
+              }
+            ],
+            "limitations": [
+              "此數字為自結數，非正式會計師核閱財報。"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "kind": "fact",
+            "text": "鴻海2026年1至9月累計合併營業收入為7,669,772,510仟元，較去年同期增加39.53%。",
+            "evidence_refs": [
+              "ev-fwd1-2317-rev-202609"
+            ],
+            "facts": [
+              {
+                "metric": "ytd_revenue",
+                "value": 7669772510,
+                "unit": "仟元",
+                "currency": "NTD",
+                "period": "2026-01 to 2026-09",
+                "period_basis": "ytd",
+                "source_ref": "ev-fwd1-2317-rev-202609"
+              }
+            ],
+            "limitations": [
+              "僅有累計營收數據，尚未包含完整損益表與EPS明細。"
+            ]
+          },
+          {
+            "claim_id": "c3",
+            "kind": "unknown",
+            "text": "截至目前快照未提供完整的總體經濟對產業影響之量化關聯數據及詳細估值本益比數據。",
+            "evidence_refs": [],
+            "facts": [],
+            "limitations": [
+              "缺乏估值與完整總經指標對應。"
+            ]
+          }
+        ],
+        "macro_observations": [
+          "美國2025年至2026年之CPI數據已於總經快照中列出，但尚未於本案中做進一步總經傳導分析。"
+        ],
+        "fundamental_observations": [
+          "2026年9月單月及1-9月累計合併營收均呈現大幅年增，顯示營運規模擴張。"
+        ],
+        "valuation_scenarios": [],
+        "positive_channels": [
+          "營收持續展現高雙位数年增率，營運動能強勁。"
+        ],
+        "negative_channels": [
+          "存在美國國際貿易委員會337調查等潛在法律與營運風險訊息待釐清。"
+        ],
+        "conflicts": [],
+        "unknowns": [
+          "缺少詳細的獲利能力指標（如毛利率、營益率、純益率與EPS）。",
+          "缺少當期股價與完整估值模型數據。"
+        ],
+        "next_signals": [
+          "關注後續正式財報公告之毛利率與淨利表現。",
+          "追蹤美國國際貿易委員會337調查之進展。"
+        ],
+        "limitations": [
+          "營收資料為自結數非正式財報。",
+          "缺乏足夠的估值與價格數據以支持完整的估值情境。"
+        ],
+        "source_refs": [
+          "ev-fwd1-2317-rev-202609"
+        ]
+      },
+      "review": {
+        "decision": "pass",
+        "issues": [],
+        "checked_refs": [
+          "ev-fwd1-2317-rev-202609"
+        ],
+        "checked_metric_ids": [
+          "monthly_revenue",
+          "ytd_revenue"
+        ],
+        "decision_summary": "經讀取來源 ev-fwd1-2317-rev-202609 核對，c1 與 c2 之鴻海 2026 年 9 月單月營收與 1 至 9 月累計營收之數值、單位、期間及年增率皆與原文相符，未發現重大錯誤或未支援之主張。"
+      },
+      "budget": {
+        "calls_used": 4,
+        "tool_calls_used": 3,
+        "tokens_observed": 9042,
+        "supplement_rounds": 0,
+        "active_seconds": 7.037
+      }
+    },
+    {
+      "signal_id": "fwd1-2454",
+      "ticker": "2454",
+      "direction": "none",
+      "job_id": "adddb2ad-4108-4bdf-9b2c-a45118f0420e",
+      "status": "insufficient_evidence",
+      "stop_reason": "researcher_insufficient",
+      "path": [
+        "researcher:search_evidence→ok"
+      ],
+      "steps": [
+        {
+          "seq": 3,
+          "role": "researcher",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 1,
+          "prompt_version": "researcher-v1.2.2",
+          "input_estimate": 2184,
+          "estimate_under_actual": false,
+          "prompt_tokens": 1864,
+          "total_tokens": 1941
+        },
+        {
+          "seq": 4,
+          "role": "researcher",
+          "event": "tool_call",
+          "tool": "search_evidence",
+          "status": "ok",
+          "reason": null
+        },
+        {
+          "seq": 5,
+          "role": "researcher",
+          "event": "model_call",
+          "tool": null,
+          "call_number": 2,
+          "prompt_version": "researcher-v1.2.2",
+          "input_estimate": 1504,
+          "estimate_under_actual": false,
+          "prompt_tokens": 1339,
+          "total_tokens": 2008
+        },
+        {
+          "seq": 6,
+          "role": "researcher",
+          "event": "draft",
+          "tool": null,
+          "status": "insufficient"
+        },
+        {
+          "seq": 7,
+          "role": "reviewer",
+          "event": "rules_check",
+          "tool": null,
+          "rules_decision": "insufficient",
+          "critical": [
+            "c1",
+            "c1"
+          ]
+        }
+      ],
+      "draft": {
+        "status": "insufficient",
+        "decision_summary": "已取得部分115年9月營收資訊，但第3季完整財務報告與其他關鍵估值資料未完全讀取，證據不足以支援完整總經、基本面與估值分析。",
+        "ticker": "2454",
+        "snapshot_id": "snap-fwd1-3ec3d8a09028",
+        "as_of": "2026-10-30T13:00:00+00:00",
+        "claims": [
+          {
+            "claim_id": "c1",
+            "kind": "fact",
+            "text": "聯發科 2026年9月自結合併營收淨額為 553.99 億元，較 8 月減少 13.69%。",
+            "evidence_refs": [
+              "ev-fwd1-2454-rev-202609"
+            ],
+            "facts": [
+              {
+                "metric": "月合併營收淨額",
+                "value": 55399000000,
+                "unit": "元",
+                "currency": "TWD",
+                "period": "2026-09",
+                "period_basis": "single_month",
+                "source_ref": "ev-fwd1-2454-rev-202609"
+              }
+            ],
+            "limitations": [
+              "原文未完整列出年增率與詳細財報數字"
+            ]
+          }
+        ],
+        "macro_observations": [],
+        "fundamental_observations": [
+          {
+            "observation": "2026年9月單月營收較上月衰退，顯示短期營運動能波動。"
+          }
+        ],
+        "valuation_scenarios": [],
+        "positive_channels": [],
+        "negative_channels": [],
+        "conflicts": [],
+        "unknowns": [
+          "缺少 115 年第 3 季完整合併財務報告與具體 EPS、毛利率等基本面數據",
+          "缺少對應截止日之 P/E 與股價評估數據"
+        ],
+        "next_signals": [
+          "等待完整第 3 季財報發布與後續月份營收公告"
+        ],
+        "limitations": [
+          "無法透過工具進一步讀取詳細財務報表內容與股價區間資訊",
+          "僅憑單月份營收公告不足以推論全面財務與估值狀態"
+        ],
+        "source_refs": [
+          "ev-fwd1-2454-rev-202609"
+        ]
+      },
+      "review": {
+        "decision": "insufficient",
+        "issues": [
+          {
+            "claim_id": "c1",
+            "severity": "critical",
+            "reason": "月合併營收淨額=55399000000 在 ev-fwd1-2454-rev-202609 的原文裡找不到，來源不支持這個數字",
+            "required_evidence": "read_evidence(ev-fwd1-2454-rev-202609)，逐字核對 c1 的 月合併營收淨額 數值"
+          },
+          {
+            "claim_id": "c1",
+            "severity": "minor",
+            "reason": "證據之間的「營收」數字不同（{'ev-fwd1-2454-rev-202609': 553.0, 'ev-fwd1-2454-call-2026q3': 1680.0}），草稿沒有在 conflicts 說明",
+            "required_evidence": "read_evidence(ev-fwd1-2454-rev-202609) 與 read_evidence(ev-fwd1-2454-call-2026q3)，把差異與採信理由寫進 conflicts"
+          },
+          {
+            "claim_id": "c1",
+            "severity": "critical",
+            "reason": "還有 critical 問題但沒有剩餘預算可以補查，不可宣稱已核實",
+            "required_evidence": "退回 Researcher：預算不足，需保留限制並停止，不可跳過覆核發布"
+          }
+        ],
+        "checked_refs": [
+          "ev-fwd1-2454-rev-202609"
+        ],
+        "checked_metric_ids": [
+          "月合併營收淨額"
+        ],
+        "decision_summary": "關鍵資料缺失或預算不足，無法核實；保留限制，不放行。"
+      },
+      "budget": {
+        "calls_used": 2,
+        "tool_calls_used": 1,
+        "tokens_observed": 3949,
+        "supplement_rounds": 0,
+        "active_seconds": 3.367
+      }
+    }
+  ]
+}

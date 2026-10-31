@@ -88,3 +88,5 @@
 ## 10. 2026-10-31 組長決定：J=6 單次例外
 
 組長核定，太平洋時間 2026-10-31 這一個額度日的校準 job 上限開到 20（已跑 6 + 第 5 天 6 + 舊版 dual 重跑 8），由 `dev_traces.py --j-exception 20 --j-exception-day 2026-10-31` 明確指定，其他日期仍是 J=6。每個 job 的預算、80% RPD／RPM／TPM 限制、模型與規則都不變。前瞻研究 3 個 job 存在獨立的 `tmp/forward_batch1.sqlite3`，讓 D 的校準匯出只含開發案例。
+
+實際執行（2026-10-31，台北）：前瞻 3 個（19:17）、第 5 天 6 個（19:23）、dual 重跑 8 個（22:09 完成）。重跑第一次卡在 mock 階段：mock 的 quota 沒帶例外，第 7 案被 J=6 暫停，當時尚未送出任何真實請求；停掉後拆成 6＋2 兩批重跑，輸出為 `agent/calib-v1-dual-rerun-1.json`、`-2.json`。mock 階段已修正。校準比較的 dual 一律用重跑結果；`dev-runs-calib-v1.jsonl` 仍保留舊 dual，以 started_at／repo_commit 排除。

@@ -37,7 +37,28 @@
     "note": "captured_at 晚於 cutoff 的 24 筆（22 份 FinMind 原始檔、2 筆 2454 證據）是擷取時間，不是資料可得時間。"
   },
   "research_reports": {
-    "status": "未執行",
-    "note": "三檔研究尚未以本快照跑過；手冊要求 W07–W09 各凍結一份研究。"
+    "status": "已執行（live，dual）",
+    "file": "research/forward-batch-1-reports.json",
+    "generated_at": "2026-10-31T11:17:38+00:00",
+    "commit": "76a6469",
+    "published": false,
+    "results": {
+      "2330": {
+        "job_id": "3e38c2a9-19a0-48a7-9996-a9504cdfcad8",
+        "status": "insufficient_evidence",
+        "stop_reason": "researcher_insufficient"
+      },
+      "2317": {
+        "job_id": "81194b4d-5c7e-4838-9b8e-2ecd12351856",
+        "status": "succeeded",
+        "stop_reason": "review_pass"
+      },
+      "2454": {
+        "job_id": "adddb2ad-4108-4bdf-9b2c-a45118f0420e",
+        "status": "insufficient_evidence",
+        "stop_reason": "researcher_insufficient"
+      }
+    },
+    "note": "2317 覆核通過；2330、2454 由 Researcher 回報證據不足（Q3 財報不在本快照）。未發布；方向訊號仍為 none。"
   }
 }

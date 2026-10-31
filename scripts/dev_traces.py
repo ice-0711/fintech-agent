@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
 
-from agents.budget import ProjectQuota  # noqa: E402
+from agents.budget import QUOTA_DAY_TZ, ProjectQuota  # noqa: E402
 from agents.contract import validate_job_request  # noqa: E402
 from agents.research_graph import RESEARCHER_PROMPT_VERSION, make_research_handler  # noqa: E402
 from agents.review_contract import REVIEWER_PROMPT_VERSION  # noqa: E402
@@ -132,6 +132,8 @@ def main() -> None:
            "cases": []}
 
     mock_quota = ProjectQuota(model_id="mock-model", rpm=10**4, tpm=10**8, rpd=10**6)
+    # Mocks send nothing real, so J must not pause them: one run may hold more than 6 cases.
+    mock_quota.j_exception, mock_quota.j_exception_day = len(chosen), datetime.now(QUOTA_DAY_TZ).date().isoformat()
     with tempfile.TemporaryDirectory() as tmp:
         mock_store = JobStore(Path(tmp) / "mock.sqlite3")
         mocks = {c["case_id"]: run(mock_store, c, FakeClient(mock_script(c)), "mock-model", mock_quota, "mock") for c in chosen}
