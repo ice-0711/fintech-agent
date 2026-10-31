@@ -29,7 +29,7 @@
 
 | 規則 | 狀態 |
 |---|---|
-| 每週五 21:00（台北）三檔各凍結一份，共 9 份；批次 1 為 2026-10-30 21:00 | 我在 675fa9e 看到 `forward-batch-1-sources.json` 為 v0.4-draft（2026-10-31），status 仍是 draft，快照尚未記入 frozen；組長要先決定是否納入第三季（B 的 Q3 公告檢查見下方 2.3）。cutoff 10/30 21:00 已過，快照怎麼產生由組長決定，D 不處理 |
+| 每週五 21:00（台北）三檔各凍結一份，共 9 份；批次 1 為 2026-10-30 21:00 | 我在 675fa9e 看到 `forward-batch-1-sources.json` 為 v0.4-draft（2026-10-31），status 仍是 draft。組長 2026-10-31 決定：第三季選 A（FinMind 未上架則改 B 並記原因）、direction 選 (b)；之後由 B 轉 frozen、組長跑快照。cutoff 10/30 21:00 已過，快照怎麼產生由組長決定，D 不處理 |
 | 截止時間與來源可得時間同存；cutoff 後發布的來源不得列入 | 規則在檔案 `evidence_rules`；凍結後由 B 稽核、D 抽查 |
 | 價格口徑：raw 未還原；entry 為 cutoff 後下一個交易日開盤；D1／D5／D20 收盤 | runner 已依此實作（見 e2e-w07.md 第四節） |
 | 資料不足照收錄，不補造方向、不挑掉失敗樣本 | runner 對每一份訊號都輸出一列，缺價或未成熟標 NA，不會消失 |
@@ -65,7 +65,7 @@
 | 2 | 前瞻快照的 sha256、generated_at、raw_files 是否已記入 `forward-batch-1-sources.json` 的 `snapshot.frozen` | 檔案 `freeze_after_run` | 待做 |
 | 3 | 快照內沒有任何 `available_at` 晚於 10/30 21:00 的證據、季別、總經、股價 | `test_forward_guard.py` 的規則；D 另以快照抽查 | 待做 |
 | 4 | 3 份研究都有（或如實記缺）：方向訊號欄位、截止時間、來源可得時間 | 手冊 06 章 | 待做 |
-| 5 | 把方向訊號填進 `forward-signals-batch1.json`（由報告 JSON 取值，不自己判斷）後，11/02 起用 runner 算 D1，之後 D5、D20 | `scripts/forward_eval.py` | 待做 |
+| 5 | （方向訊號組長已決定三批全記 `none`，樣板已填好）快照完成後，11/02 起用 runner 算 D1，之後 D5、D20 | `scripts/forward_eval.py` | 待做 |
 
 runner 指令範例（以實際檔名為準，價格與日曆檔放在 `evaluation/` 之下，不要放進 `data/forward`）：
 
@@ -84,7 +84,7 @@ python scripts/forward_eval.py \
 
 | 項目 | 原因 | 需要誰 |
 |---|---|---|
-| 批次 1 的方向訊號 | A 的報告 JSON 沒有 `direction` 欄位；B 提兩案：(a) 新增 Researcher 明示、Reviewer 覆核的欄位，(b) 第 1 批全記 `none` 只展示路徑。決定前 `forward-signals-batch1.json` 維持 null | 組長 |
+| 批次 1 的方向訊號 | 組長 2026-10-31 已決定選 (b)：三批全記 `none`，只展示 1／5／20 日報酬，不算命中率；`forward-signals-batch1.json` 三筆已改為 `none` | —（已解決） |
 | 批次 1 的價格 | 11/02 起才有 | — |
 | 真實交易日曆與價格檔 | B 已給口徑（FinMind `TaiwanStockTradingDate`；價格 `TaiwanStockPrice` 未還原，欄位 date、stock_id、open、close、Trading_Volume；只含 2330、2317、2454；放 `evaluation/forward/`）；實際檔案還沒匯出 | 組長或 D 於 11/02 前後依口徑匯出 |
 | 零報酬的方向命中規約 | 已解決：組長 2026-10-29 核定，零報酬不計入分子分母、另列筆數（`handoff/decisions-2026-10.md` 第八節） | — |

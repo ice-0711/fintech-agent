@@ -1,24 +1,24 @@
 {
   "batch_id": "forward-batch-1",
-  "note": "樣板：direction 待 10/30 21:00 研究凍結、B／組長核准報告後由報告 JSON 填入，不是 D 或 AI 猜的；null 代表尚未有方向訊號資料",
+  "note": "組長 2026-10-31 決定 direction 選 (b)：第 1 批三份全部記 none，只展示 1／5／20 日報酬，不算命中率（不是 D 或 AI 猜的方向）。若之後新增由 Researcher 明示、Reviewer 覆核的 direction 欄位，才改填 up／down",
   "signals": [
     {
       "signal_id": "fwd1-2330",
       "ticker": "2330",
       "signal_cutoff_at": "2026-10-30T21:00:00+08:00",
-      "direction": null
+      "direction": "none"
     },
     {
       "signal_id": "fwd1-2317",
       "ticker": "2317",
       "signal_cutoff_at": "2026-10-30T21:00:00+08:00",
-      "direction": null
+      "direction": "none"
     },
     {
       "signal_id": "fwd1-2454",
       "ticker": "2454",
       "signal_cutoff_at": "2026-10-30T21:00:00+08:00",
-      "direction": null
+      "direction": "none"
     }
   ]
 }
