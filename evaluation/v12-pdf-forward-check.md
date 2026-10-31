@@ -1,8 +1,9 @@
 # W07-D 線上 PDF 與前瞻首批檢查（v12-pdf-forward-check）
 
 - 任務：W07-D｜D｜驗證端到端和前瞻觀察規則；線上 PDF 及前瞻首批
-- 版本：v0.1 草稿（2026-10-29）｜撰寫：D；初稿由 AI 協助，D 需逐項核對後才送出
-- 驗收人：B 交叉評分，組長核准結論（**尚未驗收**）
+- 版本：v0.2（2026-10-31）；初版 v0.1 為 2026-10-29｜撰寫：D；初稿由 AI 協助，D 需逐項核對後才送出
+- 驗收人：B 交叉評分（初版通過，2026-10-31，`docs/B-review-W07-D.md`）；組長核准結論（**尚未核准**）
+- v0.2 更新依據：`origin/main` 675fa9e；B 指出的過時處只在 `e2e-w07.md`，本檔只更新前瞻狀態與受阻項目
 - 搭配文件：`evaluation/e2e-w07.md`（端到端結果與未執行清單）
 
 ## 一、線上 PDF 檢查（目前只有 MOCK 版）
@@ -28,7 +29,7 @@
 
 | 規則 | 狀態 |
 |---|---|
-| 每週五 21:00（台北）三檔各凍結一份，共 9 份；批次 1 為 2026-10-30 21:00 | 批次 1 尚未凍結（檔案 status 為 draft） |
+| 每週五 21:00（台北）三檔各凍結一份，共 9 份；批次 1 為 2026-10-30 21:00 | 我在 675fa9e 看到 `forward-batch-1-sources.json` 為 v0.4-draft（2026-10-31），status 仍是 draft，快照尚未記入 frozen；組長要先決定是否納入第三季（B 的 Q3 公告檢查見下方 2.3）。cutoff 10/30 21:00 已過，快照怎麼產生由組長決定，D 不處理 |
 | 截止時間與來源可得時間同存；cutoff 後發布的來源不得列入 | 規則在檔案 `evidence_rules`；凍結後由 B 稽核、D 抽查 |
 | 價格口徑：raw 未還原；entry 為 cutoff 後下一個交易日開盤；D1／D5／D20 收盤 | runner 已依此實作（見 e2e-w07.md 第四節） |
 | 資料不足照收錄，不補造方向、不挑掉失敗樣本 | runner 對每一份訊號都輸出一列，缺價或未成熟標 NA，不會消失 |
@@ -43,9 +44,9 @@
 | 2 | 2026-11-06 21:00 | 2026-11-09 開盤 | 11/09、11/13、12/04 |
 | 3 | 2026-11-13 21:00 | 2026-11-16 開盤 | 11/16、11/20、12/11（與截取日同日，17:30 前截取則 NA） |
 
-除權息：2330 的除息日預計為 2026-12-10，只落在批次 3 的 20 日窗內，依規約標記並保留 raw 報酬。2317、2454 目前查無除權息預告，B 要求第 2、3 批前再查。
+除權息（B 2026-10-31 的口徑）：2330 第二季現金股利 7.0 元，除息日 2026-12-10，只落在批次 3 的 20 日窗內，依規約標記並保留 raw 報酬。2454 上半年現金股利每股 24.5 元，除息交易日 2027-01-05（MOPS 公告 2026-10-30 17:08），不在三批任何觀察窗內。2317 目前沒有。
 
-### 2.3 批次 1 凍結前的來源狀態（引用 B 的檔案，D 未獨立核對）
+### 2.3 批次 1 凍結前的來源狀態（v0.1 記錄；B 2026-10-31 已補第三季公告與對帳，D 未獨立核對）
 
 | 項目 | B 記錄的狀態 |
 |---|---|
@@ -60,7 +61,7 @@
 
 | # | 檢查 | 依據 | 狀態 |
 |---|---|---|---|
-| 1 | B 通知凍結後，檢查 `evidence-audit-w07.md` 與 `data/v12-report-audit.csv`（B 在群組要求） | B 10/28 訊息 | 待做 |
+| 1 | 快照產生、B 通知凍結後，檢查 `evidence-audit-w07.md` 與 `data/v12-report-audit.csv`（B 在群組要求） | B 10/28 訊息 | 待做（快照尚未產生） |
 | 2 | 前瞻快照的 sha256、generated_at、raw_files 是否已記入 `forward-batch-1-sources.json` 的 `snapshot.frozen` | 檔案 `freeze_after_run` | 待做 |
 | 3 | 快照內沒有任何 `available_at` 晚於 10/30 21:00 的證據、季別、總經、股價 | `test_forward_guard.py` 的規則；D 另以快照抽查 | 待做 |
 | 4 | 3 份研究都有（或如實記缺）：方向訊號欄位、截止時間、來源可得時間 | 手冊 06 章 | 待做 |
@@ -71,9 +72,9 @@ runner 指令範例（以實際檔名為準，價格與日曆檔放在 `evaluati
 ```
 python scripts/forward_eval.py \
   --signals evaluation/forward-signals-batch1.json \
-  --prices evaluation/forward-prices/prices-2026-11.csv \
-  --calendar evaluation/forward-prices/trading-dates-2026.csv \
-  --actions evaluation/forward-prices/corporate-actions.json \
+  --prices evaluation/forward/prices-2026-11.csv \
+  --calendar evaluation/forward/trading-dates-2026.csv \
+  --actions evaluation/forward/corporate-actions.json \
   --as-of 2026-11-02T18:00:00+08:00 \
   --out evaluation/forward-eval-batch1.csv \
   --summary-out evaluation/forward-eval-batch1-summary.json
@@ -83,16 +84,17 @@ python scripts/forward_eval.py \
 
 | 項目 | 原因 | 需要誰 |
 |---|---|---|
-| 批次 1 的方向訊號與價格 | 10/30 21:00 才凍結，價格 11/02 起才有 | B、組長 |
-| 真實交易日曆（含颱風假等實際休市） | runner 不內建日曆；我沒有取得 FinMind 資料 | B 或組長匯出 |
-| 零報酬的方向命中規約 | 手冊沒寫；runner 暫記 `zero_return` | 組長登記 |
+| 批次 1 的方向訊號 | A 的報告 JSON 沒有 `direction` 欄位；B 提兩案：(a) 新增 Researcher 明示、Reviewer 覆核的欄位，(b) 第 1 批全記 `none` 只展示路徑。決定前 `forward-signals-batch1.json` 維持 null | 組長 |
+| 批次 1 的價格 | 11/02 起才有 | — |
+| 真實交易日曆與價格檔 | B 已給口徑（FinMind `TaiwanStockTradingDate`；價格 `TaiwanStockPrice` 未還原，欄位 date、stock_id、open、close、Trading_Volume；只含 2330、2317、2454；放 `evaluation/forward/`）；實際檔案還沒匯出 | 組長或 D 於 11/02 前後依口徑匯出 |
+| 零報酬的方向命中規約 | 已解決：組長 2026-10-29 核定，零報酬不計入分子分母、另列筆數（`handoff/decisions-2026-10.md` 第八節） | — |
 | Supabase 權限與重啟的 D 自行驗證 | 沒有授權的連線資料 | 組長 |
 
 ## 四、交付紀錄
 
 | 欄位 | 內容 |
 |---|---|
-| 版本 | v0.1 草稿 |
-| 實際工時 | （待 D 自己填） |
-| 成果連結 | （待 D 上傳後填） |
-| 驗收人與日期 | B 交叉評分、組長核准：待 |
+| 版本 | v0.2（2026-10-31）；v0.1 已隨 PR #11 合併（44dfcb5） |
+| 實際工時 | 約 4 小時（D 自己回報，10/29 一天；與 e2e-w07.md 為同一次工時，不重複計算）；10/31 修訂時間待 D 自己補 |
+| 成果連結 | v0.1：https://github.com/kk1030-bit/fintech-agent/pull/11（已合併）；v0.2：（待 D 上傳後填） |
+| 驗收人與日期 | B 交叉評分：初版通過（2026-10-31）；組長核准：待 |

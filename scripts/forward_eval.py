@@ -196,7 +196,7 @@ def evaluate_signal(signal: dict, calendar: list[date], prices: dict, as_of: dat
         out[f"d{k}_corporate_action_in_window"] = ";".join(in_window)
         if direction in ("up", "down"):
             if ret == 0:
-                out[f"d{k}_direction_hit"] = "zero_return"  # 規約未定，不算命中也不算未命中，待組長登記
+                out[f"d{k}_direction_hit"] = "zero_return"  # 組長 2026-10-29 核定：不計入方向命中率的分子與分母，另列筆數
             elif (direction == "up") == (ret > 0):
                 out[f"d{k}_direction_hit"] = "hit"
             else:
