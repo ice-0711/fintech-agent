@@ -25,11 +25,11 @@ Reviewer 的決定只有三種，名稱與程式一致（組長 `agents/research
 
 ## 三、模型判斷與規則判斷
 
-最終決定由**模型的判斷**與**確定性規則的判斷**共同產生，取兩者中較嚴格的一個（pass < revise < insufficient）。因此規則可以推翻模型的 pass，但規則不會把模型的 revise 放寬為 pass（組長 `agents/research_graph.py`）。
+最終決定由**模型的判斷**與**確定性規則的判斷**共同產生，取兩者中較嚴格的一個（pass < revise < insufficient）。因此規則可以推翻模型的 pass（組長 `agents/research_graph.py`）。
 
 規則由組長納入 `agents/review_checks.py`，其中部分來自 D 的草稿規則（repo 根目錄 README.md：「規則已由組長納入 agents/review_checks.py」）。與本稿三個例子有關的規則包括：引用的來源可得時間晚於 cutoff（lookahead）、TTM 不是連續四個單季（ttm_not_consecutive）、把累計當成單季（ytd_as_single）、同業平均納入 2330（peer_includes_2330）。
 
-自 2026-10-31 起，可得時間與 cutoff 的先後改由程式比對，模型不再自行比較；模型若列出時間問題、而程式確認引用來源都在 cutoff 前可得，該問題會被移除並記錄（組長 `handoff/decisions-2026-10.md` 第 9 節）。
+自 2026-10-31 起，可得時間與 cutoff 的先後改由程式比對，模型不再自行比較。模型若列出時間問題，而程式確認該主張引用的來源都在 cutoff 前可得，該問題會被移除，並記 `timing_issue_refuted` 事件（含模型原判與原文）供評分查核；移除後若沒有其他 critical 問題，模型的結論會改為 pass，之後仍與規則的判斷合併、取較嚴格者（組長 `handoff/decisions-2026-10.md` 第 9 節；`agents/review_checks.py` 的 `drop_refuted_timing_issues`）。也就是說，只有在這種「時間問題被程式否定」的情況下，模型原本的 revise 或 insufficient 才會改為 pass。
 
 ## 四、Reviewer 不是全能的
 
