@@ -2,7 +2,7 @@
   "version": "quota-baseline-v1",
   "prepared_at": "2026-09-28",
   "prepared_for": "W01-L (補做)",
-  "status": "gemini_verified_by_lead; render/supabase unverified",
+  "status": "gemini_verified_by_lead; render/supabase read from dashboards 2026-11-02 (Render 2GB not purchased)",
   "rule": "Unknown values stay null. Do not fill with guesses, student-plan claims or public tier tables. agents/budget.py treats any null as J = 0 (mock only).",
   "gemini": {
     "model_id": "gemini-3.5-flash-lite",
@@ -51,20 +51,26 @@
   },
   "render": {
     "current_plan_in_repo": "free (render.yaml plan: free; PROJECT_STATUS.md: 512MB RAM)",
-    "planned_2gb": "plan only — not assumed active, not purchased",
-    "monthly_cost": null,
-    "checked_at": null
+    "planned_2gb": "1c-2g（1 CPU、2 GB RAM）US$25／月；未開通、未付費，待組長核准",
+    "monthly_cost": 0,
+    "checked_at": "2026-11-02",
+    "current_plan": "Free（0.1 CPU、512 MB RAM，閒置會休眠）；服務 fintech-agent，Ohio，Auto-Deploy On Commit",
+    "other_plans_seen": "0.5c-512mb US$7／月；2c-4g US$85／月",
+    "source": "Render Dashboard → fintech-agent → Compute（組長登入的瀏覽器，Claude 唯讀查看）"
   },
   "supabase": {
-    "plan": null,
-    "db_size_limit": null,
-    "db_size_used": null,
-    "storage_limit": null,
-    "storage_used": null,
-    "egress_limit": null,
-    "backup": null,
-    "checked_at": null,
-    "how_to_fill": "Supabase Dashboard → Project Settings → Usage / Billing；到 80% 停止新增並通知，不自動刪正式資料。"
+    "plan": "Free（organization kk1030-bit，2 個專案：fintech-agent ap-northeast-1、fintech-agent-test eu-west-1，皆 NANO）",
+    "db_size_limit": "0.5 GB／專案",
+    "db_size_used": "fintech-agent 25.64 MB；fintech-agent-test 25.07 MB（約 5%）",
+    "storage_limit": "1 GB（organization）",
+    "storage_used": "0 GB（期間平均）",
+    "egress_limit": "5 GB／月（另 cached egress 5 GB）",
+    "backup": "Free Plan 不含排程備份（Backups 頁面明示）；備份需自行匯出",
+    "checked_at": "2026-11-02",
+    "how_to_fill": "Supabase Dashboard → Project Settings → Usage / Billing；到 80% 停止新增並通知，不自動刪正式資料。",
+    "egress_used": "0.00 GB",
+    "billing_cycle": "2026-10-04 至 2026-11-04",
+    "source": "Supabase Dashboard → Organization Usage、fintech-agent-test → Database → Backups（Claude 唯讀查看）"
   },
   "gemini_alternatives_checked": [
     {
