@@ -59,6 +59,6 @@
         "stop_reason": "researcher_insufficient"
       }
     },
-    "note": "2317 覆核通過；2330、2454 由 Researcher 回報證據不足（Q3 財報不在本快照）。未發布；方向訊號仍為 none。"
+    "note": "2317 覆核通過；2330、2454 由 Researcher 回報證據不足。2330 第三季財報 cutoff 前未公告，快照只有 10/15 自結數；2454 第三季財報已以證據收錄（ev-fwd1-2454-fs-2026q3、ev-fwd1-2454-call-2026q3），但 Researcher 只搜尋一次就回報不足，未讀取（2026-11-02 依 B 稽核更正）。兩案的 9 月營收引用與原文相符，但被覆核程式的中文金額誤判列為 critical（見 research/forward-batch-1-audit.md 第三節）。不重跑；未發布；方向訊號仍為 none。"
   }
 }
