@@ -314,3 +314,20 @@ def test_read_only_ui_has_no_model_code():
         imports = [line for line in path.read_text(encoding="utf-8").splitlines()
                    if line.startswith(("import ", "from "))]
         assert not [line for line in imports if "provider" in line or "genai" in line or "budget" in line]
+
+
+def test_peer_stats_keep_peers_with_a_different_period(monkeypatch):
+    """Lead 2026-11-02 (handbook F02): a peer on another financial period still counts; the note says so."""
+    from research_ui import comparison
+    real = comparison._row
+
+    def shifted(code, *a):
+        row, issues = real(code, *a)
+        if code == "3034":
+            row["financial_period"] = "2026Q1"
+        return row, issues
+
+    monkeypatch.setattr(comparison, "_row", shifted)
+    d = comparison.build_comparison()
+    assert d["periods_consistent"] is False and d["peer_stats"]["period_note"] == "同業財報期不同"
+    assert d["peer_stats"]["pe_ttm"]["n"] == 2

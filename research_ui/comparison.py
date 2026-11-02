@@ -230,8 +230,9 @@ def build_comparison() -> dict[str, Any]:
         rows.append(row)
         checks.extend(issues)
 
-    subject_period = next((r["financial_period"] for r in rows if r["role"] == "subject"), None)
-    peers = [r for r in rows if r["include_in_peer_stats"] and r["financial_period"] == subject_period]
+    # Handbook F02: same-day prices, each company's own financial period stated per row (lead 2026-11-02).
+    peers = [r for r in rows if r["include_in_peer_stats"]]
+    periods_consistent = len({r["financial_period"] for r in rows if r["financial_period"]}) <= 1
 
     def avg(metric: str, nd: int = 2) -> dict[str, Any]:
         vals = [r["metrics"][metric]["value"] for r in peers if r["metrics"][metric]["value"] is not None]
@@ -252,10 +253,11 @@ def build_comparison() -> dict[str, Any]:
         "synthetic_fixture": synthetic is not False,
         "data_status": "B 標示為真實資料（synthetic_fixture=false），待 D 覆核" if synthetic is False
                        else "B 未標示真實或合成，一律以 FIXTURE 呈現",
-        "periods_consistent": len({r["financial_period"] for r in rows if r["financial_period"]}) <= 1,
+        "periods_consistent": periods_consistent,
         "rows": rows,
         "peer_stats": {
-            "basis": "只用 role=peer、與主體同財報期、且可由工具重現者；2330 產業參照與主體一律排除",
+            "basis": "只用 role=peer 且可由工具重現者，各自採最新財報期並逐列標示；2330 產業參照與主體一律排除",
+            "period_note": None if periods_consistent else "同業財報期不同",
             "pe_ttm": avg("pe_ttm"), "pb": avg("pb"), "revenue_yoy_quarter": avg("revenue_yoy_quarter", 4),
             "snapshot_values": {"pe_ttm": stats_snapshot.get("peer_avg_pe"), "pb": stats_snapshot.get("peer_avg_pb"),
                                 "revenue_yoy_quarter": stats_snapshot.get("peer_avg_revenue_yoy")},

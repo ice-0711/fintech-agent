@@ -56,11 +56,36 @@ def paragraph_contains(paragraph: str, value: float) -> bool:
     for s in num_variants(value):
         if re.search(rf"(?<![\d,.]){re.escape(s)}(?![\d,]|\.\d)", paragraph):
             return True
-    return False
+    # MOPS 新聞稿的中文單位金額（5,118億5,700萬元）換算後相符也算（CR-W08，組長 2026-11-02 核定）
+    return value_matches(value, chinese_amounts(paragraph))
 
 
 UNIT_SCALES = (1, 100, 0.01, 1e3, 1e-3, 1e4, 1e-4, 1e5, 1e-5, 1e6, 1e-6, 1e8, 1e-8)  # %、千元、萬、億、百萬
 NUM_RE = re.compile(r"-?\d[\d,]*\.?\d*")
+_BIG = {"兆": 1e12, "億": 1e8, "萬": 1e4}
+_SMALL = {"仟": 1e3, "千": 1e3, "佰": 1e2, "百": 1e2}
+CN_AMOUNT_RE = re.compile(r"(?:\d[\d,]*(?:\.\d+)?[兆億萬仟千佰百]+)+(?:\d[\d,]*(?:\.\d+)?)?")
+_CN_TOKEN = re.compile(r"\d[\d,]*(?:\.\d+)?|[兆億萬仟千佰百]")
+
+
+def chinese_amounts(text: str) -> list[float]:
+    """中文單位金額換成元：5,118億5,700萬 → 511,857,000,000；553億9仟9佰萬 → 55,399,000,000（B 的 CR-W08）。"""
+    out = []
+    for m in CN_AMOUNT_RE.finditer(text or ""):
+        total, section, last = 0.0, 0.0, None
+        for tok in _CN_TOKEN.findall(m.group(0)):
+            if tok in _SMALL:
+                section += (last or 0) * _SMALL[tok]
+                last = None
+            elif tok in _BIG:
+                section += last or 0
+                last = None
+                total += section * _BIG[tok]
+                section = 0.0
+            else:
+                last = float(tok.replace(",", ""))
+        out.append(total + section + (last or 0))
+    return out
 
 
 def numbers_in(text: str) -> list[float]:
@@ -101,16 +126,20 @@ def is_unverified(ev: dict) -> bool:
 
 
 def find_conflicts(evidences: list[dict]) -> list[dict]:
-    """同一個關鍵字（營收、毛利率）在不同證據裡出現不同數字，就是來源衝突。"""
+    """同一個關鍵字（營收、毛利率）在不同證據裡出現同單位的不同數字，就是來源衝突。
+    只比同單位（億對億、% 對 %）：「營收 5,118 億」與「營收增加 50.9%」不算衝突（CR-W08，組長 2026-11-02）。
+    月營收與季營收單位相同仍會列出；check_draft 只把它當 minor。"""
     out = []
     for kw in CONFLICT_KEYWORDS:
-        found = {}
+        by_unit: dict[str, dict] = {}
         for ev in evidences:
             m = re.search(rf"{kw}[^\d]{{0,16}}?([\d,]+(?:\.\d+)?)\s*(億|%|％)", ev.get("paragraph", ""))
             if m:
-                found[ev["evidence_version_id"]] = float(m.group(1).replace(",", ""))
-        if len(set(found.values())) > 1:
-            out.append({"keyword": kw, "values": found})
+                unit = "%" if m.group(2) == "％" else m.group(2)
+                by_unit.setdefault(unit, {})[ev["evidence_version_id"]] = float(m.group(1).replace(",", ""))
+        for found in by_unit.values():
+            if len(set(found.values())) > 1:
+                out.append({"keyword": kw, "values": found})
     return out
 
 
@@ -256,7 +285,7 @@ def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, r
                         elif r in obs:
                             pool += numbers_in(str(obs[r].get("brief") or obs[r].get("digest") or ""))
                         elif r in evid:
-                            pool += numbers_in(evid[r].get("paragraph", ""))
+                            pool += numbers_in(evid[r].get("paragraph", "")) + chinese_amounts(evid[r].get("paragraph", ""))
                     if not value_matches(val, pool):
                         where = "、".join(srcs)
                         issues.append(_iss(cid, "critical", f"{metric}={val} 在引用的 {where} 裡找不到，來源不支持這個數字",

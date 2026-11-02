@@ -90,3 +90,12 @@
 組長核定，太平洋時間 2026-10-31 這一個額度日的校準 job 上限開到 20（已跑 6 + 第 5 天 6 + 舊版 dual 重跑 8），由 `dev_traces.py --j-exception 20 --j-exception-day 2026-10-31` 明確指定，其他日期仍是 J=6。每個 job 的預算、80% RPD／RPM／TPM 限制、模型與規則都不變。前瞻研究 3 個 job 存在獨立的 `tmp/forward_batch1.sqlite3`，讓 D 的校準匯出只含開發案例。
 
 實際執行（2026-10-31，台北）：前瞻 3 個（19:17）、第 5 天 6 個（19:23）、dual 重跑 8 個（22:09 完成）。重跑第一次卡在 mock 階段：mock 的 quota 沒帶例外，第 7 案被 J=6 暫停，當時尚未送出任何真實請求；停掉後拆成 6＋2 兩批重跑，輸出為 `agent/calib-v1-dual-rerun-1.json`、`-2.json`。mock 階段已修正。校準比較的 dual 一律用重跑結果；`dev-runs-calib-v1.jsonl` 仍保留舊 dual，以 started_at／repo_commit 排除。
+
+## 11. 2026-11-02 組長決定：回覆 B 的 W08 待決事項
+
+- **中文金額單位（CR-W08，`docs/CR-W08-review-chinese-amounts.md`）**：採用。`agents/review_checks.py` 新增 `chinese_amounts()`，原文的「5,118億5,700萬元」這類寫法換算後相符即算來源支持；引用證據的數字池也納入換算值。寫錯的數字仍判 not_supported。測試 `tests/test_review_chinese_amounts.py`。屬第二段，W09 鎖定時一併鎖定。
+- **來源衝突只比同單位**：`find_conflicts()` 只比較同單位（億對億、% 對 %）。月營收與季營收單位相同仍會列出，維持 minor、不擋。
+- **影響範圍**：B 掃描過，開發集 10 案的證據沒有中文單位金額，校準結果不受影響。以新規則重放前瞻第 1 批草稿：2330 規則判定 insufficient → pass；2454 insufficient → pass（只剩月營收與季營收的 minor）；2317 不變。
+- **前瞻第 1 批不重跑**：照手冊「資料不足照收錄」，以現有結果記錄。中文金額誤判、2454 Researcher 只搜尋一次未讀第三季證據，兩點寫進限制。
+- **同業平均**：依手冊 F02「各自財報期與來源明示」，不同財報期的同業都計入（2454 比較組 n=2），表格逐列標財報季別，`periods_consistent = false` 時註明「同業財報期不同」。`research_ui/comparison.py` 已由組長端改（11/02，不再篩同財報期，`peer_stats.period_note`；PDF 同步加註），測試 `test_peer_stats_keep_peers_with_a_different_period`；請 A 核對網站呈現。
+- **發布前容量 80% 檢查（`data/storage-and-safety-w08.md` 第六節）**：原則採用；門檻依 Supabase 實際方案訂，組長提供方案與用量後再實作，migration 先在測試專案演練。
