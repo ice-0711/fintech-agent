@@ -36,7 +36,7 @@
 |---|---|---|---|
 | CASE-22-good（D 草稿） | 單季與 TTM 分開寫，並註明單季值不是 TTM；TTM 列出 2025Q3 至 2026Q2 連續四季 | pass | B 確認 TTM 四季皆已對 MOPS 原文 |
 | CASE-22-flawed（D 草稿） | 把單季 EPS 寫成 TTM EPS，期間只有一季 | revise，critical 指向 c1 | 規則判定 TTM 不是連續四個單季 |
-| live dual，job e9045bbd（2026-10-31） | 草稿口徑正確，但 TTM 期間寫在 period 欄 | revise 後再覆核，預算用完以 insufficient 停止 | 組長事後判定為**誤擋**，10/31 修正規則（見 W04 case-walkthrough-v1.md） |
+| live dual，job e9045bbd（2026-10-31） | 草稿口徑正確，但 TTM 期間寫在 period 欄 | 第一次：模型 pass、規則 revise，最終 revise；第二次：模型 pass、規則 insufficient，最終 insufficient，預算用完停止 | 組長事後判定為**誤擋**，10/31 修正規則（見 W04 case-walkthrough-v1.md） |
 
 - **退件與停止**：flawed 版被退回，要求用 get_financial_snapshot 確認連續四個單季；不足則 TTM EPS 標 null。live 執行顯示，補查 1 輪後 8 次模型發送用完，系統停止而不發布。
 - **來源／測試標籤**：前兩列為 D 草稿＋B 交叉評分；第三列為 live trace（組長 `agent/calib-v1-day4.json`），結果屬修正前規則，不與修正後結果比較。

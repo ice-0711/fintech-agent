@@ -25,7 +25,7 @@
 
 ## 三、專案層級的額度
 
-除了單一 job 的限制，整個專案還受 Gemini API 額度限制：每分鐘請求數、每分鐘 token 與每日請求數都只用到 80%；每日研究 job 上限 J 為 6（gemini-3.5-flash-lite，RPD 500）。額度用完時，job 暫停為 paused_quota，到時自動恢復；額度未知時不做真實發送（J＝0）（組長 `handoff/state-machine-v1.md`；`handoff/v12-scope-quota.md` 第 4 節）。
+除了單一 job 的限制，整個專案還受 Gemini API 額度限制：每分鐘請求數、每分鐘 token 與每日請求數都只用到 80%；每日研究 job 上限 J 為 6（gemini-3.5-flash-lite，RPD 500）。唯一例外是太平洋時間 2026-10-31 這一個額度日：組長核定校準 job 上限單日開到 20，並以執行參數明確指定；其他日期仍是 J＝6，每個 job 的預算、80% 額度限制、模型與規則都不變（組長 `handoff/decisions-2026-10.md` 第 10 節）。額度用完時，job 暫停為 paused_quota，到時自動恢復；額度未知時不做真實發送（J＝0）（組長 `handoff/state-machine-v1.md`；`handoff/v12-scope-quota.md` 第 4 節）。
 
 這些是**專題內部**的限制，不是 Google 的規定。Google 帳戶的實際額度由組長核實並保存紀錄（R06）。
 

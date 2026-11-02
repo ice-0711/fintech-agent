@@ -57,7 +57,7 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 **案例二：衝突（live，修正前規則）。** CASE-11 是開發案例，類別「矛盾來源」，題型為合併與個體報表口徑混用，標的 2317。在 dual 模式中，Reviewer 模型判定 insufficient，理由是證據的可得時間晚於 cutoff；但該證據的可得時間 14:15（台北）其實早於 cutoff 17:00（台北），是模型自行比較時區時出錯，規則判斷則為 pass，最終取較嚴格的 insufficient。組長於 10 月 31 日改由程式比對可得時間，模型提出、而程式證明不成立的時間問題會被移除並記錄，並以測試確認。附件：live trace job da86df90-f5c6-4f7d-81b3-1fa090fdc31f（組長 `agent/calib-v1-day2.json`）；組長 `handoff/decisions-2026-10.md` 第 9 節；`tests/test_review_time_ttm.py`。
 
-**案例三：不足（live）。** CASE-18 是開發案例，類別「缺少資料」，題型為關鍵證據在 cutoff 之後，標的 2454。Researcher 搜尋證據查無資料，手上只有 2026Q1 的財務快照，於是把主張標為 unknown、回報 insufficient 並停止，沒有補造 2026Q2 的數字。這次 job 用了 4 次模型發送、2 次工具呼叫。附件：live trace job 6f344c33-1ecf-47e6-92e8-6d0aa14ec1cc（組長 `agent/calib-v1-day4.json`）。
+**案例三：不足（live，dual 模式）。** CASE-18 是開發案例，類別「缺少資料」，題型為關鍵證據在 cutoff 之後，標的 2454。Researcher 搜尋證據時查無資料（#4，no_data），只取得 2026Q1 的財務快照（#6）。第一次撰寫的草稿沒有通過程式的草稿格式檢查（#9，trace 記為 draft_invalid；摘要檔沒有保存檢查出的問題內容），系統要求重寫，用掉第 4 次模型發送後，Researcher 交出狀態為 insufficient 的草稿（#11）：唯一的主張標為 unknown，沒有任何事實數字。這份草稿本身也有問題。確定性規則檢查（#12）判 insufficient，列出兩個 critical：一是主張 c1 引用的工具結果 obs-1 是 search_evidence 的 no_data，不是有效資料；二是草稿沒有任何有來源的事實主張，沒有可核對的內容。job 以 insufficient_evidence 結束，未發布。這次執行沒有補造 2026Q2 的數字，但它不是模範結果：草稿先是格式不合格，交出的版本又引用了無效的工具結果。整個 job 用了 4 次模型發送、2 次工具呼叫。附件：live trace job 6f344c33-1ecf-47e6-92e8-6d0aa14ec1cc（組長 `agent/calib-v1-day4.json`；步驟序號以 # 表示）。
 
 **說明**：截至 2026-10-31 的開發集 live 執行中，dual 模式**尚無一案走到覆核通過並發布**（組長 `handoff/W06-gate-v12.md` 第 8 節；`agent/calib-v1-day1~4.json`），所以「正常」案例只能用 MOCK 報告示範發布流程，不能當作研究結果。三個案例都是開發案例或驗收用報告，不是保留案例，也不是正式實驗結果。
 

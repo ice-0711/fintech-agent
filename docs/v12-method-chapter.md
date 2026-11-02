@@ -6,7 +6,7 @@ title: "第三章　研究方法"
 
 ## 3.1　研究範圍與設計原則
 
-本研究以 Researcher 與 Reviewer 兩個 Agent 協作，在有限的 Gemini API 預算下，提高台股投資分析的證據完整度與可追溯性。研究主體固定為 2330 台積電、2317 鴻海與 2454 聯發科；2379 瑞昱、3034 聯詠只作為 2454 的比較對象，不建立 LLM 研究任務；2330 在 2454 的比較面板中作為產業參照（組長 `handoff/v12-scope-quota.md`）。
+本研究以 Researcher 與 Reviewer 兩個 Agent 協作，在有限的 Gemini API 預算下，檢視是否能提高台股投資分析的證據完整度與可追溯性；是否確實提高，要等第四章的實驗結果。研究主體固定為 2330 台積電、2317 鴻海與 2454 聯發科；2379 瑞昱、3034 聯詠只作為 2454 的比較對象，不建立 LLM 研究任務；2330 在 2454 的比較面板中作為產業參照（組長 `handoff/v12-scope-quota.md`）。
 
 本期功能範圍為 F01 季度資料、F02 同業比較、F03 收藏儀表板、F04 驗證與 F05 線上 PDF。F06 小型 2D 關係圖已由組長於 2026-10-22 決定延後（見 3.8 節）。
 
@@ -46,7 +46,7 @@ F01 提供季度、TTM 與年度三層資料，規則如 3.2、3.3 節。F02 的
 
 **六個工具。** Agent 只能透過六個白名單工具讀取凍結快照：search_evidence、read_evidence、get_financial_snapshot、get_macro_snapshot、get_price_window、calculate_metrics。工具以狀態、工具名稱、原因、資料四個欄位回覆，查不到回 no_data 而不回 0，每次限時 15 秒；所有數值計算交由確定性計算模組（B 技術事實第五節）。
 
-**兩角色交接。** Researcher 每輪最多執行 2 個工具，輸出草稿後交給 Reviewer。Reviewer 只能使用 read_evidence、get_financial_snapshot、get_macro_snapshot、calculate_metrics，需要搜尋或查價時以「需要的證據」退回 Researcher；它沒有發布、核准或修改資料的權限。Reviewer 的最終決定由模型判斷與確定性規則取較嚴格者：pass 時 job 結束為 succeeded；revise 時若補查輪少於 2、剩餘發送至少 2 次，退回 Researcher 修正；insufficient 時結束為 insufficient_evidence（組長 `agents/prompts/reviewer-v1.2.txt`、`handoff/state-machine-v1.md`、`agents/research_graph.py`）。圖 3-2 說明兩角色的交接。
+**兩角色交接。** Researcher 每輪最多執行 2 個工具，輸出草稿後交給 Reviewer。Reviewer 只能使用 read_evidence、get_financial_snapshot、get_macro_snapshot、calculate_metrics，需要搜尋或查價時以「需要的證據」退回 Researcher；它沒有發布、核准或修改資料的權限。Reviewer 的最終決定由模型判斷與確定性規則取較嚴格者。自 2026-10-31 起，可得時間由程式比對：模型提出的時間問題若被程式否定（引用來源都在 cutoff 前可得），該問題會被移除並記錄；移除後若沒有其他 critical，模型結論改為 pass，再與規則判斷合併取較嚴格者（組長 `handoff/decisions-2026-10.md` 第 9 節；`agents/review_checks.py`）。最終決定為 pass 時，job 結束為 succeeded；revise 時若補查輪少於 2、剩餘發送至少 2 次，退回 Researcher 修正；insufficient 時結束為 insufficient_evidence（組長 `agents/prompts/reviewer-v1.2.txt`、`handoff/state-machine-v1.md`、`agents/research_graph.py`）。圖 3-2 說明兩角色的交接。
 
 ![圖 3-2　dual 模式的兩角色交接與預算（示意圖，依組長狀態機文件繪製）](../report/fig/fig3-2.png){width=70%}
 

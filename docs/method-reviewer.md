@@ -25,11 +25,11 @@ Reviewer 的決定只有三種，名稱與程式一致（組長 `agents/research
 
 ## 三、模型判斷與規則判斷
 
-最終決定由**模型的判斷**與**確定性規則的判斷**共同產生，取兩者中較嚴格的一個（pass < revise < insufficient）。因此規則可以推翻模型的 pass，但規則不會把模型的 revise 放寬為 pass（組長 `agents/research_graph.py`）。
+最終決定由**模型的判斷**與**確定性規則的判斷**共同產生，取兩者中較嚴格的一個（pass < revise < insufficient）。因此規則可以推翻模型的 pass（組長 `agents/research_graph.py`）。
 
 規則由組長納入 `agents/review_checks.py`，其中部分來自 D 的草稿規則（repo 根目錄 README.md：「規則已由組長納入 agents/review_checks.py」）。與本稿三個例子有關的規則包括：引用的來源可得時間晚於 cutoff（lookahead）、TTM 不是連續四個單季（ttm_not_consecutive）、把累計當成單季（ytd_as_single）、同業平均納入 2330（peer_includes_2330）。
 
-自 2026-10-31 起，可得時間與 cutoff 的先後改由程式比對，模型不再自行比較；模型若列出時間問題、而程式確認引用來源都在 cutoff 前可得，該問題會被移除並記錄（組長 `handoff/decisions-2026-10.md` 第 9 節）。
+自 2026-10-31 起，可得時間與 cutoff 的先後改由程式比對，模型不再自行比較。模型若列出時間問題，而程式確認該主張引用的來源都在 cutoff 前可得，該問題會被移除，並記 `timing_issue_refuted` 事件（含模型原判與原文）供評分查核；移除後若沒有其他 critical 問題，模型的結論會改為 pass，之後仍與規則的判斷合併、取較嚴格者（組長 `handoff/decisions-2026-10.md` 第 9 節；`agents/review_checks.py` 的 `drop_refuted_timing_issues`）。也就是說，只有在這種「時間問題被程式否定」的情況下，模型原本的 revise 或 insufficient 才會改為 pass。
 
 ## 四、Reviewer 不是全能的
 
@@ -51,9 +51,9 @@ D 也在自己的草稿中說明：預期決定是 D 先寫的，修補規則也
 | agent 常設停止條件，例如最大迭代次數 | R04 | 8 次模型發送、2 補查輪、180 秒 | |
 | 一個 LLM 產生、另一個評估並回饋的循環 | R04 的 evaluator-optimizer | dual 模式的 Researcher 與 Reviewer；但本專題另加確定性規則與工具限制，兩者**不等同** | |
 | 模型回傳函式名稱與參數，由應用程式執行後回傳結果 | R05 | 工具由程式執行，模型不直接存取資料 | |
-| 後果重大的函式呼叫，建議先請使用者確認 | R05 | 發布需組長登入並核對 hash；模型沒有發布權 | |
+| 函式呼叫在執行前先驗證（最佳實務「Validation」） | R05 | 工具呼叫由程式檢查與執行；發布需組長登入並核對 hash，模型沒有發布權 | |
 
-R05 我讀到的是日文機器翻譯版，英文原頁待確認。
+R05 於 2026-11-01 改依英文原頁（Interactions API 版本，最後更新 2026-09-23）。英文頁的最佳實務是「執行前先驗證函式呼叫」，沒有「後果重大時先請使用者確認」這句，所以上表第五列已改寫。英文頁範例的 API 呼叫方式與本專題程式不同，引用哪一版文件待組長決定（見 docs/literature-cards.md R05）。
 
 ## 六、人工核准與發布
 
