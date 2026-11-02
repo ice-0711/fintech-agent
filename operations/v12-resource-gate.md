@@ -47,7 +47,7 @@
 - 現在只有 1 份報告：清單 2.5 秒。
 - 9 份前瞻報告全部發布後：估計約 10 次連線，清單可能要 10 秒以上（推估，未實測）。
 
-**已修正（組長 11/02 核准）**：`ReportStore.published_versions()` 改成一次查詢取回全部已發布版本，並快取 60 秒；同一程序發布成功時立即清除。`/reports` 與 `/api/ui/published` 共用。別的程序（例如組長 Mac）發布的報告最多 60 秒後出現。測試 `test_published_list_is_cached_60s_and_cleared_by_own_publish`。不影響凍結的實驗輸入（`agents/publication.py`、`research_ui/` 不在第二段凍結清單）。
+**已修正（組長 11/02 核准）**：`ReportStore.published_versions()` 改成一次查詢取回全部已發布版本，並快取 60 秒；同一程序發布成功時立即清除。`/reports` 與 `/api/ui/published` 共用。別的程序（例如組長 Mac）發布的報告最多 60 秒後出現。測試 `test_published_list_is_cached_60s_and_cleared_by_own_publish`。部署後實測（commit f7014d1）：`/reports` 第一次 3.12 秒（查庫），之後 0.27–0.36 秒；`/api/ui/published` 0.32–0.34 秒（原本 3.88 秒）。不影響凍結的實驗輸入（`agents/publication.py`、`research_ui/` 不在第二段凍結清單）。
 
 ## 六、容量 80% 閘門（B 的 CR，11/02 原則核准）
 
