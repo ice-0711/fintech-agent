@@ -62,9 +62,9 @@
 | 5 | 冒煙測試：`/`、`/reports`、登入、登出 | 全部 200；登入後 cookie 有 Secure | 11/02 部分完成：`/`、`/reports`、`/admin/login` 200；組長登入成功（`/api/ui/session` admin=true）；登出與 Secure cookie 未測 |
 | 6 | 端到端：Mac 跑一份研究 → 建版本 → Render 核准 → 發布 → 公開下載 PDF | PDF hash 與版本紀錄一致；未核准的不出現在 `/reports` | 11/02 完成（用前瞻第 1 批 2317 既有 job，未新跑研究）：Mac 建版本 `rv-6556af9c…`（report hash `1d17ec28f5c4…`）→ 組長於 Render 登入核准 → Render 發布 31 秒 → 未登入下載 PDF 200、265,590 bytes，sha256 `3e31a2b1aeba…` 與版本紀錄一致；`/reports` 列出 1 份；不存在的 id 回 404。網站沒有核准真實報告的按鈕，以登入後的 API 呼叫完成 |
 | 7 | 重工作限一份：發布 PDF 時不同時跑其他 PDF | gunicorn 1 worker；記錄發布期間 RSS 峰值 | 11/02：Render 1 worker；發布期間無其他 PDF；Events 無記憶體不足重啟 |
-| 8 | 量 RSS（閒置、讀 4–5 份報告、發布 PDF） | 數字記入 `operations/v12-resource-gate.md` | 部分：Free 方案看不到記憶體圖（需付費方案）。同一份 PDF 在組長 Mac 產生時峰值 RSS 約 442 MB（macOS，含 pandas／matplotlib，僅供參考）；Render 512 MB 上這次發布成功、未重啟。讀 4–5 份報告未測 |
+| 8 | 量 RSS（閒置、讀 4–5 份報告、發布 PDF） | 數字記入 `operations/v12-resource-gate.md` | 部分：Free 方案看不到記憶體圖（需付費方案）。同一份 PDF 在組長 Mac 產生時峰值 RSS 約 442 MB（macOS，含 pandas／matplotlib，僅供參考）；Render 512 MB 上這次發布成功、未重啟。讀 4–5 份報告未測 ；讀取延遲見 `operations/v12-resource-gate.md` 第三節 |
 | 9 | 純讀 0 LLM | 讀報告期間 Gemini 用量不變（Render 根本沒有 key） | 未執行 |
-| 10 | 備份與還原：`report_versions` 匯出 → 測試專案還原 → hash 比對 | 記入 `handoff/backup-restore-log.md` | 未執行 |
+| 10 | 備份與還原：`report_versions` 匯出 → 測試專案還原 → hash 比對 | 記入 `handoff/backup-restore-log.md` | 11/02 完成：Supabase 匯出 → 本機重建 → 5 項 hash／筆數核對全 PASS，9 個 job 資料庫完整；竄改 PDF 會被擋（`handoff/backup-restore-log.md`） |
 | 11 | F06 2D 關聯圖 | 10/22 已決定延後；記「未達，轉後續版本」，圖不增加 worker 重工作 | 未達（依決定） |
 
 ## 五、回滾
@@ -80,4 +80,5 @@
 - 報告存放的 Supabase 專案（測試或正式）待決定。
 - 2026-11-02：第一份 LIVE 報告（2317，前瞻第 1 批）已在 Render 512 MB 上發布成功；Free 看不到記憶體圖，連續發布多份或 PDF 較大時仍可能不夠。
 - 網站沒有核准真實（LIVE）報告的按鈕，目前以組長登入後的 API 呼叫核准與發布。
-- 備份還原尚未實測；Supabase Free 不含排程備份，需自行匯出。
+- Supabase Free 不含排程備份，改用 `scripts/backup_reports.py` 自行匯出（11/02 演練通過）。
+- 公開清單每份報告各開一條資料庫連線，報告變多會變慢（`operations/v12-resource-gate.md` 第五節，TTL 快取待組長核准）。
