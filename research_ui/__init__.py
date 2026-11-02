@@ -156,7 +156,7 @@ def _real_published() -> tuple[list[dict[str, Any]], str | None]:
     """Published versions only (the store never lists drafts or approved-but-unpublished ones)."""
     try:
         store = _reports()
-        return [store.get(r["report_version_id"]) for r in store.published()], None
+        return store.published_versions(), None
     except Exception as exc:  # noqa: BLE001 - the fixture list still renders; the error is shown
         return [], f"報告版本庫讀取失敗：{str(exc)[:160]}"
 

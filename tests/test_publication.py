@@ -124,3 +124,29 @@ def test_api_approval_needs_the_logged_in_lead_not_a_token(tmp_path, monkeypatch
     assert listing[0]["report_version_id"] == rv
     pdf = c.get(f"/reports/{rv}.pdf")
     assert pdf.status_code == 200 and pdf.data.startswith(b"%PDF")
+
+
+def test_published_list_is_cached_60s_and_cleared_by_own_publish(tmp_path):
+    """Lead 2026-11-02: the public list reads the store at most once a minute (one query, not one per report)."""
+    now = {"t": 0.0}
+    site = ReportStore(tmp_path / "r.sqlite3", LocalStorage(tmp_path / "storage"), clock=lambda: now["t"])
+    mac = ReportStore(tmp_path / "r.sqlite3", LocalStorage(tmp_path / "storage"))  # another process, same DB
+    queries = []
+    real_rows = site._db.rows
+    site._db.rows = lambda sql, params=(): (queries.append(sql), real_rows(sql, params))[1]
+
+    def publish(store, job):
+        v = store.create_version(job, EVENTS)
+        store.approve(v["report_version_id"], v["report_hash"], "lead")
+        return store.publish(v["report_version_id"])["report_version_id"]
+
+    first = publish(site, JOB)
+    assert [r["report_version_id"] for r in site.published()] == [first]
+    queries.clear()
+    second = publish(mac, dict(JOB, job_id="job-2"))
+    now["t"] = 59
+    assert [r["report_version_id"] for r in site.published()] == [first] and not queries  # cached, no query
+    now["t"] = 61
+    assert {r["report_version_id"] for r in site.published()} == {first, second} and len(queries) == 1
+    third = publish(site, dict(JOB, job_id="job-3"))
+    assert third in {r["report_version_id"] for r in site.published()}  # own publish shows at once

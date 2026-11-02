@@ -245,12 +245,17 @@ def open_report_db(target: str | Path) -> _SQLite | _Postgres:
     return _Postgres(str(target)) if str(target).startswith(("postgresql://", "postgres://")) else _SQLite(target)
 
 
+PUBLISHED_TTL_SECONDS = 60  # public list cache (lead 2026-11-02): each Postgres query opens a TLS connection
+
+
 class ReportStore:
     def __init__(self, path: str | Path, storage: Storage,
-                 renderer: Callable[[dict[str, Any], dict[str, Any]], bytes] = render_pdf):
-        self.storage, self.renderer = storage, renderer
+                 renderer: Callable[[dict[str, Any], dict[str, Any]], bytes] = render_pdf,
+                 clock: Callable[[], float] = time.monotonic):
+        self.storage, self.renderer, self._clock = storage, renderer, clock
         self._lock = threading.Lock()
         self._db = open_report_db(path)
+        self._published_cache: tuple[float, list[dict[str, Any]]] | None = None
 
     def _row(self, rv_id: str) -> dict[str, Any]:
         rows = self._db.rows("select * from report_versions where report_version_id = ?", (rv_id,))
@@ -324,14 +329,28 @@ class ReportStore:
                 "update report_versions set status = 'published', pdf_hash = ?, storage_key = ?, published_at = ?, "
                 "failure = null where report_version_id = ? and status in ('approved', 'pdf_failed')",
                 (pdf_hash, key, utc_now_iso(), rv_id))
+            self._published_cache = None  # this process's list shows the new report at once
         return self._row(rv_id)
 
-    def published(self) -> list[dict[str, Any]]:
-        rows = self._db.rows(
-            "select report_version_id from report_versions where status = 'published' order by published_at desc")
+    def published_versions(self) -> list[dict[str, Any]]:
+        """All published versions in one query, cached for PUBLISHED_TTL_SECONDS. A report published by another
+        process (e.g. the lead's Mac) appears here within that time; drafts and approved versions never do."""
+        now = self._clock()
+        cached = self._published_cache
+        if cached is not None and now - cached[0] < PUBLISHED_TTL_SECONDS:
+            return cached[1]
+        rows = self._db.rows("select * from report_versions where status = 'published' order by published_at desc")
         out = []
         for r in rows:
-            v = self._row(r["report_version_id"])
+            v = dict(r)
+            v["report"] = json.loads(v.pop("report_json"))
+            out.append(v)
+        self._published_cache = (now, out)
+        return out
+
+    def published(self) -> list[dict[str, Any]]:
+        out = []
+        for v in self.published_versions():
             out.append({"report_version_id": v["report_version_id"], "ticker": v["report"]["ticker"],
                         "cutoff_at": v["report"]["cutoff_at"], "published_at": v["published_at"],
                         "publication_status": v["status"], "review_decision": v["report"]["review"]["decision"],

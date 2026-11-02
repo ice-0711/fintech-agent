@@ -47,7 +47,7 @@
 - 現在只有 1 份報告：清單 2.5 秒。
 - 9 份前瞻報告全部發布後：估計約 10 次連線，清單可能要 10 秒以上（推估，未實測）。
 
-建議（**待組長核准**，屬程式修改）：公開清單加 60 秒 TTL 快取，發布成功時清除；或把 `published()` 改成一次查詢。兩者都不影響凍結的實驗輸入（`agents/publication.py`、`research_ui/` 不在第二段凍結清單）。
+**已修正（組長 11/02 核准）**：`ReportStore.published_versions()` 改成一次查詢取回全部已發布版本，並快取 60 秒；同一程序發布成功時立即清除。`/reports` 與 `/api/ui/published` 共用。別的程序（例如組長 Mac）發布的報告最多 60 秒後出現。測試 `test_published_list_is_cached_60s_and_cleared_by_own_publish`。不影響凍結的實驗輸入（`agents/publication.py`、`research_ui/` 不在第二段凍結清單）。
 
 ## 六、容量 80% 閘門（B 的 CR，11/02 原則核准）
 
@@ -63,6 +63,6 @@ B 在 `data/storage-and-safety-w08.md` 第六節提的門檻：Storage 800 MB、
 |---|---|
 | Render 上的實際記憶體峰值 | 未能量測（Free 無 metrics）；以「發布成功、無重啟」為證 |
 | 讀 4–5 份報告的資源測試 | 未執行：目前只有 1 份已發布，第二批發布後補測 |
-| 公開清單 TTL 快取 | 待組長核准 |
+| 公開清單 TTL 快取 | 11/02 完成 |
 | 2GB 升級 | 待組長決定；目前證據顯示 512 MB 可發布 1 份 |
 | 容量 80% 閘門實作 | 原則核准，排第二批之後 |
