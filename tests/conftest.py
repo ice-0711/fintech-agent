@@ -49,6 +49,18 @@ def job_request(**overrides):
     return req
 
 
+LIVE_STORE_VARS = ("REPORT_DB_URL", "REPORT_SUPABASE_URL", "REPORT_SUPABASE_SERVICE_KEY", "REPORT_STORAGE_BUCKET",
+                   "SUPABASE_URL", "SUPABASE_KEY", "SUPABASE_SERVICE_KEY")
+
+
+@pytest.fixture(autouse=True)
+def offline_report_store(monkeypatch):
+    """Tests never reach the real Supabase report store: .env (loaded by `import agents`) holds the lead's
+    REPORT_* values, and on 11/02 a test published a fixture report through them. A test that needs one sets it."""
+    for name in LIVE_STORE_VARS:
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture(autouse=True)
 def isolated_tool_registry():
     """Each test starts with no registered tool bodies (other suites, e.g. evaluation/,
