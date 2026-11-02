@@ -82,3 +82,7 @@
 - 網站沒有核准真實（LIVE）報告的按鈕，目前以組長登入後的 API 呼叫核准與發布。
 - Supabase Free 不含排程備份，改用 `scripts/backup_reports.py` 自行匯出（11/02 演練通過）。
 - 公開清單每份報告各開一條資料庫連線，報告變多會變慢（`operations/v12-resource-gate.md` 第五節，TTL 快取待組長核准）。
+
+## 七、事故紀錄
+
+- **2026-11-02 17:15 測試誤發布假報告**：組長 Mac 的 `.env` 補上 `REPORT_*` 後，`pytest` 讀到這些變數，把測試用 2330 報告（`job-1`、`snap-dev-case-01`，標 LIVE）寫進 Supabase 測試專案並發布，公開清單可見。原因修正：`tests/conftest.py` 每個測試先清掉 `REPORT_*`／`SUPABASE_*`（commit 7c2f876）。組長核准後刪除該列與 PDF（`rv-9cc063a2-…`），公開清單恢復只有 2317，假 PDF 回 404。17:12 的備份早於此事，不含假報告。
