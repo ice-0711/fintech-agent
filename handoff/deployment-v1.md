@@ -55,10 +55,10 @@
 
 | # | 步驟 | 驗收 | 結果 |
 |---|---|---|---|
-| 1 | 組長確認 Render 方案（2GB 規格、月費）並核准 | 後台截圖：方案、RAM、月費 | 未執行 |
-| 2 | 組長確認 Supabase 方案與用量（DB、Storage） | 後台讀數填入 `handoff/quota-baseline.json` | 未執行 |
-| 3 | Render 設定第三節的必填變數 | `/admin/login` 不再顯示「尚未設定」 | 未執行 |
-| 4 | 部署 `main` 最新 commit | Render Events 的 commit 與 `git rev-parse --short HEAD` 一致 | 未執行 |
+| 1 | 組長確認 Render 方案（2GB 規格、月費）並核准 | 後台截圖：方案、RAM、月費 | 11/02 查得：Free 512MB；2GB（1c-2g）US$25／月。建議先在 Free 實測發布 PDF 的記憶體，爆了再升級（待組長決定） |
+| 2 | 組長確認 Supabase 方案與用量（DB、Storage） | 後台讀數填入 `handoff/quota-baseline.json` | 11/02 完成：Free，DB 各約 25 MB／0.5 GB，Storage 0／1 GB；**Free 不含排程備份** |
+| 3 | Render 設定第三節的必填變數 | `/admin/login` 不再顯示「尚未設定」 | 11/02 完成：`REPORT_*` 4 個 10/28 已設，組長新增 `ADMIN_PASSWORD`、`FLASK_SECRET_KEY`；重新部署後登入頁正常 |
+| 4 | 部署 `main` 最新 commit | Render Events 的 commit 與 `git rev-parse --short HEAD` 一致 | 11/02 後台顯示 Live `46e383c`（Auto-Deploy On Commit） |
 | 5 | 冒煙測試：`/`、`/reports`、登入、登出 | 全部 200；登入後 cookie 有 Secure | 未執行 |
 | 6 | 端到端：Mac 跑一份研究 → 建版本 → Render 核准 → 發布 → 公開下載 PDF | PDF hash 與版本紀錄一致；未核准的不出現在 `/reports` | 未執行 |
 | 7 | 重工作限一份：發布 PDF 時不同時跑其他 PDF | gunicorn 1 worker；記錄發布期間 RSS 峰值 | 未執行 |
