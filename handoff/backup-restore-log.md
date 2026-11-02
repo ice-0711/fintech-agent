@@ -35,6 +35,6 @@
 ## 四、限制與後續
 
 - 這次只有 1 份已發布報告；第二、三批發布後要再跑一次 `export`。
-- 備份存在組長 Mac 的 `tmp/backups/`（不進 git，內含報告全文但無金鑰）。Mac 硬碟壞掉就一起不見；建議每次匯出後另存一份到雲端硬碟或隨身碟（待組長決定位置）。
+- 備份存在組長 Mac 的 `tmp/backups/`（不進 git，內含報告全文但無金鑰）。Mac 硬碟壞掉就一起不見；組長 11/02 決定：每次匯出後另存一份到 iCloud Drive `fintech-agent-backups/`（首份 20261102-171214 已存，掃描無金鑰字串）。
 - 沒有演練「還原回 Supabase」：需要時用 `supabase_migrations/20261028_report_versions_store.sql` 建表，再把 `report_versions.json` 逐列寫回、PDF 上傳回同一 storage key。已發布的 PDF 不可覆寫，所以只能還原到空的專案或空的 bucket。
 - Render 本身沒有需要備份的資料（研究不在 Render 跑，報告在 Supabase）。

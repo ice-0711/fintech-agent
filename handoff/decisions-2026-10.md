@@ -99,3 +99,12 @@
 - **前瞻第 1 批不重跑**：照手冊「資料不足照收錄」，以現有結果記錄。中文金額誤判、2454 Researcher 只搜尋一次未讀第三季證據，兩點寫進限制。
 - **同業平均**：依手冊 F02「各自財報期與來源明示」，不同財報期的同業都計入（2454 比較組 n=2），表格逐列標財報季別，`periods_consistent = false` 時註明「同業財報期不同」。`research_ui/comparison.py` 已由組長端改（11/02，不再篩同財報期，`peer_stats.period_note`；PDF 同步加註），測試 `test_peer_stats_keep_peers_with_a_different_period`；請 A 核對網站呈現。
 - **發布前容量 80% 檢查（`data/storage-and-safety-w08.md` 第六節）**：原則採用；門檻依 Supabase 實際方案訂，組長提供方案與用量後再實作，migration 先在測試專案演練。
+
+## 12. 2026-11-02 組長決定：W08 部署
+
+- **部署架構**：研究只在組長 Mac 跑（job 存 `tmp/*.sqlite3`）；Render 只做組長登入、核准、發布 PDF 與公開閱讀，不設 Gemini 金鑰與 `RESEARCH_API_TOKEN`。`research_jobs` 不搬 Supabase。詳見 `handoff/deployment-v1.md`。
+- **Render 方案**：維持 Free（512 MB）。11/02 在 Free 上發布 1 份 PDF 成功；第二批發布若出現 `pdf_failed`（記憶體不足）再升級 1c-2g（US$25／月），屆時另行核准費用。
+- **報告存放**：維持 Supabase 測試專案 `fintech-agent-test`（`report_versions`＋私有 bucket `reports`），正式專案不動。
+- **備份**：每批發布後執行 `scripts/backup_reports.py export`，並另存一份到 iCloud Drive `fintech-agent-backups/`（11/02 首份已存）。
+- **公開清單快取**：60 秒 TTL，一次查詢（commit f7014d1）。
+- **Notion**：W01-L、W02-L、W06-L 改回「進行中」，與實際未完成項一致（W01 TPM 精確值；W02 job 遷移改為不搬、待記錄；W06 介面凍結紀錄與閘門文件）。
