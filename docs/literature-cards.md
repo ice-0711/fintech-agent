@@ -141,7 +141,7 @@
 
 - Google Developer Program：https://developers.google.com/program/plans-and-pricing（**未讀**）
 - Render Compute：https://render.com/pricing#compute（**未讀**）
-- 用途與核對由組長負責。依工作包，Render 2GB 為計畫，不得寫成已部署。
+- 用途與核對由組長負責。Render 目前維持 Free（512 MB），2GB 未升級（組長 decisions 第 12 節，2026-11-02），不得寫成已升級。
 
 ---
 
