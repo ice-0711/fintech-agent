@@ -38,6 +38,20 @@
 
 草稿中 TTM 的數字本身有原文依據：B 已確認 2330 的 TTM EPS 86.28 元＝2025Q3 17.44＋2025Q4 19.51＋2026Q1 22.08＋2026Q2 27.25，四季皆已對 MOPS 原文（B `docs/B-review-W06-D-redo.md` 第二節第 3 點）。
 
+### 規則修正後的重跑
+
+組長於 2026-10-31 晚間以新規則（reviewer-v1.2.1）重跑 CASE-22 dual（job `0dd723ce-bd18-4f17-a2d6-508b3479d280`，組長 `agent/calib-v1-dual-rerun-2.json`）：
+
+| 步 | 角色 | 動作 | 工具 | 結果 | trace ID |
+|---|---|---|---|---|---|
+| 1 | Researcher | 取得 cutoff 時可得的財務快照 | get_financial_snapshot | ok | 0dd723ce#4 |
+| 2 | Researcher | 搜尋證據段落 | search_evidence | ok | 0dd723ce#6 |
+| 3 | Researcher | 輸出草稿：單季 27.25、累計 49.33、TTM 86.28（2025Q3–2026Q2）分開 | — | 草稿 | 0dd723ce#9 |
+| 4 | Reviewer | 核對 ev-dev-22-official | read_evidence | ok | 0dd723ce#11 |
+| 5 | Reviewer | 覆核決定 | — | 模型 pass、規則 pass，最終 pass，沒有 critical | 0dd723ce#14 |
+
+job 以 succeeded 結束：5 次模型發送、3 次工具呼叫、0 輪補查。**通過覆核不等於答案正確**，正確性要等 D 評分。修正前（e9045bbd）與修正後（0dd723ce）是不同規則下的結果，不直接比較。
+
 ## 四、同一案例在另外兩種模式
 
 同一天、同一案例的另外兩次 live 執行（同一份 trace 檔）：

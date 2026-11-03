@@ -52,7 +52,7 @@ F01 提供季度、TTM 與年度三層資料，規則如 3.2、3.3 節。F02 的
 
 **預算。** 每個 job 最多 8 次模型發送，包含全部角色以及失敗、格式重試與網路重試；dual 模式前 4 次用於初次研究，第 5 次保留給覆核。另有 10 次工具呼叫、2 輪補查、每次輸入 3,000 token、每 job 40,000 token 與 180 秒主動時間的限制；一次只有一個 job 執行。預算用完時停止，不跳過覆核去發布（組長 `handoff/state-machine-v1.md` 第 3 節；B 核對程式值相符）。
 
-**覆核的限制。** Reviewer 不是全能的。repo 已記錄漏抓與誤擋的實例：例如 CASE-22 的 dual 執行中，規則只讀 quarters 欄而誤判 TTM 不連續，組長於 2026-10-31 修正，並註明修正前後的 dual 結果不可直接比較（組長 `handoff/decisions-2026-10.md` 第 9 節）。本章不主張雙 Agent 提高了正確率，這個問題由第四章的實驗回答。
+**覆核的限制。** Reviewer 不是全能的。repo 已記錄漏抓與誤擋的實例：例如 CASE-22 的 dual 執行中，規則只讀 quarters 欄而誤判 TTM 不連續，組長於 2026-10-31 修正，並註明修正前後的 dual 結果不可直接比較（組長 `handoff/decisions-2026-10.md` 第 9 節）；同一案例以新規則重跑後通過覆核（組長 `agent/calib-v1-dual-rerun-2.json`）。本章不主張雙 Agent 提高了正確率，這個問題由第四章的實驗回答。
 
 ## 3.6　成果呈現：收藏儀表板與線上 PDF（F03、F05）
 
@@ -79,7 +79,7 @@ F06 小型 2D 關係圖為條件式項目（最多 20 點、30 線，須有核�
 | 財務快照與 MOPS 對帳 | 有紀錄：250／250 值、25／25 公告時間一致 | B fact sheet 第九節 |
 | 六工具與計算模組 | 有紀錄：B 回報 277 項測試通過（2026-10-28） | B 技術事實第五節 |
 | 預算硬限制、checkpoint 續跑 | 有紀錄：mock 測試通過 | 組長 `handoff/W06-gate-v12.md` 第 1 節 |
-| dual 模式 live 執行 | 有紀錄：開發集校準進行中；10/31 修正誤擋規則 | 組長 `agent/calib-v1-day*.json`、decisions 第 9 節 |
+| dual 模式 live 執行 | 有紀錄：10/31 修正誤擋規則；新規則下開發集 10 案有 4 案通過覆核（CASE-01、11、22、26），6 案停在證據不足。通過覆核不等於正確，正確性待 D 評分 | 組長 `agent/calib-v1-day5.json`、`calib-v1-dual-rerun-1.json`、`-2.json`；decisions 第 9、10 節 |
 | 案例與資料凍結 cases-v1 | 有紀錄：三方簽核 | B `data-freeze.md` 第七節 |
 | 收藏儀表板 | 有紀錄：A 的驗收自查與截圖，待組長驗收 | A `ui/v12-dashboard-acceptance.md` |
 | 線上 PDF | 有紀錄：3 份 **MOCK** 報告完成核准、Storage 寫入與讀回比對；尚無 LIVE 報告 | A `reports/v12-online-pdf-check.md` |

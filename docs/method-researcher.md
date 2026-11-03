@@ -62,7 +62,7 @@ dual 模式下，Researcher 的草稿交給 Reviewer。Reviewer 回覆 pass、re
 
 ## 六、本週案例
 
-依組長提供的開發集 trace，本週案例取自三模式校準第 4 天（2026-10-31）的 CASE-22 dual 模式 live 執行，見 case-walkthrough-v1.md 與 v12-agent-case.md。CASE-22 是開發案例，不是保留案例。
+依組長提供的開發集 trace，本週案例取自三模式校準第 4 天（2026-10-31）的 CASE-22 dual 模式 live 執行，見 case-walkthrough-v1.md 與 v12-agent-case.md。該次執行在 10/31 修正前的規則下被誤擋；修正後重跑（job 0dd723ce，組長 `agent/calib-v1-dual-rerun-2.json`）模型與規則都判 pass，通過覆核（通過覆核不等於正確，正確性待 D 評分）。CASE-22 是開發案例，不是保留案例。
 
 ## 七、待補
 
