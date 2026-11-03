@@ -14,7 +14,7 @@
 |---|---|---|---|
 | 財報、股價、交易日、台股加權指數 | FinMind API（TaiwanStockFinancialStatements、TaiwanStockBalanceSheet、TaiwanStockCashFlowsStatement、TaiwanStockPrice、TaiwanStockTradingDate） | 財務快照的主要數字 | B，`data/financial-snapshots.json` 的 source_manifest |
 | 公告時間、證據原文、對帳值、缺漏科目 | 公開資訊觀測站（MOPS），人工抄錄 | 可得時間與原文核對 | B，`data/manual/*.csv` |
-| 美國 CPI、聯邦基金利率 | FRED（CPIAUCSL、FEDFUNDS） | 總經背景 | B，`data/manual/macro.csv` |
+| 美國 CPI、聯邦基金利率 | FRED（CPIAUCSL、FEDFUNDS） | 總經背景 | B，`data/manual/macro.csv`；前瞻批次的總經放在 `data/manual/forward/`（B `docs/B-review-W02-W07-C.md` 第一節） |
 | FinMind 原始回應 | 22 份，每份記錄 SHA-256 與擷取時間 | 追溯原始資料；依授權不上傳 GitHub | B，`data/v12-frozen-manifest.json` |
 
 財務快照涵蓋 5 家公司、2025Q2 至 2026Q2 共 5 季，截止日 2026-09-30，版本 v1.6-tw-market；採合併報表，金額單位億元、股數百萬股、EPS 與股價單位元（B，`docs/B-W07-C-技術事實.md` 第二節）。B 已把快照數字與 MOPS 原文逐筆核對：250 個數值與 25 個財報公告時間全部一致（B，`data/v12-finance-fact-sheet.md` 第九節）。

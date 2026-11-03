@@ -93,7 +93,7 @@
 | 研究問題 | 如何讓模型連接外部工具與 API。頁面列出三種用途：採取行動、擴充知識、延伸能力（如計算或製圖） |
 | 方法摘要 | 流程四步：定義函式宣告（名稱、說明、參數）；把使用者提示連同宣告送給模型；**由應用程式自己執行函式**（模型不執行）；把結果送回模型，產生給使用者的回覆。可多輪重複，支援同一輪平行呼叫多個獨立函式，也支援依序串接（組合式呼叫）。函式宣告需有 type、name、description、parameters。呼叫模式以 tool_choice 設定：auto（預設，模型自行決定）、any（一定要呼叫函式）、none（禁止呼叫）、validated（確保符合 schema）。無狀態模式須每次送完整對話歷史，且模型回傳的思考與函式呼叫步驟要原樣送回；範例中，函式結果以 call_id 對應模型的函式呼叫 id。Gemini 3 系列的思考簽章由 SDK 自動處理。最佳實務：說明清楚具體、名稱不含空白與特殊字元、參數用明確型別、同時啟用的工具以 10–20 個為上限、提供脈絡與指示、執行前先驗證函式呼叫、做好錯誤處理、外部 API 使用適當驗證。限制：只支援 OpenAPI schema 的子集；過大或巢狀過深的 schema 可能被拒；Python 支援的參數型別有限。另有遠端 MCP、串流工具呼叫等章節 |
 | 本專題採用點 | 說明「模型提出工具呼叫、由程式執行並回傳結果」的分工，以及函式 schema、呼叫模式與錯誤處理的文件依據。實際 SDK 與 API 版本由組長鎖定 |
-| 不能據此聲稱的結論 | 範例中的模型名稱不代表本專題採用；文件不證明工具選擇的正確性。英文頁的範例使用 Interactions API（`client.interactions.create`）；本專題程式 `agents/provider.py` 使用 google-genai SDK 的 `models.generate_content`（C 只讀函式名稱，不判定程式）。兩者不是同一套 API 呼叫方式，正文引用時不能把英文頁的步驟寫成本專題的實作細節，**引用哪一版文件待組長決定**。10/31 讀到的日文頁（標題含「Generate Content API (Legacy)」）不再作為本卡依據 |
+| 不能據此聲稱的結論 | 範例中的模型名稱不代表本專題採用；文件不證明工具選擇的正確性。英文頁的範例使用 Interactions API（`client.interactions.create`）；本專題程式 `agents/provider.py` 使用 google-genai SDK 的 `models.generate_content`（C 只讀函式名稱，不判定程式）。兩者不是同一套 API 呼叫方式，正文引用時不能把英文頁的步驟寫成本專題的實作細節。組長 2026-11-03 決定引用英文原頁（查閱日期 2026-11-01），引用的是「執行前先驗證函式呼叫」等最佳實務原則，與用哪種 API 無關；正文註腳寫：「該頁範例使用 Interactions API，本專題程式使用 generate_content；本文只引用其函式呼叫最佳實務。」10/31 讀到的日文頁（標題含「Generate Content API (Legacy)」）不再作為本卡依據 |
 | 原始 URL | https://ai.google.dev/gemini-api/docs/function-calling |
 
 ## R06｜Gemini API rate limits
@@ -161,7 +161,6 @@
 
 | 問題 | 提供人 |
 |---|---|
-| R05 正文引用英文頁（Interactions API 版本）或 generateContent 版本 | 組長 |
 | R01–R03 附錄與圖片內容（目前只讀正文文字；如方法章需引用附錄再補讀） | C |
 | R02 是否另有正式發表版本 | C |
 | R01 OpenReview 頁面直接核對（目前依 ICLR 官方頁面確認） | C |

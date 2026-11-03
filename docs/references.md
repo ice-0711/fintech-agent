@@ -21,6 +21,7 @@ Anthropic. (2024, December 19). *Building effective agents*. https://www.anthrop
 
 **R05**
 Google. (2026, September 23). *Function calling with the Gemini API*. Google AI for Developers. Retrieved November 1, 2026, from https://ai.google.dev/gemini-api/docs/function-calling
+（註：查閱日期 2026-11-01。該頁範例使用 Interactions API，本專題程式使用 generate_content；本文只引用其函式呼叫最佳實務。組長 2026-11-03 決定引用英文原頁。）
 
 **R06**
 Google. (2026, October 28). *Rate limits*. Gemini API. Google AI for Developers. https://ai.google.dev/gemini-api/docs/rate-limits
@@ -38,6 +39,5 @@ kk1030-bit. (2026). *fintech-agent* (Commit 53816d4) [Source code]. GitHub. http
 |---|---|
 | R01 的 OpenReview 頁面尚未直接開啟核對（目前依 ICLR 官方頁面） | C |
 | R02 是否另有正式發表版本（arXiv 頁面未列） | C |
-| R05 正文引用英文頁（Interactions API 版本）或 generateContent 版本 | 組長 |
 | R05、R07 的日期採頁面「最後更新」日；官方文件會持續更新，定稿前需再核對一次 | C |
 | R08 作者欄用 GitHub 帳號名稱或組長真實姓名 | 組長 |

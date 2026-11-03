@@ -39,7 +39,7 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 收藏儀表板讓使用者在瀏覽器中收藏最多 5 個代號，只存代號、不跨裝置；畫面列出已發布研究，顯示版本、資料截止、財報期、來源更新時間、估值狀態與資料品質風險。A 的驗收以無介面瀏覽器依序切換 5 檔股票、收藏、篩選與排序、開啟三份報告，全程只發出讀取請求，沒有建立 job、沒有寫入資料庫，模型呼叫 0 次（A `ui/v12-dashboard-acceptance.md` 第 2、4 節）。
 
-![圖 7-1　收藏與已發布研究（A 截圖，W06，1440 寬）。卡片上的版本為 FIXTURE 範例，PDF 欄顯示「線上 PDF 尚未提供（W07）」，是 W06 當時的畫面。](../design/w06/W06-dashboard-1440x900.png){width=72%}
+![圖 7-1　研究工作台的已發布研究清單（A 截圖，2026-11-02 擷取，1440 寬）。三份皆為經人工核准後發布的 MOCK 驗收版本：模型決策為預錄腳本、數字為真實快照工具輸出，不是正式研究結論。畫面為本機執行 web_app.py 擷取，不是 Render 線上站（A `design/w07/c-figures/README.md`）。](../design/w07/c-figures/fig7-1-published-list-real-1440.png){width=38%}
 
 資料品質風險沒有執行任何檢查時顯示「未評估」，不顯示為低風險；每張卡片固定註明「低」不代表股價安全（A 同上第 4 節）。
 
@@ -47,7 +47,7 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 報告詳情頁與 PDF 包含研究問題與 cutoff、主張（事實、推論、未知）、反向證據、季度資料、2454 同業比較、DCF 與敏感度、資料品質風險、未知事項、來源，以及版本與方法限制（A 同上第 3 節）。2317 的估值顯示「無法判定：TTM FCF ≤ 0，5 年持平情境不適用」，不出現負的 DCF（同上）。
 
-![圖 7-2　2454 研究報告詳情（A 截圖，1440 寬）。頁首標示「MOCK 測試報告」。截圖中的版本為 rv-d1fafb87（10/29 版），已於 10/31 由 rv-a520d5cc 取代；依 A 的說明，兩版只差同業快照欄位名稱，數字相同。](../design/w07/W07-report-2454-1440.png){width=48%}
+![圖 7-2　2454 聯發科報告詳情上半部（A 截圖，2026-11-02 擷取，1440 寬；版本 rv-a520d5cc，資料截止 2026-09-30 17:30）。網頁與 PDF 由同一份核准 JSON 產生；同業數字來自同業快照 v1.8-w06，與主快照 fin-snap:v1.6-tw-market 為不同檔案（A 同上）。](../design/w07/c-figures/fig7-2-report-2454-top-1440.png){width=80%}
 
 來源欄位區分兩種：公告片段，以及財報快照的工具結果；後者標示「工具結果，不是公告片段」，並列出可得時間、原始財報檔編號與 sha256（A 同上第 0 節）。
 
@@ -55,11 +55,11 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 **案例一：正常（MOCK）。** 2454 的研究報告走完建立草稿、核准 hash、產生 PDF、寫入 Storage、讀回比對 hash 的完整流程，成為已發布版本 rv-a520d5cc。這份報告是 **MOCK**：模型的決策是預錄腳本（先 revise、後 pass），工具結果則是 B 快照的真實輸出；PDF 首頁標示「MOCK 測試報告：不是研究結論」。附件：`reports/v12-online-pdf/` 內的 PDF、報告 JSON 與 manifest（A）。
 
-**案例二：衝突（live，修正前規則）。** CASE-11 是開發案例，類別「矛盾來源」，題型為合併與個體報表口徑混用，標的 2317。在 dual 模式中，Reviewer 模型判定 insufficient，理由是證據的可得時間晚於 cutoff；但該證據的可得時間 14:15（台北）其實早於 cutoff 17:00（台北），是模型自行比較時區時出錯，規則判斷則為 pass，最終取較嚴格的 insufficient。組長於 10 月 31 日改由程式比對可得時間，模型提出、而程式證明不成立的時間問題會被移除並記錄，並以測試確認。附件：live trace job da86df90-f5c6-4f7d-81b3-1fa090fdc31f（組長 `agent/calib-v1-day2.json`）；組長 `handoff/decisions-2026-10.md` 第 9 節；`tests/test_review_time_ttm.py`。
+**案例二：衝突（live，dual 模式，新規則）。** CASE-08 是開發案例，類別「矛盾來源」，題型為同一事件兩個來源金額不同，標的 2317。Researcher 搜尋證據後，讀了官方損益表（ev-dev-08-official）與一份二手整理摘要（ev-dev-08-conflict）（#4、#6、#7），撰寫草稿（#11）。Reviewer 讀兩份證據核對（#13、#14），模型判 pass，規則判 revise（critical 指向 c2），最終取較嚴格的 revise，退回 Researcher（#16；摘要檔只保存最後一次覆核內容，第一次退件的完整理由沒有保存）。Researcher 修正一次（#17、#18）：以官方損益表的營業收入作為事實主張，把二手摘要的數字改標為 unknown，並在 conflicts 欄記錄兩個來源有落差、無法在原文中核實，回報 insufficient。規則檢查（#19）沒有 critical，job 以 insufficient_evidence 結束，未發布。整個 job 用了 6 次模型發送、5 次工具呼叫、1 輪補查。附件：live trace job d8884abc-b06f-4568-802d-83992bc82ad3（組長 `agent/calib-v1-dual-rerun-1.json`；步驟序號以 # 表示）。
 
-**案例三：不足（live，dual 模式）。** CASE-18 是開發案例，類別「缺少資料」，題型為關鍵證據在 cutoff 之後，標的 2454。Researcher 搜尋證據時查無資料（#4，no_data），只取得 2026Q1 的財務快照（#6）。第一次撰寫的草稿沒有通過程式的草稿格式檢查（#9，trace 記為 draft_invalid；摘要檔沒有保存檢查出的問題內容），系統要求重寫，用掉第 4 次模型發送後，Researcher 交出狀態為 insufficient 的草稿（#11）：唯一的主張標為 unknown，沒有任何事實數字。這份草稿本身也有問題。確定性規則檢查（#12）判 insufficient，列出兩個 critical：一是主張 c1 引用的工具結果 obs-1 是 search_evidence 的 no_data，不是有效資料；二是草稿沒有任何有來源的事實主張，沒有可核對的內容。job 以 insufficient_evidence 結束，未發布。這次執行沒有補造 2026Q2 的數字，但它不是模範結果：草稿先是格式不合格，交出的版本又引用了無效的工具結果。整個 job 用了 4 次模型發送、2 次工具呼叫。附件：live trace job 6f344c33-1ecf-47e6-92e8-6d0aa14ec1cc（組長 `agent/calib-v1-day4.json`；步驟序號以 # 表示）。
+**案例三：不足（live，dual 模式，修正前規則）。** CASE-18 是開發案例，類別「缺少資料」，題型為關鍵證據在 cutoff 之後，標的 2454。Researcher 搜尋證據時查無資料（#4，no_data），只取得 2026Q1 的財務快照（#6）。第一次撰寫的草稿沒有通過程式的草稿格式檢查（#9，trace 記為 draft_invalid；摘要檔沒有保存檢查出的問題內容），系統要求重寫，用掉第 4 次模型發送後，Researcher 交出狀態為 insufficient 的草稿（#11）：唯一的主張標為 unknown，沒有任何事實數字。這份草稿本身也有問題。確定性規則檢查（#12）判 insufficient，列出兩個 critical：一是主張 c1 引用的工具結果 obs-1 是 search_evidence 的 no_data，不是有效資料；二是草稿沒有任何有來源的事實主張，沒有可核對的內容。job 以 insufficient_evidence 結束，未發布。這次執行沒有補造 2026Q2 的數字，但它不是模範結果：草稿先是格式不合格，交出的版本又引用了無效的工具結果。整個 job 用了 4 次模型發送、2 次工具呼叫。附件：live trace job 6f344c33-1ecf-47e6-92e8-6d0aa14ec1cc（組長 `agent/calib-v1-day4.json`；步驟序號以 # 表示）。這次是修正前規則的執行；新規則重跑（job de1d50cf，組長 `agent/calib-v1-dual-rerun-1.json`）同樣停在證據不足。
 
-**說明**：截至 2026-10-31 的開發集 live 執行中，dual 模式**尚無一案走到覆核通過並發布**（組長 `handoff/W06-gate-v12.md` 第 8 節；`agent/calib-v1-day1~4.json`），所以「正常」案例只能用 MOCK 報告示範發布流程，不能當作研究結果。三個案例都是開發案例或驗收用報告，不是保留案例，也不是正式實驗結果。
+**說明**：在 10/31 修正前的規則下（校準第 1–4 天），dual 模式尚無一案通過覆核（組長 `handoff/W06-gate-v12.md` 第 8 節；`agent/calib-v1-day1~4.json`）。10/31 修正規則後，以新規則執行的開發集 10 案 dual 中，**4 案通過覆核**（CASE-01、11、22、26），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分，本節不寫正確率或成功率。CASE-11 兩次執行都照實記錄：修正前（job da86df90，10/29）證據可得時間 14:15 其實早於 cutoff 17:00（台北），Reviewer 模型自行比較時區出錯而判 insufficient，規則判 pass，最終取較嚴格的 insufficient，是誤擋；組長 10/31 改由程式比對可得時間後重跑（job 9fc9e029），模型與規則都判 pass，通過覆核（組長 `agent/calib-v1-day2.json`、`agent/calib-v1-dual-rerun-1.json`；decisions 第 9 節）。研究 job 本身不發布，以上 job 都沒有進入發布流程，所以「正常」案例仍以 MOCK 報告示範發布流程，不能當作研究結果。三個案例都是開發案例或驗收用報告，不是保留案例，也不是正式實驗結果。
 
 ## 7.6　live、mock 與 replay
 
@@ -73,9 +73,9 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 ## 7.7　待補
 
+已完成：A 已於 2026-11-02 提供現行版本截圖（圖 7-1、7-2 已更換）；B 已以 10/29、10/31 新版報告重跑稽核，`data/v12-report-audit.csv` 的 W7A-001～039 共 39 項全部 pass（B `docs/B-review-W02-W07-C.md` 第一節）。
+
 | 缺什麼 | 提供人 |
 |---|---|
-| 以目前版本（rv-a520d5cc）與真實 published 清單重新截圖 | A |
-| B 以 10/29、10/31 新版報告重跑稽核（`data/v12-report-audit.csv` 的 W7A 列） | B |
 | 正式部署後的網站與手機實測 | 組長（W08） |
 | LIVE 報告 | 組長決定開放時機 |

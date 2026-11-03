@@ -39,7 +39,10 @@ Reviewer 的決定只有三種，名稱與程式一致（組長 `agents/research
 |---|---|---|---|
 | 漏抓 | D 的 CASE-11-flawed 草稿，以未註明口徑的數字冒充個體營收；當時的規則判 pass | 組長 10/24 核定採用 basis_unspecified 規則，10/26 合併 | B `docs/B-review-W06-D-redo.md`；組長 decisions 第七節 |
 | 漏抓 | A 的三份 MOCK 報告中，有事實主張引用的公告原文找不到該數字；規則沒有攔下 | 組長 10/29 核定：事實數字必須出現在引用來源或工具結果中，否則列 critical | A `reports/v12-online-pdf-check.md` 第 0 節；組長 decisions 第八節 |
-| 誤擋 | CASE-22 dual 的 TTM 期間寫在 period 欄，規則只讀 quarters 欄，誤判為不連續 | 組長 10/31 修正；第 1–4 天 dual 結果與第 5 天後不可直接比較 | 組長 decisions 第 9 節；W04 case-walkthrough-v1.md |
+| 誤擋 | CASE-22 dual（job e9045bbd，10/31 第 4 天）的 TTM 期間寫在 period 欄，規則只讀 quarters 欄，誤判為不連續 | 組長 10/31 修正；新規則重跑（job 0dd723ce）模型與規則都判 pass，通過覆核。第 1–4 天 dual 結果與第 5 天後不可直接比較 | 組長 decisions 第 9 節；`agent/calib-v1-dual-rerun-2.json`；W04 case-walkthrough-v1.md |
+| 誤擋 | CASE-11 dual（job da86df90，10/29 第 2 天）：證據可得時間 14:15 早於 cutoff 17:00（台北），Reviewer 模型自行比較時區出錯，判 insufficient；規則判 pass，最終取較嚴格的 insufficient | 組長 10/31 改由程式比對可得時間；新規則重跑（job 9fc9e029）模型與規則都判 pass，通過覆核 | 組長 `agent/calib-v1-day2.json`、`agent/calib-v1-dual-rerun-1.json`、decisions 第 9 節 |
+
+新規則下（10/31 第 5 天與 dual 重跑），開發集 10 案的 dual 執行有 4 案通過覆核（CASE-01、11、22、26），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分。
 
 D 也在自己的草稿中說明：預期決定是 D 先寫的，修補規則也是看過案例後才補，所以「10 份草稿全部符合預期」只代表與 D 的預期一致，**不能說明 Reviewer 的真實檢出能力**（D `W06-D-redo/redo/README-redo.md` 第五節）。本稿不引用任何檢出率或成功率。
 
@@ -53,7 +56,7 @@ D 也在自己的草稿中說明：預期決定是 D 先寫的，修補規則也
 | 模型回傳函式名稱與參數，由應用程式執行後回傳結果 | R05 | 工具由程式執行，模型不直接存取資料 | |
 | 函式呼叫在執行前先驗證（最佳實務「Validation」） | R05 | 工具呼叫由程式檢查與執行；發布需組長登入並核對 hash，模型沒有發布權 | |
 
-R05 於 2026-11-01 改依英文原頁（Interactions API 版本，最後更新 2026-09-23）。英文頁的最佳實務是「執行前先驗證函式呼叫」，沒有「後果重大時先請使用者確認」這句，所以上表第五列已改寫。英文頁範例的 API 呼叫方式與本專題程式不同，引用哪一版文件待組長決定（見 docs/literature-cards.md R05）。
+R05 於 2026-11-01 改依英文原頁（Interactions API 版本，最後更新 2026-09-23）。英文頁的最佳實務是「執行前先驗證函式呼叫」，沒有「後果重大時先請使用者確認」這句，所以上表第五列已改寫。組長 2026-11-03 決定引用英文原頁（查閱日期 2026-11-01）；本節引用的是函式呼叫的最佳實務原則，與用哪種 API 無關。註腳：「該頁範例使用 Interactions API，本專題程式使用 generate_content；本文只引用其函式呼叫最佳實務。」
 
 ## 六、人工核准與發布
 
