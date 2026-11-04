@@ -71,7 +71,9 @@
 | pass／revise／insufficient | Reviewer 的三種覆核決定 | 組長 reviewer-v1.2 prompt；見 W05 method-reviewer.md | 非 B 範圍（組長） |
 | succeeded／insufficient_evidence／timed_out／cancelled／failed | job 的五種終態 | 組長 `handoff/state-machine-v1.md` | 非 B 範圍（組長） |
 | trace | 一次 job 中每一步（模型發送、工具呼叫、覆核）的記錄，以 job_id 與步驟序號（seq）識別 | 組長 `agent/*.json` | 非 B 範圍（組長） |
-| live／mock／replay | live：真實模型每一步自己決定；mock：模型回覆是預錄腳本，工具與快照是真的；replay：重播已保存的紀錄 | 組長 `agent/*.json` 的 note；replay 定義待 D | 非 B 範圍（組長、D） |
+| live／mock | live：真實模型每一步自己決定；mock：模型回覆是預錄腳本，工具與快照是真的 | 組長 `agent/*.json` 的 note | 非 B 範圍（組長、D） |
+| trace 重播 | 網站重播已保存的 live 紀錄（trace），只讀、不呼叫模型；與 F04 的 evidence-replay 不同 | A `research_ui/replays.py`；組長 2026-11-04 經 D 轉達 | 非 B 範圍（組長、D） |
+| evidence-replay | F04 的驗證方法：30 個歷史案例的資料是事後擷取的，依 cutoff 篩掉當時拿不到的資料後，實際呼叫模型執行；限制是資料可能被事後修訂，不保證和當時完全相同。9 份前瞻研究不屬於 evidence-replay；與網站的 trace 重播不同 | 組長 `handoff/v12-scope-quota.md`；組長 2026-11-04 經 D 轉達 | 非 B 範圍（組長、D） |
 
 ## 驗證與成果
 

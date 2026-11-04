@@ -65,15 +65,17 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 **說明**：在 10/31 修正前的規則下（校準第 1–4 天），dual 模式尚無一案通過覆核（組長 `handoff/W06-gate-v12.md` 第 8 節；`agent/calib-v1-day1~4.json`）。10/31 修正規則後，以新規則執行的開發集 10 案 dual 中，**4 案通過覆核**（CASE-01、11、22、26）（CASE-26 依組長 10/24 決定註明：此案未觸發逾時，逾時處理以離線測試為證），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分，本節不寫正確率或成功率。CASE-11 兩次執行都照實記錄：修正前（job da86df90，10/29）證據可得時間 14:15 其實早於 cutoff 17:00（台北），Reviewer 模型自行比較時區出錯而判 insufficient，規則判 pass，最終取較嚴格的 insufficient，是誤擋；組長 10/31 改由程式比對可得時間後重跑（job 9fc9e029），模型與規則都判 pass，通過覆核（組長 `agent/calib-v1-day2.json`、`agent/calib-v1-dual-rerun-1.json`；decisions 第 9 節）。研究 job 本身不發布，以上 job 都沒有進入發布流程，所以「正常」案例仍以 MOCK 報告示範發布流程，不能當作研究結果。三個案例都是開發案例或驗收用報告，不是保留案例，也不是正式實驗結果。
 
-## 7.6　live、mock 與 replay
+## 7.6　live、mock 與 trace 重播
 
 | 類型 | 意思 | 本節用到的例子 |
 |---|---|---|
 | live | 真實模型（gemini-3.5-flash-lite）每一步自己決定 | 衝突、不足兩例 |
 | mock | 模型回覆為預錄腳本，工具與快照是真的；報告首頁標示 MOCK | 正常一例、三份線上 PDF |
-| replay | 重播已保存的紀錄，不重新呼叫模型 | 本節未使用；正式定義待 D |
+| trace 重播 | 網站重播已保存的 live 紀錄（trace），只讀、不呼叫模型（A `research_ui/replays.py`） | 本節未使用 |
 
 （組長 `agent/*.json` 的 note；A `reports/v12-online-pdf-check.md` 第 2 節。）
+
+**注意：「trace 重播」和 F04 的「evidence-replay」是兩件事。** trace 重播只是把已保存的執行紀錄重新顯示，不呼叫模型；evidence-replay 是 F04 的驗證方法，用事後擷取、依 cutoff 篩過的資料實際呼叫模型重新研究（見方法章 3.7 節，組長 `handoff/v12-scope-quota.md`）。
 
 ## 7.7　待補
 
