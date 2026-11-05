@@ -86,7 +86,7 @@ B 10/31 說的「只剩 n=1」是根據 A 的網站程式，不是手冊或 calc
 
 | 項目 | 誰 |
 |---|---|
-| 更正 `forward-batch-1.json` 的 2454 敘述 | 組長 |
-| 核定 CR-W08-review-chinese-amounts（第二段程式，W09 鎖定前） | 組長 |
-| 核定同業財報期規則，交 A 改 `comparison.py` | 組長 → A |
+| 更正 `forward-batch-1.json` 的 2454 敘述 | ✅ 組長已更正（6479b41） |
+| 核定 CR-W08-review-chinese-amounts（第二段程式，W09 鎖定前） | ✅ 組長 11/02 採用並實作（32a3ab9；同時改為只比同單位） |
+| 核定同業財報期規則，交 A 改 `comparison.py` | ✅ 組長 11/02 核定兩家都計入，已改 `comparison.py`；A 核對網站呈現 |
 | 11/02 起 D 跑 1／5／20 日報酬（direction 全 none） | D |

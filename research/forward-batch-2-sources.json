@@ -1,6 +1,6 @@
 {
   "batch_id": "forward-batch-2",
-  "version": "v0.2-draft-2026-11-01",
+  "version": "v0.4-draft-2026-11-05",
   "prepared_by": "組員 B（黃意棠）",
   "status": "draft：11/06 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
   "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；截止時間與來源可得時間同存；資料不足照收錄，不補造方向。",
@@ -25,7 +25,7 @@
     "macro": "data/manual/forward/macro-2026-10-30.csv 7 列 → 複製到 macro-2026-11-06.csv 再加新列",
     "announce": "data/manual/forward/announce-2026-10-30.csv（2379、2454 之 2026Q3）→ 複製到 announce-2026-11-06.csv 再加新列",
     "control": "data/manual/forward/mops-control-2026-10-30.csv（2379、2454 之 2026Q3）→ 複製到 mops-control-2026-11-06.csv 再加新列",
-    "q3_inclusion": "第 1 批實際：組長 10/31 決定 A，但 10/31 19:08 FinMind 無 2454 2026Q3 科目，依決定改 B（全部 2026Q2）。第 2 批沿用「A，FinMind 未上架則 B」：11/06 21:00 後產生快照時，先用 announce／control 跑 A；若 builder 因 FinMind 缺 2026Q3 中止，改 B 並在本檔記錄原因",
+    "q3_inclusion": "組長 11/02：照「A，FinMind 未上架則 B」，由 scripts/freeze_forward_batch.py 自動處理並記錄原因（announce／control 兩檔存在即先試 A）",
     "batch_1_frozen": {
       "file": "data/forward/financial-snapshots-2026-10-30.json",
       "sha256": "3ec3d8a09028d6f8d58bab6e71b613902572a23cee888f25d6b4b731552e5cca",
@@ -36,7 +36,7 @@
     "file": "data/forward/financial-snapshots-2026-11-06.json",
     "builder": "scripts/build_snapshot_finmind.py V1.8",
     "command": "python scripts\\build_snapshot_finmind.py --cutoff 2026-11-06T21:00 --out data/forward/financial-snapshots-2026-11-06.json --evidence data/manual/forward/evidence-2026-11-06.csv --macro data/manual/forward/macro-2026-11-06.csv [--announce-extra data/manual/forward/announce-2026-11-06.csv] [--control data/manual/forward/mops-control-2026-11-06.csv]",
-    "run_by": "組長（11/06 21:00 後執行）；B 於 11/06 21:00 前備妥人工輸入",
+    "run_by": "scripts/freeze_forward_batch.py --batch 2（組長，11/06 21:10 自動）；B 於 11/06 21:00 前把人工檔推上 main，之後不得改動",
     "must_not_overwrite": [
       "data/financial-snapshots.json",
       "data/forward/financial-snapshots-2026-10-30.json",
@@ -78,9 +78,9 @@
     {
       "ticker": "3034",
       "role": "peer",
-      "expected_latest_period": "2026Q2 或 2026Q3",
+      "expected_latest_period": "2026Q3",
       "q3_note": "2025Q3 為 2025-11-04 公告，2026Q3 很可能落在 11/02–11/06。若第31款發言時間 ≤ 11/06 21:00：announce-2026-11-06.csv 加列；mops-control-2026-11-06.csv 填本季營收與 EPS（無單季新聞稿時以 1–9 月累計減 2026Q1、Q2 推算並在 note 註明）。納入後 2454 的同業平均恢復為 2379、3034 兩家",
-      "status": "to_verify_2026-11-02_to_11-06（重點）"
+      "status": "collected_2026-11-05：MOPS 第31款 2026-11-03 16:52:01 董事會通過 115Q3 合併財報（早於 cutoff）。已加入 announce-2026-11-06.csv；mops-control-2026-11-06.csv 填單季營收 309.72 億、EPS 9.99（1–9月累計 827.77 億、EPS 26.58 減 Q1、Q2 推算）"
     }
   ],
   "evidence_candidates": [
@@ -89,7 +89,7 @@
       "item": "115 年 10 月合併營業收入（MOPS 重大訊息第51款或每月營收）",
       "expected": "鴻海通常於月初公告上月營收，預期 cutoff 前可得（以實際發言時間為準）",
       "rule": "月營收為公司自結，不是財報；不可加總取代季報",
-      "status": "to_collect"
+      "status": "to_collect：至 2026-11-05 12:00 MOPS 重大訊息尚未見 10 月營收公告（11/02 說明媒體報導、11/02 公司債、11/03 法說會預告 11/12）"
     },
     {
       "ticker": "3034",
@@ -120,7 +120,8 @@
       "series_id": "FEDFUNDS",
       "new_observation": "2026-10",
       "available_at": "2026-11-03T00:00:00-05:00（保守：次月第一個工作日 11/02 的隔天；11/01 起為美東標準時間 -05:00）",
-      "status": "to_collect_after_2026-11-03"
+      "status": "collected_2026-11-05（FRED CSV，使用者下載）；2026-07～09 值與第 1 批相同（3.63、3.63、3.75）",
+      "value": 3.88
     },
     {
       "series_id": "CPIAUCSL",
@@ -169,12 +170,13 @@
     "以 scratch 程式載入檢查（load_announce／load_mops_control／load_evidence／load_macro）",
     "11/06 21:00 前 push；組長 21:00 後產生快照；B 記錄 sha256 並轉 frozen"
   ],
-  "peer_period_rule": "待組長核定：手冊 F02 允許「各自財報期與來源明示」，B 的 calculator 不篩財報期；A 的 research_ui/comparison.py 只計入與 2454 同財報期的同業。混合 Q2／Q3 時兩者結果不同，第 2 批快照前需統一（見 research/forward-batch-1-audit.md 第四節）",
+  "peer_period_rule": "組長 2026-11-02 核定（decisions 第 11 節）：不同財報期的同業都計入（n=2），逐列標財報季別，periods_consistent=false 時註明「同業財報期不同」",
   "decisions_applied": [
     "股價可得時間 17:30（組長 10/22）",
     "F06 延後，前瞻不產生關係圖資料（組長 10/22）",
     "2317 不做 FCF 正常化（組長 10/22）",
     "direction 三批全記 none，只展示 1／5／20 日報酬，不算命中率（組長 10/31）",
-    "第三季：A，FinMind 未上架則 B（組長 10/31）"
+    "第三季：A，FinMind 未上架則 B（組長 10/31）",
+    "同業平均跨財報期都計入（組長 11/02）"
   ]
 }

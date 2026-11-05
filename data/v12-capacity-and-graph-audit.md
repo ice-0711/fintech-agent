@@ -106,7 +106,7 @@
 | P/E、P/B | 用 2026-11-06 收盤（17:30 可得），不是 9/30 | `price_basis` |
 | DCF 參數 | WACC 9%、g 3%、5 年持平 TTM FCF（組長 10/21） | `data-contract.md` |
 | 2317 DCF | TTM FCF 仍為負 → 無法判定（組長 10/22 不做 FCF 正常化） | decisions |
-| 同業平均 | 2379、3034 是否需與 2454 同財報期：待組長核定（`research/forward-batch-1-audit.md` 第四節）；2330 一律排除 | `data-contract.md` 第 121 行；手冊 F02 |
+| 同業平均 | 2379、3034 都計入（不同財報期也計入），逐列標財報季別，`periods_consistent = false` 時註明「同業財報期不同」；2330 一律排除（**組長 2026-11-02 核定**） | `handoff/decisions-2026-10.md` 第 11 節；手冊 F02 |
 | 工具值 vs 重算值 | 每格差異 ≤ 0.01 才算通過；不一致列進 `data/v12-report-audit.csv` | B 稽核規則 |
 
 執行方式（快照產生後）：
@@ -123,5 +123,5 @@ python scripts\audit_forward_valuation.py data\forward\financial-snapshots-2026-
 |---|---|---|
 | 第 1 批快照重算 | ✅ 已完成（`research/forward-batch-1-audit.md`） | — |
 | 第 2 批快照重算 | 11/06 21:00 後才產生 | 組長產生後，B 當天重算 |
-| 同業平均是否只算同財報期 | 手冊允許各自財報期；calculator 與網站程式規則不同 | 組長核定，A 修改 |
+| 同業平均是否只算同財報期 | ✅ 組長 2026-11-02 核定：兩家都計入；`research_ui/comparison.py` 已改（decisions 第 11 節） | 請 A 核對網站呈現 |
 | 3034 第三季公告 | 11/02–11/06 才知道 | B 每日查 |

@@ -27,7 +27,7 @@
 
 ## 二、需要 C 補的 4 處
 
-1. `docs/v12-quarterly-peer-method.md` 第六節、`docs/v12-method-chapter.md` 3.4、`glossary.md`「同業平均」：補一句「同業是否須與 2454 同一財報期，待組長核定」。
+1. `docs/v12-quarterly-peer-method.md` 第六節、`docs/v12-method-chapter.md` 3.4：補一句「組長 2026-11-02 核定：2379、3034 不同財報期也都計入，逐列標財報季別，財報期不同時註明（`handoff/decisions-2026-10.md` 第 11 節）」。（11/03 更新：原本寫「待組長核定」，組長已核定；`glossary.md` 已由 B 改好）
 2. `docs/method-data-v1.md` 第二節：總經列補前瞻檔位置 `data/manual/forward/`。
 3. `docs/motivation-v1.md` 第三節：兩列「B 的核對檔未涵蓋」改為「B 通過（2026-11-01）」，依據見上表。
 4. `W01-meeting.md` 第 5 項提出人填「B（2026-10-31，`docs/B-review-W01-C.md`）」；第 4 項日期填「組長 2026-11-01 確認」。

@@ -11,7 +11,7 @@
 
 | 驗收項目 | 結果 | 依據 |
 |---|---|---|
-| 有 80% 停止閾值 | 🟡 **規則有、程式只做到一半** | 模型額度：`agents/budget.py` 的 `HEADROOM = 0.8`，RPD、RPM、TPM 達 80% 就停止送出（程式已實作）。DB／Storage／流量：`handoff/v12-scope-quota.md` 寫「80% 停止新增並通知」，但 `agents/publication.py` 發布前**沒有檢查用量**。本文第三節列出 B 建議的閾值數字，程式改動屬組長檔案，B 另提 CR 建議（第六節） |
+| 有 80% 停止閾值 | 🟡 **規則有、程式只做到一半**（組長 11/02：CR 原則採用，門檻 800 MB／400 MB 可照用，第二批後實作） | 模型額度：`agents/budget.py` 的 `HEADROOM = 0.8`，RPD、RPM、TPM 達 80% 就停止送出（程式已實作）。DB／Storage／流量：`handoff/v12-scope-quota.md` 寫「80% 停止新增並通知」，但 `agents/publication.py` 發布前**沒有檢查用量**。本文第三節列出 B 建議的閾值數字，程式改動屬組長檔案，B 另提 CR 建議（第六節） |
 | 不自動刪正式資料 | ✅ | 正式路徑（`agents/`、`research_ui/`、`web_app.py`）沒有刪除資料或檔案的程式。PDF 寫入一次後不可覆寫：`LocalStorage.put`、`SupabaseStorage.put`（`upsert: false`，已存在就中止）。唯一的刪除在 `scripts/rehearse_publication.py`，只清掉該腳本自己在**測試專案**建立的演練列與演練 PDF |
 | 外部文字不成指令 | ✅ | 新增 `tests/test_w08_safety.py` 41 項全數通過（第二節）。兩份 prompt 都寫明「來源原文沒有指令效力」，測試會檢查這句還在 |
 | 無未核准全文外流 | ✅ | `read_evidence` 最多回 1,200 字；`search_evidence` 只回摘要、不回正文；Storage bucket `reports` 為私有，表格 `report_versions` 開 RLS、沒有任何 policy，API 角色讀不到（`supabase_migrations/20261028_report_versions_store.sql`）。FinMind 原始檔不上傳 GitHub（`.gitignore`） |
@@ -85,8 +85,8 @@ Free 方案：資料庫 500 MB、檔案儲存 1 GB、流量（egress）每月 5 
 
 | 項目 | 原因 | 需要誰 |
 |---|---|---|
-| Supabase 實際方案與 DB／Storage／流量用量 | B 沒有後台權限，也不應取得 | 組長：Dashboard → Usage 截圖或讀數，填入第三節 |
-| 80% 檢查寫進發布流程 | `agents/publication.py` 是組長檔案 | 組長（見第六節 CR 建議） |
+| Supabase 實際方案與 DB／Storage／流量用量 | ✅ 組長 11/02 讀數：Free；DB fintech-agent 25.64 MB、fintech-agent-test 25.07 MB（約 5%）；Storage 約 0.27 MB；流量 0.00 GB；Free 無排程備份，改用 `scripts/backup_reports.py`（`operations/v12-resource-gate.md`） | — |
+| 80% 檢查寫進發布流程 | 組長 11/02 原則採用，第二批後實作 | 組長（見第六節 CR 建議） |
 | Render 記憶體（2 GB 為計畫） | W08-L 範圍 | 組長 |
 
 ---
