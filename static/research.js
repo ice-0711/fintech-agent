@@ -68,8 +68,37 @@
   function badge(text, cls) { return `<span class="badge ${cls}">${esc(text)}</span>`; }
   function setStatus(text) { pageStatus.textContent = text; }
 
-  async function getJson(url, options) {
-    const res = await fetch(url, options);
+  /* W08-A: the server has one sync worker (Render Free). While it renders a PDF (about 30 s there) or wakes up
+   * after idling (about 50 s), requests wait. Say so after 5 s instead of looking frozen, and give up after
+   * TIMEOUT_MS so callers can retry. Model requests are never made from here. */
+  const SLOW_MS = 5000;
+  const TIMEOUT_MS = 25000;
+  const PUBLISH_TIMEOUT_MS = 180000;
+  let slowCount = 0, statusBeforeSlow = null;
+  function markSlow(on) {
+    if (on) {
+      if (slowCount++ === 0) statusBeforeSlow = pageStatus.textContent;
+      setStatus("伺服器回應較慢（剛喚醒或正在產生 PDF），請稍候…");
+    } else if (--slowCount === 0 && statusBeforeSlow !== null) {
+      setStatus(statusBeforeSlow); statusBeforeSlow = null;
+    }
+  }
+
+  async function getJson(url, options = {}, timeoutMs = TIMEOUT_MS) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    let slow = false;
+    const slowTimer = setTimeout(() => { slow = true; markSlow(true); }, SLOW_MS);
+    let res;
+    try {
+      res = await fetch(url, { ...options, signal: ctrl.signal });
+    } catch (err) {
+      throw Object.assign(new Error(err.name === "AbortError" ? `伺服器 ${Math.round(timeoutMs / 1000)} 秒內沒有回應` : "網路連線失敗"),
+        { status: 0, timeout: err.name === "AbortError" });
+    } finally {
+      clearTimeout(timer); clearTimeout(slowTimer);
+      if (slow) markSlow(false);
+    }
     const type = res.headers.get("content-type") || "";
     const body = type.includes("application/json") ? await res.json() : null;
     if (!body) throw Object.assign(new Error(`伺服器回應非 JSON（HTTP ${res.status}）`), { status: res.status });
@@ -117,12 +146,18 @@
   let published = null;
   let publishedError = null;
 
-  async function loadPublished() {
+  // Transient failures (no answer, 5xx) retry automatically with backoff; the user can also retry at once.
+  const transient = err => !err.status || err.status >= 500;
+  function retryLater(fn, attempt) { const wait = Math.min(5000 * 2 ** attempt, 40000); setTimeout(() => fn(attempt + 1), wait); return wait; }
+  let publishedRetry = null;
+
+  async function loadPublished(attempt = 0) {
     try {
       published = await getJson("/api/ui/published");
-      publishedError = null;
+      publishedError = null; publishedRetry = null;
     } catch (err) {
       published = null; publishedError = err;
+      publishedRetry = transient(err) && attempt < 4 ? retryLater(loadPublished, attempt) : null;
     }
     renderReports();
   }
@@ -130,7 +165,8 @@
   function renderReports() {
     const box = $("#reportList");
     if (publishedError) {
-      box.innerHTML = `<div class="empty error-box">已發布清單讀取失敗：${esc(publishedError.message)}</div>`;
+      box.innerHTML = `<div class="empty error-box">已發布清單讀取失敗：${esc(publishedError.message)}${publishedRetry ? `；${Math.round(publishedRetry / 1000)} 秒後自動重試` : ""}
+        <div class="actions" style="justify-content:center;margin-top:8px"><button type="button" class="ghost" data-retry="published">立即重試</button></div></div>`;
       return;
     }
     if (!published) return;
@@ -455,7 +491,7 @@
       const body = await getJson(`/api/ui/jobs/${encodeURIComponent(jobId)}/approve`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ report_version_id: pendingVersion.report_version_id, report_hash: pendingVersion.report_hash })
-      });
+      }, PUBLISH_TIMEOUT_MS);
       pendingVersion = null;
       note.innerHTML = `已發布第 ${esc(body.version.version_no)} 版。${pdfLinks(body.version)}
         <button type="button" class="ghost" data-open-report="${esc(body.version.report_version_id)}">開啟報告</button>`;
@@ -528,7 +564,8 @@
       renderReport(body.report);
       $("#reportSection").scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
-      panel.innerHTML = `<div class="empty error-box">${err.status === 404 ? "找不到這份已發布報告（未核准版本不公開）。" : esc(err.message)}</div>`;
+      panel.innerHTML = `<div class="empty error-box">${err.status === 404 ? "找不到這份已發布報告（未核准版本不公開）。" : esc(err.message)}
+        ${transient(err) ? `<div class="actions" style="justify-content:center;margin-top:8px"><button type="button" class="ghost" data-open-report="${esc(rvId)}">重試</button></div>` : ""}</div>`;
     }
   }
 
@@ -608,7 +645,7 @@
     const peer = t.peer_comparison ? `<div class="sens-wrap"><table class="cmp-table sens-table data-table"><thead><tr><th>公司</th><th>財報期／收盤</th><th>P/E</th><th>P/B</th><th>單季營收 YoY</th><th>FCF TTM</th><th>DCF 差距</th><th>估值狀態</th></tr></thead>
       <tbody>${t.peer_comparison.rows.map(x => { const m = x.metrics; const role = ROLE[x.role] || [x.role, "b-neutral"]; return `<tr class="${x.role === "industry_reference" ? "ref-row" : ""}"><th>${esc(x.ticker)} ${esc(x.name)}<br>${badge(role[0], role[1])}</th><td>${esc(x.financial_period)}<br>${num(x.price && x.price.value)}</td><td>${num(m.pe_ttm.value)}</td><td>${num(m.pb.value)}</td><td>${m.revenue_yoy_quarter.value === null ? "NA" : pct(m.revenue_yoy_quarter.value)}</td><td>${num(m.fcf_ttm.value, 1)}</td><td>${m.dcf_gap.value === null ? "NA" : pct(m.dcf_gap.value)}</td><td>${esc(x.valuation.label)}</td></tr>`; }).join("")}</tbody></table></div>`
       : `<p class="hint">同業比較不適用：${esc(t.peer_na_reason || "—")}</p>`;
-    const peerNote = t.peer_comparison ? `<p class="footnote">同業數字來自同業快照 <span class="mono">${esc(t.peer_comparison.peer_snapshot_version || "NA")}</span>（${esc(t.peer_comparison.peer_snapshot_file || "NA")}），與本報告主快照 <span class="mono">${esc(r.source_snapshot_id)}</span> 是兩份不同的檔案。</p>` : "";
+    const peerNote = t.peer_comparison ? `<p class="footnote">同業數字來自同業快照 <span class="mono">${esc(t.peer_comparison.peer_snapshot_version || "NA")}</span>（${esc(t.peer_comparison.peer_snapshot_file || "NA")}），與本報告主快照 <span class="mono">${esc(r.source_snapshot_id)}</span> 是兩份不同的檔案。${(t.peer_comparison.peer_stats || {}).period_note ? `<b>${esc(t.peer_comparison.peer_stats.period_note)}</b>，各列財報期見上表。` : ""}</p>` : "";
     return `${t.scope_note ? `<p class="hint warn-line">${esc(t.scope_note)}</p>` : ""}
       <div class="sub">季度資料</div>${q}
       <div class="sub">DCF 假設與敏感度</div>
@@ -650,7 +687,7 @@
       <p class="footnote">同日收盤價 ${esc(s.price && s.price.value)} 元。基準情境 FCF 不成長，所以模型值偏保守；這張表用來看假設變動的影響，不是目標價。</p></details>`;
   }
 
-  async function loadComparison() {
+  async function loadComparison(attempt = 0) {
     const panel = $("#comparisonPanel");
     try {
       const d = await getJson("/api/ui/comparison/2454");
@@ -674,13 +711,15 @@
             </tr>`;
           }).join("")}</tbody>
         </table>
-        <p class="hint">同業平均　${statLine("P/E", ps.pe_ttm, v => v.toFixed(2) + " 倍", ps.snapshot_values.pe_ttm)}　${statLine("P/B", ps.pb, v => v.toFixed(2) + " 倍", ps.snapshot_values.pb)}　${statLine("單季營收 YoY", ps.revenue_yoy_quarter, pct, ps.snapshot_values.revenue_yoy_quarter)}<br>${esc(ps.basis)}；排除：${esc(ps.excluded.join("、"))}</p>
+        <p class="hint">同業平均　${statLine("P/E", ps.pe_ttm, v => v.toFixed(2) + " 倍", ps.snapshot_values.pe_ttm)}　${statLine("P/B", ps.pb, v => v.toFixed(2) + " 倍", ps.snapshot_values.pb)}　${statLine("單季營收 YoY", ps.revenue_yoy_quarter, pct, ps.snapshot_values.revenue_yoy_quarter)}<br>${esc(ps.basis)}；排除：${esc(ps.excluded.join("、"))}${ps.period_note ? `；<b>${esc(ps.period_note)}</b>，各列財報期見上表` : ""}</p>
         ${sensitivity(d)}
         <p class="footnote">${esc(d.data_status)}。DCF 假設：WACC ${pct(d.dcf_assumptions.wacc)}、g ${pct(d.dcf_assumptions.terminal_growth)}、${esc(d.dcf_assumptions.fcf_basis)}（${esc(d.dcf_assumptions.source)}）。${esc(d.valuation_footnote)}</p>
         ${d.checks.length ? `<details><summary class="hint" style="cursor:pointer">待 B、D 處理的 ${d.checks.length} 項資料問題</summary><ul class="checks">${d.checks.map(c => `<li>${esc(c.ticker)}・${esc(c.metric)}：${esc(c.issue)}</li>`).join("")}</ul></details>` : ""}
         <p class="footnote">主值只顯示工具可由快照重現的數字；缺值一律 NA＋原因，不以 0 補。P/E、P/B 不使用營收或獲利比代替。</p>`;
     } catch (err) {
-      panel.innerHTML = `<div class="empty error-box">比較資料讀取失敗：${esc(err.message)}</div>`;
+      const wait = transient(err) && attempt < 4 ? retryLater(loadComparison, attempt) : null;
+      panel.innerHTML = `<div class="empty error-box">比較資料讀取失敗：${esc(err.message)}${wait ? `；${Math.round(wait / 1000)} 秒後自動重試` : ""}
+        <div class="actions" style="justify-content:center;margin-top:8px"><button type="button" class="ghost" data-retry="comparison">立即重試</button></div></div>`;
     }
   }
 
@@ -736,6 +775,10 @@
   $("#onlyFav").addEventListener("change", renderReports);
   $("#sortOrder").addEventListener("change", renderReports);
 
+  document.addEventListener("click", e => {
+    const retry = e.target.closest("[data-retry]");
+    if (retry) { if (retry.dataset.retry === "published") loadPublished(); else loadComparison(); return; }
+  });
   document.addEventListener("click", e => {
     const ref = e.target.closest("[data-evidence]");
     if (ref) { openEvidence(ref.dataset.evidence, ref.dataset.report || currentReportId, ref); return; }

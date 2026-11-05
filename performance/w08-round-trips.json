@@ -1,0 +1,280 @@
+{
+ "note": "report-store database queries / Storage reads per request, counted by scripts/w08_counted_wsgi.py; before = origin/main 7d5256f, after = this branch",
+ "rv": "rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83",
+ "before": {
+  "label": "before",
+  "endpoints": {
+   "GET /api/ui/published": {
+    "status": 200,
+    "first_db": 1,
+    "first_storage": 0,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /reports": {
+    "status": 200,
+    "first_db": 0,
+    "first_storage": 0,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /api/ui/reports/<rv>": {
+    "status": 200,
+    "first_db": 1,
+    "first_storage": 0,
+    "repeat_db_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /api/ui/evidence/<id>": {
+    "status": 200,
+    "first_db": 1,
+    "first_storage": 0,
+    "repeat_db_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /reports/<rv>.pdf (lead's preview)": {
+    "status": 200,
+    "first_db": 1,
+    "first_storage": 1,
+    "repeat_db_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "repeat_storage_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "GET /api/ui/reports/<rv>/download": {
+    "status": 200,
+    "first_db": 3,
+    "first_storage": 1,
+    "repeat_db_each": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "repeat_storage_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "GET /api/ui/reports/<rv>.pdf (A's preview)": {
+    "status": 404,
+    "first_db": 1,
+    "first_storage": 0,
+    "repeat_db_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  }
+ },
+ "after": {
+  "label": "after",
+  "endpoints": {
+   "GET /api/ui/published": {
+    "status": 200,
+    "first_db": 1,
+    "first_storage": 0,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /reports": {
+    "status": 200,
+    "first_db": 0,
+    "first_storage": 0,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /api/ui/reports/<rv>": {
+    "status": 200,
+    "first_db": 0,
+    "first_storage": 0,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /api/ui/evidence/<id>": {
+    "status": 200,
+    "first_db": 0,
+    "first_storage": 0,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /reports/<rv>.pdf (lead's preview)": {
+    "status": 200,
+    "first_db": 1,
+    "first_storage": 1,
+    "repeat_db_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "repeat_storage_each": [
+     1,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "GET /api/ui/reports/<rv>/download": {
+    "status": 200,
+    "first_db": 0,
+    "first_storage": 1,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "GET /api/ui/reports/<rv>.pdf (A's preview)": {
+    "status": 200,
+    "first_db": 0,
+    "first_storage": 0,
+    "repeat_db_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "repeat_storage_each": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  }
+ }
+}
