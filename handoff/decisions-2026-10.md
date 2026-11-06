@@ -95,7 +95,7 @@
 
 - **中文金額單位（CR-W08，`docs/CR-W08-review-chinese-amounts.md`）**：採用。`agents/review_checks.py` 新增 `chinese_amounts()`，原文的「5,118億5,700萬元」這類寫法換算後相符即算來源支持；引用證據的數字池也納入換算值。寫錯的數字仍判 not_supported。測試 `tests/test_review_chinese_amounts.py`。屬第二段，W09 鎖定時一併鎖定。
 - **來源衝突只比同單位**：`find_conflicts()` 只比較同單位（億對億、% 對 %）。月營收與季營收單位相同仍會列出，維持 minor、不擋。
-- **影響範圍**：B 掃描過，開發集 10 案的證據沒有中文單位金額，校準結果不受影響。以新規則重放前瞻第 1 批草稿：2330 規則判定 insufficient → pass；2454 insufficient → pass（只剩月營收與季營收的 minor）；2317 不變。
+- **影響範圍**：~~B 掃描過，開發集 10 案的證據沒有中文單位金額~~（**11/05 B 更正**：當時的掃描不接受數字與單位間的空格，漏掉 CASE-08 二手摘要的「2 兆 2,558.94 億元」；11/06 已改為允許空格）。校準結果仍不受影響：CASE-08 single 不經覆核，dual 的 c2 是 unknown、沒有數值。保留集由 B 用修正後的版本再掃一次。以新規則重放前瞻第 1 批草稿：2330 規則判定 insufficient → pass；2454 insufficient → pass（只剩月營收與季營收的 minor）；2317 不變。
 - **前瞻第 1 批不重跑**：照手冊「資料不足照收錄」，以現有結果記錄。中文金額誤判、2454 Researcher 只搜尋一次未讀第三季證據，兩點寫進限制。
 - **同業平均**：依手冊 F02「各自財報期與來源明示」，不同財報期的同業都計入（2454 比較組 n=2），表格逐列標財報季別，`periods_consistent = false` 時註明「同業財報期不同」。`research_ui/comparison.py` 已由組長端改（11/02，不再篩同財報期，`peer_stats.period_note`；PDF 同步加註），測試 `test_peer_stats_keep_peers_with_a_different_period`；請 A 核對網站呈現。
 - **發布前容量 80% 檢查（`data/storage-and-safety-w08.md` 第六節）**：原則採用；門檻依 Supabase 實際方案訂，組長提供方案與用量後再實作，migration 先在測試專案演練。

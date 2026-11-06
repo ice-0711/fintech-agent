@@ -11,11 +11,15 @@ def test_chinese_amounts_converted_to_yuan():
     assert chinese_amounts("約新台幣1兆4,942億4千萬元") == [1494240000000.0]
     assert chinese_amounts("稅後純益約新台幣7,630億6千萬元") == [763060000000.0]
     assert chinese_amounts("營業利益為新台幣271億2佰萬元") == [27102000000.0]
+    assert chinese_amounts("二手摘要：約 2 兆 2,558.94 億元") == [2255894000000.0]  # spaces, CASE-08 (B 11/05)
+    assert chinese_amounts("5,118 億 5,700 萬元") == [511857000000.0]
 
 
 def test_plain_numbers_are_not_read_as_chinese_amounts():
     assert chinese_amounts("EPS 29.43元，增加50.9%") == []
-    assert chinese_amounts("營業收入合計 2,525,894,433 千元") == []  # 千元 tables keep the old path
+    # 千元 tables still match through numbers_in; the extra yuan candidate is the same amount (B 11/05)
+    assert chinese_amounts("營業收入合計 2,525,894,433 千元") == [2525894433000.0]
+    assert chinese_amounts("2026 年 6 月") == []
 
 
 def test_claim_matching_chinese_amount_is_supported():

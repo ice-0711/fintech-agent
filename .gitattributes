@@ -1,0 +1,2 @@
+# Forward snapshots are hashed byte for byte (research/forward-batch-*.json): never convert line endings (B 11/05, Windows CRLF)
+data/forward/*.json -text
