@@ -1,0 +1,245 @@
+{
+ "viewports": {
+  "1440": {
+   "page_load_requests": [
+    {
+     "method": "GET",
+     "url": "/research"
+    },
+    {
+     "method": "GET",
+     "url": "/static/research.css"
+    },
+    {
+     "method": "GET",
+     "url": "/static/research.js"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/published"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/comparison/2454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/replays"
+    }
+   ],
+   "ticker_switch_15_clicks_requests": [],
+   "open_report_clicks": 15,
+   "open_report_requests": [
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    }
+   ],
+   "pdf_and_source_requests": [
+    {
+     "method": "GET",
+     "url": "/api/ui/evidence/snap-2330-2026Q2?report=rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    }
+   ],
+   "downloads": [
+    {
+     "file": "2330-v1-rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454.pdf",
+     "bytes": 411006,
+     "head": "%PDF-"
+    },
+    {
+     "file": "2330-v1-rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454.pdf",
+     "bytes": 411006,
+     "head": "%PDF-"
+    }
+   ],
+   "pdf_button_uncovered": true,
+   "source_drawer_uncovered": true,
+   "posts_or_analyze": [],
+   "page_errors": []
+  },
+  "390": {
+   "page_load_requests": [
+    {
+     "method": "GET",
+     "url": "/research"
+    },
+    {
+     "method": "GET",
+     "url": "/static/research.css"
+    },
+    {
+     "method": "GET",
+     "url": "/static/research.js"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/published"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/comparison/2454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/replays"
+    }
+   ],
+   "ticker_switch_15_clicks_requests": [],
+   "open_report_clicks": 15,
+   "open_report_requests": [
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-a520d5cc-7b34-4f0d-b5ee-008fbddd6f83"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-915bb95c-9fbd-435b-8fdd-5e83188e24d7"
+    },
+    {
+     "method": "GET",
+     "url": "/api/ui/reports/rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    }
+   ],
+   "pdf_and_source_requests": [
+    {
+     "method": "GET",
+     "url": "/api/ui/evidence/snap-2330-2026Q2?report=rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454"
+    }
+   ],
+   "downloads": [
+    {
+     "file": "2330-v1-rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454.pdf",
+     "bytes": 411006,
+     "head": "%PDF-"
+    },
+    {
+     "file": "2330-v1-rv-d407e7cc-cf7c-4c8a-a210-9d3452d75454.pdf",
+     "bytes": 411006,
+     "head": "%PDF-"
+    }
+   ],
+   "pdf_button_uncovered": true,
+   "source_drawer_uncovered": true,
+   "posts_or_analyze": [],
+   "page_errors": []
+  }
+ },
+ "slow_server": {
+  "status_after_6s": "伺服器回應較慢（剛喚醒或正在產生 PDF），請稍候…",
+  "status_after_load": "系統待命",
+  "first_503_text": "比較資料讀取失敗：伺服器回應非 JSON（HTTP 503）；5 秒後自動重試\n立即重試",
+  "recovered_after_retry": true
+ },
+ "server_counters_delta": {
+  "model_generate_content": 0,
+  "model_client_created": 0,
+  "gemini_adapter_created": 0,
+  "full_statement_fetch": 0,
+  "outbound_connections": 0
+ }
+}

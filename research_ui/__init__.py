@@ -32,6 +32,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import threading
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
@@ -162,6 +164,13 @@ def _real_published() -> tuple[list[dict[str, Any]], str | None]:
 
 
 def _real_version(rv_id: str) -> dict[str, Any] | None:
+    """A published version. Published versions are write-once, so the store's 60 s published list (one query)
+    answers first; only an id not in it costs a database read (W08-A: on Render each read is a new TLS
+    connection to Supabase, about 1 s)."""
+    real, _ = _real_published()
+    for v in real:
+        if v["report_version_id"] == rv_id:
+            return v
     try:
         v = _reports().get(rv_id)
     except KeyError:
@@ -169,11 +178,35 @@ def _real_version(rv_id: str) -> dict[str, Any] | None:
     return v if v["status"] == "published" else None
 
 
+# W08-A: published PDFs are write-once and hash-checked, so a few can be kept in memory. Repeated preview /
+# download clicks then cost no Storage request. Bounded so it cannot grow on Render's 512 MB.
+PDF_CACHE_MAX_FILES = 8
+PDF_CACHE_MAX_BYTES = 24 * 1024 * 1024
+_pdf_cache: OrderedDict[str, bytes] = OrderedDict()
+_pdf_cache_lock = threading.Lock()
+
+
+def _published_pdf(v: dict[str, Any]) -> bytes:
+    rv = v["report_version_id"]
+    with _pdf_cache_lock:
+        if rv in _pdf_cache:
+            _pdf_cache.move_to_end(rv)
+            return _pdf_cache[rv]
+    data = _reports().storage.get(v["storage_key"])
+    if hashlib.sha256(data).hexdigest() != v["pdf_hash"]:
+        raise PublicationError("PDF 與發布紀錄的 hash 不符")
+    with _pdf_cache_lock:
+        _pdf_cache[rv] = data
+        while len(_pdf_cache) > PDF_CACHE_MAX_FILES or sum(map(len, _pdf_cache.values())) > PDF_CACHE_MAX_BYTES:
+            _pdf_cache.popitem(last=False)
+    return data
+
+
 def _version_links(v: dict[str, Any]) -> dict[str, Any]:
     rv = v["report_version_id"]
     return {"report_version_id": rv, "version_no": v["version_no"], "published_at": v["published_at"],
             "report_hash": v["report_hash"], "pdf_hash": v["pdf_hash"],
-            "pdf_url": f"/reports/{rv}.pdf", "download_url": f"/api/ui/reports/{rv}/download"}
+            "pdf_url": f"/api/ui/reports/{rv}.pdf", "download_url": f"/api/ui/reports/{rv}/download"}
 
 
 def _real_row(v: dict[str, Any]) -> dict[str, Any]:
@@ -231,18 +264,32 @@ def _real_detail(v: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@bp.get("/api/ui/reports/<rv_id>/download")
-def download_report(rv_id: str):
-    if _real_version(rv_id) is None:
+def _pdf_response(rv_id: str, disposition: str):
+    v = _real_version(rv_id)
+    if v is None or not v.get("storage_key"):
         return jsonify({"ok": False, "error": "not_found"}), 404
+    etag = f'"{v["pdf_hash"]}"'
+    headers = {"ETag": etag, "Cache-Control": "public, max-age=3600"}  # a published PDF never changes
+    if request.headers.get("If-None-Match") == etag:
+        return Response(status=304, headers=headers)
     try:
-        data = _reports().read_published_pdf(rv_id)
+        data = _published_pdf(v)
     except (KeyError, PublicationError, OSError) as exc:
         return jsonify({"ok": False, "error": "pdf_unavailable", "message": str(exc)[:200]}), 404
-    v = _reports().get(rv_id)
     name = f"{v['report']['ticker']}-v{v['version_no']}-{rv_id}.pdf"
     return Response(data, mimetype="application/pdf",
-                    headers={"Content-Disposition": f'attachment; filename="{name}"', "Cache-Control": "no-store"})
+                    headers={**headers, "Content-Disposition": f'{disposition}; filename="{name}"'})
+
+
+@bp.get("/api/ui/reports/<rv_id>/download")
+def download_report(rv_id: str):
+    return _pdf_response(rv_id, "attachment")
+
+
+@bp.get("/api/ui/reports/<rv_id>.pdf")
+def preview_report_pdf(rv_id: str):
+    """Inline preview for the page (same bytes as /reports/<rv>.pdf, served from the published-list cache)."""
+    return _pdf_response(rv_id, "inline")
 
 
 @bp.post("/api/ui/mock/jobs")

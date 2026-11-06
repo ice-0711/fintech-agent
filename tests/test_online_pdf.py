@@ -238,3 +238,83 @@ def test_peer_snapshot_version_is_named_apart_from_the_main_snapshot(lead, clock
     assert peer["peer_snapshot_file"] == "data/v12-peer-snapshot.json"
     _, text = pdf_text(client.get(f"/api/ui/reports/{v['report_version_id']}/download").data)
     assert "同業快照 v1.8-w06" in text and rep["source_snapshot_id"] in text
+
+
+# ----- W08-A: read path without repeated database / Storage round trips ------------------------------------
+def test_pdf_preview_and_download_come_from_the_published_list_and_support_etag(lead, clock, monkeypatch):
+    import research_ui
+
+    app, client = lead
+    _, v = publish(client, clock, "2454", key="w08-etag")
+    rv = v["report_version_id"]
+    store = app.extensions["report_store"]
+    research_ui._pdf_cache.clear()
+    first = client.get(f"/api/ui/reports/{rv}.pdf")
+    assert first.status_code == 200 and first.headers["Content-Disposition"].startswith("inline")
+    assert first.headers["ETag"] == f'"{v["pdf_hash"]}"'
+    # no more database reads by id, and no Storage read either: both are served from memory now
+    monkeypatch.setattr(store, "get", lambda *_: (_ for _ in ()).throw(AssertionError("db read")))
+    monkeypatch.setattr(store.storage, "get", lambda *_: (_ for _ in ()).throw(AssertionError("storage read")))
+    again = client.get(f"/api/ui/reports/{rv}/download")
+    assert again.status_code == 200 and again.data == first.data and "attachment" in again.headers["Content-Disposition"]
+    assert client.get(f"/api/ui/reports/{rv}/download", headers={"If-None-Match": first.headers["ETag"]}).status_code == 304
+    assert client.get(f"/api/ui/reports/{rv}").status_code == 200  # report detail also without a db read
+
+
+def test_pdf_cache_is_bounded_and_rejects_tampered_bytes(lead, clock):
+    import research_ui
+
+    app, client = lead
+    _, v = publish(client, clock, "2330", key="w08-tamper")
+    rv = v["report_version_id"]
+    research_ui._pdf_cache.clear()
+    store = app.extensions["report_store"]
+    path = store.storage._path(app.extensions["report_store"].get(rv)["storage_key"])
+    path.chmod(0o644)
+    path.write_bytes(b"%PDF-tampered")
+    r = client.get(f"/api/ui/reports/{rv}/download")
+    assert r.status_code == 404 and r.get_json()["error"] == "pdf_unavailable"
+    assert rv not in research_ui._pdf_cache  # a failed hash check is never cached
+
+
+def test_pdf_cache_keeps_at_most_eight_files(monkeypatch):
+    import hashlib
+    from types import SimpleNamespace
+
+    import research_ui
+
+    blob = b"%PDF-" + b"x" * 1000
+    fake = SimpleNamespace(storage=SimpleNamespace(get=lambda key: blob))
+    monkeypatch.setattr(research_ui, "_reports", lambda: fake)
+    research_ui._pdf_cache.clear()
+    for i in range(research_ui.PDF_CACHE_MAX_FILES + 3):
+        research_ui._published_pdf({"report_version_id": f"rv-{i}", "storage_key": f"k{i}",
+                                    "pdf_hash": hashlib.sha256(blob).hexdigest()})
+    assert list(research_ui._pdf_cache) == [f"rv-{i}" for i in range(3, research_ui.PDF_CACHE_MAX_FILES + 3)]
+    research_ui._pdf_cache.clear()
+
+
+def test_unpublished_versions_have_no_pdf_route(lead, clock):
+    app, client = lead
+    job_id = create(client, ticker="2317", cutoff_at=CUTOFF, scenario="revise_then_pass",
+                    idempotency_key="w08-draft").get_json()["job"]["job_id"]
+    run_until_done(client, clock, job_id)
+    v = client.post(f"/api/ui/jobs/{job_id}/report").get_json()["version"]
+    visitor = app.test_client()
+    assert visitor.get(f"/api/ui/reports/{v['report_version_id']}.pdf").status_code == 404
+
+
+def test_pdf_render_releases_memory_even_when_refused(monkeypatch):
+    """W08-A: without this, each render left ~70–230 MB behind (467 → 538 MB after two), over Render's 512 MB."""
+    from research_ui import report_pdf
+
+    calls = []
+    monkeypatch.setattr(report_pdf, "release_memory", lambda: calls.append(1))
+    report = {"ticker": "2330", "cutoff_at": CUTOFF, "source_snapshot_id": "s", "question_version": "q",
+              "claims": [{"claim_id": f"c{i}", "kind": "fact", "text": "很長的主張" * 40, "evidence_refs": []}
+                         for i in range(200)], "data": {}, "disclaimer": "d", "run_label": "MOCK"}
+    with pytest.raises(PublicationError):
+        report_pdf.render_report_pdf(report, {"report_version_id": "rv-x", "version_no": 1, "report_hash": "h"})
+    report["claims"] = report["claims"][:2]
+    assert report_pdf.render_report_pdf(report, {"report_version_id": "rv-x", "version_no": 1, "report_hash": "h"})
+    assert calls == [1, 1]

@@ -9,6 +9,8 @@ Limits: ≤ 10 pages, ≤ 5 MB. Sources are clickable links.
 
 from __future__ import annotations
 
+import ctypes
+import gc
 import json
 import tempfile
 from datetime import datetime
@@ -305,9 +307,27 @@ def render_report_pdf(report: dict[str, Any], version: dict[str, Any]) -> bytes:
     d.text(report.get("disclaimer") or "", 10, True)
 
     pages = d.pdf.page_no()
-    if pages > MAX_PDF_PAGES:
-        raise PublicationError(f"PDF {pages} 頁，超過 {MAX_PDF_PAGES} 頁上限")
-    out = bytes(d.pdf.output())
+    try:
+        if pages > MAX_PDF_PAGES:
+            raise PublicationError(f"PDF {pages} 頁，超過 {MAX_PDF_PAGES} 頁上限")
+        out = bytes(d.pdf.output())
+    finally:
+        del d
+        release_memory()
     if len(out) > MAX_PDF_BYTES:
         raise PublicationError("PDF 超過 5MB 上限")
     return out
+
+
+def release_memory() -> None:
+    """Give the memory of one render back to the OS (W08-A).
+
+    Measured 11/05 (same imports as the server): without this the worker grows with every PDF —
+    207 → 467 → 538 MB after two renders, which would exceed Render Free's 512 MB on the second publish.
+    With gc + glibc malloc_trim it returns to about 265 MB after each render (peak per render about 470 MB).
+    The PDF content is unchanged. No-op where glibc is not available (macOS, Windows)."""
+    gc.collect()
+    try:
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except (OSError, AttributeError):
+        pass
