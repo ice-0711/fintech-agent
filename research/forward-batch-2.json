@@ -1,0 +1,98 @@
+{
+  "batch_id": "forward-batch-2",
+  "task": "W08-L",
+  "signal_cutoff_at": "2026-11-06T21:00:00+08:00",
+  "snapshot_file": "data/forward/financial-snapshots-2026-11-06.json",
+  "snapshot_sha256": "f8bedf9f5c7e2af1b2607071d412342d8cd7c14d40fa53a297c4ed7b386a22fc",
+  "generated_at": "2026-11-06T21:39:38+08:00",
+  "generated_late": "排程 21:10 未觸發，組長端 21:40 手動執行，晚於截止約 40 分鐘；不重抓覆蓋。",
+  "sources_file": "research/forward-batch-2-sources.json",
+  "builder_args": [
+    "--cutoff",
+    "2026-11-06T21:00",
+    "--out",
+    "data/forward/financial-snapshots-2026-11-06.json",
+    "--evidence",
+    "data/manual/forward/evidence-2026-11-06.csv",
+    "--macro",
+    "data/manual/forward/macro-2026-11-06.csv"
+  ],
+  "research_tickers": [
+    "2330",
+    "2317",
+    "2454"
+  ],
+  "comparison_only": {
+    "subject": "2454",
+    "peers": [
+      "2379",
+      "3034"
+    ],
+    "industry_reference": "2330",
+    "note": "只 2454 套用固定比較組；2379、3034 只跑確定性比較工具，不建 LLM 任務"
+  },
+  "periods_used": {
+    "2330": "2026Q2",
+    "2317": "2026Q2",
+    "2454": "2026Q2",
+    "2379": "2026Q2",
+    "3034": "2026Q2"
+  },
+  "q3_decision": "B：A 中止（  對帳通過：2317 2026Q2 / 抓取 2454 聯發科技 ... / [中止] [2454] 找不到 2026Q3 的科目 EPS（請用 --list-types 確認 type 名稱）），改不帶新季別人工檔",
+  "direction": "none（照第 1 批；只展示 1／5／20 日報酬，不算命中率）",
+  "raw_files": [
+    "data/raw/finmind/TaiwanStockFinancialStatements_2330_74c3a822c42b.json",
+    "data/raw/finmind/TaiwanStockBalanceSheet_2330_78a896d9c7c9.json",
+    "data/raw/finmind/TaiwanStockCashFlowsStatement_2330_6d1581983651.json",
+    "data/raw/finmind/TaiwanStockFinancialStatements_2317_5229282b80dc.json",
+    "data/raw/finmind/TaiwanStockBalanceSheet_2317_46d7b96474b7.json",
+    "data/raw/finmind/TaiwanStockCashFlowsStatement_2317_476006bbf638.json",
+    "data/raw/finmind/TaiwanStockFinancialStatements_2454_a3cd58156f0a.json",
+    "data/raw/finmind/TaiwanStockBalanceSheet_2454_937e40a91d1b.json",
+    "data/raw/finmind/TaiwanStockCashFlowsStatement_2454_6c61e30a189c.json",
+    "data/raw/finmind/TaiwanStockFinancialStatements_2379_9d8c64dda603.json",
+    "data/raw/finmind/TaiwanStockBalanceSheet_2379_82d46e5a0bf6.json",
+    "data/raw/finmind/TaiwanStockCashFlowsStatement_2379_0db685b14c0a.json",
+    "data/raw/finmind/TaiwanStockFinancialStatements_3034_c2d4fe636764.json",
+    "data/raw/finmind/TaiwanStockBalanceSheet_3034_a423d1246edf.json",
+    "data/raw/finmind/TaiwanStockCashFlowsStatement_3034_a1d082087fb1.json",
+    "data/raw/finmind/TaiwanStockTradingDate_ALL_57c87020b51c.json",
+    "data/raw/finmind/TaiwanStockPrice_2330_22895872ecdb.json",
+    "data/raw/finmind/TaiwanStockPrice_2317_18e06965fcf2.json",
+    "data/raw/finmind/TaiwanStockPrice_2454_8eb8ce8519fb.json",
+    "data/raw/finmind/TaiwanStockPrice_2379_a86f46a479e3.json",
+    "data/raw/finmind/TaiwanStockPrice_3034_c79fa0f93166.json",
+    "data/raw/finmind/TaiwanStockPrice_TAIEX_f006c4e61f01.json"
+  ],
+  "no_backfill_check": {
+    "evidence_available_after_cutoff": 0,
+    "quarters_available_after_cutoff": 0,
+    "prices_after_2026_11_06": 0
+  },
+  "research_reports": {
+    "status": "已執行（live，dual）",
+    "file": "research/forward-batch-2-reports.json",
+    "generated_at": "2026-11-06T13:42:00+00:00",
+    "commit": "ef527ec",
+    "published": false,
+    "results": {
+      "2330": {
+        "job_id": "80db7437-fdb8-4903-b658-d8db260bd7f6",
+        "status": "succeeded",
+        "stop_reason": "review_pass"
+      },
+      "2317": {
+        "job_id": "9282d872-dabb-4c3d-91ae-808ff533986a",
+        "status": "insufficient_evidence",
+        "stop_reason": "researcher_insufficient"
+      },
+      "2454": {
+        "job_id": "2d82cca9-c66a-4d6d-bf86-c645e9d62d67",
+        "status": "insufficient_evidence",
+        "stop_reason": "researcher_insufficient"
+      }
+    },
+    "note": "2330 覆核通過（9 月營收以中文金額引用，11/02 修正後判定為來源支持）；2317、2454 由 Researcher 只做一次 search_evidence 就回報不足，與第 1 批同樣的提早停止問題（W09 v2 修正的對象）。2317 草稿把「鴻海」寫成「鶣海」（模型輸出錯字）。未發布；方向訊號仍為 none。"
+  },
+  "agent_version": "v1（researcher-v1.2.2／reviewer-v1.2.1，單次輸入上限 3,000）；與第 1 批相同，見 handoff/agent-version-changes.md"
+}
