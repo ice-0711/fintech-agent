@@ -35,9 +35,9 @@ HEADROOM = 0.8
 class BudgetLimits:
     max_calls: int = 8
     initial_research_calls: int = 4
-    max_input_tokens: int = 3000
+    max_input_tokens: int = 6000   # W09（組長 11/06）：3,000 → 6,000，減少舊工具結果被壓縮；見 handoff/agent-version-changes.md
     max_output_tokens: int = 1500  # includes thinking tokens
-    job_token_budget: int = 40000
+    job_token_budget: int = 64000  # W09：40,000 → 64,000，配合輸入上限（8 ×（6,000＋1,500）＝60,000）
     max_tool_calls: int = 10
     max_same_tool_call: int = 2
     max_supplement_rounds: int = 2

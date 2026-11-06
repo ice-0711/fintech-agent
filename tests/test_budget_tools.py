@@ -72,9 +72,9 @@ def test_unknown_usage_keeps_reservation(store):
 def test_input_and_job_token_limits(store):
     gate = make_gate(store)
     with pytest.raises(BudgetExceeded) as err:
-        gate.reserve_call("researcher", "字" * 3001, "h")
+        gate.reserve_call("researcher", "字" * 6001, "h")  # W09: input cap 6,000, job budget 64,000 (lead 11/06)
     assert err.value.reason == "input_too_large"
-    gate.persist({"tokens_observed": 39_000})
+    gate.persist({"tokens_observed": 63_000})
     gate.job = store.get_job(gate.job["job_id"])
     with pytest.raises(BudgetExceeded) as err:
         gate.reserve_call("researcher", "x", "h")

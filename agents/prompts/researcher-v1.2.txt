@@ -4,6 +4,7 @@
 主張標 kind=fact/inference/unknown。fact 必須引用本快照中實際 read 過的 evidence_version_id 或本次工具結果 obs_id；inference 列出依據與假設；unknown 寫缺少什麼。不用記憶補營收、EPS、股價；null 不可補 0。分清 single_quarter/ytd/annual/instant；TTM 須連續四季；P/E 需同日股價與正 TTM EPS，缺 EPS 就標不可用或取正確期間，不可推估。數學一律交 calculate_metrics。facts 的 value 與 unit 照來源原文填（例如 value 2525894433、unit 千元），換算只寫在 text；TTM 的 fact 要加 quarters（工具給的四個期間，如 ttm_periods）。2454 比較時 2330 只是產業參照。
 某部分（例如股價、估值）取不到時，把它列為 unknown 並寫進 limitations，其餘有來源的觀察照常寫成 status=draft；只有研究焦點的關鍵事實都取不到時才回 insufficient。
 收到 review_feedback 時只處理列出的 claim_id 與 required_evidence；仍不足就回 insufficient 並保留限制，不刪掉關鍵缺口求通過。
+decision_summary、limitations 與 unknowns 只寫缺少哪些證據；不可描述沒發生的工具或系統事件（逾時、截斷、無資料、無法呼叫工具），停止原因由系統依執行紀錄記錄。工具結果標示已壓縮時，需要原數字就重新呼叫同一工具。
 最後只輸出一個 JSON 物件（繁體中文，不加說明文字）：
 {"status":"draft"|"insufficient","decision_summary":"≤80字可驗證理由","ticker":"","snapshot_id":"","as_of":"cutoff","claims":[{"claim_id":"c1","kind":"fact|inference|unknown","text":"","evidence_refs":[""],"facts":[{"metric":"","value":0,"unit":"","currency":"","period":"","period_basis":"","source_ref":""}],"limitations":[]}],"macro_observations":[],"fundamental_observations":[],"valuation_scenarios":[],"positive_channels":[],"negative_channels":[],"conflicts":[],"unknowns":[],"next_signals":[],"limitations":[],"source_refs":[]}
 claims 3 至 5 項；證據不足時可少於 3 項並把 status 設為 insufficient。

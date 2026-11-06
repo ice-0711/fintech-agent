@@ -32,7 +32,7 @@ from .tools import MACRO_SERIES_WHITELIST, args_hash, dispatch
 PROMPTS = Path(__file__).resolve().parent / "prompts"
 RESEARCHER_PROMPT = (PROMPTS / "researcher-v1.2.txt").read_text(encoding="utf-8")
 REVIEWER_PROMPT = (PROMPTS / "reviewer-v1.2.txt").read_text(encoding="utf-8")
-RESEARCHER_PROMPT_VERSION = "researcher-v1.2.2"  # W06 dev calibration 10/21–10/22: sources first, partial unknowns, facts as in source, TTM quarters
+RESEARCHER_PROMPT_VERSION = "researcher-v1.2.3"  # W09 (lead 11/06): no system events in summaries, finish with partial facts
 QUESTION = "截至 cutoff_at，總經、基本面與估值證據支持哪些觀察？有哪些反向證據、假設與待確認訊號？"
 DECISION_RANK = {"pass": 0, "revise": 1, "insufficient": 2}
 MAX_STR, MAX_LIST, MAX_RESULT_CHARS = 200, 5, 900
@@ -76,7 +76,8 @@ def shrink_history(contents: list[Any], observations: list[dict[str, Any]], incl
                 continue
             obs = by_id.get(fr.response.get("obs_id"), {})
             fr.response = {"obs_id": fr.response.get("obs_id"), "status": fr.response.get("status"),
-                           "digested": True, "digest": obs.get("digest", "")[:160]}
+                           "digested": True, "digest": obs.get("digest", "")[:160],
+                           "note": "此結果因輸入上限已壓縮；需要原數字請重新呼叫同一工具（W09）"}
             shrunk += 1
     return shrunk
 
@@ -151,6 +152,9 @@ class ResearchRun:
         self.draft: dict[str, Any] | None = cp.get("draft")
         self.reviews: list[dict[str, Any]] = cp.get("reviews", [])
         self.format_retries: dict[str, int] = cp.get("format_retries", {"researcher": 0, "reviewer": 0})
+        # System events the model only sees indirectly (W09): they ground the stop reason and the summary check.
+        self.sys_events: set[str] = set(cp.get("sys_events", []))
+        self.tools_off_reason: str | None = cp.get("tools_off_reason")
         self.resume_next: str = cp.get("next", "researcher")
         self.final: dict[str, Any] | None = None
         self.last_result: dict[str, Any] = {}
@@ -171,6 +175,8 @@ class ResearchRun:
             "draft": self.draft,
             "reviews": self.reviews,
             "format_retries": self.format_retries,
+            "sys_events": sorted(self.sys_events),
+            "tools_off_reason": self.tools_off_reason,
         }
         self.gate.job = self.lease.save(changes)
         self.lease.heartbeat()
@@ -222,6 +228,7 @@ class ResearchRun:
         if len(text) > MAX_RESULT_CHARS:
             body = {"obs_id": obs_id, "status": result.get("status"), "tool": name,
                     "reason": result.get("reason"), "data": text[:MAX_RESULT_CHARS] + "…(截斷)"}
+            self.sys_events.add("truncated")
         obs = {"obs_id": obs_id, "role": role, "tool_name": name, "args_hash": h, "status": result.get("status"),
                "reason": result.get("reason"), "output_hash": _hash(json.dumps(result, sort_keys=True, ensure_ascii=False))[:16],
                "digest": digest(result), "brief": digest(result, 500)}
@@ -240,27 +247,38 @@ class ResearchRun:
             if adapter.estimate_input(role, contents, system) > cap - 100:
                 n += shrink_history(contents, self.observations, include_last=True)
             if n:
+                self.sys_events.add("digested")
                 self.event(role, "context_digested", {"results": n, "estimate_before": before,
                                                       "estimate_after": adapter.estimate_input(role, contents, system)})
 
     def tools_allowed(self, role: str, contents: list[Any] | None = None, system: str = "") -> bool:
+        ok, why = self._tools_allowed(role, contents, system)
+        if not ok:
+            self.sys_events.add("tools_off")
+            self.tools_off_reason = why
+        return ok
+
+    def _tools_allowed(self, role: str, contents: list[Any] | None, system: str) -> tuple[bool, str | None]:
         rem = self.remaining()
         if rem["tool_calls"] <= 0:
-            return False
+            return False, f"工具呼叫已達上限 {self.gate.limits.max_tool_calls} 次"
         if contents is not None:
             limit = self.gate.limits.max_input_tokens - TOOL_HEADROOM
             est = self.adapters[role].estimate_input(role, contents, system)
             if est > limit and shrink_history(contents, self.observations):
                 est = self.adapters[role].estimate_input(role, contents, system)  # older results digested
-            if est > limit:
-                return False  # still no room for another tool result: answer now instead of overflowing
+            if est > limit:  # still no room for another tool result: answer now instead of overflowing
+                return False, f"輸入已接近單次上限 {self.gate.limits.max_input_tokens} token，放不下新的工具結果"
+        last = "只剩寫草稿的一次發送"
         if role == "researcher":
             if self.mode == "single":
-                return rem["model_calls"] > 1
+                return rem["model_calls"] > 1, last
             if self.job["stage"] in ("research", "tools"):
-                return self.job.get("calls_used", 0) < self.gate.limits.initial_research_calls - 1
-            return rem["model_calls"] > 2  # revision: keep one call for the draft and one for review
-        return rem["model_calls"] > 1  # reviewer: keep one call for the decision
+                lim = self.gate.limits.initial_research_calls
+                return (self.job.get("calls_used", 0) < lim - 1,
+                        f"初次研究最多 {lim} 次發送，其餘保留給覆核；這是最後一次")
+            return rem["model_calls"] > 2, "修正輪只剩寫草稿與覆核各一次"  # keep one for the draft, one for review
+        return rem["model_calls"] > 1, "只剩寫覆核結論的一次發送"  # reviewer: keep one call for the decision
 
     # -- nodes ---------------------------------------------------------------
     def can_researcher_send_again(self) -> bool:
@@ -357,8 +375,11 @@ class ResearchRun:
         obs = [o for o in self.observations if role == "researcher" or o["role"] == "reviewer"]
         briefs = [{"obs_id": o["obs_id"], "tool_name": o["tool_name"], "status": o["status"],
                    "data": o.get("brief") or o.get("digest", "")} for o in obs]
-        tail = ("現在不能再呼叫工具。請只依上面已取得的資料輸出規定的 JSON 草稿；不足就 status=insufficient。"
-                if role == "researcher" else "現在不能再呼叫工具。請只依上面資料輸出規定的覆核 JSON。")
+        why = f"（原因：{self.tools_off_reason}）" if self.tools_off_reason else ""
+        tail = (f"現在不能再呼叫工具{why}。請依上面已取得的資料完成規定的 JSON 草稿：取得的事實照寫成 fact，"
+                "缺的部分列 unknown 並寫進 limitations；只有研究焦點的關鍵事實完全沒有時才 status=insufficient。"
+                "decision_summary 只寫缺少哪些證據，不要描述工具或系統事件，系統會依執行紀錄記錄停止原因。"
+                if role == "researcher" else f"現在不能再呼叫工具{why}。請只依上面資料輸出規定的覆核 JSON。")
         adapter, cap = self.adapters[role], self.gate.limits.max_input_tokens
 
         def build() -> list[Any]:
@@ -432,7 +453,8 @@ class ResearchRun:
             rules = None
             if self.mode == "dual" and draft.get("claims"):
                 rules = check_draft(draft, self.toolbox.snapshot_view(), job["cutoff_at"], job["source_snapshot_id"],
-                                    remaining_calls=0, observations=self.observations)["review"]
+                                    remaining_calls=0, observations=self.observations,
+                                    system_events=self.sys_events)["review"]
                 self.reviews.append({"round": len(self.reviews) + 1, "model": None, "rules": rules, "final": rules})
                 self.event("reviewer", "rules_check", {"rules_decision": rules["decision"],
                            "critical": [i["claim_id"] for i in rules["issues"] if i["severity"] == "critical"]})
@@ -499,7 +521,8 @@ class ResearchRun:
         if refuted:
             self.event("reviewer", "timing_issue_refuted", {"model_decision": model_decision, "issues": refuted})
         rules = check_draft(draft, view, job["cutoff_at"], job["source_snapshot_id"],
-                            remaining_calls=self.remaining()["model_calls"], observations=self.observations)["review"]
+                            remaining_calls=self.remaining()["model_calls"], observations=self.observations,
+                            system_events=self.sys_events)["review"]
         final = merge_reviews(review, rules)
         self.reviews.append({"round": len(self.reviews) + 1, "model": review, "rules": rules, "final": final})
         self.event("reviewer", "review", {"round": len(self.reviews), "model_decision": review["decision"],
@@ -560,7 +583,23 @@ class ResearchRun:
             return self.finish("insufficient_evidence", "researcher_insufficient" if not problems else "workflow_invalid_draft")
         return self.finish("succeeded", "workflow_draft_without_review")
 
+    def stop_facts(self) -> list[str]:
+        """Why the run stopped, from the trace only (W09): the model's own summary is not trusted for this."""
+        facts = [f"{o['tool_name']} 回 {o['status']}" + (f"（{o['reason']}）" if o.get("reason") else "")
+                 for o in self.observations if o.get("status") != "ok"]
+        if self.tools_off_reason:
+            facts.append("工具關閉：" + self.tools_off_reason)
+        if "digested" in self.sys_events:
+            facts.append("較早的工具結果因輸入上限被壓縮成摘要")
+        if "truncated" in self.sys_events:
+            facts.append("有工具結果超過長度上限被截斷")
+        facts.append(f"模型發送 {self.job.get('calls_used', 0)}/{self.gate.limits.max_calls} 次、"
+                     f"工具呼叫 {len(self.observations)}/{self.gate.limits.max_tool_calls} 次")
+        return facts
+
     def finish(self, status: str, reason: str, review: dict[str, Any] | None = None) -> GraphState:
+        if status == "insufficient_evidence":
+            self.event("system", "stop_facts", {"stop_reason": reason, "facts": self.stop_facts()})
         self.final = {"status": status, "stage": "finished", "stop_reason": reason, "draft": self.draft,
                       "review": review, "publication_status": "draft"}  # never published here (W07 human approval)
         self.save({"draft": self.draft, "review": review}, "end")
