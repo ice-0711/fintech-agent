@@ -108,3 +108,9 @@
 - **備份**：每批發布後執行 `scripts/backup_reports.py export`，並另存一份到 iCloud Drive `fintech-agent-backups/`（11/02 首份已存）。
 - **公開清單快取**：60 秒 TTL，一次查詢（commit f7014d1）。
 - **Notion**：W01-L、W02-L、W06-L 改回「進行中」，與實際未完成項一致（W01 TPM 精確值；W02 job 遷移改為不搬、待記錄；W06 介面凍結紀錄與閘門文件）。
+
+## 13. 2026-11-06 組長決定：校準 v1 簽核
+
+- 簽核三模式校準 v1（W06-D）：D 評分 `evaluation/d-drafts/calib-v1-scores-D.txt`、B 交叉評分 `calib-v1-scores-B.md`，30 列標籤一致、53 個事實數值正確。S10、S15 備註中的「待組長裁決」以 11/03 裁決為準。
+- W06 閘門定稿（`handoff/W06-gate-v12.md` 第 2、9 節）：N01–N03 ✅、N07 ✅（附限制）。
+- W09 是否修正 Researcher：方案見 `handoff/W09-researcher-fix-proposal.md`，待組長決定。

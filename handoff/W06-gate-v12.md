@@ -1,6 +1,6 @@
-# W06 閘門（W06-L）— 草稿，10/23 定稿
+# W06 閘門（W06-L）— 2026-11-06 定稿
 
-狀態截至 2026-10-21。標「待 10/22–10/23」的項目在當天更新。
+原稿狀態截至 2026-10-21；第 2 節與第 9 節於 2026-11-06 依三模式校準 v1（D 評分、B 交叉評分、組長簽核）更新。
 
 ## 1. W06-L 驗收
 
@@ -18,10 +18,10 @@
 
 | 項目 | 狀態 | 說明 |
 |---|---|---|
-| N01 季度／YTD／TTM／年度 | 🟡 | TTM 連續四季已修（20d2e9a）；B 的 `tests/test_tool_fixtures.py` TR-14（content_hash）仍失敗，待 B |
-| N02 同業與產業參照 | 🟡 | B 已鎖同業快照（2454 主體、2330 排除，P/E 23.23、P/B 6.29）；A 的 `test_comparison_rules` 因資料更新失敗，待 A；live 尚未跑到 peer_comparison |
-| N03 收藏與已發布清單 | 🟡 | A 的收藏與清單骨架存在；已發布清單需 W07 的 report 版本，現為 mock |
-| N07 Researcher 選工具、Reviewer 發現矛盾後補查 | ⏳ 待 10/22–10/23 live | mock 全過；10/21 第一批 6 案（v1.4）全為 insufficient，原因是 Researcher 不讀快照來源。已校準 prompt（researcher-v1.2.1）並修 2 個串接問題；受每日 J=6 限制，10/22 重跑 6 案、10/23 跑 4 案 |
+| N01 季度／YTD／TTM／年度 | ✅（11/06） | TTM 可由 `period` 判定（10/31）；B 的 TR-14 已修，全套 395 項測試通過；校準 v1 的 53 個事實數值經 B 程式核對全部正確 |
+| N02 同業與產業參照 | ✅（11/06） | 同業平均規則 11/02 核定（不同財報期都計入、逐列標季別）；A 的比較測試通過、網站已顯示「同業財報期不同」 |
+| N03 收藏與已發布清單 | ✅（11/06） | 已發布清單接真實 `report_versions`；11/02 第一份 LIVE 報告（2317 前瞻第 1 批）已公開 |
+| N07 Researcher 選工具、Reviewer 發現矛盾後補查 | ✅（附限制，11/06） | CASE-08 dual（d8884abc）Reviewer 發現來源衝突、退回修正一次後停在證據不足（D、B 判合理）；dual 新規則 10 案 4 案覆核通過（CASE-01、11、22、26）。限制見第 9 節：Researcher 常太早停，且停止理由與執行紀錄不符 |
 
 ## 3. 凍結（方法／工具／案例）
 
@@ -76,3 +76,13 @@
 - **凍結分兩段**：
   1. 10/23 凍結案例、分組、資料與評分規則（B 重跑 `scripts/build_freeze.py`）。
   2. Researcher/Reviewer prompt、Agent 程式與 thinking 等級：10/26 以開發集 live 再驗證一次後鎖定，最遲於 W09（手冊鎖實驗版本週）前；若 Reviewer 仍無法完成覆核，依 model-config.md 預設備案把 thinking_level 由 minimal 改為 low 再驗一次。調整只用開發集，保留集不動。
+
+
+## 9. 2026-11-06 三模式校準 v1 簽核（組長）
+
+- **範圍**：開發集 10 案 × 3 模式 = 30 列（`evaluation/d-drafts/dev-runs-calib-v1.jsonl`；dual 只用 10/31 新規則的 10 列，舊 dual 8 列與 10/27 CASE-01 single 失敗列不計分）。
+- **評分**：D `evaluation/d-drafts/calib-v1-scores-D.txt`；B 交叉評分 `evaluation/d-drafts/calib-v1-scores-B.md`：30 列標籤全部一致，53 個事實數值全部正確（1 個由人工確認，原因是中文金額含空格，11/06 已修）。
+- **組長裁決（11/03）**：obs-* 引用算可解析；CASE-19 依 `allow_insufficient=False` 選證據不足判不符合預期行為；S28 依凍結快照改回 supported。S10、S15 備註中「待組長裁決」以此為準。
+- **結論**：沒有任何錯誤數字被當成事實寫進覆核通過的報告；主要問題是**該答的案例停在證據不足**（CASE-04、CASE-19 的 `allow_insufficient=False` 都選了不足），而且**停止理由常與執行紀錄不符**：S30（CASE-04 說價格工具無資料，未呼叫）、S17／S27（CASE-26 說逾時，未發生）、S18（CASE-15 說快照截斷，實為系統壓縮舊結果）、S20（CASE-18 說無法再呼叫工具，預算尚有 4 次）。
+- **後續**：W09 鎖定前是否修正 Researcher，見 `handoff/W09-researcher-fix-proposal.md`（待組長決定）。
+- **簽核**：組長 2026-11-06 簽核校準 v1（W06-D）。
