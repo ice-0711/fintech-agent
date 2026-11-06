@@ -10,6 +10,7 @@ Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2023)
 
 **R02**
 Schick, T., Dwivedi-Yu, J., Dessì, R., Raileanu, R., Lomeli, M., Zettlemoyer, L., Cancedda, N., & Scialom, T. (2023). *Toolformer: Language models can teach themselves to use tools*. arXiv. https://doi.org/10.48550/arXiv.2302.04761
+（註：本卡內容依 arXiv v1 整理，因此引用 arXiv 版。此文另發表於 NeurIPS 2023（Advances in Neural Information Processing Systems 36，Main Conference Track，DOI 10.52202/075280-2997），正式版作者多列 Eric Hambro 一位，內容可能與 arXiv v1 不同。）
 
 **R03**
 Yang, H., Zhang, B., Wang, N., Guo, C., Zhang, X., Lin, L., Wang, J., Zhou, T., Guan, M., Zhang, R., & Wang, C. D. (2024). *FinRobot: An open-source AI agent platform for financial applications using large language models*. arXiv. https://doi.org/10.48550/arXiv.2405.14767
@@ -31,13 +32,11 @@ Google. (2026, October 30). *Gemini Developer API pricing*. Google AI for Develo
 
 **R08**
 kk1030-bit. (2026). *fintech-agent* (Commit 53816d4) [Source code]. GitHub. https://github.com/kk1030-bit/fintech-agent/tree/53816d4fb7d178d309cb556bd55fe9f49533e7e5
-（註：commit 日期 2026-06-15。）
+（註：commit 日期 2026-06-15。作者欄採 GitHub 帳號名稱 kk1030-bit：APA 第 7 版引用軟體時以來源上顯示的名稱為作者，repo 上顯示的是帳號名稱。）
 
 ## 待處理
 
 | 事項 | 提供人 |
 |---|---|
 | R01 的 OpenReview 頁面尚未直接開啟核對（目前依 ICLR 官方頁面） | C |
-| R02 是否另有正式發表版本（arXiv 頁面未列） | C |
 | R05、R07 的日期採頁面「最後更新」日；官方文件會持續更新，定稿前需再核對一次 | C |
-| R08 作者欄用 GitHub 帳號名稱或組長真實姓名 | 組長 |

@@ -42,7 +42,7 @@ Reviewer 的決定只有三種，名稱與程式一致（組長 `agents/research
 | 誤擋 | CASE-22 dual（job e9045bbd，10/31 第 4 天）的 TTM 期間寫在 period 欄，規則只讀 quarters 欄，誤判為不連續 | 組長 10/31 修正；新規則重跑（job 0dd723ce）模型與規則都判 pass，通過覆核。第 1–4 天 dual 結果與第 5 天後不可直接比較 | 組長 decisions 第 9 節；`agent/calib-v1-dual-rerun-2.json`；W04 case-walkthrough-v1.md |
 | 誤擋 | CASE-11 dual（job da86df90，10/29 第 2 天）：證據可得時間 14:15 早於 cutoff 17:00（台北），Reviewer 模型自行比較時區出錯，判 insufficient；規則判 pass，最終取較嚴格的 insufficient | 組長 10/31 改由程式比對可得時間；新規則重跑（job 9fc9e029）模型與規則都判 pass，通過覆核 | 組長 `agent/calib-v1-day2.json`、`agent/calib-v1-dual-rerun-1.json`、decisions 第 9 節 |
 
-新規則下（10/31 第 5 天與 dual 重跑），開發集 10 案的 dual 執行有 4 案通過覆核（CASE-01、11、22、26），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分。
+新規則下（10/31 第 5 天與 dual 重跑），開發集 10 案的 dual 執行有 4 案通過覆核（CASE-01、11、22、26）（CASE-26 依組長 10/24 決定註明：此案未觸發逾時，逾時處理以離線測試為證），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分。
 
 D 也在自己的草稿中說明：預期決定是 D 先寫的，修補規則也是看過案例後才補，所以「10 份草稿全部符合預期」只代表與 D 的預期一致，**不能說明 Reviewer 的真實檢出能力**（D `W06-D-redo/redo/README-redo.md` 第五節）。本稿不引用任何檢出率或成功率。
 

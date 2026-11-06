@@ -62,7 +62,7 @@ F01 提供季度、TTM 與年度三層資料，規則如 3.2、3.3 節。F02 的
 
 ## 3.7　驗證範圍與實驗設計（F04）
 
-F04 的驗證範圍包含 evidence-replay、9 份前瞻與數學回歸；沒有當時版本的資料只能稱 evidence-replay，且不挑掉失敗樣本（組長 `handoff/v12-scope-quota.md`）。
+F04 的驗證範圍包含 evidence-replay、9 份前瞻與數學回歸；沒有當時版本的資料只能稱 evidence-replay，且不挑掉失敗樣本（組長 `handoff/v12-scope-quota.md`）。**evidence-replay** 是指：30 個歷史案例的資料是事後擷取的，依 cutoff 篩掉當時拿不到的資料後，實際呼叫模型執行研究；限制是這些資料可能在事後被修訂，不保證與 cutoff 當時看到的完全相同。9 份前瞻研究是在 cutoff 當下取得資料、之後再觀察真實結果，不屬於 evidence-replay。evidence-replay 也不同於網站的「trace 重播」：後者只重新顯示已保存的執行紀錄，不呼叫模型（A `research_ui/replays.py`）。
 
 評估案例共 30 案，分為 10 個開發案與 20 個保留案；5 類（完整證據、矛盾來源、缺少資料、數字口徑、工具與安全）各有 2 個開發案與 4 個保留案，每檔股票 10 案。保留案例封存，與開發集不重疊，只供正式評分（B 技術事實第三節）。正式測試為 20 保留案 × 3 模式 = 60 次執行（`docs/CR-W05-holdout.md`）。開發集另進行 10 案 × 3 模式的校準（組長 `handoff/calibration-plan-v1.md`）。9 份前瞻研究是以未來真實行情觀察的小樣本，不屬於 30 案評估（B 技術事實第七節）。實驗設計與評估指標見第四章。
 
@@ -79,13 +79,13 @@ F06 小型 2D 關係圖為條件式項目（最多 20 點、30 線，須有核�
 | 財務快照與 MOPS 對帳 | 有紀錄：250／250 值、25／25 公告時間一致 | B fact sheet 第九節 |
 | 六工具與計算模組 | 有紀錄：B 回報 277 項測試通過（2026-10-28） | B 技術事實第五節 |
 | 預算硬限制、checkpoint 續跑 | 有紀錄：mock 測試通過 | 組長 `handoff/W06-gate-v12.md` 第 1 節 |
-| dual 模式 live 執行 | 有紀錄：10/31 修正誤擋規則；新規則下開發集 10 案有 4 案通過覆核（CASE-01、11、22、26），6 案停在證據不足。通過覆核不等於正確，正確性待 D 評分 | 組長 `agent/calib-v1-day5.json`、`calib-v1-dual-rerun-1.json`、`-2.json`；decisions 第 9、10 節 |
+| dual 模式 live 執行 | 有紀錄：10/31 修正誤擋規則；新規則下開發集 10 案有 4 案通過覆核（CASE-01、11、22、26；CASE-26 此案未觸發逾時，逾時處理以離線測試為證），6 案停在證據不足。通過覆核不等於正確，正確性待 D 評分 | 組長 `agent/calib-v1-day5.json`、`calib-v1-dual-rerun-1.json`、`-2.json`；decisions 第 9、10 節 |
 | 案例與資料凍結 cases-v1 | 有紀錄：三方簽核 | B `data-freeze.md` 第七節 |
 | 收藏儀表板 | 有紀錄：A 的驗收自查與截圖，待組長驗收 | A `ui/v12-dashboard-acceptance.md` |
-| 線上 PDF | 有紀錄：3 份 **MOCK** 報告完成核准、Storage 寫入與讀回比對；尚無 LIVE 報告 | A `reports/v12-online-pdf-check.md` |
+| 線上 PDF | 有紀錄：3 份 **MOCK** 報告完成核准、Storage 寫入與讀回比對；2026-11-02 第一份 LIVE 報告（2317，前瞻第 1 批）在 Render 發布成功 | A `reports/v12-online-pdf-check.md`；組長 `handoff/deployment-v1.md` 第六節 |
 | 30 案正式實驗（60 次） | 規劃中，待 D 結果 | `docs/CR-W05-holdout.md` |
 | 9 份前瞻 | 第 1 批已建立，結果待 D | B 技術事實第七節 |
-| Render 2GB | 計畫，未開通 | 組長 `handoff/v12-scope-quota.md` 第 4 節 |
+| Render 方案 | 維持 Free（512 MB）；若發布時記憶體不足再升級 2GB，費用另行核准 | 組長 `handoff/decisions-2026-10.md` 第 12 節 |
 | F06 | 已延後 | 組長 2026-10-22 |
 
 ## 3.10　本章限制

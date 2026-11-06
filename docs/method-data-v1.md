@@ -86,7 +86,7 @@ Reviewer 把「推論當事實」與「傳聞當事實」都列為 critical 問�
 |---|---|---|
 | 既有（學期初基線） | FinMind 資料抓取、Supabase 儲存、規則式財務摘要與 FCF 預測、年度 DCF（`valuation_agent/dcf_model.py`）、三張圖表、Flask 網站；PDF 僅本機產出 | R08 固定版本 53816d4 的 PROJECT_STATUS.md（2026-05-30） |
 | 既有程式本學期的調整 | DCF 參數由組長 2026-10-21 核定為全專案統一：WACC 9%、終端成長率 3%、5 年持平於 TTM FCF；`dcf_model.py` 預設由 10% 改為 9%。這是程式預設，不是個股風險估計 | 組長 `handoff/decisions-2026-10.md` 第一節 |
-| 待核實假設 | Render 2GB 是計畫，repo 內設定仍是免費方案 512MB；Supabase 方案與用量；學生或開發者福利不計入可用額度 | 組長 `handoff/v12-scope-quota.md` 第 4 節 |
+| 待核實假設 | Render 維持免費方案 512 MB，2GB 只在記憶體不足時另行核准升級（組長 decisions 第 12 節，2026-11-02）；Supabase 方案與用量；學生或開發者福利不計入可用額度 | 組長 `handoff/v12-scope-quota.md` 第 4 節 |
 | 新增（V1.2） | LangGraph／Gemini 雙 Agent、持久 job、六工具、F01 季度資料、F02 同業比較、F03 收藏儀表板、F05 線上 PDF；F04 驗證持續進行 | 工作包；`handoff/v12-scope-quota.md` |
 | 已延後 | F06 小型 2D 關係圖 | 組長 2026-10-22 決定 |
 

@@ -45,7 +45,7 @@
 ## 例三：參照角色（把 2330 算進 2454 的同業平均）
 
 - **規則**：2454 的同業平均只算 2379、3034；2330 是產業參照，主體 2454 也不計入（B fact sheet 第七節第 3 點）。草稿若把 2330 放進同業平均，覆核規則 peer_includes_2330 列為 critical，要求以 calculate_metrics 的 peer_comparison 重算（組長 `agents/review_checks.py`）。
-- **驗算**：D 以合成數字驗證：2379 的 P/E 設為 20、3034 設為 10、2330 設為 50；正確的同業平均是 (20＋10)÷2＝15.0，若誤含 2330 會變成 26.67。B 的程式結果為 15.0，與手算一致（D `W03-D/v12-financial-test-results.md` 第 7 項）。D 另寫了測試：同業平均含 2330 時必須出現 peer_includes_2330，只含 2379、3034 時不出現（D `W04-D/test_reviewer_v12.py`）。
+- **驗算**：D 以合成數字驗證：2379 的 P/E 設為 20、3034 設為 10、2330 設為 50；正確的同業平均是 (20＋10)÷2＝15.0，若誤含 2330 會變成 26.67。B 的程式結果為 15.0，與手算一致（D `evaluation/d-drafts/W02-D/W03-D/v12-financial-test-results.md` 第 7 項）。D 另寫了測試：同業平均含 2330 時必須出現 peer_includes_2330，只含 2379、3034 時不出現（D `evaluation/d-drafts/W02-D/W04-D/test_reviewer_v12.py`）。
 - **退件與停止**：判 revise，要求移除 2330 後重算；修正後重新覆核。
 - **來源／測試標籤**：合成驗算例＋D 草稿測試（未驗收）。**目前沒有這一題的 live trace**，repo 的 `tests/` 中也沒有對應的正式測試；需要時請 D 或組長補。
 

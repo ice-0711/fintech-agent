@@ -33,13 +33,15 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 本機的角色是開發與驗收：A 在本機以 MOCK 模式啟動網站，用瀏覽器模擬 1440 與 390 寬度測試清單、詳情、預覽與下載（A 同上第 4 節）。
 
-**仍待完成**：正式部署到 Render 屬於 W08；手機只做過桌面瀏覽器模擬，尚未實機測試；研究入口目前只開 MOCK，何時開放 LIVE 由組長決定（A 同上第 4、6 節）。因此本稿不宣稱線上 PDF 已在正式網站上線。
+**部署現況（2026-11-02 起）**：網站已部署在 Render Free（512 MB）。研究只在組長的 Mac 執行；Render 只負責組長登入、核准、發布 PDF 與公開閱讀，不設 Gemini 金鑰（組長 `handoff/decisions-2026-10.md` 第 12 節、`handoff/deployment-v1.md`）。2026-11-02 第一份 LIVE 報告（2317，前瞻第 1 批）已在 Render 上發布成功；網站目前沒有核准 LIVE 報告的按鈕，以組長登入後的 API 呼叫核准與發布（組長 `handoff/deployment-v1.md` 第六節）。
+
+**仍待完成**：依 A 的驗收紀錄，手機只做過桌面瀏覽器模擬，尚未實機測試（A 同上第 4 節）；連續發布多份時 512 MB 是否足夠仍待觀察，若記憶體不足再升級 2GB，費用另行核准（組長 decisions 第 12 節）。
 
 ## 7.3　收藏儀表板
 
 收藏儀表板讓使用者在瀏覽器中收藏最多 5 個代號，只存代號、不跨裝置；畫面列出已發布研究，顯示版本、資料截止、財報期、來源更新時間、估值狀態與資料品質風險。A 的驗收以無介面瀏覽器依序切換 5 檔股票、收藏、篩選與排序、開啟三份報告，全程只發出讀取請求，沒有建立 job、沒有寫入資料庫，模型呼叫 0 次（A `ui/v12-dashboard-acceptance.md` 第 2、4 節）。
 
-![圖 7-1　研究工作台的已發布研究清單（A 截圖，2026-11-02 擷取，1440 寬）。三份皆為經人工核准後發布的 MOCK 驗收版本：模型決策為預錄腳本、數字為真實快照工具輸出，不是正式研究結論。畫面為本機執行 web_app.py 擷取，不是 Render 線上站（A `design/w07/c-figures/README.md`）。](../design/w07/c-figures/fig7-1-published-list-real-1440.png){width=38%}
+![圖 7-1　研究工作台的已發布研究清單（A 截圖，2026-11-02 擷取，1440 寬）。三份皆為經人工核准後發布的 MOCK 驗收版本：模型決策為預錄腳本、數字為真實快照工具輸出，不是正式研究結論。畫面為本機執行 web_app.py 擷取，不是 Render 線上站（A `design/w07/c-figures/README.md`）。](../design/w07/c-figures/fig7-1-published-list-real-1440.png){width=30%}
 
 資料品質風險沒有執行任何檢查時顯示「未評估」，不顯示為低風險；每張卡片固定註明「低」不代表股價安全（A 同上第 4 節）。
 
@@ -47,7 +49,9 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 報告詳情頁與 PDF 包含研究問題與 cutoff、主張（事實、推論、未知）、反向證據、季度資料、2454 同業比較、DCF 與敏感度、資料品質風險、未知事項、來源，以及版本與方法限制（A 同上第 3 節）。2317 的估值顯示「無法判定：TTM FCF ≤ 0，5 年持平情境不適用」，不出現負的 DCF（同上）。
 
-![圖 7-2　2454 聯發科報告詳情上半部（A 截圖，2026-11-02 擷取，1440 寬；版本 rv-a520d5cc，資料截止 2026-09-30 17:30）。網頁與 PDF 由同一份核准 JSON 產生；同業數字來自同業快照 v1.8-w06，與主快照 fin-snap:v1.6-tw-market 為不同檔案（A 同上）。](../design/w07/c-figures/fig7-2-report-2454-top-1440.png){width=80%}
+![圖 7-2（上）　2454 聯發科報告詳情上半部：版本、cutoff、快照、PDF 預覽與下載、估值狀態（含基準收盤價）、資料品質（A 截圖，2026-11-02 擷取，1440 寬；版本 rv-a520d5cc，資料截止 2026-09-30 17:30）。此為 MOCK 驗收版本，不是正式研究結論。](../design/w07/c-figures/fig7-2-report-2454-top-1440.png){width=68%}
+
+![圖 7-2（下）　同一份報告的季度資料、DCF 假設與敏感度、同業比較。網頁與 PDF 由同一份核准 JSON 產生；同業數字來自同業快照 v1.8-w06，與主快照 fin-snap:v1.6-tw-market 為不同檔案（A `design/w07/c-figures/README.md`）。](../design/w07/c-figures/fig7-2-report-2454-tables-1440.png){width=58%}
 
 來源欄位區分兩種：公告片段，以及財報快照的工具結果；後者標示「工具結果，不是公告片段」，並列出可得時間、原始財報檔編號與 sha256（A 同上第 0 節）。
 
@@ -59,17 +63,19 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 **案例三：不足（live，dual 模式，修正前規則）。** CASE-18 是開發案例，類別「缺少資料」，題型為關鍵證據在 cutoff 之後，標的 2454。Researcher 搜尋證據時查無資料（#4，no_data），只取得 2026Q1 的財務快照（#6）。第一次撰寫的草稿沒有通過程式的草稿格式檢查（#9，trace 記為 draft_invalid；摘要檔沒有保存檢查出的問題內容），系統要求重寫，用掉第 4 次模型發送後，Researcher 交出狀態為 insufficient 的草稿（#11）：唯一的主張標為 unknown，沒有任何事實數字。這份草稿本身也有問題。確定性規則檢查（#12）判 insufficient，列出兩個 critical：一是主張 c1 引用的工具結果 obs-1 是 search_evidence 的 no_data，不是有效資料；二是草稿沒有任何有來源的事實主張，沒有可核對的內容。job 以 insufficient_evidence 結束，未發布。這次執行沒有補造 2026Q2 的數字，但它不是模範結果：草稿先是格式不合格，交出的版本又引用了無效的工具結果。整個 job 用了 4 次模型發送、2 次工具呼叫。附件：live trace job 6f344c33-1ecf-47e6-92e8-6d0aa14ec1cc（組長 `agent/calib-v1-day4.json`；步驟序號以 # 表示）。這次是修正前規則的執行；新規則重跑（job de1d50cf，組長 `agent/calib-v1-dual-rerun-1.json`）同樣停在證據不足。
 
-**說明**：在 10/31 修正前的規則下（校準第 1–4 天），dual 模式尚無一案通過覆核（組長 `handoff/W06-gate-v12.md` 第 8 節；`agent/calib-v1-day1~4.json`）。10/31 修正規則後，以新規則執行的開發集 10 案 dual 中，**4 案通過覆核**（CASE-01、11、22、26），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分，本節不寫正確率或成功率。CASE-11 兩次執行都照實記錄：修正前（job da86df90，10/29）證據可得時間 14:15 其實早於 cutoff 17:00（台北），Reviewer 模型自行比較時區出錯而判 insufficient，規則判 pass，最終取較嚴格的 insufficient，是誤擋；組長 10/31 改由程式比對可得時間後重跑（job 9fc9e029），模型與規則都判 pass，通過覆核（組長 `agent/calib-v1-day2.json`、`agent/calib-v1-dual-rerun-1.json`；decisions 第 9 節）。研究 job 本身不發布，以上 job 都沒有進入發布流程，所以「正常」案例仍以 MOCK 報告示範發布流程，不能當作研究結果。三個案例都是開發案例或驗收用報告，不是保留案例，也不是正式實驗結果。
+**說明**：在 10/31 修正前的規則下（校準第 1–4 天），dual 模式尚無一案通過覆核（組長 `handoff/W06-gate-v12.md` 第 8 節；`agent/calib-v1-day1~4.json`）。10/31 修正規則後，以新規則執行的開發集 10 案 dual 中，**4 案通過覆核**（CASE-01、11、22、26）（CASE-26 依組長 10/24 決定註明：此案未觸發逾時，逾時處理以離線測試為證），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分，本節不寫正確率或成功率。CASE-11 兩次執行都照實記錄：修正前（job da86df90，10/29）證據可得時間 14:15 其實早於 cutoff 17:00（台北），Reviewer 模型自行比較時區出錯而判 insufficient，規則判 pass，最終取較嚴格的 insufficient，是誤擋；組長 10/31 改由程式比對可得時間後重跑（job 9fc9e029），模型與規則都判 pass，通過覆核（組長 `agent/calib-v1-day2.json`、`agent/calib-v1-dual-rerun-1.json`；decisions 第 9 節）。研究 job 本身不發布，以上 job 都沒有進入發布流程，所以「正常」案例仍以 MOCK 報告示範發布流程，不能當作研究結果。三個案例都是開發案例或驗收用報告，不是保留案例，也不是正式實驗結果。
 
-## 7.6　live、mock 與 replay
+## 7.6　live、mock 與 trace 重播
 
 | 類型 | 意思 | 本節用到的例子 |
 |---|---|---|
 | live | 真實模型（gemini-3.5-flash-lite）每一步自己決定 | 衝突、不足兩例 |
 | mock | 模型回覆為預錄腳本，工具與快照是真的；報告首頁標示 MOCK | 正常一例、三份線上 PDF |
-| replay | 重播已保存的紀錄，不重新呼叫模型 | 本節未使用；正式定義待 D |
+| trace 重播 | 網站重播已保存的 live 紀錄（trace），只讀、不呼叫模型（A `research_ui/replays.py`） | 本節未使用 |
 
 （組長 `agent/*.json` 的 note；A `reports/v12-online-pdf-check.md` 第 2 節。）
+
+**注意：「trace 重播」和 F04 的「evidence-replay」是兩件事。** trace 重播只是把已保存的執行紀錄重新顯示，不呼叫模型；evidence-replay 是 F04 的驗證方法，用事後擷取、依 cutoff 篩過的資料實際呼叫模型重新研究（見方法章 3.7 節，組長 `handoff/v12-scope-quota.md`）。
 
 ## 7.7　待補
 
@@ -77,5 +83,5 @@ A 以程式檢查每份 PDF：報告 JSON 中的關鍵項目（每條主張、�
 
 | 缺什麼 | 提供人 |
 |---|---|
-| 正式部署後的網站與手機實測 | 組長（W08） |
-| LIVE 報告 | 組長決定開放時機 |
+| 手機實機測試 | A |
+| LIVE 報告的畫面截圖（取代現行 MOCK 截圖；A 說明 LIVE 版本產生後會再提供） | A |

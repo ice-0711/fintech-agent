@@ -42,4 +42,4 @@
 
 ## 六、部署限制
 
-Render 2GB 是**計畫**，repo 內設定仍是免費方案 512MB，尚未開通；是否足夠要等 W08 實測，不寫成保證足夠（組長 `handoff/v12-scope-quota.md` 第 4 節）。
+Render 2GB 原為**計畫**；組長 2026-11-02 決定維持免費方案 512 MB，11/02 已在 512 MB 上發布 1 份 PDF 成功，後續發布若記憶體不足再升級 2GB，費用另行核准，不寫成保證足夠（組長 `handoff/decisions-2026-10.md` 第 12 節；`handoff/v12-scope-quota.md` 第 4 節）。

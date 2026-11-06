@@ -43,13 +43,15 @@ dual 模式下，Researcher 的草稿交給 Reviewer。Reviewer 回覆 pass、re
 
 （組長 `handoff/state-machine-v1.md` 第 2 節。Reviewer 的規則詳見 W05 method-reviewer.md。）
 
-## 四、live、mock、replay 的差別
+## 四、live、mock、trace 重播的差別
 
 | 名稱 | 意思 | 寫作時可以怎麼說 | 依據 |
 |---|---|---|---|
 | live | 真實模型（gemini-3.5-flash-lite）每一步自己決定，工具與快照是真的 | 可描述為實際執行，必須附 job_id | 組長 `agent/*.json` note |
 | mock | 模型的回覆是預錄腳本，工具與快照是真的 | 只能寫「模擬（MOCK）」，不得講成模型的判斷或研究結論 | 同上 |
-| replay | 重播已保存的紀錄，不重新呼叫模型 | 只能寫「重播」，不得講成即時執行 | 定義待 D 核對 |
+| trace 重播 | 網站重播已保存的 live 紀錄（trace），只讀、不呼叫模型 | 只能寫「重播」，不得講成即時執行 | A `research_ui/replays.py`（標示 REPLAY） |
+
+**注意：「trace 重播」和 F04 的「evidence-replay」是兩件事。** trace 重播只是把已保存的執行紀錄重新顯示，不呼叫模型；evidence-replay 是 F04 的驗證方法，用事後擷取、依 cutoff 篩過的資料實際呼叫模型重新研究（見方法章 3.7 節，組長 `handoff/v12-scope-quota.md`）。
 
 例如 A 在 W07 產生的三份線上 PDF 是 MOCK（模型決策為預錄腳本），PDF 首頁標示「MOCK 測試報告：不是研究結論」（A `reports/v12-online-pdf-check.md` 第 2 節）。
 
@@ -68,6 +70,5 @@ dual 模式下，Researcher 的草稿交給 Reviewer。Reviewer 回覆 pass、re
 
 | 缺什麼 | 提供人 |
 |---|---|
-| replay 的正式定義 | D |
 | 本稿技術敘述核對 | B |
 | 文字核准 | 組長 |
