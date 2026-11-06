@@ -37,6 +37,38 @@ SNAPSHOT_FIELD = {"close_price": "close_price", "eps_ttm": "eps_ttm", "revenue":
 
 TIMING_RE = re.compile(r"available_at|captured_at|cutoff|前視|時效|可得時間")
 
+# W09（組長 11/06）：草稿描述的工具／系統事件必須真的發生過（校準 v1 的 S30、S17、S27）
+TOOL_MENTION = {"get_price_window": r"get_price_window|價格視窗|價格工具|股價工具",
+                "get_financial_snapshot": r"get_financial_snapshot|財務快照工具|財報快照工具",
+                "get_macro_snapshot": r"get_macro_snapshot|總經工具",
+                "read_evidence": r"read_evidence|讀取原文|原文工具",
+                "search_evidence": r"search_evidence|搜尋工具"}
+NO_DATA_RE = re.compile(r"無資料|沒有資料|查無|no_data|取不到|沒資料")
+TIMEOUT_RE = re.compile(r"逾時|超時|timeout|time ?out", re.I)
+TRUNCATED_RE = re.compile(r"截斷|被截|壓縮")
+TOOLS_OFF_RE = re.compile(r"無法(再)?呼叫|不能再呼叫|無法(再)?使用工具|工具(呼叫)?(已)?(用完|達上限)")
+
+
+def unsupported_system_claims(draft: dict, observations: list[dict], system_events: set[str]) -> list[str]:
+    """草稿文字提到的工具事件（無資料、逾時、截斷、無法呼叫）在執行紀錄裡找不到的，逐句列出。"""
+    texts = [draft.get("decision_summary") or ""] + list(draft.get("limitations") or []) + list(draft.get("unknowns") or [])
+    for c in draft.get("claims", []):
+        texts += [c.get("text") or ""] + list(c.get("limitations") or [])
+    bad_status = {o.get("tool_name") for o in observations if o.get("status") not in ("ok", None)}
+    timed_out = any(o.get("status") == "tool_error" and TIMEOUT_RE.search(str(o.get("reason") or "")) for o in observations)
+    out = []
+    for seg in (x for t in texts for x in re.split(r"[。；;\n]", str(t)) if x.strip()):
+        tools = [name for name, pat in TOOL_MENTION.items() if re.search(pat, seg)]
+        if NO_DATA_RE.search(seg) and tools and not all(t in bad_status for t in tools):
+            out.append(seg.strip())
+        elif TIMEOUT_RE.search(seg) and not timed_out:
+            out.append(seg.strip())
+        elif TRUNCATED_RE.search(seg) and not ({"digested", "truncated"} & system_events):
+            out.append(seg.strip())
+        elif TOOLS_OFF_RE.search(seg) and "tools_off" not in system_events:
+            out.append(seg.strip())
+    return out[:3]
+
 
 def _source_time(ev: dict) -> str | None:
     """來源的可得時間：官方 available_at 優先，否則 captured_at（與 snapshot._avail 相同）。"""
@@ -207,7 +239,7 @@ def _iss(claim_id, severity, reason, required, code, outcome="revise"):
 
 
 def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, remaining_calls: int = 3,
-                observations: list[dict] | None = None) -> dict:
+                observations: list[dict] | None = None, system_events: set[str] | None = None) -> dict:
     """回傳 {"review": {...符合 schema...}, "trace": [規則代碼與結果]}。"""
     claims = draft.get("claims", [])
     evid = {e["evidence_version_id"]: e for e in snapshot.get("evidences", [])}
@@ -375,6 +407,12 @@ def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, r
             need = (f"get_financial_snapshot(ticker={snapshot.get('ticker', '')}, cutoff={cutoff_at}) 取得 {', '.join(nulls)}"
                     if nulls else f"read_evidence(本快照 {snapshot_id} 內的來源編號) 取得可核實的事實")
             issues.append(_iss(first_id, "critical", "草稿沒有任何有來源的事實主張，沒有可核對的內容", need, "no_fact_claims", "insufficient"))
+
+    # --- 草稿描述的工具／系統事件要真的發生過（W09）---
+    if observations is not None:
+        for seg in unsupported_system_claims(draft, observations, system_events or set()):
+            issues.append(_iss(first_id, "critical", f"草稿說「{seg[:60]}」，但執行紀錄沒有這件事",
+                               "依實際工具結果改寫；停止原因由系統記錄，草稿只寫缺少哪些證據", "unsupported_system_claim"))
 
     # --- 決定 ---
     crit = [i for i in issues if i["severity"] == "critical"]

@@ -114,3 +114,9 @@
 - 簽核三模式校準 v1（W06-D）：D 評分 `evaluation/d-drafts/calib-v1-scores-D.txt`、B 交叉評分 `calib-v1-scores-B.md`，30 列標籤一致、53 個事實數值正確。S10、S15 備註中的「待組長裁決」以 11/03 裁決為準。
 - W06 閘門定稿（`handoff/W06-gate-v12.md` 第 2、9 節）：N01–N03 ✅、N07 ✅（附限制）。
 - W09 是否修正 Researcher：方案見 `handoff/W09-researcher-fix-proposal.md`，待組長決定。
+
+## 14. 2026-11-06 組長決定：W09 Researcher 修正（Agent v2）
+
+- 採 `handoff/W09-researcher-fix-proposal.md` 第三節 1–4：停止原因由程式依執行紀錄產生；覆核新增「草稿描述的工具事件須在執行紀錄中」；壓縮與工具關閉時告知模型；Researcher prompt 升為 researcher-v1.2.3。
+- **放寬預算**：單次輸入上限 3,000 → 6,000 token、每 job token 上限 40,000 → 64,000。每 job 8 次發送、10 次工具、2 輪補查不變。**此改動須在報告中呈現**，版本對照見 `handoff/agent-version-changes.md`。
+- 生效：11/06 第二批前瞻跑完後合併（第二批仍用 v1）；11/09–11/10 dual 開發集重跑，D、B 評分後 11/13 鎖定。

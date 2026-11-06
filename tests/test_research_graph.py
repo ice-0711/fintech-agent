@@ -358,8 +358,14 @@ def test_format_retry_never_takes_the_review_call(store):
 
 
 
-def test_reviewer_final_turn_has_no_tools_so_a_good_draft_gets_a_decision(store):
-    """10/23 live CASE-01: flash-lite asked for tools on the reviewer's text-only turn; now no tools are declared."""
+def test_reviewer_final_turn_has_no_tools_so_a_good_draft_gets_a_decision(store, monkeypatch):
+    """10/23 live CASE-01: flash-lite asked for tools on the reviewer's text-only turn; now no tools are declared.
+    The text-only turn comes from the input cap, so this keeps the pre-W09 cap of 3,000 to reach it."""
+    import functools
+
+    from agents import research_graph
+    monkeypatch.setattr(research_graph, "BudgetLimits",
+                        functools.partial(research_graph.BudgetLimits, max_input_tokens=3000))
     rd = {"evidence_version_id": "ev-dev-01-official"}
     final, client, events = run_case(store, CASE01, [
         fc_response("read_evidence", rd), text_response(draft(GOOD_CLAIMS)),
@@ -413,3 +419,13 @@ def test_overlong_review_summary_is_trimmed_not_discarded(store):
     assert final["stop_reason"] == "review_pass" and final["calls_used"] == 4  # no retry spent on the summary
     assert len(final["review"]["decision_summary"]) <= 120
     assert any(e["event_type"] == "review_normalized" for e in events)
+
+
+def test_insufficient_run_records_stop_facts_from_the_trace(store):
+    """W09 (lead 11/06): the stop reason a person reads comes from the trace, not from the model's summary."""
+    final, client, events = run_case(store, CASE01, [
+        fc_response("search_evidence", {"query": "營收", "ticker": "2330"}),
+        text_response(draft([], status="insufficient"))])
+    assert final["status"] == "insufficient_evidence"
+    facts = [e for e in events if e["event_type"] == "stop_facts"]
+    assert len(facts) == 1 and any("模型發送" in f for f in facts[0]["detail"]["facts"])
