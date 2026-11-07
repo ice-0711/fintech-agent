@@ -1,8 +1,8 @@
 {
   "batch_id": "forward-batch-2",
-  "version": "v0.4-draft-2026-11-05",
+  "version": "v1.0-frozen-2026-11-07",
   "prepared_by": "組員 B（黃意棠）",
-  "status": "draft：11/06 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
+  "status": "frozen：快照 2026-11-06 21:39:38 產生（排程未觸發，組長手動，晚約 40 分鐘）；B 2026-11-07 稽核通過（research/forward-batch-2-audit.md）",
   "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；截止時間與來源可得時間同存；資料不足照收錄，不補造方向。",
   "signal_cutoff_at": "2026-11-06T21:00:00+08:00",
   "research_tickers": [
@@ -45,10 +45,12 @@
     ],
     "overwrite_guard": "builder 對已存在的 --out 一律中止（tests/test_w08_safety.py 驗證）",
     "frozen": {
-      "sha256": null,
-      "generated_at": null,
-      "raw_files": null,
-      "manual_inputs": null
+      "sha256": "f8bedf9f5c7e2af1b2607071d412342d8cd7c14d40fa53a297c4ed7b386a22fc",
+      "generated_at": "2026-11-06T21:39:38+08:00",
+      "raw_files": 22,
+      "manual_inputs": "5 個，sha256 與 main 相符（evidence-2026-11-06.csv fe65e491…、macro-2026-11-06.csv e3fe2b34…）",
+      "q3_result": "A 中止（FinMind 無 2454 2026Q3 EPS 科目）→ B：五家都用 2026Q2；announce／mops-control-2026-11-06.csv 未讀入",
+      "verified_by": "組員 B 2026-11-07"
     }
   },
   "financial_sources": [
@@ -56,31 +58,31 @@
       "ticker": "2330",
       "expected_latest_period": "2026Q2（或依第 1 批決定）",
       "q3_note": "2026Q3 董事會通過財報預期 11 月中旬（以實際公告為準），可能晚於 cutoff；11/02–11/06 每日查 MOPS 第31款。10/15 法說會數字已在第 1 批證據，只作證據段落",
-      "status": "to_verify_2026-11-02_to_11-06"
+      "status": "checked：cutoff 前未公告 2026Q3 財報"
     },
     {
       "ticker": "2317",
       "expected_latest_period": "2026Q2",
       "q3_note": "2025Q3 為 2025-11-13 公告，預期 cutoff 後（落在第 3 批前後）",
-      "status": "to_verify_2026-11-02_to_11-06"
+      "status": "checked：cutoff 前未公告 2026Q3 財報"
     },
     {
       "ticker": "2454",
       "expected_latest_period": "2026Q3 公告已在第 1 批人工檔（2454 10/30 17:02:29；2379 10/28 18:33:55）；是否進快照取決於 11/06 FinMind 是否已有 2026Q3",
-      "status": "carried_over（快照納入與否待 11/06）"
+      "status": "carried_over；快照因 A 中止改 B，未納入 2026Q3"
     },
     {
       "ticker": "2379",
       "role": "peer",
       "expected_latest_period": "2026Q3 公告已在第 1 批人工檔（2454 10/30 17:02:29；2379 10/28 18:33:55）；是否進快照取決於 11/06 FinMind 是否已有 2026Q3",
-      "status": "carried_over（快照納入與否待 11/06）"
+      "status": "carried_over；快照因 A 中止改 B，未納入 2026Q3"
     },
     {
       "ticker": "3034",
       "role": "peer",
       "expected_latest_period": "2026Q3",
       "q3_note": "2025Q3 為 2025-11-04 公告，2026Q3 很可能落在 11/02–11/06。若第31款發言時間 ≤ 11/06 21:00：announce-2026-11-06.csv 加列；mops-control-2026-11-06.csv 填本季營收與 EPS（無單季新聞稿時以 1–9 月累計減 2026Q1、Q2 推算並在 note 註明）。納入後 2454 的同業平均恢復為 2379、3034 兩家",
-      "status": "collected_2026-11-05：MOPS 第31款 2026-11-03 16:52:01 董事會通過 115Q3 合併財報（早於 cutoff）。已加入 announce-2026-11-06.csv；mops-control-2026-11-06.csv 填單季營收 309.72 億、EPS 9.99（1–9月累計 827.77 億、EPS 26.58 減 Q1、Q2 推算）"
+      "status": "collected_2026-11-05：MOPS 第31款 2026-11-03 16:52:01 董事會通過 115Q3 合併財報（早於 cutoff）。已加入 announce-2026-11-06.csv；mops-control-2026-11-06.csv 填單季營收 309.72 億、EPS 9.99（1–9月累計 827.77 億、EPS 26.58 減 Q1、Q2 推算）；快照因 A 中止改 B，未納入 2026Q3（FinMind 原始檔已含 3034 Q3，故 content_hash 改變，數值不變）"
     }
   ],
   "evidence_candidates": [
@@ -89,7 +91,7 @@
       "item": "115 年 10 月合併營業收入（MOPS 重大訊息第51款或每月營收）",
       "expected": "鴻海通常於月初公告上月營收，預期 cutoff 前可得（以實際發言時間為準）",
       "rule": "月營收為公司自結，不是財報；不可加總取代季報",
-      "status": "to_collect：至 2026-11-05 12:00 MOPS 重大訊息尚未見 10 月營收公告（11/02 說明媒體報導、11/02 公司債、11/03 法說會預告 11/12）"
+      "status": "not_available_before_cutoff：2026-11-06 19:57 查 MOPS 重大訊息，最新為 11/03 法說會預告，未見 10 月營收 → 移到第 3 批"
     },
     {
       "ticker": "3034",

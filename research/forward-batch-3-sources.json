@@ -1,0 +1,194 @@
+{
+  "batch_id": "forward-batch-3",
+  "version": "v0.3-draft-2026-11-07",
+  "prepared_by": "組員 B（黃意棠）",
+  "status": "draft：11/13 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
+  "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；資料不足照收錄，不補造方向；12/11 截取時仍未成熟的觀察記 NA。",
+  "signal_cutoff_at": "2026-11-13T21:00:00+08:00",
+  "research_tickers": [
+    "2330",
+    "2317",
+    "2454"
+  ],
+  "comparison_only": {
+    "subject": "2454",
+    "peers": [
+      "2379",
+      "3034"
+    ],
+    "industry_reference": "2330",
+    "note": "只 2454 套用固定比較組；2379、3034 只跑確定性比較工具，不建 LLM 任務"
+  },
+  "carry_over_from_batch_2": {
+    "rule": "第 2 批最終推上 main 的四個人工檔全部沿用（可得時間不變），複製成 *-2026-11-13.csv 再加新列；不改第 1、2 批任何檔案",
+    "base_files": [
+      "data/manual/forward/evidence-2026-11-06.csv",
+      "data/manual/forward/macro-2026-11-06.csv",
+      "data/manual/forward/announce-2026-11-06.csv",
+      "data/manual/forward/mops-control-2026-11-06.csv"
+    ],
+    "when": "已完成 2026-11-07：四個 *-2026-11-13.csv 由第 2 批 main 版本（7d5256f）原樣複製，尚未加新列",
+    "batch_2_frozen": {
+      "file": "data/forward/financial-snapshots-2026-11-06.json",
+      "sha256": "f8bedf9f5c7e2af1b2607071d412342d8cd7c14d40fa53a297c4ed7b386a22fc",
+      "generated_at": "2026-11-06T21:39:38+08:00"
+    },
+    "q3_note": "第 2 批 A 因 FinMind 無 2454 2026Q3 EPS 科目而中止。第 3 批仍先試 A（Q3 財報法定申報期限 11/14，FinMind 可能仍未上架），失敗會自動改 B"
+  },
+  "snapshot": {
+    "file": "data/forward/financial-snapshots-2026-11-13.json",
+    "builder": "scripts/build_snapshot_finmind.py V1.8",
+    "run_by": "scripts/freeze_forward_batch.py --batch 3（組長，11/13 21:10 自動）；B 於 11/13 21:00 前把人工檔推上 main，之後不得改動",
+    "must_not_overwrite": [
+      "data/financial-snapshots.json",
+      "data/forward/financial-snapshots-2026-10-30.json",
+      "data/forward/financial-snapshots-2026-11-06.json",
+      "fixtures/dev/",
+      "fixtures/test/"
+    ],
+    "frozen": {
+      "sha256": null,
+      "generated_at": null,
+      "raw_files": null,
+      "manual_inputs": null
+    }
+  },
+  "financial_sources": [
+    {
+      "ticker": "2330",
+      "expected_latest_period": "2026Q3（若 11/13 21:00 前董事會通過）",
+      "q3_note": "台積電第三季財報通常在 11 月中旬董事會通過；每天查 MOPS 第31款。發言時間 ≤ cutoff → announce 加列、control 填單季營收與 EPS（10/15 法說會自結數已在證據，可交叉核對）",
+      "status": "to_verify_2026-11-09_to_11-13"
+    },
+    {
+      "ticker": "2317",
+      "expected_latest_period": "2026Q3（若 11/12 法說會當日或之前董事會通過）",
+      "q3_note": "鴻海 11/03 公告 11/12 召開第三季法說會；董事會通過時間以 MOPS 第31款發言時間為準",
+      "status": "to_verify_2026-11-09_to_11-13"
+    },
+    {
+      "ticker": "2454",
+      "expected_latest_period": "2026Q3",
+      "status": "carried_over（第 1 批起已有 10/30 17:02:29 公告）"
+    },
+    {
+      "ticker": "2379",
+      "role": "peer",
+      "expected_latest_period": "2026Q3",
+      "status": "carried_over（10/28 18:33:55）"
+    },
+    {
+      "ticker": "3034",
+      "role": "peer",
+      "expected_latest_period": "2026Q3",
+      "status": "carried_over（11/03 16:52:01）"
+    }
+  ],
+  "evidence_candidates": [
+    {
+      "ticker": "2330",
+      "item": "115 年 10 月營收",
+      "expected": "通常每月 10 日前後公告，預期 cutoff 前可得",
+      "rule": "月營收為公司自結，不是財報；不可加總取代季報",
+      "status": "to_collect"
+    },
+    {
+      "ticker": "2454",
+      "item": "115 年 10 月營收",
+      "expected": "通常每月 10 日前後公告，預期 cutoff 前可得",
+      "status": "to_collect"
+    },
+    {
+      "ticker": "2317",
+      "item": "115 年 10 月營收",
+      "expected": "若第 2 批 cutoff 前未公告，於本批收錄",
+      "status": "to_collect（視第 2 批結果）"
+    },
+    {
+      "ticker": "2330／2317",
+      "item": "第三季財報董事會通過（第31款）與法說會新聞稿",
+      "status": "to_check"
+    },
+    {
+      "ticker": "any",
+      "item": "11/07–11/13 三檔其他第51款重大訊息",
+      "rule": "只收與研究焦點相關、發言時間 ≤ 11/13 21:00 者",
+      "status": "to_check"
+    }
+  ],
+  "macro_sources": [
+    {
+      "series_id": "CPIAUCSL",
+      "new_observation": "2026-10",
+      "available_at": "2026-11-10T08:30:00-05:00（BLS 排程；台北 11/10 21:30）",
+      "status": "to_collect（11/10 晚上後下載 FRED CSV）"
+    },
+    {
+      "series_id": "FEDFUNDS",
+      "new_observation": "無",
+      "note": "2026-11 月平均要 12 月初才發布 → 不收"
+    },
+    {
+      "series_id": "TAIEX",
+      "expected_latest_observation": "2026-11-13 收盤（17:30 可得）",
+      "status": "auto_by_builder"
+    }
+  ],
+  "price_basis": {
+    "signal_price": "FinMind TaiwanStockPrice raw_unadjusted，2026-11-13 收盤，17:30 可得",
+    "evaluation": {
+      "entry": "2026-11-16 開盤（預期）",
+      "D1": "2026-11-16 收盤（預期）",
+      "D5": "2026-11-20 收盤（預期）",
+      "D20": "2026-12-11 收盤（預期）",
+      "note": "D20 剛好落在 12/11 定稿日：收盤價 17:30 才可得，12/11 截取若早於 17:30 依手冊記 NA",
+      "calendar_check": "以 FinMind TaiwanStockTradingDate 實際交易日核對"
+    }
+  },
+  "corporate_actions": [
+    {
+      "ticker": "2330",
+      "ex_dividend_trading_date": "2026-12-10",
+      "in_window": "是（D20 預期 12/11）",
+      "rule": "依既有規則記 corporate_action_in_window，raw 報酬照算、不還原，並在報告註明（evaluation/e2e-w07.md）"
+    },
+    {
+      "ticker": "2454",
+      "ex_dividend_trading_date": "2027-01-05",
+      "in_window": "否"
+    },
+    {
+      "ticker": "2317",
+      "status": "11/13 前查 TWSE 除權除息預告表"
+    }
+  ],
+  "checklist_2026_11_13": [
+    "11/07 起：第 2 批快照產生後，複製四個人工檔成 *-2026-11-13.csv（不改第 2 批檔）",
+    "11/09–11/13 每日查 MOPS：2330、2317 第31款；2330、2454（及 2317）10 月營收；其他第51款",
+    "11/10 21:30 後抓 FRED CPIAUCSL 2026-10",
+    "以 scratch 程式載入檢查四個檔",
+    "11/13 20:00 前 push；21:00 後組長產生快照；B 記錄 sha256 並轉 frozen",
+    "第 3 批快照產生後，接著做 9 份前瞻總稽核（research/forward-manifest-9.json、evaluation/v12-forward-manifest.csv）"
+  ],
+  "peer_period_rule": "組長 2026-11-02 核定（decisions 第 11 節）：不同財報期的同業都計入，逐列標財報季別",
+  "decisions_applied": [
+    "股價可得時間 17:30（組長 10/22）",
+    "direction 三批全記 none（組長 10/31）",
+    "第三季：A，FinMind 未上架則 B（組長 10/31）",
+    "同業平均跨財報期都計入（組長 11/02）",
+    "中文金額含空格也辨識（組長 11/06，a758dc1）"
+  ],
+  "agent_version": "v2（researcher-v1.2.3；單次輸入上限 6,000；handoff/agent-version-changes.md）",
+  "financial_basis": {
+    "rule_source": "手冊 V1.2 固定資料規則；data-contract.md；decisions 第 11 節",
+    "statement_basis": "consolidated（合併報表）",
+    "quarter_basis": "single_quarter。若第 3 批納入 2026Q3：MOPS 第31款只給 1–9 月累計（ytd），單季＝累計減同年 Q1、Q2（同口徑且前期存在才可轉）；EPS 同法推算並在 control note 註明",
+    "ttm": "最近 4 個連續單季；納入 2026Q3 時 TTM＝2025Q4～2026Q3，否則維持 2025Q3～2026Q2。任一季 EPS 為 unverified 時 TTM 為 null",
+    "pe": "P/E＝2026-11-13 收盤（raw，17:30 可得）÷ TTM EPS；EPS ≤ 0 記 NA",
+    "pb": "P/B＝同日收盤 ÷ 最新一季 BVPS（母公司權益 ÷ 流通股數）；BVPS ≤ 0 記 NA",
+    "fcf_dcf": "FCF＝營業現金流 − 資本支出（正值）；DCF：WACC 9%、g 3%、5 年 TTM FCF 持平；TTM FCF 為負（2317）記無法判定",
+    "peer": "2454 為比較主體；2379、3034 都計入同業平均，財報期不同也計入並逐列標季別；2330 為產業參照不計入",
+    "monthly_revenue": "月營收為公司自結，只作證據段落，不加總取代季報",
+    "price_basis": "訊號價與觀察價都用 TaiwanStockPrice raw_unadjusted；觀察窗內除息只標 corporate_action_in_window，不還原"
+  }
+}
