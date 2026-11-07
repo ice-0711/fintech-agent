@@ -35,16 +35,21 @@
 | 外部文字不當指令 | test_w08_safety::test_injection_text_cannot_reach_tools_as_arguments;test_tools_ignore_instructions_inside_sources | 通過 | |
 | 重複 20 請求(有授權) | evaluation/d-drafts/W08-D/test_w08d_repeat20.py::test_20_identical_authorized_requests_create_one_job | 通過 | 第 1 次 202,後 19 次 200,job_id 只有 1 個,資料表只有 1 筆 |
 | 重複 20 請求(未授權) | evaluation/d-drafts/W08-D/test_w08d_repeat20.py::test_20_unauthorized_requests_all_401_and_create_nothing | 通過 | 20 次皆 401,沒有建立 job |
-| DB 暫失 | 無 | **未執行** | 現有程式沒有 Supabase 版 JobStore 的失敗注入測試;本次沒有授權的測試資料庫,不對正式庫注入故障 |
+| DB 暫失 | test_audit_fixes::test_crashing_tool_returns_fixed_error(工具拋出 "db down",回固定錯誤 tool_error,不當機) | 通過(僅限 mock 的工具故障) | 真實 Supabase 版 JobStore 的資料庫暫失:**未執行**。目前沒有授權的測試資料庫,不對正式庫注入故障 |
 
-## 四、缺陷清單
+## 四、E02/E03/E04/E08/E09 對照與缺口
 
-- 本次測試沒有出現失敗的測試,所以沒有新增可重現的缺陷。
-- 缺口(不是已發現的錯誤):
-  1. DB 暫失沒有測(原因見上)。責任人:組長(提供測試專案與 Supabase 版 JobStore 後才能測)。
-  2. worker 中斷是假時鐘模擬,沒有真的結束 process。
-  3. 全部是 mock,不能當成 Render 上線結果。
-- 任務書寫的缺陷編號 E02/E03/E04/E08/E09,我在 repo 找不到定義,所以沒有對號入座。【請組長或 B 告知編號對應,再補】
+編號與內容依 evaluation/d-drafts/W01-D/acceptance-v5.md(來源:專題手冊第 06 章)。本次沒有出現失敗的測試,所以沒有新增可重現的缺陷;下表是「有測試的」與「缺口」。缺口不是已發現的錯誤。
+
+| 編號 | 項目 | 現有測試(皆 mock,通過) | 缺口(本次未執行) |
+|---|---|---|---|
+| E02 | 預算上限由程式阻擋 | test_budget_tools:test_eight_call_cap_counts_failures_and_is_persisted、test_tool_limits、test_supplement_rounds_and_active_time | 無 |
+| E03 | 重複送件與中斷重啟 | 20 次重複請求(本次新增,2 項);test_job_survives_process_restart;test_expired_lease_is_recovered_and_stale_worker_is_fenced | 「模糊網路結果存成未確定狀態」「不重複發布」:本次沒找到對應測試 |
+| E04 | 安全阻擋 | test_w08_safety(41 項:未知工具、假引用與他案/保留案 evidence id、來源文字不當指令);未授權建立 job 20 次皆 401 | 「未授權發布」:本次依測試名稱搜尋,沒找到專門測試(只有未發布報告不外流的 test_unpublished_report_never_leaves_server) |
+| E08 | 純讀與故障狀態 | test_research_ui:test_reading_pages_never_starts_analysis、test_read_only_ui_has_no_model_code、test_page_renders_without_secrets_or_sync_analysis;test_audit_fixes::test_crashing_tool_returns_fixed_error | 「關閉 Gemini 後仍可讀舊報告」「資料庫故障畫面」:本次沒找到測試;真實 DB 暫失:未執行 |
+| E09 | 建置、測試與還原 | 全部離線測試 417 passed | 建置、憑證掃描、rollback:D 本次未執行。備份還原演練紀錄見 handoff/backup-restore-log.md(組長 W08-L,D 沒有重跑) |
+
+責任人:E03、E08 缺口與真實 DB 暫失需要組長提供授權測試資料庫後才能測;其餘缺口請 B 或組長決定是否補測。
 
 ## 五、限制
 
@@ -55,5 +60,5 @@
 
 | 項目 | 原因 | 提供人 |
 |---|---|---|
-| DB 暫失注入 | 無授權測試資料庫 | 組長 |
+| 真實 DB 暫失注入 | 無授權測試資料庫 | 組長 |
 | 並行 20 請求 | 本次只做循序 | D 可在後續補 |
