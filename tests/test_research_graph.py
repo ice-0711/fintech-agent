@@ -75,7 +75,7 @@ def test_researcher_path_follows_tool_results_and_review_passes(store):
     assert final["calls_used"] == 4 and final["review"]["decision"] == "pass"
     calls = [e for e in events if e["event_type"] == "model_call"]
     assert all(c["detail"]["prompt_version"] and c["detail"]["model_id"] == MODEL for c in calls)
-    assert [c["detail"]["prompt_version"] for c in calls][-1] == "reviewer-v1.2.1"
+    assert [c["detail"]["prompt_version"] for c in calls][-1] == "reviewer-v1.2.2"
 
 
 def test_different_case_takes_a_different_path_and_stops_insufficient(store):

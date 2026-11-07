@@ -21,7 +21,7 @@ import re
 from typing import Any
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REVIEWER_PROMPT_VERSION = "reviewer-v1.2.1"
+REVIEWER_PROMPT_VERSION = "reviewer-v1.2.2"  # 11/07: obs results are in the payload, read_evidence only for ev- ids
 PROMPT_PATH = os.path.join(HERE, "prompts", "reviewer-v1.2.txt")
 SCHEMA_PATH = os.path.join(os.path.dirname(HERE), "agent", "reviewer_output.schema.json")
 

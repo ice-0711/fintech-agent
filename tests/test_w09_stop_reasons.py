@@ -43,3 +43,24 @@ def test_digested_result_says_it_can_be_read_again():
     contents = [types.Content(role="user", parts=[part]), types.Content(role="user", parts=[types.Part.from_text(text="x")])]
     assert shrink_history(contents, obs) == 1
     assert "重新呼叫" in contents[0].parts[0].function_response.response["note"]
+
+
+def test_unknown_may_cite_a_no_data_result_but_fact_may_not():
+    """11/07 CASE-15/26: an unknown claim citing a no_data result is evidence of absence, not an error."""
+    from agents.review_checks import check_draft
+    obs = [{"obs_id": "obs-1", "tool_name": "get_price_window", "status": "no_data"}]
+    snap = {"evidences": [], "ticker": "2454"}
+
+    def codes(kind):
+        draft = {"claims": [{"claim_id": "c1", "kind": kind, "text": "缺同日股價", "evidence_refs": ["obs-1"],
+                             "facts": [], "limitations": []}]}
+        return [i["code"] for i in check_draft(draft, snap, "2026-08-05T17:00:00+08:00", "snap-x", observations=obs)["trace"]]
+
+    assert "bad_tool_result" not in codes("unknown")
+    assert "bad_tool_result" in codes("fact")
+
+
+def test_number_written_with_trailing_zero_is_found():  # 11/07 CASE-19: "USD 40.0 Billion"
+    from agents.review_checks import paragraph_contains
+    assert paragraph_contains("Revenue USD 40.0 Billion (synthetic)", 40.0)
+    assert not paragraph_contains("營收 400 億", 40.0)

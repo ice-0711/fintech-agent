@@ -81,7 +81,10 @@ def _t(s: str) -> datetime:
 
 def num_variants(v: float) -> list[str]:
     f = float(v)
-    return list({format(f, ",.10g"), format(f, ".10g")})
+    out = {format(f, ",.10g"), format(f, ".10g")}
+    if f.is_integer():  # 原文常寫「40.0」「40.00」（11/07 CASE-19：40.0 曾被判找不到）
+        out |= {format(f, ",.1f"), format(f, ".1f"), format(f, ",.2f"), format(f, ".2f")}
+    return list(out)
 
 
 def paragraph_contains(paragraph: str, value: float) -> bool:
@@ -268,7 +271,8 @@ def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, r
                 continue
             if r in obs:
                 checked_refs.append(r)
-                if obs[r].get("status") != "ok":
+                # unknown 引用 no_data 是「查過、確實沒有」的證據（11/07 CASE-15、CASE-26）；只有 fact／inference 不可引用
+                if obs[r].get("status") != "ok" and kind != "unknown":
                     issues.append(_iss(cid, "critical", f"引用的工具結果 {r} 狀態為 {obs[r].get('status')}，不是有效資料",
                                        f"退回 Researcher：{cid} 不可引用 {obs[r].get('tool_name')} 的 {obs[r].get('status')} 結果；改用 read_evidence 取得有效來源", "bad_tool_result"))
                 continue

@@ -7,7 +7,7 @@
 | 版本 | 期間 | Researcher prompt | Reviewer prompt | 單次輸入上限 | 每 job token 上限 | 用在哪些結果 |
 |---|---|---|---|---|---|---|
 | v1（校準版） | 10/26–11/06 | researcher-v1.2.2 | reviewer-v1.2.1（10/31 起） | 3,000 | 40,000 | 三模式校準 v1（開發集 30 列）、前瞻第 1、2 批 |
-| v2（W09 修正版） | 11/09 起 | researcher-v1.2.3 | reviewer-v1.2.1 | **6,000** | **64,000** | W09 開發集 dual 重跑、W09 鎖定後的正式實驗（保留集 60 次）、前瞻第 3 批 |
+| v2（W09 修正版） | 11/06 起（11/07 再修覆核規則） | researcher-v1.2.3 | **reviewer-v1.2.2**（11/07） | **6,000** | **64,000** | W09 開發集 dual 重跑、W09 鎖定後的正式實驗（保留集 60 次）、前瞻第 3 批 |
 
 以下不變：每 job 最多 8 次模型發送、10 次工具呼叫、2 輪補查；單次輸出 1,500 token（含 thinking）；模型 `gemini-3.5-flash-lite`；thinking `minimal`；初次研究最多 4 次發送（dual）。
 
@@ -27,6 +27,20 @@
 | 5 | Researcher prompt 加一句：摘要只寫缺少哪些證據，不描述工具或系統事件 | `agents/prompts/researcher-v1.2.txt`（版本 researcher-v1.2.3） | 原因 2 |
 
 **用校準 v1 的草稿離線驗證第 3 項**：S30（CASE-04）、S17／S27（CASE-26）都會被抓到；覆核通過的 CASE-01、11、22 沒有被誤擋；CASE-15 的「快照截斷」因確實發生過壓縮而不標記。
+
+## v2 的 11/07 補修（組長 11/07 決定）
+
+v2 重跑第 2 天（11/07）發現 4 案未通過中，有 2 案主要是覆核規則的 bug，把正確內容判錯：
+
+| # | 變更 | 位置 | 案例 |
+|---|---|---|---|
+| 6 | unknown 主張引用 no_data 的工具結果不再列 critical（那是「查過、確實沒有」的證據）；fact／inference 引用 no_data 仍列 critical | `agents/review_checks.py` | CASE-15、CASE-26 |
+| 7 | 數字比對接受「40.0」「40.00」這類整數加小數零的寫法 | `agents/review_checks.py` `num_variants` | CASE-19 |
+| 8 | Reviewer prompt：obs 結果已附在覆核資料中，read_evidence 只讀 ev- 來源編號（避免浪費一次發送） | `agents/prompts/reviewer-v1.2.txt`（reviewer-v1.2.2） | CASE-15、CASE-26 |
+
+開發集重跑中，CASE-01、04、08（11/06）與 CASE-11、18、22（11/07）用的是補修前的規則；這三項只會造成「誤判錯」，不會讓錯的內容通過，所以這 6 案的結果不受影響。受影響的 CASE-15、19、26 於 11/08 用補修後版本重跑，以 11/08 的結果為準。
+
+**仍未解決（寫進限制）**：CASE-19（數字口徑，不允許選證據不足）Researcher 遇到幣別混用仍自行放棄，沒有改正或填 null。
 
 ## 對研究問題與結果的影響（寫報告時要說明）
 
