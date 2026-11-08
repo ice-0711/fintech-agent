@@ -1,6 +1,6 @@
 # W04-C 案例逐步說明（case-walkthrough-v1）
 
-- 任務 ID：W04-C｜版本：v2｜狀態：**草稿，待 B 核對、組長核准**
+- 任務 ID：W04-C｜版本：v2｜狀態：**組長 2026-11-08 核准，可直接引用**
 - 來源：組長 `agent/calib-v1-day4.json`（產生於 2026-10-31 16:30 台北；commit d41c828；模型 gemini-3.5-flash-lite；prompt researcher-v1.2.2、reviewer-v1.2.0）。
 - 案例：**CASE-22（開發案例，類別「數字口徑」，題型「單季 EPS 當 TTM EPS」）**，標的 2330，cutoff 2026-08-12 17:00（台北）。
 - 執行類型：**live**（真實模型每一步自己決定）。job_id：`e9045bbd-9c61-4d79-bc16-f12139605eca`（以下簡寫 e9045bbd）。
