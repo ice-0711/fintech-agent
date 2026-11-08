@@ -36,12 +36,14 @@
 
 ### 3. CASE-13：保留集案例本身沒有問題；舊的同名開發草稿要標示清楚 ✅
 
-- **保留集 CASE-13**（2330，缺少資料，「只有社群傳聞沒有原件」，cutoff 2026-09-30 17:30，allow_insufficient=True）與手冊第 06 章附表、`data-freeze.md` 第 25 行一致，封存後沒有改動。cutoff 前沒有任何官方原件可用，預期行為「不補造數字、說明不足」合理。不受 Agent v2 改動影響，因為它本來就允許選證據不足。
+> 2026-11-07 依組長要求移除保留集案例的情境描述，只保留一致性結論（decisions 第 15 節）。本文件不再寫入保留集內容。
+
+- **保留集 CASE-13**：與手冊第 06 章附表、`data-freeze.md` 一致，封存後沒有改動。
 - **同名舊資料**：10/09–10/15 的開發階段有一個**不同內容**的「CASE-13」（2317，缺 CapEx），出現在：
   - `agent/researcher-v12-traces.json`（組長 10/15 的 mock／live 紀錄）
   - D 的 `evaluation/d-drafts/W02-D/W04-D/dev_drafts.json`、`W05-D/reviewer-checks.json`、`reviewer-run-results.json`
   - `design/research-qa-v1.md`、`design/w06/screenshot-run-2026-10-21.json`（網站 REPLAY `researcher-v12-traces:CASE-13`）
-- 這些都是 10/20 封存前的舊編號，內容與保留集 CASE-13 不同（不同公司、不同擾動），**沒有接觸到保留集題目或答案**，不構成資料洩漏。
+- 這些都是 10/20 封存前的舊編號，與保留集的 CASE-13 不是同一個案例，**沒有接觸到保留集題目或答案**，不構成資料洩漏。
 - 建議（文書，不影響數字）：引用這些舊紀錄時寫成「10/15 舊開發草稿 CASE-13（2317 CapEx，已廢除，與保留集無關）」，避免報告或展示把它當成保留集案例。
 
 ---
