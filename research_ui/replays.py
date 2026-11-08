@@ -21,6 +21,16 @@ ROOT = Path(__file__).resolve().parent.parent
 TRACE_FILES = ("agent/dev-v14-batch1.json", "agent/researcher-v12-traces.json",
                "agent/researcher-v12-traces-gemini-3.6-flash.json")
 
+# Recorded runs whose case id was later retired. Shown with this note so a viewer does not read them as the
+# sealed holdout case of the same number (lead, handoff/decisions-2026-10.md §15, 11/07; B's source audit).
+SUPERSEDED = {
+    "researcher-v12-traces:CASE-13": {
+        "label": "舊開發草稿，已廢除",
+        "note": "這是 10/15 以前的舊開發草稿題目（2317 缺 CapEx），已廢除，與保留集 CASE-13 無關；保留集未被污染。"
+                "依據：handoff/decisions-2026-10.md 第 15 節、evaluation/source-audit-final.md 第一節第 3 點。",
+    },
+}
+
 
 def _load() -> list[dict[str, Any]]:
     runs = []
@@ -33,8 +43,10 @@ def _load() -> list[dict[str, Any]]:
             live = case.get("live")
             if not live:
                 continue
+            replay_id = f"{path.stem}:{case['case_id']}"
             runs.append({
-                "replay_id": f"{path.stem}:{case['case_id']}",
+                "replay_id": replay_id,
+                "superseded": SUPERSEDED.get(replay_id),
                 "file": rel,
                 "generated_at": doc.get("generated_at"),
                 "commit": doc.get("commit"),
@@ -52,7 +64,7 @@ def _load() -> list[dict[str, Any]]:
 
 def list_replays() -> list[dict[str, Any]]:
     return [{k: r[k] for k in ("replay_id", "file", "generated_at", "commit", "model_id", "case_id", "ticker",
-                               "category", "title")}
+                               "category", "title", "superseded")}
             | {"status": r["run"].get("status"), "stop_reason": r["run"].get("stop_reason"),
                "review_rounds": sum(1 for s in r["run"].get("steps", []) if s.get("event") == "review")}
             for r in _load()]
@@ -111,7 +123,7 @@ def get_replay(replay_id: str) -> dict[str, Any] | None:
         "replay_id": found["replay_id"],
         "label": "REPLAY",
         "source": {k: found[k] for k in ("file", "generated_at", "commit", "model_id", "prompt_versions")},
-        "case": {k: found[k] for k in ("case_id", "ticker", "category", "title", "expected_behavior")},
+        "case": {k: found[k] for k in ("case_id", "ticker", "category", "title", "expected_behavior", "superseded")},
         "job": {"status": run.get("status"), "stage": "finished", "stop_reason": run.get("stop_reason"),
                 "ticker": found["ticker"], "mode": "dual", "model_id": found["model_id"],
                 "prompt_version": (found.get("prompt_versions") or {}).get("researcher"),

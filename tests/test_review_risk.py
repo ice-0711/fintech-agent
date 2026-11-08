@@ -183,6 +183,16 @@ def test_replay_of_case04_shows_recorded_reviewer_issues(ui):
     assert [e["tool_name"] for e in r["events"] if e["event_type"] == "tool_call"][:2] == ["get_financial_snapshot", "get_price_window"]
 
 
+def test_retired_case13_draft_is_labelled_and_no_other_replay_is(ui):
+    """Lead 11/07 (decisions §15): the 10/15 'CASE-13' trace is a retired dev draft, unrelated to holdout CASE-13."""
+    rows = ui.get("/api/ui/replays").get_json()["replays"]
+    flagged = [r["replay_id"] for r in rows if r["superseded"]]
+    assert flagged == ["researcher-v12-traces:CASE-13"]
+    r = ui.get("/api/ui/replays/researcher-v12-traces:CASE-13").get_json()
+    note = r["case"]["superseded"]
+    assert note["label"] == "舊開發草稿，已廢除" and "與保留集 CASE-13 無關" in note["note"]
+
+
 def test_unknown_replay_is_404(ui):
     assert ui.get("/api/ui/replays/nope:CASE-99").status_code == 404
 
