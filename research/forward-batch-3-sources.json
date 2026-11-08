@@ -1,6 +1,6 @@
 {
   "batch_id": "forward-batch-3",
-  "version": "v0.3-draft-2026-11-07",
+  "version": "v0.4-draft-2026-11-09",
   "prepared_by": "組員 B（黃意棠）",
   "status": "draft：11/13 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
   "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；資料不足照收錄，不補造方向；12/11 截取時仍未成熟的觀察記 NA。",
@@ -33,7 +33,19 @@
       "sha256": "f8bedf9f5c7e2af1b2607071d412342d8cd7c14d40fa53a297c4ed7b386a22fc",
       "generated_at": "2026-11-06T21:39:38+08:00"
     },
-    "q3_note": "第 2 批 A 因 FinMind 無 2454 2026Q3 EPS 科目而中止。第 3 批仍先試 A（Q3 財報法定申報期限 11/14，FinMind 可能仍未上架），失敗會自動改 B"
+    "q3_note": "第 2 批 A 因 FinMind 無 2454 2026Q3 EPS 科目而中止。第 3 批仍先試 A（Q3 財報法定申報期限 11/14，FinMind 可能仍未上架），失敗會自動改 B",
+    "added_q2_announcements": {
+      "date": "2026-11-09",
+      "rows": [
+        "ev-2330-2026q2-01",
+        "ev-2454-2026q2-01",
+        "ev-2317-2026q2-01",
+        "ev-2379-2026q2-01",
+        "ev-3034-2026q2-01"
+      ],
+      "source": "原樣取自 data/financial-snapshots.json（30 案凍結快照）的 evidences，段落文字與 content_hash 不變；可得時間 2026-07-16～08-12，皆早於 cutoff",
+      "reason": "第 1、2 批前瞻證據檔只放 cutoff 前的新公告，漏了 Q2 公告片段（--evidence 是取代不是附加），報告的季度數字因此找不到對應公告原文。第 1、2 批已凍結不補；第 3 批起補上。B 的設計疏失。"
+    }
   },
   "snapshot": {
     "file": "data/forward/financial-snapshots-2026-11-13.json",
