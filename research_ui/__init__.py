@@ -47,6 +47,7 @@ from agents.publication import PublicationError
 from agents.snapshot import SnapshotToolbox
 
 from .comparison import build_comparison, company_row, referenced_evidence_ids
+from .report_data import snapshot_context
 from .mock_jobs import SCENARIOS, MockJobs
 from .replays import get_replay, list_replays
 
@@ -398,7 +399,8 @@ def evidence_detail(ev_id: str):
             "cutoff_check": "cutoff 後才可得，不可引用" if after else "cutoff 前可得", "synthetic_fixture": False}})
     if real is not None:  # the exact snapshot of that report (case snapshots included)
         rep = real["report"]
-        out = SnapshotToolbox(rep["ticker"], rep["source_snapshot_id"], rep["cutoff_at"]).read_evidence(ev_id)
+        with snapshot_context(rep["source_snapshot_id"]):  # forward reports read their own snapshot file
+            out = SnapshotToolbox(rep["ticker"], rep["source_snapshot_id"], rep["cutoff_at"]).read_evidence(ev_id)
     else:
         out = tools_impl.read_evidence(ev_id)
     if out.get("status") != "ok":
