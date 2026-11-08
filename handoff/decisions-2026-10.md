@@ -137,3 +137,11 @@
 - `data/v12-finance-fact-sheet.md` 第七節第 128、132 行寫了兩個保留案例各自測試的目的（題型層級，無答案、數字或來源內容）。此檔屬第一段凍結，**不修改、不重新凍結**，以本節揭露。
 - 理由：題型分類本已公開（30 案總表）；保留集的有效性取決於未用於調整系統，Agent v2 只以開發集修正與驗證（第 14、16 節、`handoff/agent-version-changes.md`）。
 - B 已於 11/08 從其餘共用文件移除保留集案例內容（`evaluation/source-audit-final.md`、`docs/CR-W05-holdout.md`、`docs/B-W01-W06-檔案說明.md`）。之後共用文件不得寫入保留集案例內容。
+
+## 18. 2026-11-08 組長決定：鎖定前補做 single、workflow 的 v2 煙霧測試
+
+- 原因：v2 改動（輸入上限、停止規則、Researcher prompt）三個模式共用，但 v2 重跑只驗了 dual。11/13 鎖定後不能再改，若 single 或 workflow 在 v2 有問題，W10 正式實驗才發現就只能整批記為失敗。
+- 做法：用 11/09–11/12 空出的額度（原排 11/09–11/10 的 dual 重跑已於 11/06–11/08 提前完成），single、workflow 各跑開發集 10 案，共 20 個 job，每天 19:30 自動執行（J=6 內）。輸出 `agent/calib-v2-modes-day1..4*.json`。
+- **由組長端自行執行與檢查，不交 D 評分、不需任何組員動作**；只確認不會出錯、停止理由與執行紀錄一致、必答案例（CASE-01、04、19、22）沒有停在證據不足。結果併入 11/12 的 v1／v2 比較。
+- 更正：CASE-15 為 `allow_insufficient=True`，11/08 停在證據不足屬允許結果，不列為限制。
+- 前瞻第三批維持 11/13 21:10：cutoff 21:00 已登錄在 `research/forward-batch-3-sources.json`，`freeze_forward_batch.py` 未到截止時間會拒絕執行。
