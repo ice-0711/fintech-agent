@@ -1,6 +1,6 @@
 # W04-C Researcher 流程與 Agent 定義（method-researcher）
 
-- 任務 ID：W04-C｜版本：v2（2026-10-31 依組長的 trace 與狀態機文件修訂）｜狀態：**草稿，待 B 核對技術事實、組長核准**
+- 任務 ID：W04-C｜版本：v2（2026-10-31 依組長的 trace 與狀態機文件修訂）｜狀態：**組長 2026-11-08 核准，可直接引用；之後的修改照常提 PR，不需再等核准**
 - 依據：組長 `handoff/state-machine-v1.md`（2026-10-21）、`agents/prompts/researcher-v1.2.txt`、`agent/*.json` 開發集 trace；B `docs/B-W07-C-技術事實.md`；R04。
 - 本稿只描述流程與定義。實驗結果由 D 提供，本稿不引用任何成功率。
 

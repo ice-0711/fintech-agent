@@ -1,6 +1,6 @@
 # W05-C Reviewer 與缺值處理方法稿（method-reviewer）
 
-- 任務 ID：W05-C｜版本：v2（2026-10-31 依組長程式文件、D 草稿與 B 交叉評分修訂）｜狀態：**草稿，待 D 核對狀態命名與 R04／R05 引用、B 核對技術事實、組長核准**
+- 任務 ID：W05-C｜版本：v2（2026-10-31 依組長程式文件、D 草稿與 B 交叉評分修訂）｜狀態：**組長 2026-11-08 核准，可直接引用；之後的修改照常提 PR，不需再等核准**
 - 依據：組長 `agents/prompts/reviewer-v1.2.txt`、`handoff/state-machine-v1.md`、`agents/review_checks.py`、`agents/research_graph.py`、`handoff/decisions-2026-10.md`；D `evaluation/d-drafts/W06-D-redo/`；B `docs/B-review-W06-D-redo.md`。
 
 ## 一、Reviewer 是什麼

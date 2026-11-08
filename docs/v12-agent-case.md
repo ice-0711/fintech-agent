@@ -1,6 +1,6 @@
 # W04-C Agent 案例敘事（v12-agent-case）
 
-- 任務 ID：W04-C｜版本：v2｜狀態：**草稿，待 B 核對、組長核准**
+- 任務 ID：W04-C｜版本：v2｜狀態：**組長 2026-11-08 核准，可直接引用；之後的修改照常提 PR，不需再等核准**
 - **與指定情節的差異**：工作包指定的情節是「發現期間不符→覆核」。這次 live 執行的實際過程不同：Researcher 的草稿口徑是正確的，是覆核規則把正確的 TTM 期間誤判為不連續（誤擋）。本稿照實寫這次的真實過程，不為了符合指定情節而改寫事實；若需要符合指定情節的案例，待組長提供合適的 trace。
 - 依據：組長 `agent/calib-v1-day4.json`，CASE-22（開發案例）dual 模式 **live** 執行，job_id `e9045bbd-9c61-4d79-bc16-f12139605eca`；組長 `handoff/decisions-2026-10.md` 第 9、10 節；規則修正後的重跑為 job `0dd723ce-bd18-4f17-a2d6-508b3479d280`（組長 `agent/calib-v1-dual-rerun-2.json`）。括號內為 trace ID（job_id 前 8 碼＋步驟序號）。逐步表見 case-walkthrough-v1.md。
 

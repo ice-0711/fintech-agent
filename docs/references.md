@@ -2,7 +2,7 @@
 
 - 屬 W02-C 進度。只列手冊第 08 章指定的 R01–R08。
 - 關係摘錄的官方來源（2454、2379 年報）見 docs/v12-source-excerpts.csv，屬資料來源而非文獻，正文引用時以來源表處理。
-- 狀態：**草稿，待核准**。2026-11-01 修訂。尚未確認的事項列在文末「待處理」，不在條目中自行補寫。
+- 狀態：**組長 2026-11-08 核准，可直接引用；之後的修改照常提 PR，不需再等核准**。2026-11-01 修訂。尚未確認的事項列在文末「待處理」，不在條目中自行補寫。
 
 **R01**
 Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2023). ReAct: Synergizing reasoning and acting in language models. In *The Eleventh International Conference on Learning Representations (ICLR 2023)*. https://openreview.net/forum?id=WE_vluYUL-X
