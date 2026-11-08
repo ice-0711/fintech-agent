@@ -85,5 +85,6 @@
 | cases-v1 | 2026-10-25 凍結的案例與資料版本，案例總指紋 98af84030d45 | B-W07-C 第四節 | ✓（B、組長 10/25，D 10/28 簽核） |
 | evidence-replay、9 份前瞻、數學回歸 | F04 驗證的三個範圍；沒有當時版本的資料只能稱 evidence-replay | 組長 `handoff/v12-scope-quota.md` | ✓ |
 | 前瞻研究 | 以未來真實行情觀察的小樣本研究，共 9 份，不屬於 30 案評估 | B-W07-C 第七節 | ✓；補：每週五 21:00 凍結（10/30、11/06、11/13），之後以實際股價看 1／5／20 日報酬；方向訊號三批都記 none，不算命中率（組長 10/31） |
+| Agent v1／v2 | v1：校準版（10/26–11/06），單次輸入 3,000、每 job 40,000 token；v2：W09 修正版（11/06 起），單次輸入 6,000、每 job 64,000 token，停止原因由程式產生並新增覆核規則。校準 v1 與前瞻第 1、2 批用 v1；正式實驗與前瞻第 3 批用 v2；兩版結果不放同一張表比較 | 組長 `handoff/agent-version-changes.md`；decisions 第 14、16 節 | 非 B 範圍（組長） |
 | published（已發布） | 經組長核准 hash、PDF 寫入 Storage 並讀回比對 hash 成功後才算發布 | A `reports/v12-online-pdf-check.md` | 非 B 範圍（A、組長） |
 | localStorage 收藏 | 瀏覽器內最多存 5 個代號，不跨裝置 | 工作包；A `ui/v12-dashboard-acceptance.md` | 非 B 範圍（A） |

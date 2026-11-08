@@ -50,7 +50,9 @@ F01 提供季度、TTM 與年度三層資料，規則如 3.2、3.3 節。F02 的
 
 ![圖 3-2　dual 模式的兩角色交接與預算（示意圖，依組長狀態機文件繪製）](../report/fig/fig3-2.png){width=70%}
 
-**預算。** 每個 job 最多 8 次模型發送，包含全部角色以及失敗、格式重試與網路重試；dual 模式前 4 次用於初次研究，第 5 次保留給覆核。另有 10 次工具呼叫、2 輪補查、每次輸入 3,000 token、每 job 40,000 token 與 180 秒主動時間的限制；一次只有一個 job 執行。預算用完時停止，不跳過覆核去發布（組長 `handoff/state-machine-v1.md` 第 3 節；B 核對程式值相符）。
+**預算。** 每個 job 最多 8 次模型發送，包含全部角色以及失敗、格式重試與網路重試；dual 模式前 4 次用於初次研究，第 5 次保留給覆核。另有 10 次工具呼叫、2 輪補查、每次輸入 6,000 token、每 job 64,000 token 與 180 秒主動時間的限制（Agent v2；v1 曾為每次輸入 3,000、每 job 40,000 token，組長 `handoff/decisions-2026-10.md` 第 14 節、`handoff/agent-version-changes.md`）；一次只有一個 job 執行。預算用完時停止，不跳過覆核去發布（組長 `handoff/state-machine-v1.md` 第 3 節；B 核對程式值相符）。
+
+**Agent 版本。** 組長 2026-11-06 依三模式校準 v1 的結果修正 Researcher，形成 Agent v2：除放寬上述輸入與 token 上限，停止原因改由程式依執行紀錄產生，覆核規則新增「草稿描述的工具事件（無資料、逾時、截斷、無法呼叫工具）須在執行紀錄中」，Researcher prompt 升為 researcher-v1.2.3；11/07 再修覆核規則（unknown 主張引用 no_data 不列 critical、數字比對接受「40.0」寫法），Reviewer prompt 升為 reviewer-v1.2.2（組長 `handoff/decisions-2026-10.md` 第 14 節、`handoff/agent-version-changes.md`）。三模式校準 v1 與前瞻第 1、2 批用 v1；W09 鎖定後的正式實驗與前瞻第 3 批用 v2。兩個版本的結果不放在同一張表比較，需要比較時標明版本。
 
 **覆核的限制。** Reviewer 不是全能的。repo 已記錄漏抓與誤擋的實例：例如 CASE-22 的 dual 執行中，規則只讀 quarters 欄而誤判 TTM 不連續，組長於 2026-10-31 修正，並註明修正前後的 dual 結果不可直接比較（組長 `handoff/decisions-2026-10.md` 第 9 節）；同一案例以新規則重跑後通過覆核（組長 `agent/calib-v1-dual-rerun-2.json`）。本章不主張雙 Agent 提高了正確率，這個問題由第四章的實驗回答。
 
@@ -64,7 +66,7 @@ F01 提供季度、TTM 與年度三層資料，規則如 3.2、3.3 節。F02 的
 
 F04 的驗證範圍包含 evidence-replay、9 份前瞻與數學回歸；沒有當時版本的資料只能稱 evidence-replay，且不挑掉失敗樣本（組長 `handoff/v12-scope-quota.md`）。**evidence-replay** 是指：30 個歷史案例的資料是事後擷取的，依 cutoff 篩掉當時拿不到的資料後，實際呼叫模型執行研究；限制是這些資料可能在事後被修訂，不保證與 cutoff 當時看到的完全相同。9 份前瞻研究是在 cutoff 當下取得資料、之後再觀察真實結果，不屬於 evidence-replay。evidence-replay 也不同於網站的「trace 重播」：後者只重新顯示已保存的執行紀錄，不呼叫模型（A `research_ui/replays.py`）。
 
-評估案例共 30 案，分為 10 個開發案與 20 個保留案；5 類（完整證據、矛盾來源、缺少資料、數字口徑、工具與安全）各有 2 個開發案與 4 個保留案，每檔股票 10 案。保留案例封存，與開發集不重疊，只供正式評分（B 技術事實第三節）。正式測試為 20 保留案 × 3 模式 = 60 次執行（`docs/CR-W05-holdout.md`）。開發集另進行 10 案 × 3 模式的校準（組長 `handoff/calibration-plan-v1.md`）。9 份前瞻研究是以未來真實行情觀察的小樣本，不屬於 30 案評估（B 技術事實第七節）。實驗設計與評估指標見第四章。
+評估案例共 30 案，分為 10 個開發案與 20 個保留案；5 類（完整證據、矛盾來源、缺少資料、數字口徑、工具與安全）各有 2 個開發案與 4 個保留案，每檔股票 10 案。保留案例封存，與開發集不重疊，只供正式評分（B 技術事實第三節）。正式測試為 20 保留案 × 3 模式 = 60 次執行（`docs/CR-W05-holdout.md`）。開發集另進行 10 案 × 3 模式的校準（組長 `handoff/calibration-plan-v1.md`）。9 份前瞻研究是以未來真實行情觀察的小樣本，不屬於 30 案評估（B 技術事實第七節）；前瞻報告跨兩個 Agent 版本，第 1、2 批為 v1、第 3 批為 v2，逐份標示版本（組長 `handoff/agent-version-changes.md`）。實驗設計與評估指標見第四章。
 
 ## 3.8　F06 的處理
 
@@ -79,12 +81,12 @@ F06 小型 2D 關係圖為條件式項目（最多 20 點、30 線，須有核�
 | 財務快照與 MOPS 對帳 | 有紀錄：250／250 值、25／25 公告時間一致 | B fact sheet 第九節 |
 | 六工具與計算模組 | 有紀錄：B 回報 277 項測試通過（2026-10-28） | B 技術事實第五節 |
 | 預算硬限制、checkpoint 續跑 | 有紀錄：mock 測試通過 | 組長 `handoff/W06-gate-v12.md` 第 1 節 |
-| dual 模式 live 執行 | 有紀錄：10/31 修正誤擋規則；新規則下開發集 10 案有 4 案通過覆核（CASE-01、11、22、26；CASE-26 此案未觸發逾時，逾時處理以離線測試為證），6 案停在證據不足。通過覆核不等於正確，正確性待 D 評分 | 組長 `agent/calib-v1-day5.json`、`calib-v1-dual-rerun-1.json`、`-2.json`；decisions 第 9、10 節 |
+| dual 模式 live 執行 | 有紀錄（校準 v1，Agent v1）：10/31 修正誤擋規則；新規則下開發集 10 案有 4 案通過覆核（CASE-01、11、22、26；CASE-26 此案未觸發逾時，逾時處理以離線測試為證），6 案停在證據不足。通過覆核不等於正確，正確性待 D 評分 | 組長 `agent/calib-v1-day5.json`、`calib-v1-dual-rerun-1.json`、`-2.json`；decisions 第 9、10 節 |
 | 案例與資料凍結 cases-v1 | 有紀錄：三方簽核 | B `data-freeze.md` 第七節 |
 | 收藏儀表板 | 有紀錄：A 的驗收自查與截圖，待組長驗收 | A `ui/v12-dashboard-acceptance.md` |
-| 線上 PDF | 有紀錄：3 份 **MOCK** 報告完成核准、Storage 寫入與讀回比對；2026-11-02 第一份 LIVE 報告（2317，前瞻第 1 批）在 Render 發布成功 | A `reports/v12-online-pdf-check.md`；組長 `handoff/deployment-v1.md` 第六節 |
+| 線上 PDF | 有紀錄：3 份 **MOCK** 報告完成核准、Storage 寫入與讀回比對；2026-11-02 第一份 LIVE 報告（2317，前瞻第 1 批，Agent v1）在 Render 發布成功 | A `reports/v12-online-pdf-check.md`；組長 `handoff/deployment-v1.md` 第六節 |
 | 30 案正式實驗（60 次） | 規劃中，待 D 結果 | `docs/CR-W05-holdout.md` |
-| 9 份前瞻 | 第 1 批已建立，結果待 D | B 技術事實第七節 |
+| 9 份前瞻 | 有紀錄：第 1 批（cutoff 10/30，Agent v1）2317 通過覆核，2330、2454 停在證據不足；第 2 批（cutoff 11/06，Agent v1）2330 通過覆核，2317、2454 停在證據不足；第 3 批（11/13，Agent v2）未執行。通過覆核不等於正確，前瞻不計方向命中 | `research/forward-batch-1-reports.json`、`forward-batch-2-reports.json`；B `research/forward-batch-2-audit.md` 第三節；組長 `handoff/agent-version-changes.md` |
 | Render 方案 | 維持 Free（512 MB）；若發布時記憶體不足再升級 2GB，費用另行核准 | 組長 `handoff/decisions-2026-10.md` 第 12 節 |
 | F06 | 已延後 | 組長 2026-10-22 |
 
