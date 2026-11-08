@@ -31,6 +31,8 @@ Reviewer 的決定只有三種，名稱與程式一致（組長 `agents/research
 
 自 2026-10-31 起，可得時間與 cutoff 的先後改由程式比對，模型不再自行比較。模型若列出時間問題，而程式確認該主張引用的來源都在 cutoff 前可得，該問題會被移除，並記 `timing_issue_refuted` 事件（含模型原判與原文）供評分查核；移除後若沒有其他 critical 問題，模型的結論會改為 pass，之後仍與規則的判斷合併、取較嚴格者（組長 `handoff/decisions-2026-10.md` 第 9 節；`agents/review_checks.py` 的 `drop_refuted_timing_issues`）。也就是說，只有在這種「時間問題被程式否定」的情況下，模型原本的 revise 或 insufficient 才會改為 pass。
 
+**Agent v2 的規則變更**（2026-11-06 起，組長 `handoff/decisions-2026-10.md` 第 14 節、`handoff/agent-version-changes.md`）：覆核新增 `unsupported_system_claims`，草稿提到「無資料、逾時、截斷、無法呼叫工具」而執行紀錄中沒有時列 critical；停止原因改由程式依執行紀錄產生。11/07 補修：unknown 主張引用 no_data 的工具結果不再列 critical（fact、inference 引用 no_data 仍列 critical）；數字比對接受「40.0」「40.00」這類寫法；Reviewer prompt 升為 reviewer-v1.2.2。本稿三個例子與下方 4／10 的結果都屬 Agent v1，與 v2 的結果不放在同一張表比較。
+
 ## 四、Reviewer 不是全能的
 
 以下是 repo 中已記錄的實例，說明 Reviewer 會漏抓，也會誤擋：
@@ -42,7 +44,7 @@ Reviewer 的決定只有三種，名稱與程式一致（組長 `agents/research
 | 誤擋 | CASE-22 dual（job e9045bbd，10/31 第 4 天）的 TTM 期間寫在 period 欄，規則只讀 quarters 欄，誤判為不連續 | 組長 10/31 修正；新規則重跑（job 0dd723ce）模型與規則都判 pass，通過覆核。第 1–4 天 dual 結果與第 5 天後不可直接比較 | 組長 decisions 第 9 節；`agent/calib-v1-dual-rerun-2.json`；W04 case-walkthrough-v1.md |
 | 誤擋 | CASE-11 dual（job da86df90，10/29 第 2 天）：證據可得時間 14:15 早於 cutoff 17:00（台北），Reviewer 模型自行比較時區出錯，判 insufficient；規則判 pass，最終取較嚴格的 insufficient | 組長 10/31 改由程式比對可得時間；新規則重跑（job 9fc9e029）模型與規則都判 pass，通過覆核 | 組長 `agent/calib-v1-day2.json`、`agent/calib-v1-dual-rerun-1.json`、decisions 第 9 節 |
 
-新規則下（10/31 第 5 天與 dual 重跑），開發集 10 案的 dual 執行有 4 案通過覆核（CASE-01、11、22、26）（CASE-26 依組長 10/24 決定註明：此案未觸發逾時，逾時處理以離線測試為證），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分。
+新規則下（10/31 第 5 天與 dual 重跑，校準 v1、Agent v1），開發集 10 案的 dual 執行有 4 案通過覆核（CASE-01、11、22、26）（CASE-26 依組長 10/24 決定註明：此案未觸發逾時，逾時處理以離線測試為證），其餘 6 案停在證據不足（組長 `agent/calib-v1-day5.json`、`agent/calib-v1-dual-rerun-1.json`、`-2.json`）。「通過覆核」只表示模型與確定性規則都沒有找到 critical 問題，**不代表內容正確**；正確性要等 D 評分。
 
 D 也在自己的草稿中說明：預期決定是 D 先寫的，修補規則也是看過案例後才補，所以「10 份草稿全部符合預期」只代表與 D 的預期一致，**不能說明 Reviewer 的真實檢出能力**（D `W06-D-redo/redo/README-redo.md` 第五節）。本稿不引用任何檢出率或成功率。
 
