@@ -131,3 +131,9 @@
 
 - 依 v2 重跑第 2 天：unknown 引用 no_data 不列 critical；數字比對接受「40.0」寫法；Reviewer prompt 升 reviewer-v1.2.2（不用 read_evidence 讀 obs）。詳見 `handoff/agent-version-changes.md`「v2 的 11/07 補修」。
 - 11/08 重跑受影響的 CASE-15、19、26，並跑 CASE-29（共 4 個 job，J=6 內）；11/13 鎖定時程不變。CASE-19 的放棄行為不再修，寫進限制。
+
+## 17. 2026-11-08 組長決定：fact sheet 保留集描述照原樣保留（選項 a）
+
+- `data/v12-finance-fact-sheet.md` 第七節第 128、132 行寫了兩個保留案例各自測試的目的（題型層級，無答案、數字或來源內容）。此檔屬第一段凍結，**不修改、不重新凍結**，以本節揭露。
+- 理由：題型分類本已公開（30 案總表）；保留集的有效性取決於未用於調整系統，Agent v2 只以開發集修正與驗證（第 14、16 節、`handoff/agent-version-changes.md`）。
+- B 已於 11/08 從其餘共用文件移除保留集案例內容（`evaluation/source-audit-final.md`、`docs/CR-W05-holdout.md`、`docs/B-W01-W06-檔案說明.md`）。之後共用文件不得寫入保留集案例內容。
