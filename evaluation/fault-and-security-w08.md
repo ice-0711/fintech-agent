@@ -10,7 +10,7 @@
 
 1. 抓 origin/main 最新版,照 handoff/agent-test-commands.md 跑全部離線測試。
 2. 依任務要求(429、timeout、DB 暫失、worker 中斷、未授權端點、假引用、重複 20 請求),找出現有測試對應哪一項。
-3. 現有測試只重複 2 次的項目,新增 evaluation/d-drafts/W08-D/test_w08d_repeat20.py(複製到 tests/ 資料夾後才能執行,因為要用 tests/conftest.py) 實測 20 次。
+3. 現有測試只重複 2 次的項目,新增 tests/test_w08d_repeat20.py(組長 11/08 合併時移入 tests/，全套測試會一起跑) 實測 20 次。
 
 ## 二、實際命令與結果
 
@@ -62,3 +62,13 @@
 |---|---|---|
 | 真實 DB 暫失注入 | 無授權測試資料庫 | 組長 |
 | 並行 20 請求 | 本次只做循序 | D 可在後續補 |
+
+## 七、組長補註（2026-11-08，合併時）
+
+- 新測試已移到 `tests/test_w08d_repeat20.py`，全套 417 項通過（含這 2 項）。
+- 第四節列為缺口、但其實已有測試的：
+  - E03「不重複發布」：`tests/test_publication.py::test_publish_renders_real_pdf_and_never_overwrites`（已發布不可再發布、Storage 不可覆寫）。
+  - E04「未授權發布」：`tests/test_publication.py::test_api_approval_needs_the_logged_in_lead_not_a_token`（核准需組長登入，token 不行）；`tests/test_jobs_queue.py::test_admin_login_closed_without_password`。
+  - E08「沒有 Gemini 也能讀」：Render 上本來就沒有 Gemini 金鑰，11/02、11/06 兩份 LIVE 報告都在此條件下公開閱讀與下載（`handoff/deployment-v1.md` 第四節）。
+  - E09「還原」：`handoff/backup-restore-log.md`（11/02、11/06 兩次匯出還原核對通過）；rollback 程序見 `handoff/deployment-v1.md` 第五節。
+- 真實資料庫暫失：Supabase 測試專案的金鑰只在組長端，不外發；此項列為未執行，寫進限制。
