@@ -81,12 +81,12 @@ F06 小型 2D 關係圖為條件式項目（最多 20 點、30 線，須有核�
 | 財務快照與 MOPS 對帳 | 有紀錄：250／250 值、25／25 公告時間一致 | B fact sheet 第九節 |
 | 六工具與計算模組 | 有紀錄：B 回報 277 項測試通過（2026-10-28） | B 技術事實第五節 |
 | 預算硬限制、checkpoint 續跑 | 有紀錄：mock 測試通過 | 組長 `handoff/W06-gate-v12.md` 第 1 節 |
-| dual 模式 live 執行 | 有紀錄（校準 v1，Agent v1）：10/31 修正誤擋規則；新規則下開發集 10 案有 4 案通過覆核（CASE-01、11、22、26；CASE-26 此案未觸發逾時，逾時處理以離線測試為證），6 案停在證據不足。通過覆核不等於正確，正確性待 D 評分 | 組長 `agent/calib-v1-day5.json`、`calib-v1-dual-rerun-1.json`、`-2.json`；decisions 第 9、10 節 |
+| dual 模式 live 執行 | 有紀錄（校準 v1，Agent v1）：10/31 修正誤擋規則；新規則下開發集 10 案有 4 案通過覆核（CASE-01、11、22、26；CASE-26 此案未觸發逾時，逾時處理以離線測試為證），6 案停在證據不足。通過覆核不等於正確，正確性待 D 評分 | D 評分的校準 v1 資料 `evaluation/d-drafts/dev-runs-calib-v1.jsonl`（dual 取 10/31 新規則的 10 列）、D `calib-v1-scores-D.txt`；組長 `handoff/W06-gate-v12.md` 第 9 節簽核；decisions 第 9、10 節 |
 | 案例與資料凍結 cases-v1 | 有紀錄：三方簽核 | B `data-freeze.md` 第七節 |
 | 收藏儀表板 | 有紀錄：A 的驗收自查與截圖，待組長驗收 | A `ui/v12-dashboard-acceptance.md` |
 | 線上 PDF | 有紀錄：3 份 **MOCK** 報告完成核准、Storage 寫入與讀回比對；2026-11-02 第一份 LIVE 報告（2317，前瞻第 1 批，Agent v1）在 Render 發布成功 | A `reports/v12-online-pdf-check.md`；組長 `handoff/deployment-v1.md` 第六節 |
 | 30 案正式實驗（60 次） | 規劃中，待 D 結果 | `docs/CR-W05-holdout.md` |
-| 9 份前瞻 | 有紀錄：第 1 批（cutoff 10/30，Agent v1）2317 通過覆核，2330、2454 停在證據不足；第 2 批（cutoff 11/06，Agent v1）2330 通過覆核，2317、2454 停在證據不足；第 3 批（11/13，Agent v2）未執行。通過覆核不等於正確，前瞻不計方向命中 | `research/forward-batch-1-reports.json`、`forward-batch-2-reports.json`；B `research/forward-batch-2-audit.md` 第三節；組長 `handoff/agent-version-changes.md` |
+| 9 份前瞻 | 有紀錄：第 1 批（cutoff 10/30，Agent v1）2317 通過覆核，2330、2454 停在證據不足；第 2 批（cutoff 11/06，Agent v1）2330 通過覆核，2317、2454 停在證據不足；第 3 批（11/13，Agent v2）未執行。以上是各份報告的執行狀態，不是評分結果；前瞻的評分由 D 提供。通過覆核不等於正確，前瞻不計方向命中 | `research/forward-batch-1-reports.json`、`forward-batch-2-reports.json`；B `research/forward-batch-2-audit.md` 第三節；組長 `handoff/agent-version-changes.md` |
 | Render 方案 | 維持 Free（512 MB）；若發布時記憶體不足再升級 2GB，費用另行核准 | 組長 `handoff/decisions-2026-10.md` 第 12 節 |
 | F06 | 已延後 | 組長 2026-10-22 |
 
