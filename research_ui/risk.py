@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable
 
 GAP_THRESHOLD = 0.15
-METHOD_VERSION = "valuation-gap-v1.1 (±15%) / data-quality-v1.1"
+METHOD_VERSION = "valuation-gap-v1.1 (±15%) / data-quality-v1.2"  # v1.2: source_traceable per B 11/09
 
 VALUATION_LABELS = {
     "below_model": "市價低於模型估值",

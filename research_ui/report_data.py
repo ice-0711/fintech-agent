@@ -26,7 +26,8 @@ from .comparison import DCF_ASSUMPTIONS, build_comparison, company_row_at, quart
 from .risk import METHOD_VERSION as RISK_METHOD
 from .risk import RISK_FOOTNOTE, VALUATION_FOOTNOTE
 
-DATA_VERSION = "report-data-v1.3"  # v1.3: forward snapshots (snap-fwd*) read from their own file
+DATA_VERSION = "report-data-v1.4"  # v1.4: source_traceable = statement hashes + cited ev- fragments (B 11/09)
+# v1.3: forward snapshots (snap-fwd*) read from their own file
 # v1.2: peer_snapshot_version / peer_snapshot_file (was snapshot_version)
 # v1.1: snapshot_id citations resolve to the financial-snapshot tool result
 EXCERPT_CHARS = 200
@@ -158,7 +159,7 @@ def _build_report_data(job: dict[str, Any]) -> dict[str, Any]:
             "method": method,
         }
 
-    row = company_row_at(ticker, cutoff)
+    row = company_row_at(ticker, cutoff, cited_refs=refs)
     window = tools_impl.get_price_window(ticker, cutoff, 5)
     peer, peer_reason = None, "同業比較只適用 2454"
     if ticker == "2454":
