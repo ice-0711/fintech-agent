@@ -188,7 +188,7 @@
           <span class="tags">${labelBadge(r)}${badge("已發布", "b-ok")}${favs.includes(r.ticker) ? badge("★ 收藏", "b-run") : ""}</span>
         </header>
         <div class="meta">
-          <span>版本 <b class="mono">${esc(r.report_version_id)}</b>${r.version_no ? `（第 ${esc(r.version_no)} 版）` : ""}</span>
+          <span>版本 <b class="mono">${esc(r.report_version_id)}</b>${r.version_no ? `（第 ${esc(r.version_no)} 版${r.versions_published > 1 ? `，最新；另有 ${r.versions_published - 1} 個舊版在報告詳情` : ""}）` : ""}</span>
           <span>發布 <b>${fmtTime(r.published_at)}</b></span>
           <span>資料截止 <b>${fmtTime(r.cutoff_at)}</b></span>
           <span>財報期 <b>${esc(r.financial_period || "NA（無可用財報）")}</b></span>
@@ -579,12 +579,14 @@
     $("#reportPanel").innerHTML = `
       <div class="actions">
         <b style="font-size:16px">${esc(r.ticker)} ${esc(r.company)}</b>
-        ${labelBadge(r)}${badge("已發布", "b-ok")}${riskBadge(dq)}
+        ${labelBadge(r)}${badge("已發布", "b-ok")}${r.is_latest === false ? badge(`舊版・第 ${r.version_no} 版`, "b-bad") : ""}${riskBadge(dq)}
         ${outcome ? badge(outcome[0], outcome[1]) : ""}${r.snapshot_stale ? badge("快照過期", "b-warn") : ""}
       </div>
+      ${r.is_latest === false ? `<div class="hint warn-line">這是舊版（第 ${esc(r.version_no)} 版），已有第 ${esc(r.latest_version_no)} 版。舊版照規則保留供追溯，閱讀請以新版為準。
+        <button type="button" class="ghost" data-open-report="${esc(r.latest_version_id)}">開啟第 ${esc(r.latest_version_no)} 版</button></div>` : ""}
       <p class="hint">${esc(r.question)}</p>
       <dl class="kv">
-        <dt>版本</dt><dd class="mono">${esc(r.report_version_id)}</dd>
+        <dt>版本</dt><dd class="mono">${esc(r.report_version_id)}${r.version_no ? `（第 ${esc(r.version_no)} 版${r.is_latest ? "，最新" : ""}）` : ""}</dd>
         <dt>資料截止</dt><dd>${fmtTime(r.cutoff_at)}</dd>
         <dt>財報期</dt><dd>${esc(r.financial_period || "NA（無可用財報）")}</dd>
         <dt>來源更新</dt><dd>${fmtTime(r.data_updated_at)}${r.snapshot_stale ? "（快照過期，可能非最新）" : ""}</dd>
@@ -598,7 +600,7 @@
         <iframe title="PDF 預覽" data-src="${esc(r.pdf_url)}" loading="lazy"></iframe></details>` : ""}
       <div class="status-pair">
         <div><div class="sub" style="margin-top:0">估值狀態</div>${badge(v.label || "無法判定", VAL_CLS[v.status] || "b-neutral")}
-          <p class="hint">${v.gap !== null && v.gap !== undefined ? `DCF 每股 ${esc(v.dcf_per_share)} 元，與同日收盤價差距 ${pct(v.gap)}。` : esc(v.reason || "")}${r.tables && r.tables.price && r.tables.price.value != null ? `基準收盤價：${esc(r.tables.price.trade_date)} 收盤 ${num(r.tables.price.value)} 元（未還原）。` : ""}</p>
+          <p class="hint">${v.gap !== null && v.gap !== undefined ? `DCF 每股 ${esc(v.dcf_per_share)} 元，與同日收盤價差距 ${pct(v.gap)}。` : (v.reason ? `${esc(v.reason)}。` : "")}${r.tables && r.tables.price && r.tables.price.value != null ? `基準收盤價：${esc(r.tables.price.trade_date)} 收盤 ${num(r.tables.price.value)} 元（未還原）。` : ""}</p>
           <p class="footnote">±15% 是本專題的顯示門檻，不是經驗證的投資規則；DCF 取決於 WACC、g 與 FCF 假設。</p></div>
         <div><div class="sub" style="margin-top:0">資料品質</div>${riskBadge(dq)}
           <p class="hint">${esc((dq.reasons || []).join("；"))}</p>
@@ -620,7 +622,7 @@
       <div class="sub">方法與資料限制</div>${list(r.limitations)}
       ${r.history && r.history.length ? `<div class="sub">歷史版本（只列已發布）</div><ul class="plain">${r.history.map(h =>
         `<li><b>第 ${esc(h.version_no)} 版</b>・${fmtTime(h.published_at)}・<span class="mono">${esc(h.report_hash.slice(0, 12))}…</span>
-          ${h.report_version_id === r.report_version_id ? badge("目前", "b-ok") : `<button type="button" class="ghost" data-open-report="${esc(h.report_version_id)}">開啟</button>`}
+          ${h.report_version_id === r.latest_version_id ? badge("最新", "b-ok") : badge("舊版", "b-neutral")}${h.report_version_id === r.report_version_id ? badge("正在看", "b-run") : `<button type="button" class="ghost" data-open-report="${esc(h.report_version_id)}">開啟</button>`}
           <a class="btn-link" href="${esc(h.download_url)}" download>下載</a></li>`).join("")}</ul>` : ""}
       ${r.disclaimer ? `<p class="footnote"><b>${esc(r.disclaimer)}</b></p>` : ""}
       <p class="footnote">「無來源」的主張不能當作事實；刪除線的來源 ID 表示快照中找不到該片段。${r.tables ? "網頁與 PDF 由同一份核准 JSON 產生。" : ""}</p>`;

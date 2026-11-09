@@ -318,3 +318,23 @@ def test_pdf_render_releases_memory_even_when_refused(monkeypatch):
     report["claims"] = report["claims"][:2]
     assert report_pdf.render_report_pdf(report, {"report_version_id": "rv-x", "version_no": 1, "report_hash": "h"})
     assert calls == [1, 1]
+
+
+def test_list_shows_only_the_newest_version_and_old_version_points_to_it(lead, clock):
+    """A, 11/09: v1 and v2 of the same job both showed as LIVE/published; visitors could not tell which to read."""
+    app, client = lead
+    job_id, v1 = publish(client, clock, "2330", key="latest")
+    store = app.extensions["report_store"]
+    job = app.extensions["research_ui_mock"].store.get_job(job_id)
+    job["draft"] = dict(job["draft"], limitations=["第二版"])
+    v2 = store.create_version(job, [])
+    store.approve(v2["report_version_id"], v2["report_hash"], approver="lead")
+    store.publish(v2["report_version_id"])
+    visitor = app.test_client()
+    real = [r for r in visitor.get("/api/ui/published").get_json()["reports"] if not r["synthetic_fixture"]]
+    assert [r["report_version_id"] for r in real] == [v2["report_version_id"]]
+    assert real[0]["version_no"] == 2 and real[0]["versions_published"] == 2 and real[0]["is_latest"] is True
+    old = visitor.get(f"/api/ui/reports/{v1['report_version_id']}").get_json()["report"]
+    assert old["is_latest"] is False and old["latest_version_id"] == v2["report_version_id"]
+    assert old["latest_version_no"] == 2 and [h["version_no"] for h in old["history"]] == [2, 1]
+    assert visitor.get(f"/api/ui/reports/{v1['report_version_id']}/download").status_code == 200  # still published
