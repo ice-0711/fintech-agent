@@ -12,7 +12,11 @@ from the job's own snapshot with B's tools. No LLM, no network, no new formula.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import json
+import re
+from pathlib import Path
 from typing import Any
 
 from agents import tools_impl
@@ -22,7 +26,8 @@ from .comparison import DCF_ASSUMPTIONS, build_comparison, company_row_at, quart
 from .risk import METHOD_VERSION as RISK_METHOD
 from .risk import RISK_FOOTNOTE, VALUATION_FOOTNOTE
 
-DATA_VERSION = "report-data-v1.2"  # v1.2: peer_snapshot_version / peer_snapshot_file (was snapshot_version)
+DATA_VERSION = "report-data-v1.3"  # v1.3: forward snapshots (snap-fwd*) read from their own file
+# v1.2: peer_snapshot_version / peer_snapshot_file (was snapshot_version)
 # v1.1: snapshot_id citations resolve to the financial-snapshot tool result
 EXCERPT_CHARS = 200
 METHOD_LIMITATIONS = [
@@ -84,7 +89,48 @@ def _claim_refs(job: dict[str, Any]) -> list[str]:
     return [ref for c in ((job.get("draft") or {}).get("claims") or []) for ref in (c.get("evidence_refs") or [])]
 
 
+ROOT = Path(__file__).resolve().parents[1]
+FORWARD_ID = re.compile(r"^snap-fwd(\d+)-([0-9a-f]{12})$")
+
+
+def forward_snapshot_file(snapshot_id: str) -> Path | None:
+    """Forward research jobs (scripts/forward_research.py) carry source_snapshot_id snap-fwd{n}-{sha256[:12]} and
+    ran on research/forward-batch-{n}.json's snapshot_file. Returns that file when its sha256 matches."""
+    m = FORWARD_ID.match(snapshot_id or "")
+    if not m:
+        return None
+    rec_path = ROOT / "research" / f"forward-batch-{m.group(1)}.json"
+    if not rec_path.exists():
+        return None
+    rec = json.loads(rec_path.read_text(encoding="utf-8"))
+    path = ROOT / rec["snapshot_file"]
+    if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest()[:12] != m.group(2):
+        return None
+    return path
+
+
+def snapshot_context(snapshot_id: str):
+    """Make B's tools read the snapshot the job actually ran on (W08 fix: forward jobs used to be read against the
+    frozen 30-case snapshot, so sources showed as unresolved and the close was 2026-09-30's)."""
+    path = forward_snapshot_file(snapshot_id)
+    return tools_impl.use_snapshot(path) if path else contextlib.nullcontext()
+
+
 def build_report_data(job: dict[str, Any]) -> dict[str, Any]:
+    snap_id = job["source_snapshot_id"]
+    if FORWARD_ID.match(snap_id or "") and forward_snapshot_file(snap_id) is None:
+        return {"scope": "unavailable", "scope_note": f"找不到 {snap_id} 對應的前瞻快照檔（或 sha256 不符），本版不呈現資料表",
+                "quarters": None, "quarters_na_reason": "找不到快照檔", "peer_comparison": None,
+                "peer_na_reason": "找不到快照檔", "sources": [], "method": {}}
+    with snapshot_context(snap_id):
+        data = _build_report_data(job)
+    path = forward_snapshot_file(snap_id)
+    if path is not None:
+        data["snapshot_file"] = str(path.relative_to(ROOT))
+    return data
+
+
+def _build_report_data(job: dict[str, Any]) -> dict[str, Any]:
     ticker, cutoff, snap_id = job["ticker"], job["cutoff_at"], job["source_snapshot_id"]
     toolbox = SnapshotToolbox(ticker, snap_id, cutoff)
     refs = _claim_refs(job)
