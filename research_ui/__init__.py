@@ -144,8 +144,29 @@ def published_reports():
         "synthetic_fixture": bool(fixture.get("synthetic_fixture")),
         "fixture_note": fixture.get("fixture_note"),
         "timezone": "Asia/Taipei",
-        "reports": [_real_row(v) for v in real] + rows,
+        "reports": [_real_row(v) for v in _latest_per_job(real)] + rows,
     })
+
+
+def _latest_per_job(real: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The public list shows one card per research job: its newest published version (A, 11/09). Older versions
+    stay published and reachable from the report's version history, marked as superseded there."""
+    latest: dict[str, dict[str, Any]] = {}
+    for v in real:
+        cur = latest.get(v["job_id"])
+        if cur is None or v["version_no"] > cur["version_no"]:
+            latest[v["job_id"]] = v
+    keep = {v["report_version_id"] for v in latest.values()}
+    return [v for v in real if v["report_version_id"] in keep]  # keep the store's order (newest published first)
+
+
+def _version_status(v: dict[str, Any]) -> dict[str, Any]:
+    real, _ = _real_published()
+    same = [x for x in real if x["job_id"] == v["job_id"]]
+    newest = max(same, key=lambda x: x["version_no"]) if same else v
+    return {"is_latest": newest["report_version_id"] == v["report_version_id"],
+            "latest_version_id": newest["report_version_id"], "latest_version_no": newest["version_no"],
+            "versions_published": max(len(same), 1)}
 
 
 # ----- W07-A: real published versions (ReportStore + Storage) -------------------------------
@@ -228,6 +249,7 @@ def _real_row(v: dict[str, Any]) -> dict[str, Any]:
         "data_quality": {"level": dq.get("level"), "label": dq.get("label"), "reasons": dq.get("reasons") or [],
                          "footnote": (data.get("method") or {}).get("risk_footnote")},
         **{k: x for k, x in _version_links(v).items() if k != "report_version_id"},
+        **_version_status(v),
     }
 
 
