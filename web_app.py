@@ -12,7 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from flask import Flask, jsonify, render_template, request, send_from_directory, url_for
+from flask import Flask, jsonify, redirect, render_template, request, send_from_directory, url_for
 
 from agents.admin import bp as admin_bp, configure as admin_configure
 from agents.api import bp as research_jobs_bp, public_bp as public_reports_bp
@@ -93,7 +93,9 @@ def stock_payload(stock_code: str) -> dict[str, Any]:
 
 @app.get("/")
 def index():
-    return render_template("dashboard.html")
+    """Lead 11/09: the home page goes to the research workbench. The old query page reads Supabase project
+    watooxoseljrnlsoequc, which has been unhealthy (503) since ~11/06; 302 so it can be switched back."""
+    return redirect(url_for("research_ui.research_page"), code=302)
 
 
 @app.get("/api/stocks")
