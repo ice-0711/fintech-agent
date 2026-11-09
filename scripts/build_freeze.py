@@ -73,6 +73,8 @@ RUBRIC_FILES = ["evaluation/d-drafts/rubric-v1-final.md", "evaluation/d-drafts/p
 AGENT_FILES = [
     "agents/tools.py", "agents/snapshot.py", "agents/contract.py", "agents/review_checks.py",
     "agents/review_contract.py", "agents/research_graph.py", "agents/provider.py",
+    # 11/09 補列：v2 的輸入／token 上限在 budget.py；store、worker 決定 job 狀態與逾時（組長 11/09）
+    "agents/budget.py", "agents/store.py", "agents/worker.py",
 ]
 PROMPT_FILES = ["agents/prompts/researcher-v1.2.txt", "agents/prompts/reviewer-v1.2.txt"]
 STAGE1_GROUPS = ("data_files", "tool_files", "rubric_files", "manual_files")
@@ -436,6 +438,13 @@ def lock_agent() -> int:
     fm["agent_files"] = [file_entry(r) for r in AGENT_FILES]
     fm["prompt_files"] = [file_entry(r) for r in PROMPT_FILES]
     fm["versions"]["prompt_version"] = contract.PROMPT_VERSION
+    from agents.research_graph import RESEARCHER_PROMPT_VERSION  # noqa: E402
+    from agents.review_contract import REVIEWER_PROMPT_VERSION  # noqa: E402
+    from agents.budget import BudgetLimits  # noqa: E402
+    lim = BudgetLimits()
+    fm["versions"].update({"researcher_prompt_version": RESEARCHER_PROMPT_VERSION,
+                           "reviewer_prompt_version": REVIEWER_PROMPT_VERSION,
+                           "budget_limits": {k: getattr(lim, k) for k in vars(lim)}})
     fm["freeze_stages"]["stage2"].update({"locked": True, "locked_at": now})
     OUT_FROZEN.write_text(json.dumps(fm, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     md = OUT_MD.read_text(encoding="utf-8")
