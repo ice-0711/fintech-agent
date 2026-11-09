@@ -159,3 +159,10 @@
 - 組長端 11/09 在 Mac 建立第 2 版草稿（Supabase）：2330 `rv-db6b0e1b…`（快照 11/06，收盤 2,135，來源 2/2 可解析，資料品質低）、2317 `rv-2ed6652e…`（快照 10/30，收盤 245.5，來源 1/1，資料品質低）。資料版本 report-data-v1.4。
 - 第 1 版維持已發布、留在歷史版本，不改寫；第 2 版待組長在 Render 登入核准後發布。發布後重跑 `backup_reports.py export` 並存 iCloud。
 - 11/09 14:53–14:54 組長在 Render 登入後核准發布：2330 第 2 版 14:54:16、2317 第 2 版 14:54:44（台北）。線上確認：主張來源全部可解析、PDF 可下載。備份 `tmp/backups/20261109-145511`（4 份報告、4 份 PDF、11 個 job 資料庫，還原核對全部 PASS），已另存 iCloud `fintech-agent-backups/`，掃描無金鑰字串。
+
+## 21. 2026-11-09 舊網站首頁改導向研究工作台
+
+- 問題：舊網站「查詢分析」（`main.py`）讀的 Supabase 正式專案 `watooxoseljrnlsoequc`（東京，Free／Nano）約 11/06 起 Unhealthy，所有 REST 與內部健康檢查回 503；資源用量正常（CPU 3%、記憶體 51%、磁碟 13%），Supabase 全站狀態正常。11/09 15:03 組長同意後執行 Restart project，15:16 仍 503。待組長向 Supabase Support 開單。
+- 影響：只有舊查詢頁。研究工作台、LIVE 報告與 PDF 用報告測試專案，不受影響；實驗、鎖定、前瞻批次不需要舊網站。
+- 組長決定：首頁 `/` 改 302 導向 `/research`（`web_app.py`，`tests/test_home_redirect.py`，commit 044e8d5），15:23 Render 上線確認。Supabase 修好後可改回。
+- 風險：`fundamental_data` 只在該專案、Free 無備份；恢復後應另行匯出。
