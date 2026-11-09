@@ -66,15 +66,67 @@ def _evidence(ref: str) -> dict[str, Any]:
     return {"id": ref, "exists": True, "hash_match": match}
 
 
-def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+STATEMENT_DATASETS = ("TaiwanStockFinancialStatements", "TaiwanStockBalanceSheet", "TaiwanStockCashFlowsStatement")
+
+
+def _statement_hash(snapshot: dict[str, Any], code: str) -> str | None:
+    """B (11/09): a quarter's content_hash = sha256(income sha256 + balance-sheet sha256 + cash-flow sha256), the three
+    raw FinMind files listed in the same snapshot's source_manifest.raw_files. None when a file is missing or ambiguous."""
+    files = (snapshot.get("source_manifest") or {}).get("raw_files") or []
+    parts = []
+    for dataset in STATEMENT_DATASETS:
+        hits = [f for f in files if f.get("data_id") == code and f.get("dataset") == dataset and f.get("sha256")]
+        if len(hits) != 1:
+            return None
+        parts.append(hits[0]["sha256"])
+    return hashlib.sha256("".join(parts).encode("utf-8")).hexdigest()
+
+
+def _yoy_period(period: str | None) -> str | None:
+    if not period or len(period) != 6 or period[4] != "Q":
+        return None
+    return f"{int(period[:4]) - 1}{period[4:]}"
+
+
+def financial_traceability(code: str, cutoff: str, periods: list[str]) -> tuple[str, str]:
+    """Every quarter the metrics use must carry source_id, available_at ≤ cutoff and the combined statement hash.
+    pass when all do; conflict when a value disagrees; missing when a field (or the quarter) is absent."""
+    snapshot = tools_impl._load_snapshots()
+    quarters = {q["period"]: q for q in (snapshot.get("financials", {}).get(code) or {}).get("quarters", [])}
+    expected = _statement_hash(snapshot, code)
+    cutoff_dt = tools_impl._parse_iso(cutoff)
+    if not periods:
+        return "missing", "沒有用到任何財報季度"
+    missing, conflict = [], []
+    for period in periods:
+        q = quarters.get(period)
+        if q is None or not all(q.get(k) for k in ("source_id", "available_at", "content_hash")):
+            missing.append(period)
+        elif tools_impl._parse_iso(q["available_at"]) > cutoff_dt:
+            conflict.append(f"{period} 可得時間晚於資料截止")
+        elif expected is None:
+            missing.append(f"{period}（快照缺原始財報檔紀錄）")
+        elif q["content_hash"] != expected:
+            conflict.append(f"{period} hash 與原始財報檔不符")
+    if conflict:
+        return "conflict", "財報：" + "、".join(conflict)
+    if missing:
+        return "missing", "財報缺來源欄位：" + "、".join(missing)
+    return "pass", ""
+
+
+def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str,
+         cited_refs: list[str] | None = None) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """cited_refs: the ev- IDs a report's claims cite (report data). None = the comparison panel, which shows the
+    fragments B's peer snapshot lists for each company. No default ID is added (B, 11/09)."""
     issues: list[dict[str, Any]] = []
     snap = dict(snap)
-    snap.setdefault("evidence_refs", [f"ev-{code}-2026q2-01"])
     quarters = _quarters(code, cutoff)
     fin = tools_impl.get_financial_snapshot(code, cutoff)
     fin_data = fin.get("data") or {}
     m = fin_data.get("metrics") or {}
-    refs = list(snap.get("evidence_refs") or [])
+    refs = [r for r in (cited_refs if cited_refs is not None else snap.get("evidence_refs") or [])
+            if str(r).startswith("ev-")]
 
     price = None
     window = tools_impl.get_price_window(code, cutoff, 1)
@@ -156,6 +208,17 @@ def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str) -> tupl
     # data-quality checks (predefined list; see ui/v12-risk-state-cases.md)
     evidence = [_evidence(r) for r in refs]
     ttm_periods = fin_data.get("ttm_periods") or []
+    yoy = _yoy_period(fin_data.get("latest_period"))
+    used_periods = list(ttm_periods) + ([yoy] if yoy and any(q["period"] == yoy for q in quarters) else [])
+    fin_result, fin_detail = financial_traceability(code, cutoff, used_periods)
+    if any(e["exists"] and e["hash_match"] is False for e in evidence):
+        ev_result, ev_detail = "conflict", "引用的片段 hash 不符"
+    elif any(not e["exists"] for e in evidence):
+        ev_result, ev_detail = "missing", "引用的片段不在快照中：" + "、".join(e["id"] for e in evidence if not e["exists"])
+    else:
+        ev_result, ev_detail = "pass", ""  # also when nothing is cited: that half is not checked
+    trace_result = next(r for r in ("conflict", "missing", "pass") if r in (fin_result, ev_result))
+    trace_detail = "；".join(d for d in (fin_detail, ev_detail) if d)
     unverified = [q["period"] for q in quarters if q["period"] in ttm_periods and q.get("eps_source") == "unverified"]
     eps_ok = eps_ttm is not None and not unverified
     eps_detail = ("不足 4 季" if eps_ttm is None else f"EPS 來源未驗證：{'、'.join(unverified)}") if not eps_ok else ""
@@ -174,11 +237,7 @@ def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str) -> tupl
         Check("fin_available_at", "財報可得時間", True,
               "pass" if fin_data.get("available_at") else ("time_unknown" if fin_data else "missing"),
               "" if fin_data.get("available_at") else "沒有可得時間"),
-        Check("source_traceable", "來源片段可追溯", True,
-              "conflict" if any(e["exists"] and e["hash_match"] is False for e in evidence)
-              else ("pass" if evidence and all(e["exists"] for e in evidence) else "missing"),
-              "" if evidence and all(e["exists"] and e["hash_match"] for e in evidence) else
-              "片段 hash 不符" if any(e["hash_match"] is False for e in evidence) else "引用的片段不在快照中"),
+        Check("source_traceable", "來源可追溯（財報季度＋引用片段）", True, trace_result, trace_detail),
         Check("bvps", "每股淨值 BVPS", False, "pass" if isinstance(bvps, (int, float)) and bvps > 0 else "missing"),
         Check("yoy_base", "去年同季營收", False, "pass" if out["revenue_yoy_quarter"]["value"] is not None else "missing",
               out["revenue_yoy_quarter"]["na_reason"] or ""),
@@ -277,7 +336,7 @@ def company_row(code: str) -> dict[str, Any]:
     return row
 
 
-def company_row_at(code: str, cutoff: str) -> dict[str, Any]:
+def company_row_at(code: str, cutoff: str, cited_refs: list[str] | None = None) -> dict[str, Any]:
     """Tool-derived row at any cutoff (report data). B's peer snapshot values are used for the
     consistency check only when the snapshot has the same cutoff; otherwise there is nothing to compare."""
     peer = json.loads(PEER_SNAPSHOT.read_text(encoding="utf-8"))
@@ -288,7 +347,7 @@ def company_row_at(code: str, cutoff: str) -> dict[str, Any]:
     base = peer["companies"].get(code) or {}
     snap = dict(base) if same else {"name": base.get("name")}
     snap.setdefault("role", base.get("role") or "research")
-    row, _ = _row(code, snap, price_as_of, cutoff)
+    row, _ = _row(code, snap, price_as_of, cutoff, cited_refs=list(cited_refs or []))
     row["price_as_of"] = price_as_of
     row["compared_with_peer_snapshot"] = same
     return row

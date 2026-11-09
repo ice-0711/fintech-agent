@@ -64,3 +64,65 @@ def test_evidence_drawer_reads_the_forward_snapshot(tmp_path, clock):
     ref = report["claims"][0]["evidence"][0]["id"]
     ev = client.get(f"/api/ui/evidence/{ref}?report={v['report_version_id']}").get_json()["evidence"]
     assert ev["hash_match"] and ev["cutoff_check"] == "cutoff 前可得"
+
+
+# ----- source_traceable (B 11/09): statement hashes + cited ev- fragments, no default fragment ID ------------
+import copy  # noqa: E402
+import glob  # noqa: E402
+
+import pytest  # noqa: E402
+
+from research_ui import comparison  # noqa: E402
+
+
+@pytest.mark.parametrize("path", ["data/financial-snapshots.json", *sorted(glob.glob(str(ROOT / "data/forward/*.json")))])
+def test_every_quarter_hash_is_the_three_statement_files(path):
+    snap = json.loads((ROOT / path).read_text(encoding="utf-8"))
+    n = 0
+    for code, company in snap["financials"].items():
+        for q in company["quarters"]:
+            assert q["content_hash"] == comparison._statement_hash(snap, code), (code, q["period"])
+            n += 1
+    assert n == 25
+
+
+def test_forward_live_reports_are_low_risk_once_quarters_are_traced():
+    for batch, ticker in ((2, "2330"), (1, "2317")):
+        dq = build_report_data(forward_job(batch, ticker))["data_quality"]
+        trace = next(c for c in dq["checks"] if c["check_id"] == "source_traceable")
+        assert trace["result"] == "pass" and dq["level"] == "low", (ticker, dq)
+
+
+def _patched(monkeypatch, mutate):
+    snap = copy.deepcopy(tools_impl._load_snapshots())
+    mutate(snap)
+    monkeypatch.setattr(tools_impl, "_load_snapshots", lambda: snap)
+
+
+CUT = "2026-09-30T17:30:00+08:00"
+TTM = ["2025Q3", "2025Q4", "2026Q1", "2026Q2", "2025Q2"]
+
+
+def test_tampered_quarter_hash_is_a_conflict(monkeypatch):
+    _patched(monkeypatch, lambda s: s["financials"]["2330"]["quarters"][-1].update(content_hash="0" * 64))
+    assert comparison.financial_traceability("2330", CUT, TTM)[0] == "conflict"
+
+
+def test_quarter_without_source_id_is_missing(monkeypatch):
+    _patched(monkeypatch, lambda s: s["financials"]["2330"]["quarters"][0].pop("source_id"))
+    result, detail = comparison.financial_traceability("2330", CUT, TTM)
+    assert result == "missing" and "2025Q2" in detail
+
+
+def test_quarter_published_after_cutoff_is_a_conflict():
+    result, detail = comparison.financial_traceability("2330", "2026-08-01T00:00:00+08:00", TTM)
+    assert result == "conflict" and "2026Q2" in detail
+
+
+def test_only_cited_fragments_are_checked_and_no_default_id_is_added():
+    row = comparison.company_row_at("2317", CUT, cited_refs=[])
+    assert row["evidence"] == []
+    assert next(c for c in row["data_quality"]["checks"] if c["check_id"] == "source_traceable")["result"] == "pass"
+    bad = comparison.company_row_at("2317", CUT, cited_refs=["ev-does-not-exist"])
+    trace = next(c for c in bad["data_quality"]["checks"] if c["check_id"] == "source_traceable")
+    assert trace["result"] == "missing" and "ev-does-not-exist" in trace["detail"]
