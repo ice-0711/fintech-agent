@@ -166,3 +166,11 @@
 - 影響：只有舊查詢頁。研究工作台、LIVE 報告與 PDF 用報告測試專案，不受影響；實驗、鎖定、前瞻批次不需要舊網站。
 - 組長決定：首頁 `/` 改 302 導向 `/research`（`web_app.py`，`tests/test_home_redirect.py`，commit 044e8d5），15:23 Render 上線確認。Supabase 修好後可改回。
 - 風險：`fundamental_data` 只在該專案、Free 無備份；恢復後應另行匯出。
+
+## 22. 2026-11-09 W10 正式評估排程與鎖定清單補列
+
+- 第二段鎖定清單補列 `agents/budget.py`（v2 輸入上限 6,000、每 job 64,000 token）、`agents/store.py`、`agents/worker.py`；鎖定時另記 researcher／reviewer prompt 版本與全部預算上限。
+- 正式評估 runner `scripts/formal_runs.py`：保留 20 案 × 3 模式 = 60 run；第二段未鎖定或 `--verify --strict` 未過即拒絕 live；只讀封存案例的執行欄位，結果列只含狀態與預算（`evaluation/formal/runs-v2.jsonl`），草稿留在 `tmp/formal_v2.sqlite3`，組長與 Claude 不打開。
+- 執行計畫 `evaluation/run-plan.json`（固定種子 20261116；同案三模式連續、起始模式輪替；每配額日 2 案 × 3 模式），待 D 確認或替換。
+- 11/09 離線檢查：保留 20 份快照工具呼叫 130 次，無例外、無缺快照（只回報錯誤，不看各案結果）。
+- **組長決定：11/16–11/25 每天 19:30 跑 6 run，含週末，共 10 個配額日**（排程 fintech-formal-v2-daily）；B、D 評分與裁決排 W11 後半。
