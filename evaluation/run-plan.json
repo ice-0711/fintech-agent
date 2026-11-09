@@ -1,0 +1,437 @@
+{
+  "experiment": "formal-v2",
+  "seed": 20261116,
+  "n_cases": 20,
+  "modes": [
+    "single",
+    "dual",
+    "workflow"
+  ],
+  "n_runs": 60,
+  "j_per_quota_day": 6,
+  "quota_days": 10,
+  "design": "固定種子打亂案例順序；同一案例三模式連續執行、起始模式輪替；每配額日 6 run（2 案 × 3 模式）",
+  "status": "組長端草案（11/09），待 D 確認或替換（W09-D run-plan）",
+  "runs": [
+    {
+      "seq": 1,
+      "run_id": "formal-v2-CASE-24-single",
+      "case_id": "CASE-24",
+      "mode": "single",
+      "quota_day_index": 1
+    },
+    {
+      "seq": 2,
+      "run_id": "formal-v2-CASE-24-dual",
+      "case_id": "CASE-24",
+      "mode": "dual",
+      "quota_day_index": 1
+    },
+    {
+      "seq": 3,
+      "run_id": "formal-v2-CASE-24-workflow",
+      "case_id": "CASE-24",
+      "mode": "workflow",
+      "quota_day_index": 1
+    },
+    {
+      "seq": 4,
+      "run_id": "formal-v2-CASE-12-dual",
+      "case_id": "CASE-12",
+      "mode": "dual",
+      "quota_day_index": 1
+    },
+    {
+      "seq": 5,
+      "run_id": "formal-v2-CASE-12-workflow",
+      "case_id": "CASE-12",
+      "mode": "workflow",
+      "quota_day_index": 1
+    },
+    {
+      "seq": 6,
+      "run_id": "formal-v2-CASE-12-single",
+      "case_id": "CASE-12",
+      "mode": "single",
+      "quota_day_index": 1
+    },
+    {
+      "seq": 7,
+      "run_id": "formal-v2-CASE-05-workflow",
+      "case_id": "CASE-05",
+      "mode": "workflow",
+      "quota_day_index": 2
+    },
+    {
+      "seq": 8,
+      "run_id": "formal-v2-CASE-05-single",
+      "case_id": "CASE-05",
+      "mode": "single",
+      "quota_day_index": 2
+    },
+    {
+      "seq": 9,
+      "run_id": "formal-v2-CASE-05-dual",
+      "case_id": "CASE-05",
+      "mode": "dual",
+      "quota_day_index": 2
+    },
+    {
+      "seq": 10,
+      "run_id": "formal-v2-CASE-17-single",
+      "case_id": "CASE-17",
+      "mode": "single",
+      "quota_day_index": 2
+    },
+    {
+      "seq": 11,
+      "run_id": "formal-v2-CASE-17-dual",
+      "case_id": "CASE-17",
+      "mode": "dual",
+      "quota_day_index": 2
+    },
+    {
+      "seq": 12,
+      "run_id": "formal-v2-CASE-17-workflow",
+      "case_id": "CASE-17",
+      "mode": "workflow",
+      "quota_day_index": 2
+    },
+    {
+      "seq": 13,
+      "run_id": "formal-v2-CASE-28-dual",
+      "case_id": "CASE-28",
+      "mode": "dual",
+      "quota_day_index": 3
+    },
+    {
+      "seq": 14,
+      "run_id": "formal-v2-CASE-28-workflow",
+      "case_id": "CASE-28",
+      "mode": "workflow",
+      "quota_day_index": 3
+    },
+    {
+      "seq": 15,
+      "run_id": "formal-v2-CASE-28-single",
+      "case_id": "CASE-28",
+      "mode": "single",
+      "quota_day_index": 3
+    },
+    {
+      "seq": 16,
+      "run_id": "formal-v2-CASE-03-workflow",
+      "case_id": "CASE-03",
+      "mode": "workflow",
+      "quota_day_index": 3
+    },
+    {
+      "seq": 17,
+      "run_id": "formal-v2-CASE-03-single",
+      "case_id": "CASE-03",
+      "mode": "single",
+      "quota_day_index": 3
+    },
+    {
+      "seq": 18,
+      "run_id": "formal-v2-CASE-03-dual",
+      "case_id": "CASE-03",
+      "mode": "dual",
+      "quota_day_index": 3
+    },
+    {
+      "seq": 19,
+      "run_id": "formal-v2-CASE-07-single",
+      "case_id": "CASE-07",
+      "mode": "single",
+      "quota_day_index": 4
+    },
+    {
+      "seq": 20,
+      "run_id": "formal-v2-CASE-07-dual",
+      "case_id": "CASE-07",
+      "mode": "dual",
+      "quota_day_index": 4
+    },
+    {
+      "seq": 21,
+      "run_id": "formal-v2-CASE-07-workflow",
+      "case_id": "CASE-07",
+      "mode": "workflow",
+      "quota_day_index": 4
+    },
+    {
+      "seq": 22,
+      "run_id": "formal-v2-CASE-09-dual",
+      "case_id": "CASE-09",
+      "mode": "dual",
+      "quota_day_index": 4
+    },
+    {
+      "seq": 23,
+      "run_id": "formal-v2-CASE-09-workflow",
+      "case_id": "CASE-09",
+      "mode": "workflow",
+      "quota_day_index": 4
+    },
+    {
+      "seq": 24,
+      "run_id": "formal-v2-CASE-09-single",
+      "case_id": "CASE-09",
+      "mode": "single",
+      "quota_day_index": 4
+    },
+    {
+      "seq": 25,
+      "run_id": "formal-v2-CASE-23-workflow",
+      "case_id": "CASE-23",
+      "mode": "workflow",
+      "quota_day_index": 5
+    },
+    {
+      "seq": 26,
+      "run_id": "formal-v2-CASE-23-single",
+      "case_id": "CASE-23",
+      "mode": "single",
+      "quota_day_index": 5
+    },
+    {
+      "seq": 27,
+      "run_id": "formal-v2-CASE-23-dual",
+      "case_id": "CASE-23",
+      "mode": "dual",
+      "quota_day_index": 5
+    },
+    {
+      "seq": 28,
+      "run_id": "formal-v2-CASE-27-single",
+      "case_id": "CASE-27",
+      "mode": "single",
+      "quota_day_index": 5
+    },
+    {
+      "seq": 29,
+      "run_id": "formal-v2-CASE-27-dual",
+      "case_id": "CASE-27",
+      "mode": "dual",
+      "quota_day_index": 5
+    },
+    {
+      "seq": 30,
+      "run_id": "formal-v2-CASE-27-workflow",
+      "case_id": "CASE-27",
+      "mode": "workflow",
+      "quota_day_index": 5
+    },
+    {
+      "seq": 31,
+      "run_id": "formal-v2-CASE-21-dual",
+      "case_id": "CASE-21",
+      "mode": "dual",
+      "quota_day_index": 6
+    },
+    {
+      "seq": 32,
+      "run_id": "formal-v2-CASE-21-workflow",
+      "case_id": "CASE-21",
+      "mode": "workflow",
+      "quota_day_index": 6
+    },
+    {
+      "seq": 33,
+      "run_id": "formal-v2-CASE-21-single",
+      "case_id": "CASE-21",
+      "mode": "single",
+      "quota_day_index": 6
+    },
+    {
+      "seq": 34,
+      "run_id": "formal-v2-CASE-06-workflow",
+      "case_id": "CASE-06",
+      "mode": "workflow",
+      "quota_day_index": 6
+    },
+    {
+      "seq": 35,
+      "run_id": "formal-v2-CASE-06-single",
+      "case_id": "CASE-06",
+      "mode": "single",
+      "quota_day_index": 6
+    },
+    {
+      "seq": 36,
+      "run_id": "formal-v2-CASE-06-dual",
+      "case_id": "CASE-06",
+      "mode": "dual",
+      "quota_day_index": 6
+    },
+    {
+      "seq": 37,
+      "run_id": "formal-v2-CASE-13-single",
+      "case_id": "CASE-13",
+      "mode": "single",
+      "quota_day_index": 7
+    },
+    {
+      "seq": 38,
+      "run_id": "formal-v2-CASE-13-dual",
+      "case_id": "CASE-13",
+      "mode": "dual",
+      "quota_day_index": 7
+    },
+    {
+      "seq": 39,
+      "run_id": "formal-v2-CASE-13-workflow",
+      "case_id": "CASE-13",
+      "mode": "workflow",
+      "quota_day_index": 7
+    },
+    {
+      "seq": 40,
+      "run_id": "formal-v2-CASE-02-dual",
+      "case_id": "CASE-02",
+      "mode": "dual",
+      "quota_day_index": 7
+    },
+    {
+      "seq": 41,
+      "run_id": "formal-v2-CASE-02-workflow",
+      "case_id": "CASE-02",
+      "mode": "workflow",
+      "quota_day_index": 7
+    },
+    {
+      "seq": 42,
+      "run_id": "formal-v2-CASE-02-single",
+      "case_id": "CASE-02",
+      "mode": "single",
+      "quota_day_index": 7
+    },
+    {
+      "seq": 43,
+      "run_id": "formal-v2-CASE-14-workflow",
+      "case_id": "CASE-14",
+      "mode": "workflow",
+      "quota_day_index": 8
+    },
+    {
+      "seq": 44,
+      "run_id": "formal-v2-CASE-14-single",
+      "case_id": "CASE-14",
+      "mode": "single",
+      "quota_day_index": 8
+    },
+    {
+      "seq": 45,
+      "run_id": "formal-v2-CASE-14-dual",
+      "case_id": "CASE-14",
+      "mode": "dual",
+      "quota_day_index": 8
+    },
+    {
+      "seq": 46,
+      "run_id": "formal-v2-CASE-25-single",
+      "case_id": "CASE-25",
+      "mode": "single",
+      "quota_day_index": 8
+    },
+    {
+      "seq": 47,
+      "run_id": "formal-v2-CASE-25-dual",
+      "case_id": "CASE-25",
+      "mode": "dual",
+      "quota_day_index": 8
+    },
+    {
+      "seq": 48,
+      "run_id": "formal-v2-CASE-25-workflow",
+      "case_id": "CASE-25",
+      "mode": "workflow",
+      "quota_day_index": 8
+    },
+    {
+      "seq": 49,
+      "run_id": "formal-v2-CASE-16-dual",
+      "case_id": "CASE-16",
+      "mode": "dual",
+      "quota_day_index": 9
+    },
+    {
+      "seq": 50,
+      "run_id": "formal-v2-CASE-16-workflow",
+      "case_id": "CASE-16",
+      "mode": "workflow",
+      "quota_day_index": 9
+    },
+    {
+      "seq": 51,
+      "run_id": "formal-v2-CASE-16-single",
+      "case_id": "CASE-16",
+      "mode": "single",
+      "quota_day_index": 9
+    },
+    {
+      "seq": 52,
+      "run_id": "formal-v2-CASE-20-workflow",
+      "case_id": "CASE-20",
+      "mode": "workflow",
+      "quota_day_index": 9
+    },
+    {
+      "seq": 53,
+      "run_id": "formal-v2-CASE-20-single",
+      "case_id": "CASE-20",
+      "mode": "single",
+      "quota_day_index": 9
+    },
+    {
+      "seq": 54,
+      "run_id": "formal-v2-CASE-20-dual",
+      "case_id": "CASE-20",
+      "mode": "dual",
+      "quota_day_index": 9
+    },
+    {
+      "seq": 55,
+      "run_id": "formal-v2-CASE-30-single",
+      "case_id": "CASE-30",
+      "mode": "single",
+      "quota_day_index": 10
+    },
+    {
+      "seq": 56,
+      "run_id": "formal-v2-CASE-30-dual",
+      "case_id": "CASE-30",
+      "mode": "dual",
+      "quota_day_index": 10
+    },
+    {
+      "seq": 57,
+      "run_id": "formal-v2-CASE-30-workflow",
+      "case_id": "CASE-30",
+      "mode": "workflow",
+      "quota_day_index": 10
+    },
+    {
+      "seq": 58,
+      "run_id": "formal-v2-CASE-10-dual",
+      "case_id": "CASE-10",
+      "mode": "dual",
+      "quota_day_index": 10
+    },
+    {
+      "seq": 59,
+      "run_id": "formal-v2-CASE-10-workflow",
+      "case_id": "CASE-10",
+      "mode": "workflow",
+      "quota_day_index": 10
+    },
+    {
+      "seq": 60,
+      "run_id": "formal-v2-CASE-10-single",
+      "case_id": "CASE-10",
+      "mode": "single",
+      "quota_day_index": 10
+    }
+  ]
+}
