@@ -162,7 +162,7 @@
 
 ## 21. 2026-11-09 舊網站首頁改導向研究工作台
 
-- 問題：舊網站「查詢分析」（`main.py`）讀的 Supabase 正式專案 `watooxoseljrnlsoequc`（東京，Free／Nano）約 11/06 起 Unhealthy，所有 REST 與內部健康檢查回 503；資源用量正常（CPU 3%、記憶體 51%、磁碟 13%），Supabase 全站狀態正常。11/09 15:03 組長同意後執行 Restart project，15:16 仍 503。待組長向 Supabase Support 開單。
+- 問題：舊網站「查詢分析」（`main.py`）讀的 Supabase 正式專案 `watooxoseljrnlsoequc`（東京，Free／Nano）約 11/06 起 Unhealthy，所有 REST 與內部健康檢查回 503；資源用量正常（CPU 3%、記憶體 51%、磁碟 13%），Supabase 全站狀態正常。11/09 15:03 組長同意後執行 Restart project，15:16 仍 503。組長決定不開單、不修復，舊查詢頁停用。
 - 影響：只有舊查詢頁。研究工作台、LIVE 報告與 PDF 用報告測試專案，不受影響；實驗、鎖定、前瞻批次不需要舊網站。
 - 組長決定：首頁 `/` 改 302 導向 `/research`（`web_app.py`，`tests/test_home_redirect.py`，commit 044e8d5），15:23 Render 上線確認。Supabase 修好後可改回。
 - 風險：`fundamental_data` 只在該專案、Free 無備份；恢復後應另行匯出。
