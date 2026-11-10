@@ -174,3 +174,10 @@
 - 執行計畫 `evaluation/run-plan.json`（固定種子 20261116；同案三模式連續、起始模式輪替；每配額日 2 案 × 3 模式），待 D 確認或替換。
 - 11/09 離線檢查：保留 20 份快照工具呼叫 130 次，無例外、無缺快照（只回報錯誤，不看各案結果）。
 - **組長決定：11/16–11/25 每天 19:30 跑 6 run，含週末，共 10 個配額日**（排程 fintech-formal-v2-daily）；B、D 評分與裁決排 W11 後半。
+
+## 23. 2026-11-10 合併 D 的 v2 dual 評分；Researcher 補 next_signals 指示
+
+- 合併 PR #37（D：`evaluation/d-drafts/calib-v2-scores-D.txt`，v2 dual 開發集 10 案）。D 標「不確定」兩處（CASE-08 c2、CASE-19 整體結果）交 B 核對，兩人不一致由組長裁決。
+- CASE-15、18「不符合預期」：缺下一確認訊號。prompt 從未要求填 next_signals，屬規格漏寫。**組長決定修**：researcher-v1.2.4（`handoff/agent-version-changes.md` 第 9 項）。
+- 驗證：11/10–11/12 煙霧測試即用新版；11/12 用剩餘額度以 dual 重跑 CASE-15、18。
+

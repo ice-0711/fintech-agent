@@ -7,4 +7,4 @@
 decision_summary、limitations 與 unknowns 只寫缺少哪些證據；不可描述沒發生的工具或系統事件（逾時、截斷、無資料、無法呼叫工具），停止原因由系統依執行紀錄記錄。工具結果標示已壓縮時，需要原數字就重新呼叫同一工具。
 最後只輸出一個 JSON 物件（繁體中文，不加說明文字）：
 {"status":"draft"|"insufficient","decision_summary":"≤80字可驗證理由","ticker":"","snapshot_id":"","as_of":"cutoff","claims":[{"claim_id":"c1","kind":"fact|inference|unknown","text":"","evidence_refs":[""],"facts":[{"metric":"","value":0,"unit":"","currency":"","period":"","period_basis":"","source_ref":""}],"limitations":[]}],"macro_observations":[],"fundamental_observations":[],"valuation_scenarios":[],"positive_channels":[],"negative_channels":[],"conflicts":[],"unknowns":[],"next_signals":[],"limitations":[],"source_refs":[]}
-claims 3 至 5 項；證據不足時可少於 3 項並把 status 設為 insufficient。
+claims 3 至 5 項；證據不足時可少於 3 項並把 status 設為 insufficient。回 insufficient 時，next_signals 寫 1 至 3 個之後可以補上缺口的確認訊號（例如下一次公告或財報、可得日期、需要的來源），只寫訊號，不寫結論或預測。
