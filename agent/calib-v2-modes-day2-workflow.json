@@ -1,0 +1,687 @@
+{
+  "generated_at": "2026-11-10T11:35:35+00:00",
+  "commit": "09cfe9d",
+  "prompt_versions": {
+    "researcher": "researcher-v1.2.4",
+    "reviewer": "reviewer-v1.2.2"
+  },
+  "note": "mock = scripted model replies (MOCK) on real tools/snapshots; live = gemini chose every step.",
+  "cases": [
+    {
+      "case_id": "CASE-01",
+      "ticker": "2330",
+      "category": "完整證據",
+      "title": "兩個相符官方段落支持事件",
+      "expected_behavior": "可提出有引用草稿；不強迫固定工具順序",
+      "mock": {
+        "job_id": "f9d9d906-6161-4c8b-9ab5-95ce1401fd59",
+        "status": "failed",
+        "stop_reason": "worker_error: pop from empty list",
+        "path": [
+          "researcher:search_evidence→ok",
+          "researcher:read_evidence→no_data"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.4",
+            "input_estimate": 2325,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "search_evidence",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.4",
+            "input_estimate": 2700,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "read_evidence",
+            "status": "no_data",
+            "reason": "ev-dev-01-official 不屬於本 job 快照 snap-dev-case-01 或 cutoff 前不可得"
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.4",
+            "input_estimate": 2847,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "draft"
+          },
+          {
+            "seq": 9,
+            "role": "reviewer",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 4,
+            "prompt_version": "reviewer-v1.2.2",
+            "input_estimate": 2037,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 10,
+            "role": "reviewer",
+            "event": "review",
+            "tool": null,
+            "final_decision": "revise",
+            "model_decision": "pass",
+            "rules_decision": "revise",
+            "critical": [
+              "c1"
+            ]
+          }
+        ],
+        "draft": {
+          "status": "draft",
+          "decision_summary": "MOCK",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "fact",
+              "text": "2026Q2 合併營收約 6,735 億元（新台幣）",
+              "evidence_refs": [
+                "ev-dev-01-official"
+              ],
+              "facts": [
+                {
+                  "metric": "revenue",
+                  "value": 6735,
+                  "currency": "TWD",
+                  "period": "2026Q2",
+                  "period_basis": "single_quarter",
+                  "source_ref": "ev-dev-01-official"
+                }
+              ],
+              "limitations": []
+            }
+          ],
+          "conflicts": [],
+          "limitations": [],
+          "ticker": "2330",
+          "snapshot_id": "snap-dev-case-01",
+          "as_of": "2026-08-12T09:00:00+00:00"
+        },
+        "review": {
+          "decision": "revise",
+          "issues": [
+            {
+              "claim_id": "c1",
+              "severity": "critical",
+              "reason": "引用 ev-dev-01-official 不存在於本快照（snap-dev-case-01）",
+              "required_evidence": "read_evidence(ev-dev-01-official) 確認是否存在；不存在則改引用本快照內的 evidence_version_id"
+            }
+          ],
+          "checked_refs": [],
+          "checked_metric_ids": [
+            "revenue"
+          ],
+          "decision_summary": "MOCK"
+        },
+        "budget": {
+          "calls_used": 5,
+          "tool_calls_used": 2,
+          "tokens_observed": 4794,
+          "supplement_rounds": 1,
+          "active_seconds": 0.004
+        }
+      },
+      "live_by_mode": {
+        "workflow": {
+          "job_id": "fad44f66-c35d-463b-8d52-e8013356d342",
+          "status": "succeeded",
+          "stop_reason": "workflow_draft_without_review",
+          "path": [
+            "researcher:search_evidence→ok",
+            "researcher:read_evidence→ok",
+            "researcher:read_evidence→ok",
+            "researcher:get_financial_snapshot→ok",
+            "researcher:get_macro_snapshot→ok",
+            "researcher:get_price_window→no_data"
+          ],
+          "steps": [
+            {
+              "seq": 3,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "search_evidence",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 4,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "read_evidence",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 5,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "read_evidence",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 6,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "get_financial_snapshot",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 7,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "get_macro_snapshot",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 8,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "get_price_window",
+              "status": "no_data",
+              "reason": "可得交易日不足，或指定區間停牌／休市"
+            },
+            {
+              "seq": 9,
+              "role": "researcher",
+              "event": "model_call",
+              "tool": null,
+              "call_number": 1,
+              "prompt_version": "researcher-v1.2.4",
+              "input_estimate": 2625,
+              "estimate_under_actual": false,
+              "prompt_tokens": 2385,
+              "total_tokens": 3574
+            },
+            {
+              "seq": 10,
+              "role": "researcher",
+              "event": "draft",
+              "tool": null,
+              "status": "draft"
+            }
+          ],
+          "draft": {
+            "status": "draft",
+            "decision_summary": "已透過官方損益表與財務快照取得115年第2季營業收入、營業毛利與每股盈餘等關鍵財務事實，唯尚缺股價與本益比等估值相關證據。",
+            "ticker": "2330",
+            "snapshot_id": "snap-dev-case-01",
+            "as_of": "2026-08-12T09:00:00+00:00",
+            "claims": [
+              {
+                "claim_id": "c1",
+                "kind": "fact",
+                "text": "台積公司115年第2季營業收入合計為 1,270,380,250 千元。",
+                "evidence_refs": [
+                  "ev-dev-01-official-1"
+                ],
+                "facts": [
+                  {
+                    "metric": "revenue_single_q",
+                    "value": 1270380250,
+                    "unit": "千元",
+                    "currency": "TWD",
+                    "period": "2026Q2",
+                    "period_basis": "single_quarter",
+                    "source_ref": "ev-dev-01-official-1"
+                  }
+                ],
+                "limitations": []
+              },
+              {
+                "claim_id": "c2",
+                "kind": "fact",
+                "text": "台積公司115年第2季營業毛利為 860,310,695 千元，毛利率為 67.72%。",
+                "evidence_refs": [
+                  "ev-dev-01-official-1"
+                ],
+                "facts": [
+                  {
+                    "metric": "gross_profit_single_q",
+                    "value": 860310695,
+                    "unit": "千元",
+                    "currency": "TWD",
+                    "period": "2026Q2",
+                    "period_basis": "single_quarter",
+                    "source_ref": "ev-dev-01-official-1"
+                  }
+                ],
+                "limitations": []
+              },
+              {
+                "claim_id": "c3",
+                "kind": "fact",
+                "text": "台積公司115年第2季基本每股盈餘為 27.25 元。",
+                "evidence_refs": [
+                  "ev-dev-01-official-2"
+                ],
+                "facts": [
+                  {
+                    "metric": "eps_single_q",
+                    "value": 27.25,
+                    "unit": "元",
+                    "currency": "TWD",
+                    "period": "2026Q2",
+                    "period_basis": "single_quarter",
+                    "source_ref": "ev-dev-01-official-2"
+                  }
+                ],
+                "limitations": []
+              },
+              {
+                "claim_id": "c4",
+                "kind": "unknown",
+                "text": "截至 cutoff_at 時點，缺乏對應的股價與估值（如 P/E）相關觀察數據。",
+                "evidence_refs": [],
+                "facts": [],
+                "limitations": [
+                  "get_price_window 取得資料為空，導致無法計算與評估當前估值水準。"
+                ]
+              }
+            ],
+            "macro_observations": [
+              "美國 2026 年 6 月 CPI 指數為 332.568，聯邦基金有效利率月平均為 3.63%。"
+            ],
+            "fundamental_observations": [
+              "115年第2季單季營業收入達 1,270,380,250 千元，單季營業利益 766,602,651 千元，營業利益率 60.34%，基本每股盈餘 27.25 元。"
+            ],
+            "valuation_scenarios": [],
+            "positive_channels": [
+              "強勁的單季營收與高達 67.72% 的毛利率顯示本業獲利能力維持高檔。"
+            ],
+            "negative_channels": [
+              "資本支出單季維持較高規模（4960.02 億元），可能影響短期自由現金流量。"
+            ],
+            "conflicts": [],
+            "unknowns": [
+              "缺乏即時股價資料以計算本益比等估值指標。"
+            ],
+            "next_signals": [
+              "後續股價行情與市場成交資料"
+            ],
+            "limitations": [
+              "無法取得價格視窗資料，估值情境與 P/E 計算列為 unknown。"
+            ],
+            "source_refs": [
+              "ev-dev-01-official-1",
+              "ev-dev-01-official-2"
+            ]
+          },
+          "review": null,
+          "budget": {
+            "calls_used": 1,
+            "tool_calls_used": 6,
+            "tokens_observed": 3574,
+            "supplement_rounds": 0,
+            "active_seconds": 3.805
+          }
+        }
+      }
+    },
+    {
+      "case_id": "CASE-04",
+      "ticker": "2330",
+      "category": "完整證據",
+      "title": "價格說法可由工具核算",
+      "expected_behavior": "可提出有引用草稿；不強迫固定工具順序",
+      "mock": {
+        "job_id": "80550d12-d6c0-4671-9385-b80051425868",
+        "status": "succeeded",
+        "stop_reason": "review_pass",
+        "path": [
+          "researcher:get_price_window→ok",
+          "researcher:get_financial_snapshot→ok",
+          "researcher:calculate_metrics→ok"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.4",
+            "input_estimate": 2323,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_price_window",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.4",
+            "input_estimate": 2506,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.4",
+            "input_estimate": 2980,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "calculate_metrics",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 9,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 4,
+            "prompt_version": "researcher-v1.2.4",
+            "input_estimate": 1929,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 10,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "draft"
+          },
+          {
+            "seq": 11,
+            "role": "reviewer",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 5,
+            "prompt_version": "reviewer-v1.2.2",
+            "input_estimate": 2060,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 12,
+            "role": "reviewer",
+            "event": "review",
+            "tool": null,
+            "final_decision": "pass",
+            "model_decision": "pass",
+            "rules_decision": "pass",
+            "critical": []
+          }
+        ],
+        "draft": {
+          "status": "draft",
+          "decision_summary": "MOCK",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "fact",
+              "text": "以同日收盤價與 TTM EPS 計算 P/E",
+              "evidence_refs": [
+                "obs-3"
+              ],
+              "limitations": []
+            }
+          ],
+          "conflicts": [],
+          "limitations": [],
+          "ticker": "2330",
+          "snapshot_id": "snap-dev-case-04",
+          "as_of": "2026-09-30T09:30:00+00:00"
+        },
+        "review": {
+          "decision": "pass",
+          "issues": [],
+          "checked_refs": [
+            "obs-3"
+          ],
+          "checked_metric_ids": [],
+          "decision_summary": "MOCK"
+        },
+        "budget": {
+          "calls_used": 5,
+          "tool_calls_used": 3,
+          "tokens_observed": 760,
+          "supplement_rounds": 0,
+          "active_seconds": 0.005
+        }
+      },
+      "live_by_mode": {
+        "workflow": {
+          "job_id": "5e4639ae-e97d-4b61-a764-23a2c0e13d8e",
+          "status": "succeeded",
+          "stop_reason": "workflow_draft_without_review",
+          "path": [
+            "researcher:search_evidence→no_data",
+            "researcher:get_financial_snapshot→ok",
+            "researcher:get_macro_snapshot→ok",
+            "researcher:get_price_window→ok"
+          ],
+          "steps": [
+            {
+              "seq": 3,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "search_evidence",
+              "status": "no_data",
+              "reason": "本快照於 cutoff 前無可得來源"
+            },
+            {
+              "seq": 4,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "get_financial_snapshot",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 5,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "get_macro_snapshot",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 6,
+              "role": "researcher",
+              "event": "tool_call",
+              "tool": "get_price_window",
+              "status": "ok",
+              "reason": null
+            },
+            {
+              "seq": 7,
+              "role": "researcher",
+              "event": "model_call",
+              "tool": null,
+              "call_number": 1,
+              "prompt_version": "researcher-v1.2.4",
+              "input_estimate": 2139,
+              "estimate_under_actual": false,
+              "prompt_tokens": 1832,
+              "total_tokens": 2790
+            },
+            {
+              "seq": 8,
+              "role": "researcher",
+              "event": "draft",
+              "tool": null,
+              "status": "draft"
+            }
+          ],
+          "draft": {
+            "status": "draft",
+            "decision_summary": "已取得2330於2026-09-30收盤價及2026Q2財務快照，可支援基本面與估值觀察。",
+            "ticker": "2330",
+            "snapshot_id": "snap-dev-case-04",
+            "as_of": "2026-09-30T09:30:00+00:00",
+            "claims": [
+              {
+                "claim_id": "c1",
+                "kind": "fact",
+                "text": "2330於2026年9月30日的收盤價為2480.0元新台幣。",
+                "evidence_refs": [
+                  "obs-4"
+                ],
+                "facts": [
+                  {
+                    "metric": "close_price",
+                    "value": 2480.0,
+                    "unit": "TWD/share",
+                    "currency": "TWD",
+                    "period": "2026-09-30",
+                    "period_basis": "instant",
+                    "source_ref": "obs-4"
+                  }
+                ],
+                "limitations": []
+              },
+              {
+                "claim_id": "c2",
+                "kind": "fact",
+                "text": "2330於2026年第2季單季每股盈餘(EPS)為27.25元新台幣。",
+                "evidence_refs": [
+                  "obs-2"
+                ],
+                "facts": [
+                  {
+                    "metric": "eps_single_quarter",
+                    "value": 27.25,
+                    "unit": "TWD/share",
+                    "currency": "TWD",
+                    "period": "2026Q2",
+                    "period_basis": "single_quarter",
+                    "source_ref": "obs-2"
+                  }
+                ],
+                "limitations": []
+              },
+              {
+                "claim_id": "c3",
+                "kind": "fact",
+                "text": "2330之TTM每股盈餘為86.28元新台幣，對應期間包含2025Q3、2025Q4、2026Q1與2026Q2。",
+                "evidence_refs": [
+                  "obs-2"
+                ],
+                "facts": [
+                  {
+                    "metric": "eps_ttm",
+                    "value": 86.28,
+                    "unit": "TWD/share",
+                    "currency": "TWD",
+                    "period": "2025Q3, 2025Q4, 2026Q1, 2026Q2",
+                    "period_basis": "ttm",
+                    "source_ref": "obs-2"
+                  }
+                ],
+                "limitations": []
+              }
+            ],
+            "macro_observations": [
+              "美國2026年6月CPI為332.568，聯邦基金有效利率月平均為3.63%。"
+            ],
+            "fundamental_observations": [
+              "公司2026年第2季單季EPS達27.25元，TTM EPS為86.28元。"
+            ],
+            "valuation_scenarios": [],
+            "positive_channels": [
+              "強勁的單季及滾動四季獲利表现。"
+            ],
+            "negative_channels": [],
+            "conflicts": [],
+            "unknowns": [
+              "缺乏詳細之營收細項與未來各季指引來源原文快照。"
+            ],
+            "next_signals": [],
+            "limitations": [
+              "來源文本搜尋無法使用，僅依賴已快照之財務與價格結構資料。"
+            ],
+            "source_refs": [
+              "obs-2",
+              "obs-3",
+              "obs-4"
+            ]
+          },
+          "review": null,
+          "budget": {
+            "calls_used": 1,
+            "tool_calls_used": 4,
+            "tokens_observed": 2790,
+            "supplement_rounds": 0,
+            "active_seconds": 3.277
+          }
+        }
+      }
+    }
+  ],
+  "model_id": "gemini-3.5-flash-lite"
+}
