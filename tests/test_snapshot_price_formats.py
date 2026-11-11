@@ -30,6 +30,16 @@ def test_closes_list_is_served_latest_first_by_cutoff(monkeypatch):
     assert box(monkeypatch, price).get_price_window("2330", CUTOFF, 5)["status"] == "no_data"  # only 2 sessions
 
 
+def test_synthetic_adjusted_is_passed_through_unchanged(monkeypatch):
+    extra = {"any_key": "any text", "n": [1, 2.5]}  # made-up shape: the tool must not interpret or reword it
+    price = {"closes": [ROW1, ROW2], "currency": "TWD", "price_basis": "raw_close", "synthetic_adjusted": extra}
+    data = box(monkeypatch, price).get_price_window("2330", CUTOFF, 1)["data"]
+    assert data["synthetic_adjusted"] == extra
+    assert set(data) == {"ticker", "currency", "price_basis", "sessions", "closes", "synthetic_adjusted", "snapshot_id"}
+    del price["synthetic_adjusted"]
+    assert "synthetic_adjusted" not in box(monkeypatch, price).get_price_window("2330", CUTOFF, 1)["data"]
+
+
 def test_single_close_shape_still_works(monkeypatch):
     price = {"trade_date": "2026-09-30", "close_price": 110.0, "eps_ttm": 5.0, "available_at": ROW2["available_at"]}
     r = box(monkeypatch, price).get_price_window("2330", CUTOFF, 1)

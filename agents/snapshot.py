@@ -171,6 +171,8 @@ class SnapshotToolbox:
             return {"status": "ok", "tool": "get_price_window", "data": {
                 "ticker": ticker, "currency": "TWD", "price_basis": "raw_close", "sessions": sessions,
                 "closes": [{"trade_date": r["trade_date"], "close_price": r["close_price"]} for r in rows[-sessions:]],
+                # Passed through exactly as the case author wrote it, no added wording (lead 11/11, decision 27).
+                **({"synthetic_adjusted": price["synthetic_adjusted"]} if "synthetic_adjusted" in price else {}),
                 "snapshot_id": self.snapshot_id}}
         return tools_impl.get_price_window(ticker=ticker, end_at=end_at, sessions=sessions)
 

@@ -93,3 +93,13 @@ D 的 v2 dual 評分與煙霧測試第 3 天：CASE-19（幣別混用，不允�
 | 14 | Researcher prompt：來源的幣別、單位或口徑不一致且核對後無法確定時，不換算、不擇一當事實；有官方來源以官方為準，其餘改列 unknown 並在 conflicts 寫明；其他有來源的觀察照常寫成 draft，不因單一衝突回 insufficient | `agents/prompts/researcher-v1.2.txt`（researcher-v1.2.5） |
 
 版本標示：11/12 起的煙霧測試第 4 天、開發集補股價後 dual 重跑、W10 正式實驗與前瞻第 3 批用 researcher-v1.2.5。11/10–11/11 的煙霧測試（第 2、3 天）是 v1.2.4。此後除非出現程式錯誤，鎖定前不再改 prompt。
+
+## v2 的 11/11 補修：price_snapshot 的 synthetic_adjusted 欄位（組長 11/11 決定，決策 27）
+
+prompt 版本不變（researcher-v1.2.5、reviewer-v1.2.2）。
+
+| # | 變更 | 位置 |
+|---|---|---|
+| 15 | 案例快照的 `price_snapshot` 有 `synthetic_adjusted` 欄位時，`get_price_window` 照原樣放進回傳的 `data`，不加說明、不改寫；沒有該欄位的案例回傳不變 | `agents/snapshot.py` |
+
+依據：出題組員（B）11/11 確認此欄位出題時就是要給 Agent 看的，工具原本漏傳。開發集沒有這個欄位，10 案行為不變。測試 `tests/test_snapshot_price_formats.py`（合成資料）。

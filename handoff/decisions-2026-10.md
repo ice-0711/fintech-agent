@@ -215,3 +215,12 @@
 - 不做：程式層「不允許停在證據不足就退回重寫」（會改變有限預算下的行為）；CASE-26 逾時（凍結案例不改，10/24 已定）；workflow、single 較常停在證據不足（對照組，照實觀察）。
 - 排程說明檔（第 4 天、前瞻第 3 批）的預期版本已改為 researcher-v1.2.5。D 的 `evaluation/d-drafts/runner-smoke.md`、`v12-runner-freeze.md` 仍寫 v1.2.4，鎖定時請 D 更新。
 - pytest 448 通過。
+
+## 27. 2026-11-11 get_price_window 回傳 synthetic_adjusted（第 24 節待確認事項結案）
+
+- 第 24 節留下的問題：保留集 `price_snapshot` 的 `synthetic_adjusted` 欄位工具不回傳，是否為出題本意。組長 11/11 詢問 B，B 回覆：該欄位應由工具回傳給 Agent，照原樣傳出，不另加說明或提示。
+- **組長決定照 B 的回覆修**（`handoff/agent-version-changes.md` 第 15 項）。屬工具漏傳欄位，不動 prompt 與覆核規則。
+- 做法只依欄位名稱：有此欄位就整個照原樣放進回傳；Claude 沒有讀取或印出欄位的值。保留集只計數量：20 案 1 日視窗皆 ok，其中 1 案回傳帶有此欄位。開發集無此欄位，行為不變。
+- 附帶效果（照實記錄）：覆核的「數字必須出現在工具結果」規則，會把此欄位內的數字視為工具回傳過的數字。
+- B 的回覆含該題的出題意圖，只留在組長與 B 之間，不寫進 repo、Notion 或任何共用文件。
+- pytest 449 通過；`build_freeze.py --verify` 一致（`agents/snapshot.py` 屬第二段）。
