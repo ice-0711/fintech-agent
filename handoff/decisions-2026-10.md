@@ -182,3 +182,11 @@
 - 驗證：11/10–11/12 煙霧測試即用新版；11/12 用剩餘額度以 dual 重跑 CASE-15、18。
 
 - 11/11 補：W11 盲評匯出 `scripts/export_for_scoring.py`（回應 D 11/11 問題 3）。60 run 都執行後才匯出；去掉模式、停止原因、覆核紀錄、預算與 Reviewer 工具結果，隨機 answer_id 打亂順序；對照表存組長 Mac `tmp/`、只公開 sha256（`key-commitment.json`），B、D 都交評分後 `--reveal` 才公開並核對 hash。
+
+## 24. 2026-11-11 股價快照格式修正；開發集缺股價列為限制
+
+- 煙霧測試第 3 天（workflow，CASE-08、11、15、18、19、22；commit 9f84e5e）：6 案無錯誤。CASE-15、18 有寫下一確認訊號。CASE-19（不允許停在證據不足）在 workflow 停在證據不足；single 第 2 天有完成。**組長端建議不修**：workflow 是固定流程基準組，prompt 三模式共用；照實記為開發集觀察（待組長確認）。
+- 股價：全域股價資料只有 2026-09-22 至 09-30 五個交易日，開發集 9 案 cutoff 在 7、8 月，`get_price_window` 回 `no_data` 是時間規則的正確結果，不是錯誤。補歷史股價要重開第一段凍結、動保留集資料、開發集重跑重評，**建議不改，列為限制**（估值未受正式評估檢驗；「未知」主張不計分；三模式條件相同）（待組長確認）。
+- 保留集狀態統計（只計數量與欄位名稱，不看題目、數值、答案）：修正前 `get_price_window` 20 案為 ok 2、no_data 15、KeyError 3。3 案的 `price_snapshot` 是 `closes` 清單格式，程式只讀得懂開發集的單筆格式。11/09 的離線檢查（第 22 節）經 dispatch 執行，例外被包成 `tool_error`，當時沒有統計到。
+- **組長決定：鎖定前修**（`handoff/agent-version-changes.md` 第 10、11 項）。屬工具讀檔格式，prompt 與判斷邏輯不動。修正後同一統計為 ok 5、no_data 15、例外 0；pytest 444 通過。
+- 保留集接觸紀錄：11/11 搜尋 `price_snapshot` 的使用位置時，終端輸出帶出 `scripts/build_holdout_cases.py` 的一行擾動說明（一個案例、一個欄位）。Claude 沒有再開該檔，也沒有據此調整 prompt 或判斷邏輯；此次修正只依欄位名稱。`synthetic_adjusted` 欄位工具不回傳，是否為出題本意待出題組員確認。

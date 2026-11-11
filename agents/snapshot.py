@@ -54,6 +54,16 @@ def _numbers(value: Any) -> list[float]:
     return []
 
 
+def price_rows(price: dict[str, Any] | None) -> list[dict[str, Any]]:
+    """A case snapshot's closes, oldest first. Two fixture shapes exist (scripts/check_cases.py reads both):
+    one close at the top level (dev cases) or a `closes` list with per-row available_at (holdout cases).
+    Rows without available_at are dropped: a price that cannot be shown available by the cutoff is not used."""
+    if not price:
+        return []
+    rows = price.get("closes") or [price]
+    return sorted((r for r in rows if r.get("available_at") and r.get("trade_date")), key=lambda r: r["trade_date"])
+
+
 def load_case_snapshot(snapshot_id: str) -> dict[str, Any] | None:
     """Dev snapshots (snap-dev-*) or sealed holdout snapshots (snap-test-*, CR-W05-holdout).
     Which cases may run is decided by the runner: scripts/dev_traces.py refuses holdout ids."""
@@ -151,12 +161,16 @@ class SnapshotToolbox:
     def get_price_window(self, ticker: str, end_at: str, sessions: int) -> dict[str, Any]:
         price = (self.case or {}).get("price_snapshot")
         if ticker == self.ticker and price:
-            if sessions != 1 or _t(price["available_at"]) > min(self.cutoff, _t(end_at)):
+            limit = min(self.cutoff, _t(end_at))
+            rows = [r for r in price_rows(price)
+                    if r.get("close_price") is not None and _t(r["available_at"]) <= limit]
+            if len(rows) < sessions:
                 return {"status": "no_data", "tool": "get_price_window",
-                        "reason": "本快照只有單日收盤價（sessions=1）", "data": None}
+                        "reason": f"本快照在 cutoff 前只有 {len(rows)} 個交易日的收盤價（要求 sessions={sessions}）",
+                        "data": None}
             return {"status": "ok", "tool": "get_price_window", "data": {
-                "ticker": ticker, "currency": "TWD", "price_basis": "raw_close", "sessions": 1,
-                "closes": [{"trade_date": price["trade_date"], "close_price": price["close_price"]}],
+                "ticker": ticker, "currency": "TWD", "price_basis": "raw_close", "sessions": sessions,
+                "closes": [{"trade_date": r["trade_date"], "close_price": r["close_price"]} for r in rows[-sessions:]],
                 "snapshot_id": self.snapshot_id}}
         return tools_impl.get_price_window(ticker=ticker, end_at=end_at, sessions=sessions)
 

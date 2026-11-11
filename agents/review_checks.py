@@ -372,7 +372,11 @@ def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, r
                     issues.append(_iss(cid, "critical", f"P/E 重算為 {round(p / e, 2)}，主張為 {val}",
                                        f"calculate_metrics(operation=pe_ttm, price={p}, eps_ttm={e}) 重算並修正 {cid}", "pe_math"))
                 ps = snapshot.get("price_snapshot")
-                if ps and (p != ps.get("close_price") or e != ps.get("eps_ttm")):
+                if ps and "closes" in ps:  # holdout shape: any listed close is a valid input; EPS only if the snapshot has one
+                    bad = p not in [r.get("close_price") for r in ps["closes"]] or ("eps_ttm" in ps and e != ps["eps_ttm"])
+                else:
+                    bad = bool(ps) and (p != ps.get("close_price") or e != ps.get("eps_ttm"))
+                if bad:
                     issues.append(_iss(cid, "critical", "P/E 的輸入和快照的收盤價或 TTM EPS 不一致",
                                        f"read_evidence({snapshot_id}) 或 get_financial_snapshot 核對同日股價與 TTM EPS", "pe_input_mismatch"))
             # --- 同業平均不可含 2330 ---

@@ -59,3 +59,14 @@ D 的 v2 dual 開發集評分（`evaluation/d-drafts/calib-v2-scores-D.txt`，PR
 
 版本標示：11/09 single 煙霧測試第 1 天用 researcher-v1.2.3；11/10 起的煙霧測試、11/12 CASE-15、18 dual 重跑、W10 正式實驗與前瞻第 3 批用 researcher-v1.2.4。D 的 v2 dual 評分屬 v1.2.3，引用時標明。
 
+
+## v2 的 11/11 補修：股價快照兩種格式（組長 11/11 決定）
+
+不是 prompt 或判斷邏輯的變更，prompt 版本不變（researcher-v1.2.4、reviewer-v1.2.2）。案例快照的 `price_snapshot` 有兩種格式（`scripts/check_cases.py` 兩種都檢查）：單筆收盤價在最外層，或 `closes` 清單、每筆各有 `available_at`。`agents/snapshot.py` 只讀得懂第一種，遇到第二種會丟 KeyError，被包成 `tool_error`。
+
+| # | 變更 | 位置 |
+|---|---|---|
+| 10 | `get_price_window` 兩種格式都讀，照每筆 `available_at` 與 cutoff 過濾；沒有 `available_at` 的價格不用，回 `no_data` | `agents/snapshot.py`（`price_rows`） |
+| 11 | P/E 輸入核對：`closes` 格式時，價格須等於清單中任一筆收盤價；快照有 `eps_ttm` 才核對 EPS | `agents/review_checks.py` |
+
+測試 `tests/test_snapshot_price_formats.py`（合成資料）。開發集 10 案行為不變（都是第一種格式或沒有股價）。
