@@ -181,3 +181,4 @@
 - CASE-15、18「不符合預期」：缺下一確認訊號。prompt 從未要求填 next_signals，屬規格漏寫。**組長決定修**：researcher-v1.2.4（`handoff/agent-version-changes.md` 第 9 項）。
 - 驗證：11/10–11/12 煙霧測試即用新版；11/12 用剩餘額度以 dual 重跑 CASE-15、18。
 
+- 11/11 補：W11 盲評匯出 `scripts/export_for_scoring.py`（回應 D 11/11 問題 3）。60 run 都執行後才匯出；去掉模式、停止原因、覆核紀錄、預算與 Reviewer 工具結果，隨機 answer_id 打亂順序；對照表存組長 Mac `tmp/`、只公開 sha256（`key-commitment.json`），B、D 都交評分後 `--reveal` 才公開並核對 hash。
