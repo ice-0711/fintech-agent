@@ -112,3 +112,11 @@
 | B（產出） | 黃意棠 | 2026-10-25 | check_cases／check_sources 0 錯誤；--verify 一致；cases_digest 98af84030d45 |
 | D（核對標準主張與擾動） | 吳維彬 | 2026-10-28 | --verify 一致；cases_digest 98af84030d45 |
 | 組長（核准凍結） | 組長 | 2026-10-25 | 核准第一段凍結（cases-v1，cases_digest 98af84030d45；組長本機 --verify 一致）；第二段 W09 前以 --lock-agent 鎖定 |
+
+## 八、修訂（第一段凍結後，組長決定的資料變更）
+
+第七節的簽核是對原始凍結內容；以下修訂由組長決定，案例與 cases_digest 不變。完整 hash 見 `data/v12-frozen-manifest.json` 的 `amendments`。
+
+| 修訂 | 時間 | 變更檔案 | 新增原始檔 | 原因 |
+|---|---|---|---|---|
+| 1 | 2026-11-11T20:25:47+08:00 | `data/financial-snapshots.json`、`agents/tools_impl.py` | 5 個 | 股價由 cutoff 前 5 個交易日補為 2025-01-02 至 2026-09-30 全部交易日（原 5 日數值相同，新增日已逐日與 TWSE 對帳一致）；get_price_window 依視窗日期選原始檔 hash。案例檔未動。決策 25 |

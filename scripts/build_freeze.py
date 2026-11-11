@@ -423,6 +423,62 @@ def verify(strict: bool = False) -> int:
     return 0
 
 
+def amend(reason: str) -> int:
+    """組長決定修改第一段凍結檔後執行：只更新被改檔案的 hash 與原始檔清單，並留下修訂紀錄。
+    案例檔不可用這個方式修改（案例變了要另立 cases-v2）；原簽核紀錄保留，修訂另列。"""
+    if not reason.strip():
+        die("--amend 需要說明原因")
+    fm, cm = load("data/v12-frozen-manifest.json"), load("evaluation/cases_manifest_v1.json")
+    if fm["freeze_stages"]["stage2"].get("locked"):
+        die("第二段已鎖定，不可再修訂")
+    if _changed(cm["source_files"]):
+        die("案例檔被修改，不能用 --amend；請另立 cases-v2")
+    changed = []
+    for group in ("data_files", "tool_files", "rubric_files", "manual_files"):
+        for i, e in enumerate(fm.get(group, [])):
+            new = file_entry(e["path"])
+            if new.get("sha256_lf") != e.get("sha256_lf"):
+                changed.append({"path": e["path"], "group": group, "old_sha256_lf": e.get("sha256_lf"),
+                                "new_sha256_lf": new.get("sha256_lf")})
+                fm[group][i] = new
+    snap = load("data/financial-snapshots.json")
+    known = {r["file"] for r in fm["raw_files"]}
+    added = []
+    for raw in snap["source_manifest"]["raw_files"]:
+        if raw["file"] in known:
+            continue
+        p = ROOT / raw["file"]
+        if not p.exists() or sha256_raw(p) != raw["sha256"]:
+            die(f"{raw['file']} 不存在或 hash 與快照紀錄不符")
+        fm["raw_files"].append({"file": raw["file"], "dataset": raw["dataset"], "entity": raw["data_id"] or "ALL",
+                                "captured_at": raw["captured_at"], "sha256": raw["sha256"], "present": True,
+                                "verified": True})
+        added.append(raw["file"])
+    if not changed and not added:
+        die("沒有任何第一段檔案變動，不需修訂")
+    now = datetime.now(TW).isoformat(timespec="seconds")
+    rev = len(fm.get("amendments", [])) + 1
+    fm.setdefault("amendments", []).append({"revision": rev, "amended_at": now, "decided_by": "組長", "reason": reason,
+                                            "changed_files": changed, "raw_files_added": added,
+                                            "cases_digest_unchanged": cm["cases_digest"]})
+    fm["versions"]["snapshot_manifest"] = snap.get("manifest_version")
+    fm["summary"].update({"raw_files": len(fm["raw_files"]),
+                          "raw_files_present": sum(1 for r in fm["raw_files"] if r["present"])})
+    nl = "\r\n" if b"\r\n" in OUT_FROZEN.read_bytes() else "\n"   # 沿用原檔換行，diff 只留真正的變更
+    OUT_FROZEN.write_text(json.dumps(fm, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline=nl)
+    md = OUT_MD.read_text(encoding="utf-8").rstrip("\n")
+    if "## 八、修訂" not in md:
+        md += ("\n\n## 八、修訂（第一段凍結後，組長決定的資料變更）\n\n"
+               "第七節的簽核是對原始凍結內容；以下修訂由組長決定，案例與 cases_digest 不變。"
+               "完整 hash 見 `data/v12-frozen-manifest.json` 的 `amendments`。\n\n"
+               "| 修訂 | 時間 | 變更檔案 | 新增原始檔 | 原因 |\n|---|---|---|---|---|")
+    md += (f"\n| {rev} | {now} | {'、'.join('`' + c['path'] + '`' for c in changed) or '無'} | {len(added)} 個 | "
+           f"{reason} |\n")
+    OUT_MD.write_text(md, encoding="utf-8")
+    print(f"修訂 {rev} 已記錄：變更 {len(changed)} 個檔案、新增原始檔 {len(added)} 個；cases_digest 不變（{cm['cases_digest'][:12]}）")
+    return verify()
+
+
 def lock_agent() -> int:
     """組長宣布 prompt 與 Agent 程式鎖定後執行：重新記錄第二段 hash，之後 --verify 全部嚴格核對。"""
     if not OUT_FROZEN.exists():
@@ -462,7 +518,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--verify", action="store_true", help="只核對現有檔案是否與凍結紀錄一致")
     ap.add_argument("--strict", action="store_true", help="與 --verify 併用：第二段變動也判失敗")
     ap.add_argument("--lock-agent", action="store_true", help="組長鎖定 prompt/Agent 程式後，記錄第二段 hash")
+    ap.add_argument("--amend", metavar="原因", help="組長決定修改第一段資料／工具檔後，更新 hash 並留修訂紀錄（案例檔不適用）")
     args = ap.parse_args(argv)
+    if args.amend is not None:
+        return amend(args.amend)
     if args.lock_agent:
         return lock_agent()
     if args.verify:

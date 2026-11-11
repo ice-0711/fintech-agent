@@ -70,3 +70,16 @@ D 的 v2 dual 開發集評分（`evaluation/d-drafts/calib-v2-scores-D.txt`，PR
 | 11 | P/E 輸入核對：`closes` 格式時，價格須等於清單中任一筆收盤價；快照有 `eps_ttm` 才核對 EPS | `agents/review_checks.py` |
 
 測試 `tests/test_snapshot_price_formats.py`（合成資料）。開發集 10 案行為不變（都是第一種格式或沒有股價）。
+
+## v2 的 11/11 資料變更：補齊歷史股價（組長 11/11 決定，決策 25）
+
+prompt 與判斷邏輯不變（researcher-v1.2.4、reviewer-v1.2.2），但 Agent 查得到的資料變了，結果要分開標示。
+
+| # | 變更 | 位置 |
+|---|---|---|
+| 12 | 全域股價由 cutoff 前 5 個交易日補為 2025-01-02 至 2026-09-30 全部交易日（未還原收盤價；逐日與 TWSE 對帳相符）。可得時間規則不變（交易日 17:30），案例 cutoff 之後的價格不給 | `data/financial-snapshots.json`（v1.7-price-history）、`scripts/extend_price_history.py` |
+| 13 | `get_price_window` 的 content_hash 指向涵蓋該視窗日期的原始檔 | `agents/tools_impl.py`（`_raw_file_covering`） |
+
+補之前，cutoff 在 7、8 月的案例 `get_price_window` 一律回 `no_data`，估值段落多寫未知；補之後可取得 cutoff 前的收盤價。
+
+版本標示：校準 v1、v2 開發集 dual 重跑（11/06–11/08）、D 的 v2 dual 評分、煙霧測試第 1–3 天（11/09–11/11）是**補股價前**；11/12 起的煙霧測試、開發集 dual 重跑、W10 正式實驗與前瞻第 3 批是**補股價後**。兩者不放同一張表。第一段凍結以修訂方式記錄（`data-freeze.md` 第八節）。

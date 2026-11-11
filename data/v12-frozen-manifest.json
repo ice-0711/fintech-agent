@@ -10,7 +10,7 @@
     "question_version": "macro-fundamental-valuation-v1",
     "prompt_version": "v1.2",
     "tool_contract": "v1.2-w07",
-    "snapshot_manifest": "v1.6-tw-market",
+    "snapshot_manifest": "v1.7-price-history",
     "snapshot_cutoff": "2026-09-30",
     "peer_snapshot": "v1.8-w06",
     "macro_whitelist": [
@@ -55,8 +55,8 @@
     {
       "path": "data/financial-snapshots.json",
       "present": true,
-      "sha256_lf": "eaae3aac9bf55da1373d47cec83bffc82a7d9c2d2f46e975407e4ace9959d411",
-      "bytes": 55265
+      "sha256_lf": "c7ef3c9826d92243b61ad94cd86441b88fd6a238a6653d7337530dfabd2978cc",
+      "bytes": 224923
     },
     {
       "path": "data/source-manifest.json",
@@ -329,6 +329,51 @@
       "sha256": "f16dfc92126b20b24d27cebf74065a2bde35596fcc72b728e926a81350fe63b0",
       "present": true,
       "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2330_bbffdfa78497.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2330",
+      "captured_at": "2026-11-11T20:18:39+08:00",
+      "sha256": "bbffdfa78497aae2edcbc75698d28de18b2f175b915f7297393b7db70acdb353",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2317_40be8e187920.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2317",
+      "captured_at": "2026-11-11T20:18:40+08:00",
+      "sha256": "40be8e187920291f09162bdbc7dfd89da0b87214886dae5555bbe1a18d6523be",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2454_09a46fe8afd2.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2454",
+      "captured_at": "2026-11-11T20:18:40+08:00",
+      "sha256": "09a46fe8afd25085cddf45500971cd3a77f533a11051667eafea29b90c36b77a",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_2379_fceba4ccac95.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "2379",
+      "captured_at": "2026-11-11T20:18:40+08:00",
+      "sha256": "fceba4ccac95dcd414ae30982e25efcec3c8033e844b92863fcc6664370d961d",
+      "present": true,
+      "verified": true
+    },
+    {
+      "file": "data/raw/finmind/TaiwanStockPrice_3034_511728802613.json",
+      "dataset": "TaiwanStockPrice",
+      "entity": "3034",
+      "captured_at": "2026-11-11T20:18:41+08:00",
+      "sha256": "51172880261362814e6e860eb83b1429857ee4d16bffbccf3359edde36b81dc9",
+      "present": true,
+      "verified": true
     }
   ],
   "manual_files": [
@@ -385,8 +430,8 @@
     {
       "path": "agents/tools_impl.py",
       "present": true,
-      "sha256_lf": "136d7bbfad1949af48f5cdc1e08c1278a24e6bf5379d497dbe7e4e54be34a8a5",
-      "bytes": 20730
+      "sha256_lf": "f5d02c90f81e7cf8f7a20840422ded3d6e3fc3fc27dbb132c8d5fa2af9d89db1",
+      "bytes": 21037
     },
     {
       "path": "agents/calculator.py",
@@ -480,8 +525,8 @@
     }
   ],
   "summary": {
-    "raw_files": 22,
-    "raw_files_present": 22,
+    "raw_files": 27,
+    "raw_files_present": 27,
     "null_hashes": 0
   },
   "approved": [
@@ -497,5 +542,35 @@
     "審查規則 basis_unspecified：組長 10/26 與 workflow 模式一併合併，三模式校準開跑前生效；屬第二段",
     "CASE-26：不改快照；live 結果註明「此案未觸發逾時」，逾時路徑以離線測試（tests/test_tool_fixtures.py TR-31、test_timeout_becomes_tool_error）為證",
     "Supabase (stock_code, year) 唯一索引與 upsert：組長 W07 先於測試專案執行（年度路徑，不影響 30 案）"
+  ],
+  "amendments": [
+    {
+      "revision": 1,
+      "amended_at": "2026-11-11T20:25:47+08:00",
+      "decided_by": "組長",
+      "reason": "股價由 cutoff 前 5 個交易日補為 2025-01-02 至 2026-09-30 全部交易日（原 5 日數值相同，新增日已逐日與 TWSE 對帳一致）；get_price_window 依視窗日期選原始檔 hash。案例檔未動。決策 25",
+      "changed_files": [
+        {
+          "path": "data/financial-snapshots.json",
+          "group": "data_files",
+          "old_sha256_lf": "eaae3aac9bf55da1373d47cec83bffc82a7d9c2d2f46e975407e4ace9959d411",
+          "new_sha256_lf": "c7ef3c9826d92243b61ad94cd86441b88fd6a238a6653d7337530dfabd2978cc"
+        },
+        {
+          "path": "agents/tools_impl.py",
+          "group": "tool_files",
+          "old_sha256_lf": "136d7bbfad1949af48f5cdc1e08c1278a24e6bf5379d497dbe7e4e54be34a8a5",
+          "new_sha256_lf": "f5d02c90f81e7cf8f7a20840422ded3d6e3fc3fc27dbb132c8d5fa2af9d89db1"
+        }
+      ],
+      "raw_files_added": [
+        "data/raw/finmind/TaiwanStockPrice_2330_bbffdfa78497.json",
+        "data/raw/finmind/TaiwanStockPrice_2317_40be8e187920.json",
+        "data/raw/finmind/TaiwanStockPrice_2454_09a46fe8afd2.json",
+        "data/raw/finmind/TaiwanStockPrice_2379_fceba4ccac95.json",
+        "data/raw/finmind/TaiwanStockPrice_3034_511728802613.json"
+      ],
+      "cases_digest_unchanged": "98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3"
+    }
   ]
 }

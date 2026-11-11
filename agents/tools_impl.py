@@ -151,6 +151,16 @@ def _raw_file(snap: dict[str, Any], dataset: str, ticker: str | None) -> dict[st
     return {}
 
 
+def _raw_file_covering(snap: dict[str, Any], dataset: str, ticker: str, first: str, last: str) -> dict[str, Any]:
+    """第一個日期範圍涵蓋 [first, last] 的原始檔紀錄；都不涵蓋時退回 _raw_file。（組長 2026-11-11，決策 25：
+    股價補成完整歷史後同一檔股票有兩個原始檔，content_hash 要指向真正含該視窗的那一個。）"""
+    for raw in snap.get("source_manifest", {}).get("raw_files", []):
+        if (raw.get("dataset") == dataset and raw.get("data_id") == ticker
+                and raw.get("start") and raw.get("end") and raw["start"] <= first and last <= raw["end"]):
+            return raw
+    return _raw_file(snap, dataset, ticker)
+
+
 @lru_cache(maxsize=1)
 def _macro_csv_hash() -> str | None:
     """換行統一為 LF 後再算，Windows（CRLF）與 macOS/Linux（LF）得到相同 hash。（組長修正 2026-10-22）"""
@@ -430,7 +440,7 @@ def get_price_window(*args: Any, **kwargs: Any) -> dict[str, Any]:
         return _resp(tool, "no_data", reason="可得交易日不足，或指定區間停牌／休市")
 
     window = rows[-sessions:]
-    raw = _raw_file(snap, "TaiwanStockPrice", ticker)
+    raw = _raw_file_covering(snap, "TaiwanStockPrice", ticker, window[0]["trade_date"], window[-1]["trade_date"])
     return _resp(tool, "ok", {
         "ticker": ticker,
         "currency": "TWD",
