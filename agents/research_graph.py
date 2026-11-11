@@ -32,7 +32,7 @@ from .tools import MACRO_SERIES_WHITELIST, args_hash, dispatch
 PROMPTS = Path(__file__).resolve().parent / "prompts"
 RESEARCHER_PROMPT = (PROMPTS / "researcher-v1.2.txt").read_text(encoding="utf-8")
 REVIEWER_PROMPT = (PROMPTS / "reviewer-v1.2.txt").read_text(encoding="utf-8")
-RESEARCHER_PROMPT_VERSION = "researcher-v1.2.4"  # 11/10 (lead): insufficient drafts list next_signals; v1.2.3 (11/06): no system events, finish with partial facts
+RESEARCHER_PROMPT_VERSION = "researcher-v1.2.5"  # 11/11 (lead): unresolved currency/unit/basis conflicts become unknown + conflicts, not insufficient; v1.2.4 (11/10): insufficient drafts list next_signals; v1.2.3 (11/06): no system events, finish with partial facts
 QUESTION = "截至 cutoff_at，總經、基本面與估值證據支持哪些觀察？有哪些反向證據、假設與待確認訊號？"
 DECISION_RANK = {"pass": 0, "revise": 1, "insufficient": 2}
 MAX_STR, MAX_LIST, MAX_RESULT_CHARS = 200, 5, 900
