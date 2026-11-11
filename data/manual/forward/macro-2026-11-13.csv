@@ -7,3 +7,4 @@ FEDFUNDS,2026-07,3.63,%,2026-08-04T00:00:00-04:00,"FRED FEDFUNDS download 2026-1
 FEDFUNDS,2026-08,3.63,%,2026-09-02T00:00:00-04:00,"FRED FEDFUNDS download 2026-10-28; H.15 monthly average, conservative = day after first business day of next month"
 FEDFUNDS,2026-09,3.75,%,2026-10-02T00:00:00-04:00,"FRED FEDFUNDS download 2026-10-28; H.15 monthly average, conservative = day after first business day of next month"
 FEDFUNDS,2026-10,3.88,%,2026-11-03T00:00:00-05:00,"FRED FEDFUNDS download 2026-11-05; H.15 monthly average, conservative = day after first business day of next month (2026-11-02)"
+CPIAUCSL,2026-10,337.476,Index 1982-1984=100,2026-11-10T08:30:00-05:00,FRED CPIAUCSL download 2026-11-11; BLS 2026 release schedule; 2026-07～09 values unchanged from 2026-10-28 vintage

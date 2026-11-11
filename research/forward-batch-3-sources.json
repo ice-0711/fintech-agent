@@ -1,6 +1,6 @@
 {
   "batch_id": "forward-batch-3",
-  "version": "v0.4-draft-2026-11-09",
+  "version": "v0.5-draft-2026-11-11",
   "prepared_by": "組員 B（黃意棠）",
   "status": "draft：11/13 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
   "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；資料不足照收錄，不補造方向；12/11 截取時仍未成熟的觀察記 NA。",
@@ -70,13 +70,13 @@
       "ticker": "2330",
       "expected_latest_period": "2026Q3（若 11/13 21:00 前董事會通過）",
       "q3_note": "台積電第三季財報通常在 11 月中旬董事會通過；每天查 MOPS 第31款。發言時間 ≤ cutoff → announce 加列、control 填單季營收與 EPS（10/15 法說會自結數已在證據，可交叉核對）",
-      "status": "to_verify_2026-11-09_to_11-13"
+      "status": "collected 2026-11-11：MOPS 第31款 2026-11-10 20:33:47 董事會通過 115Q3；announce 加列；control 單季營收 14,942.43 億、EPS 29.42（1–9月累計減 Q1、Q2 推算；10/15 自結 29.43 差 0.01 為四捨五入）"
     },
     {
       "ticker": "2317",
       "expected_latest_period": "2026Q3（若 11/12 法說會當日或之前董事會通過）",
       "q3_note": "鴻海 11/03 公告 11/12 召開第三季法說會；董事會通過時間以 MOPS 第31款發言時間為準",
-      "status": "to_verify_2026-11-09_to_11-13"
+      "status": "pending：2026-11-11 查 MOPS 重大訊息最新為 11/09 17:46:49（海外可轉債延長募集），尚無 115Q3 董事會公告；11/12 法說會前後再查"
     },
     {
       "ticker": "2454",
@@ -102,24 +102,24 @@
       "item": "115 年 10 月營收",
       "expected": "通常每月 10 日前後公告，預期 cutoff 前可得",
       "rule": "月營收為公司自結，不是財報；不可加總取代季報",
-      "status": "to_collect"
+      "status": "collected：ev-fwd3-2330-rev-202610（第51款 2026-11-10 13:45:22）"
     },
     {
       "ticker": "2454",
       "item": "115 年 10 月營收",
       "expected": "通常每月 10 日前後公告，預期 cutoff 前可得",
-      "status": "to_collect"
+      "status": "collected：ev-fwd3-2454-rev-202610（第51款 2026-11-10 16:55:49）"
     },
     {
       "ticker": "2317",
       "item": "115 年 10 月營收",
       "expected": "若第 2 批 cutoff 前未公告，於本批收錄",
-      "status": "to_collect（視第 2 批結果）"
+      "status": "pending：重大訊息未見（2026-11-11）；請查 MOPS 每月營收頁（t146sb05），9 月營收也是在該頁取得"
     },
     {
       "ticker": "2330／2317",
       "item": "第三季財報董事會通過（第31款）與法說會新聞稿",
-      "status": "to_check"
+      "status": "2330 collected：ev-fwd3-2330-fs-2026q3（第31款 2026-11-10 20:33:47）；2317 pending"
     },
     {
       "ticker": "any",
@@ -133,7 +133,7 @@
       "series_id": "CPIAUCSL",
       "new_observation": "2026-10",
       "available_at": "2026-11-10T08:30:00-05:00（BLS 排程；台北 11/10 21:30）",
-      "status": "to_collect（11/10 晚上後下載 FRED CSV）"
+      "status": "collected 2026-11-11：2026-10＝337.476（FRED 下載；2026-07～09 數值與 10/28 版本相同）"
     },
     {
       "series_id": "FEDFUNDS",
@@ -202,5 +202,9 @@
     "peer": "2454 為比較主體；2379、3034 都計入同業平均，財報期不同也計入並逐列標季別；2330 為產業參照不計入",
     "monthly_revenue": "月營收為公司自結，只作證據段落，不加總取代季報",
     "price_basis": "訊號價與觀察價都用 TaiwanStockPrice raw_unadjusted；觀察窗內除息只標 corporate_action_in_window，不還原"
-  }
+  },
+  "collection_log": [
+    "2026-11-11 B：新增 evidence 3 列（2330 10月營收、2330 115Q3 第31款、2454 10月營收）、macro 1 列（CPIAUCSL 2026-10）、announce 1 列（2330 2026Q3）、control 1 列（2330 2026Q3）。以快照程式載入檢查：evidence 15、macro 9、前瞻季別 2330／2454／2379／3034 皆 2026Q3、control 2026Q3 四家。",
+    "2330 11/10 20:48:21「訂定民國115年第三季之現金股利除息交易日」公告：待查除息交易日。若落在 2026-11-16～12-11（第 3 批觀察窗）要記 corporate_action_in_window；第 3 批觀察窗內已知的是 12/10 除息（第二季股利）。"
+  ]
 }
