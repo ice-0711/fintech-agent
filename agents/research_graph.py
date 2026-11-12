@@ -231,9 +231,11 @@ class ResearchRun:
             self.sys_events.add("truncated")
         obs = {"obs_id": obs_id, "role": role, "tool_name": name, "args_hash": h, "status": result.get("status"),
                "reason": result.get("reason"), "output_hash": _hash(json.dumps(result, sort_keys=True, ensure_ascii=False))[:16],
-               "digest": digest(result), "brief": digest(result, 500)}
+               "digest": digest(result), "brief": digest(result, 500),
+               # Full tool data, kept only for the blind-scoring export (B 11/11, decision 29); never sent to a model.
+               "data": result.get("data")}
         self.observations.append(obs)
-        self.event(role, "tool_call", {k: v for k, v in obs.items() if k not in ("role", "tool_name", "digest", "brief")},
+        self.event(role, "tool_call", {k: v for k, v in obs.items() if k not in ("role", "tool_name", "digest", "brief", "data")},
                    tool_name=name)
         return types.Part.from_function_response(name=name, response=body)
 

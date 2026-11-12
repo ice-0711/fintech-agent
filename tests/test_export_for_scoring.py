@@ -42,7 +42,8 @@ def env(tmp_path, monkeypatch):
         job = {"job_id": jid, "mode": r["mode"], "status": "failed" if failed else "succeeded",
                "stop_reason": "review_pass", "review": {"decision": "pass"}, "draft": draft,
                "checkpoint": {"observations": [
-                   {"obs_id": "obs-1", "role": "researcher", "tool_name": "get_financial_snapshot", "status": "ok", "brief": "EPS 27.25"},
+                   {"obs_id": "obs-1", "role": "researcher", "tool_name": "get_financial_snapshot", "status": "ok", "brief": "EPS 27.25",
+                    "data": {"eps_ttm": 86.28, "ttm_periods": ["2025Q3", "2025Q4", "2026Q1", "2026Q2"]}},
                    {"obs_id": "obs-2", "role": "reviewer", "tool_name": "read_evidence", "status": "ok", "brief": "REVIEWER"}]}}
         con.execute("insert into research_jobs values (?, ?)", (jid, json.dumps(job, ensure_ascii=False)))
         rows.append({"run_id": r["run_id"], "case_id": r["case_id"], "mode": r["mode"], "job_id": jid,
@@ -66,7 +67,8 @@ def test_export_blinds_modes_and_commits_to_the_key(env):
     assert {k["answer_id"] for k in key} == {a["answer_id"] for a in answers}
     a = next(x for x in answers if x["draft"])
     assert a["cited_observations"] == [{"obs_id": "obs-1", "found": True, "tool": "get_financial_snapshot",
-                                         "status": "ok", "result_brief": "EPS 27.25"}]
+                                         "status": "ok", "result_brief": "EPS 27.25",
+                                         "result_data": {"eps_ttm": 86.28, "ttm_periods": ["2025Q3", "2025Q4", "2026Q1", "2026Q2"]}}]
     assert a["draft"]["next_signals"] == ["下次財報"]
     assert sum(1 for x in answers if x["draft"] is None) == 1  # the failed run is kept, not dropped
     for who in ("B", "D"):

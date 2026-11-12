@@ -5,7 +5,7 @@
 
 輸出（evaluation/formal/scoring-v2/）
 - answers.jsonl：一行一份答卷。answer_id（隨機）、case_id、status（succeeded／insufficient_evidence／failed…）、
-  最終草稿（主張、引用、限制、衝突、未知、下一確認訊號、摘要）、主張引用到的工具結果摘要與來源原文。
+  最終草稿（主張、引用、限制、衝突、未知、下一確認訊號、摘要）、主張引用到的工具結果（完整數字，決策 29）與來源原文。
 - answers.md：同內容的可讀版，逐份列出，方便評分。
 - score-template-B.txt、score-template-D.txt：照 rubric 格式預留每份答卷的評分欄。
 - key-commitment.json：對照表的 sha256。對照表本身（answer_id → run_id、mode）存在組長 Mac 的
@@ -62,7 +62,8 @@ def answer_for(run: dict, job: dict | None, case: dict) -> dict:
         if ref.startswith("obs-"):
             o = obs.get(ref)
             cited_obs.append({"obs_id": ref, "found": o is not None,
-                              **({"tool": o["tool_name"], "status": o["status"], "result_brief": o.get("brief")} if o else {})})
+                              **({"tool": o["tool_name"], "status": o["status"], "result_brief": o.get("brief"),
+                                 "result_data": o.get("data")} if o else {})})
         elif ref.startswith("ev-"):
             ev = SnapshotToolbox(case["ticker"], case["source_snapshot_id"], case["cutoff_at"]).read_evidence(ref)
             cited_ev.append({"evidence_version_id": ref, "status": ev.get("status"),
@@ -123,7 +124,7 @@ def export(partial: bool = False, db: Path = fr.DB) -> dict:
 def render_md(answers: list[dict]) -> str:
     out = ["# 正式評估 v2 盲評答卷", "",
            "每份答卷只有案例與最終草稿；模式、停止原因、覆核紀錄、預算都已移除。評分請照 rubric-v1-final.md，",
-           "兩人獨立評分、先不看對方分數。obs-* 只附摘要（最多 500 字），需要完整數字請用同一快照重算工具結果。", ""]
+           "兩人獨立評分、先不看對方分數。obs-* 附工具回傳的完整數字結果（決策 29），不必自己重跑工具。", ""]
     for a in answers:
         out += [f"## {a['answer_id']}｜{a['case_id']}｜{a['status']}", ""]
         d = a["draft"]
@@ -138,7 +139,12 @@ def render_md(answers: list[dict]) -> str:
                 out.append(f"- {label}：{json.dumps(d[k], ensure_ascii=False)}")
         out.append("")
         for o in a["cited_observations"]:
-            out.append(f"  - {o['obs_id']}：" + (f"{o['tool']}／{o['status']}：{o.get('result_brief')}" if o["found"] else "找不到這個工具結果"))
+            if not o["found"]:
+                out.append(f"  - {o['obs_id']}：找不到這個工具結果")
+            elif o.get("result_data") is not None:
+                out.append(f"  - {o['obs_id']}：{o['tool']}／{o['status']}：{json.dumps(o['result_data'], ensure_ascii=False)}")
+            else:
+                out.append(f"  - {o['obs_id']}：{o['tool']}／{o['status']}：{o.get('result_brief')}")
         for e in a["cited_evidence"]:
             out.append(f"  - {e['evidence_version_id']}（{e['status']}）：{e.get('paragraph') or ''}")
         out.append("")
