@@ -103,3 +103,16 @@ prompt 版本不變（researcher-v1.2.5、reviewer-v1.2.2）。
 | 15 | 案例快照的 `price_snapshot` 有 `synthetic_adjusted` 欄位時，`get_price_window` 照原樣放進回傳的 `data`，不加說明、不改寫；沒有該欄位的案例回傳不變 | `agents/snapshot.py` |
 
 依據：出題組員（B）11/11 確認此欄位出題時就是要給 Agent 看的，工具原本漏傳。開發集沒有這個欄位，10 案行為不變。測試 `tests/test_snapshot_price_formats.py`（合成資料）。
+
+## v2 的 11/12 補修：覆核規則（組長 11/12 決定，決策 28）
+
+prompt 版本不變（researcher-v1.2.5、reviewer-v1.2.2），只改覆核程式。
+
+| # | 變更 | 位置 | 案例 |
+|---|---|---|---|
+| 16 | 「TTM 要四個連續單季」：pe_ttm 的期間是股價日期，本身沒寫季度時改看草稿 eps_ttm 或快照的 TTM 季度；不連續或找不到仍列 critical | `agents/review_checks.py`（`eps_ttm_quarters`） | CASE-04（算對卻被擋） |
+| 17 | 新增 minor 提醒：已取得股價卻沒有估值或本益比、沒有總經觀察。只提醒，不改變放行結果；Researcher 回 insufficient 時不加 | `agents/review_checks.py`（`coverage_notes`） | CASE-01 |
+
+第 16 項只會讓「算對卻被誤擋」的結果通過，不會讓季度錯誤的結果通過。第 17 項不影響任何案例的覆核結果，但覆核紀錄會多出 minor 項目。
+
+版本標示：11/12 開發集 CASE-01、04 dual 結果是修正前規則；11/13 起的開發集重跑、W10 正式實驗與前瞻第 3 批用修正後規則。測試 `tests/test_review_pe_coverage.py`（合成資料）。

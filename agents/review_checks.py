@@ -204,6 +204,28 @@ def ttm_quarters(fact: dict) -> list[str]:
     return [f"{i // 4}Q{i % 4 + 1}" for i in range(start, end + 1)]
 
 
+def eps_ttm_quarters(claims: list[dict], fin: dict) -> list[str]:
+    """P/E 所用 TTM EPS 的季度：草稿中 eps_ttm 事實的季度優先，沒有就用快照的 ttm_periods／ttm_quarters（決策 28）。"""
+    for c in claims:
+        for f in c.get("facts", []):
+            if f.get("metric") == "eps_ttm" and ttm_quarters(f):
+                return ttm_quarters(f)
+    return list(fin.get("ttm_periods") or [q.get("period") for q in fin.get("ttm_quarters") or []])
+
+
+def coverage_notes(draft: dict, observations: list[dict]) -> list[str]:
+    """查到了卻沒寫進草稿的部分（組長 11/12，決策 28）。只提醒、不擋：列 minor，覆核結果不因此改變。"""
+    ok = {o.get("tool_name") for o in observations if o.get("status") == "ok"}
+    has_pe = any(f.get("metric", "").startswith("pe") for c in draft.get("claims", []) for f in c.get("facts", []))
+    notes = []
+    if "get_price_window" in ok and not draft.get("valuation_scenarios") and not has_pe:
+        notes.append("已取得股價，但草稿沒有估值或本益比；可算就補上，不能算請在 unknowns 寫明原因")
+    if not draft.get("macro_observations"):
+        notes.append("已取得總經資料，但草稿沒有總經觀察" if "get_macro_snapshot" in ok
+                     else "草稿沒有總經觀察，也沒有查總經資料；請查 get_macro_snapshot，查不到請在 unknowns 寫明")
+    return notes
+
+
 def drop_refuted_timing_issues(review: dict, draft: dict, snapshot: dict, cutoff_at: str,
                                observations: list[dict] | None = None) -> tuple[dict, list[dict]]:
     """可得時間由程式比對（含時區，10/31）：模型說某主張有時間問題，但它引用的來源全都在 cutoff 前可得，就移除該問題。
@@ -360,8 +382,12 @@ def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, r
                     issues.append(_iss(cid, "minor", f"前期值 {prior} 沒有獨立來源編號（只出現在快照備註）",
                                        f"get_financial_snapshot(ticker, cutoff) 取得前一季單季值與 available_at，補上前期來源", "prior_no_source", "pass"))
             # --- TTM 要四個連續單季 ---
-            if f.get("period_basis") == "ttm" and not consecutive_quarters(ttm_quarters(f)):
-                issues.append(_iss(cid, "critical", f"TTM 需要四個連續單季，收到 {ttm_quarters(f) or f.get('period')}",
+            # P/E 的期間是股價日期，季度來自它用的 TTM EPS（組長 11/12，決策 28）：本身沒寫季度時，改查草稿的 eps_ttm 或快照的 TTM 季度。
+            quarters = ttm_quarters(f)
+            if not quarters and metric.startswith("pe"):
+                quarters = eps_ttm_quarters(claims, snap)
+            if f.get("period_basis") == "ttm" and not consecutive_quarters(quarters):
+                issues.append(_iss(cid, "critical", f"TTM 需要四個連續單季，收到 {quarters or f.get('period')}",
                                    f"get_financial_snapshot(ticker, cutoff) 確認連續四個單季都已公告；不足則 {metric} 標 null", "ttm_not_consecutive"))
             # --- 本益比重算 ---
             if metric == "pe_ttm" and f.get("inputs"):
@@ -422,8 +448,13 @@ def check_draft(draft: dict, snapshot: dict, cutoff_at: str, snapshot_id: str, r
             issues.append(_iss(first_id, "critical", f"草稿說「{seg[:60]}」，但執行紀錄沒有這件事",
                                "依實際工具結果改寫；停止原因由系統記錄，草稿只寫缺少哪些證據", "unsupported_system_claim"))
 
+    # --- 查到了卻沒寫：只提醒（minor、不影響放行，決策 28）；Researcher 已回 insufficient 時不加 ---
+    if observations is not None and draft.get("status") == "draft":
+        for note in coverage_notes(draft, observations):
+            issues.append(_iss(first_id, "minor", note, "依現有工具結果補寫；無法補時在 unknowns 說明原因", "coverage_gap", "pass"))
+
     # --- 決定 ---
-    crit = [i for i in issues if i["severity"] == "critical"]
+    crit =[i for i in issues if i["severity"] == "critical"]
     needs_insufficient = any(i["_outcome"] == "insufficient" for i in crit)
     if needs_insufficient:
         decision = "insufficient"
