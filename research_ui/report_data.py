@@ -127,7 +127,7 @@ def build_report_data(job: dict[str, Any]) -> dict[str, Any]:
         data = _build_report_data(job)
     path = forward_snapshot_file(snap_id)
     if path is not None:
-        data["snapshot_file"] = str(path.relative_to(ROOT))
+        data["snapshot_file"] = path.relative_to(ROOT).as_posix()  # same on Windows (B, 11/12)
     return data
 
 
