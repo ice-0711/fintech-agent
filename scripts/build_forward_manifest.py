@@ -41,8 +41,11 @@ HOLIDAYS: set[date] = set()
 AGENT_VERSION = {1: "v1", 2: "v1", 3: "v2"}
 # 發布紀錄不在研究紀錄檔裡，來源寫明（手動登錄，只登已在 repo 文件中的事實）
 PUBLICATIONS = {
-    "fwd1-2317": {"published": True, "report_version": "rv-6556af9c…", "published_on": "2026-11-02",
-                  "source": "handoff/deployment-v1.md 第三節第 6 步"},
+    "fwd1-2317": {"published": True, "report_version": "rv-6556af9c…（第 1 版）；rv-2ed6652e…（第 2 版，11/09 發布）",
+                  "published_on": "2026-11-02",
+                  "source": "第 1 版：handoff/deployment-v1.md 第三節第 6 步；第 2 版：handoff/decisions-2026-10.md 第 20 節"},
+    "fwd2-2330": {"published": True, "report_version": "rv-db6b0e1b…", "published_on": "2026-11-09",
+                  "source": "handoff/decisions-2026-10.md 第 20 節（11/09 14:54:16 核准發布）"},
 }
 CSV_FIELDS = ("signal_id", "batch_id", "ticker", "signal_cutoff_at", "batch_status", "snapshot_sha256",
               "snapshot_verified", "snapshot_generated_at", "generated_late", "period_used", "q3_decision",

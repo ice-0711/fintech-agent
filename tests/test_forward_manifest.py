@@ -107,6 +107,15 @@ def test_real_repo_batch_1_matches_lead_record():
     assert by["fwd1-2330"]["d20_date_expected"] == "2026-11-27"
 
 
+def test_published_reports_follow_decision_20():
+    """決策第 20 節：11/09 發布 2330 第 2 版（第 2 批快照）與 2317 第 2 版（第 1 批快照）。"""
+    by = {r["signal_id"]: r for r in bfm.build(ROOT)["signals"]}
+    assert by["fwd2-2330"]["published"] is True
+    assert by["fwd2-2330"]["report_version"].startswith("rv-db6b0e1b")
+    assert "rv-2ed6652e" in by["fwd1-2317"]["report_version"]
+    assert sorted(s for s, r in by.items() if r["published"]) == ["fwd1-2317", "fwd2-2330"]
+
+
 def test_agent_version_per_row(tmp_path):
     m = bfm.build(_fake_repo(tmp_path))
     v = {r["signal_id"][:4]: r["agent_version"] for r in m["signals"]}

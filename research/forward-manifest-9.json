@@ -8,7 +8,7 @@
     "pending_not_frozen": 3,
     "succeeded": 2,
     "insufficient_evidence": 4,
-    "published": 1,
+    "published": 2,
     "direction_up_down": 0
   },
   "signals": [
@@ -74,7 +74,7 @@
       "reviewer_prompt": "reviewer-v1.2.1",
       "commit": "76a6469",
       "published": true,
-      "report_version": "rv-6556af9c…",
+      "report_version": "rv-6556af9c…（第 1 版）；rv-2ed6652e…（第 2 版，11/09 發布）",
       "entry_date_expected": "2026-11-02",
       "d1_date_expected": "2026-11-02",
       "d5_date_expected": "2026-11-06",
@@ -153,8 +153,8 @@
       "researcher_prompt": "researcher-v1.2.2",
       "reviewer_prompt": "reviewer-v1.2.1",
       "commit": "ef527ec",
-      "published": false,
-      "report_version": null,
+      "published": true,
+      "report_version": "rv-db6b0e1b…",
       "entry_date_expected": "2026-11-09",
       "d1_date_expected": "2026-11-09",
       "d5_date_expected": "2026-11-13",
@@ -169,7 +169,7 @@
       "signal_price_available_at": "2026-11-06T17:30:00+08:00",
       "price_basis": "raw_unadjusted（FinMind TaiwanStockPrice 未還原；進場開盤與 D1／D5／D20 收盤用同一口徑）",
       "returns": "由 D 的 scripts/forward_eval.py 依實際價格計算；本表不填",
-      "audit_file": null,
+      "audit_file": "research/forward-batch-2-audit.md",
       "note": "排程 21:10 未觸發，組長端 21:40 手動執行，晚於截止約 40 分鐘；不重抓覆蓋。"
     },
     {
@@ -209,7 +209,7 @@
       "signal_price_available_at": "2026-11-06T17:30:00+08:00",
       "price_basis": "raw_unadjusted（FinMind TaiwanStockPrice 未還原；進場開盤與 D1／D5／D20 收盤用同一口徑）",
       "returns": "由 D 的 scripts/forward_eval.py 依實際價格計算；本表不填",
-      "audit_file": null,
+      "audit_file": "research/forward-batch-2-audit.md",
       "note": "排程 21:10 未觸發，組長端 21:40 手動執行，晚於截止約 40 分鐘；不重抓覆蓋。"
     },
     {
@@ -249,7 +249,7 @@
       "signal_price_available_at": "2026-11-06T17:30:00+08:00",
       "price_basis": "raw_unadjusted（FinMind TaiwanStockPrice 未還原；進場開盤與 D1／D5／D20 收盤用同一口徑）",
       "returns": "由 D 的 scripts/forward_eval.py 依實際價格計算；本表不填",
-      "audit_file": null,
+      "audit_file": "research/forward-batch-2-audit.md",
       "note": "排程 21:10 未觸發，組長端 21:40 手動執行，晚於截止約 40 分鐘；不重抓覆蓋。"
     },
     {
