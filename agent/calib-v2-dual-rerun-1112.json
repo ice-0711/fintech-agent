@@ -1,0 +1,676 @@
+{
+  "generated_at": "2026-11-12T11:32:06+00:00",
+  "commit": "84f66c2",
+  "prompt_versions": {
+    "researcher": "researcher-v1.2.5",
+    "reviewer": "reviewer-v1.2.2"
+  },
+  "note": "mock = scripted model replies (MOCK) on real tools/snapshots; live = gemini chose every step.",
+  "cases": [
+    {
+      "case_id": "CASE-15",
+      "ticker": "2454",
+      "category": "缺少資料",
+      "title": "關鍵來源正文不可讀",
+      "expected_behavior": "不補造數字/事實；說明不足與下一確認訊號",
+      "mock": {
+        "job_id": "82d1d588-cc9e-41e8-88d2-6bc54d5aee1c",
+        "status": "insufficient_evidence",
+        "stop_reason": "researcher_insufficient",
+        "path": [
+          "researcher:get_financial_snapshot→ok"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2436,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2834,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "insufficient"
+          },
+          {
+            "seq": 7,
+            "role": "reviewer",
+            "event": "rules_check",
+            "tool": null,
+            "rules_decision": "insufficient",
+            "critical": [
+              "c1"
+            ]
+          },
+          {
+            "seq": 8,
+            "role": "system",
+            "event": "stop_facts",
+            "tool": null
+          }
+        ],
+        "draft": {
+          "status": "insufficient",
+          "decision_summary": "MOCK",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "unknown",
+              "text": "CapEx 缺失，FCF 無法計算",
+              "evidence_refs": [],
+              "limitations": [
+                "CapEx null"
+              ]
+            }
+          ],
+          "conflicts": [],
+          "limitations": [],
+          "ticker": "2454",
+          "snapshot_id": "snap-dev-case-15",
+          "as_of": "2026-08-05T09:00:00+00:00"
+        },
+        "review": {
+          "decision": "insufficient",
+          "issues": [
+            {
+              "claim_id": "c1",
+              "severity": "critical",
+              "reason": "草稿沒有任何有來源的事實主張，沒有可核對的內容",
+              "required_evidence": "read_evidence(本快照 snap-dev-case-15 內的來源編號) 取得可核實的事實"
+            }
+          ],
+          "checked_refs": [],
+          "checked_metric_ids": [],
+          "decision_summary": "關鍵資料缺失或預算不足，無法核實；保留限制，不放行。"
+        },
+        "budget": {
+          "calls_used": 2,
+          "tool_calls_used": 1,
+          "tokens_observed": 320,
+          "supplement_rounds": 0,
+          "active_seconds": 0.003
+        }
+      },
+      "live": {
+        "job_id": "482e36ca-61a1-461c-a577-a3288be6debe",
+        "status": "insufficient_evidence",
+        "stop_reason": "review_insufficient",
+        "path": [
+          "researcher:search_evidence→ok",
+          "researcher:get_financial_snapshot→ok",
+          "researcher:get_price_window→ok",
+          "reviewer:read_evidence→unreadable"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2436,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2038,
+            "total_tokens": 2115
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "search_evidence",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2706,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2247,
+            "total_tokens": 2298
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 3155,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2719,
+            "total_tokens": 2776
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_price_window",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 9,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 4,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2222,
+            "estimate_under_actual": false,
+            "prompt_tokens": 1948,
+            "total_tokens": 2668
+          },
+          {
+            "seq": 10,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "draft"
+          },
+          {
+            "seq": 11,
+            "role": "reviewer",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 5,
+            "prompt_version": "reviewer-v1.2.2",
+            "input_estimate": 2775,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2499,
+            "total_tokens": 2527
+          },
+          {
+            "seq": 12,
+            "role": "reviewer",
+            "event": "tool_call",
+            "tool": "read_evidence",
+            "status": "unreadable",
+            "reason": "來源正文不可讀（paragraph 為 null），不得補造內容"
+          },
+          {
+            "seq": 13,
+            "role": "reviewer",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 6,
+            "prompt_version": "reviewer-v1.2.2",
+            "input_estimate": 2968,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2579,
+            "total_tokens": 2776
+          },
+          {
+            "seq": 14,
+            "role": "reviewer",
+            "event": "review",
+            "tool": null,
+            "final_decision": "insufficient",
+            "model_decision": "insufficient",
+            "rules_decision": "pass",
+            "critical": [
+              "c4"
+            ]
+          },
+          {
+            "seq": 15,
+            "role": "system",
+            "event": "stop_facts",
+            "tool": null
+          }
+        ],
+        "draft": {
+          "status": "draft",
+          "decision_summary": "已取得基本面快照與股價視窗，但關鍵來源正文不可讀，部分細節列為未知與限制。",
+          "ticker": "2454",
+          "snapshot_id": "snap-dev-case-15",
+          "as_of": "2026-08-05T09:00:00+00:00",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "fact",
+              "text": "聯發科 2026Q2 單季營收為 1521.83 億元。",
+              "evidence_refs": [
+                "obs-2"
+              ],
+              "facts": [
+                {
+                  "metric": "revenue_single_q",
+                  "value": 1521.83,
+                  "unit": "100m",
+                  "currency": "TWD",
+                  "period": "2026Q2",
+                  "period_basis": "single_quarter",
+                  "source_ref": "obs-2"
+                }
+              ],
+              "limitations": []
+            },
+            {
+              "claim_id": "c2",
+              "kind": "fact",
+              "text": "聯發科 2026Q2 單季營業利益為 228.68 億元。",
+              "evidence_refs": [
+                "obs-2"
+              ],
+              "facts": [
+                {
+                  "metric": "operating_income_single_q",
+                  "value": 228.68,
+                  "unit": "100m",
+                  "currency": "TWD",
+                  "period": "2026Q2",
+                  "period_basis": "single_quarter",
+                  "source_ref": "obs-2"
+                }
+              ],
+              "limitations": []
+            },
+            {
+              "claim_id": "c3",
+              "kind": "fact",
+              "text": "2026-07-30 聯發科收盤價為 3235.0 TWD/share。",
+              "evidence_refs": [
+                "obs-3"
+              ],
+              "facts": [
+                {
+                  "metric": "close_price",
+                  "value": 3235.0,
+                  "unit": "TWD/share",
+                  "currency": "TWD",
+                  "period": "2026-07-30",
+                  "period_basis": "raw_close",
+                  "source_ref": "obs-3"
+                }
+              ],
+              "limitations": []
+            },
+            {
+              "claim_id": "c4",
+              "kind": "unknown",
+              "text": "關鍵來源法說會簡報正文不可讀，詳細總經與未來展望數據缺漏。",
+              "evidence_refs": [
+                "obs-1"
+              ],
+              "facts": [],
+              "limitations": [
+                "關鍵來源正文不可讀"
+              ]
+            }
+          ],
+          "macro_observations": [],
+          "fundamental_observations": [
+            "2026Q2 單季營收 1521.83 億元，營業利益 228.68 億元。"
+          ],
+          "valuation_scenarios": [],
+          "positive_channels": [],
+          "negative_channels": [],
+          "conflicts": [],
+          "unknowns": [
+            "總經趨勢與法說會細部展望因正文不可讀而無法取得"
+          ],
+          "next_signals": [],
+          "limitations": [
+            "關鍵來源正文不可讀",
+            "估值細節部分未知"
+          ],
+          "source_refs": [
+            "obs-1",
+            "obs-2",
+            "obs-3"
+          ]
+        },
+        "review": {
+          "decision": "insufficient",
+          "issues": [
+            {
+              "claim_id": "c4",
+              "severity": "critical",
+              "reason": "關鍵來源法說會簡報（ev-dev-15-unreadable）正文不可讀，詳細總經與未來展望數據缺漏，資料不足無法支援完整分析。",
+              "required_evidence": "read_evidence(ev-dev-15-unreadable)"
+            }
+          ],
+          "checked_refs": [
+            "ev-dev-15-unreadable",
+            "obs-1",
+            "obs-2",
+            "obs-3"
+          ],
+          "checked_metric_ids": [
+            "close_price",
+            "operating_income_single_q",
+            "revenue_single_q"
+          ],
+          "decision_summary": "關鍵法說會簡報來源正文不可讀（unreadable），核心展望與總經數據缺漏，現有資料無法支撐完整分析，判定 insufficient。"
+        },
+        "budget": {
+          "calls_used": 6,
+          "tool_calls_used": 4,
+          "tokens_observed": 15160,
+          "supplement_rounds": 0,
+          "active_seconds": 22.841
+        }
+      }
+    },
+    {
+      "case_id": "CASE-18",
+      "ticker": "2454",
+      "category": "缺少資料",
+      "title": "關鍵證據在cutoff之後",
+      "expected_behavior": "不補造數字/事實；說明不足與下一確認訊號",
+      "mock": {
+        "job_id": "13e648a9-06df-4a31-9866-abf4a7c06953",
+        "status": "insufficient_evidence",
+        "stop_reason": "researcher_insufficient",
+        "path": [
+          "researcher:get_financial_snapshot→ok"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2436,
+            "estimate_under_actual": false,
+            "prompt_tokens": 100,
+            "total_tokens": 120
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2835,
+            "estimate_under_actual": false,
+            "prompt_tokens": 150,
+            "total_tokens": 200
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "insufficient"
+          },
+          {
+            "seq": 7,
+            "role": "reviewer",
+            "event": "rules_check",
+            "tool": null,
+            "rules_decision": "insufficient",
+            "critical": [
+              "c1"
+            ]
+          },
+          {
+            "seq": 8,
+            "role": "system",
+            "event": "stop_facts",
+            "tool": null
+          }
+        ],
+        "draft": {
+          "status": "insufficient",
+          "decision_summary": "MOCK",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "unknown",
+              "text": "CapEx 缺失，FCF 無法計算",
+              "evidence_refs": [],
+              "limitations": [
+                "CapEx null"
+              ]
+            }
+          ],
+          "conflicts": [],
+          "limitations": [],
+          "ticker": "2454",
+          "snapshot_id": "snap-dev-case-18",
+          "as_of": "2026-07-20T09:00:00+00:00"
+        },
+        "review": {
+          "decision": "insufficient",
+          "issues": [
+            {
+              "claim_id": "c1",
+              "severity": "critical",
+              "reason": "草稿沒有任何有來源的事實主張，沒有可核對的內容",
+              "required_evidence": "read_evidence(本快照 snap-dev-case-18 內的來源編號) 取得可核實的事實"
+            }
+          ],
+          "checked_refs": [],
+          "checked_metric_ids": [],
+          "decision_summary": "關鍵資料缺失或預算不足，無法核實；保留限制，不放行。"
+        },
+        "budget": {
+          "calls_used": 2,
+          "tool_calls_used": 1,
+          "tokens_observed": 320,
+          "supplement_rounds": 0,
+          "active_seconds": 0.003
+        }
+      },
+      "live": {
+        "job_id": "6c1d2553-72ae-4a63-b7e9-0b6ef5f44a2b",
+        "status": "insufficient_evidence",
+        "stop_reason": "researcher_insufficient",
+        "path": [
+          "researcher:search_evidence→no_data",
+          "researcher:get_financial_snapshot→ok",
+          "researcher:get_price_window→ok"
+        ],
+        "steps": [
+          {
+            "seq": 3,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 1,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2436,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2039,
+            "total_tokens": 2101
+          },
+          {
+            "seq": 4,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "search_evidence",
+            "status": "no_data",
+            "reason": "本快照於 cutoff 前無可得來源"
+          },
+          {
+            "seq": 5,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 2,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2634,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2150,
+            "total_tokens": 2201
+          },
+          {
+            "seq": 6,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_financial_snapshot",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 7,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 3,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 3083,
+            "estimate_under_actual": false,
+            "prompt_tokens": 2622,
+            "total_tokens": 2679
+          },
+          {
+            "seq": 8,
+            "role": "researcher",
+            "event": "tool_call",
+            "tool": "get_price_window",
+            "status": "ok",
+            "reason": null
+          },
+          {
+            "seq": 9,
+            "role": "researcher",
+            "event": "model_call",
+            "tool": null,
+            "call_number": 4,
+            "prompt_version": "researcher-v1.2.5",
+            "input_estimate": 2068,
+            "estimate_under_actual": false,
+            "prompt_tokens": 1778,
+            "total_tokens": 2496
+          },
+          {
+            "seq": 10,
+            "role": "researcher",
+            "event": "draft",
+            "tool": null,
+            "status": "insufficient"
+          },
+          {
+            "seq": 11,
+            "role": "reviewer",
+            "event": "rules_check",
+            "tool": null,
+            "rules_decision": "insufficient",
+            "critical": [
+              "c1"
+            ]
+          },
+          {
+            "seq": 12,
+            "role": "system",
+            "event": "stop_facts",
+            "tool": null
+          }
+        ],
+        "draft": {
+          "status": "insufficient",
+          "decision_summary": "焦點要求現堳在 cutoff 之後的關鍵證據，現有可得資料僵於 cutoff 前，缺少 cutoff 後的可信證據。",
+          "ticker": "2454",
+          "snapshot_id": "snap-dev-case-18",
+          "as_of": "2026-07-20T09:00:00+00:00",
+          "claims": [
+            {
+              "claim_id": "c1",
+              "kind": "unknown",
+              "text": "缺少 cutoff (2026-07-20) 之後的總經與基本面兼頋證據",
+              "evidence_refs": [],
+              "facts": [],
+              "limitations": [
+                "cutoff 之後正式證據尚未可得"
+              ]
+            }
+          ],
+          "macro_observations": [],
+          "fundamental_observations": [],
+          "valuation_scenarios": [],
+          "positive_channels": [],
+          "negative_channels": [],
+          "conflicts": [],
+          "unknowns": [
+            "cutoff 之後的總經、基本面與估值資料"
+          ],
+          "next_signals": [
+            "2026Q2 季報與營收公告",
+            "2026 年 7 月 20 日之後的官方重大訊息與法說會資料"
+          ],
+          "limitations": [
+            "焦點要求 cutoff 之後的證據，現有可得資料仅到 2026Q1 與 2026-07-17 單日股價"
+          ],
+          "source_refs": []
+        },
+        "review": {
+          "decision": "insufficient",
+          "issues": [
+            {
+              "claim_id": "c1",
+              "severity": "critical",
+              "reason": "草稿沒有任何有來源的事實主張，沒有可核對的內容",
+              "required_evidence": "read_evidence(本快照 snap-dev-case-18 內的來源編號) 取得可核實的事實"
+            }
+          ],
+          "checked_refs": [],
+          "checked_metric_ids": [],
+          "decision_summary": "關鍵資料缺失或預算不足，無法核實；保留限制，不放行。"
+        },
+        "budget": {
+          "calls_used": 4,
+          "tool_calls_used": 3,
+          "tokens_observed": 9477,
+          "supplement_rounds": 0,
+          "active_seconds": 15.56
+        }
+      }
+    }
+  ],
+  "model_id": "gemini-3.5-flash-lite"
+}
