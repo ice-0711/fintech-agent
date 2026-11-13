@@ -4,8 +4,15 @@ v12-runner-freeze.md（D，W09-D）
 1. 第一段凍結（案例、分組、資料、B 的工具、評分規則）：已於 2026-10-25 10:46 完成，build_freeze.py --verify 嚴格核對。
 2. 第二段凍結（Researcher、Reviewer prompt 與 Agent 程式）：截至 2026-11-11，data/v12-frozen-manifest.json 顯示 locked: false，尚未鎖定。組長預計 11/13 鎖定（決策第 18 節），鎖定後由 B 執行 build_freeze.py --lock-agent 記錄，之後改用 --verify --strict 全部嚴格核對。
 3. 正式 runner 的保護：第二段沒有鎖定，或 --verify --strict 沒通過，formal_runs.py 拒絕 live 執行（test_live_refused_until_stage2_locked 有測試）。
-4. 目前版本（來源 handoff/agent-version-changes.md）：researcher-v1.2.4、reviewer-v1.2.2，模型 gemini-3.5-flash-lite，thinking minimal，單次輸入上限 6,000 token、每 job 64,000 token，單次輸出 1,500 token，每 job 最多 8 次模型發送、10 次工具、2 輪補查，180 秒主動時間。正式實驗代號 formal-v2。
+4. 目前版本（來源 handoff/agent-version-changes.md、決策第 26 節）：researcher-v1.2.5（11/11；11/10 到 11/11 是 v1.2.4，11/10 前是 v1.2.3）、reviewer-v1.2.2，模型 gemini-3.5-flash-lite，thinking minimal，單次輸入上限 6,000 token、每 job 64,000 token，單次輸出 1,500 token，每 job 最多 8 次模型發送、10 次工具、2 輪補查，180 秒主動時間。正式實驗代號 formal-v2。
 5. 待鎖定後填入：repo commit [待填]、prompt hash [待填]、鎖定時間 [待填]。
+6. 11/11 的變更（來源：決策第 24 到 27 節，組長決定）：
+   (a) 第一段凍結 10/25 完成後，11/11 補齊歷史股價（2025-01-02 至 2026-09-30），組長用 build_freeze.py --amend 記成修訂紀錄（data/v12-frozen-manifest.json 的 amendments 第 1 筆、data-freeze.md 第八節）；cases_digest 不變，原簽核保留，修訂由組長負責。工具只給案例 cutoff 之前的價格。
+   (b) get_price_window 兩項工具修正：讀得懂 closes 清單格式的快照；快照帶有 synthetic_adjusted 欄位時照原樣回傳。prompt 與覆核規則沒動。
+   (c) Researcher 改為 v1.2.5：只加一條通用規則，來源的幣別、單位或口徑不一致且核對後無法確定時，不換算、不擇一當事實，改列 unknown 並在 conflicts 寫明。
+   (d) 限制（決策第 25 節）：保留集預期答案在 10/25 寫成，當時多數案例查不到股價；補股價後 Agent 可能寫出預期答案沒涵蓋的估值主張。預期答案不改，B 和我盲評照評分規則評，報告註明這個差異。
+   (e) 校準 v1、v2 與煙霧測試第 1 到 3 天都是補股價前跑的，補股價後的結果另外標示，不與之前放同一張表。
+   (f) 11/12 覆核程式修正（決策第 28 節，agents/review_checks.py）：pe_ttm 沒寫季度時改看 eps_ttm 的季度；新增「查到股價或總經卻沒寫」的 minor 提醒，只提醒、不改變放行結果。prompt 版本不變（researcher-v1.2.5、reviewer-v1.2.2），但正式實驗會用到，鎖定時一起註明（B 11/12 提醒）。11/12 的 CASE-01、04 dual 結果是修正前規則，11/13 起用修正後規則。
 
 二、60 run 三模式的輸入與工具
 1. 計畫：保留集 20 案 × 3 模式（single、dual、workflow）= 60 run，固定種子 20261116；同一個案例的三個模式連續執行，起始模式輪替；每配額日 6 run（2 案 × 3 模式），共 10 個配額日。run_id 格式為 formal-v2-案例ID-模式。（來源：scripts/formal_runs.py；我沒有打開 evaluation/run-plan.json）
@@ -31,31 +38,31 @@ v12-runner-freeze.md（D，W09-D）
 四、失敗輸出與九份前瞻觀察
 1. 正式 run 的失敗紀錄規則見 runner-smoke.md 第五段：成功、insufficient_evidence、failed、runner_error 都寫一列進 runs-v2.jsonl，有 run_id；paused_quota 不寫紀錄，同一個 run_id 下一個配額日先跑。
 2. 九份前瞻觀察（3 批 × 2330、2317、2454）都在清單裡，失敗、資料不足、未凍結都保留，不只挑成功的（來源：evaluation/v12-forward-manifest.csv、research/forward-manifest-9.json，B 整理）：
-- 已研究 6 份，全部是 v1（researcher-v1.2.2、reviewer-v1.2.1）：2 份 succeeded（fwd1-2317、fwd2-2330），4 份 insufficient_evidence（fwd1-2330、fwd1-2454、fwd2-2317、fwd2-2454）。已發布的只有 fwd1-2317。
-- 第 3 批 3 份（fwd3-2330、2317、2454）狀態是 pending_not_frozen，預定 11/13 21:00 截止後由組長凍結，使用 v2（researcher-v1.2.4）。
+- 已研究 6 份，全部是 v1（researcher-v1.2.2、reviewer-v1.2.1）：2 份 succeeded（fwd1-2317、fwd2-2330），4 份 insufficient_evidence（fwd1-2330、fwd1-2454、fwd2-2317、fwd2-2454）。已發布兩份：fwd1-2317 和 fwd2-2330（B 11/12 說明：前瞻總表 main 7a8a7f6 已補登 11/09 發布，fwd1-2317 另有第 2 版；先前清單漏登，已更新）。
+- 第 3 批 3 份（fwd3-2330、2317、2454）狀態是 pending_not_frozen，預定 11/13 21:00 截止後由組長凍結，使用 v2（researcher-v1.2.5，決策第 26 節）。B 11/12 補齊第 3 批人工檔；觀察窗（11/16 到 12/11）內只有 2330 在 12/10 的除息，2330 第三季股利（2027-03-11 除息）和 2317 年度配息都不在窗內；12/10 那筆照之前做法記 corporate_action_in_window、用未還原價算（來源：B 11/12 訊息，我沒有自己查）。
 - 第 1 批原訂 10/30 21:00 後執行，實際 10/31 19:08，晚約 22 小時；第 2 批實際 11/06 21:39，晚約 40 分鐘。清單都有記錄，沒有重抓覆蓋。
 - 方向一律為 none（前瞻不計方向命中）；1、5、20 日報酬由 scripts/forward_eval.py 依實際價格計算，清單不填。
 3. 版本不混用：前瞻第 1、2 批是 v1，第 3 批是 v2。兩個版本的輸入上限（3,000／40,000 與 6,000／64,000 token）和覆核規則都不同，結果差異可能來自版本而不是模型表現，所以報告中逐份標示版本，不放在同一張表比較。
 
 五、保留題隔離與已知接觸紀錄
-1. 我（D）的接觸紀錄：2026-10-19 確認檔案時讀過封存檔的檔頭與 CASE-02 標題欄位（約 600 字元），已記在 evaluation/d-drafts/protocol-v1.md 第五節與 W06 凍結報告骨架。10/19 之後我沒有刻意再打開保留集的檔案，但沒有留下紀錄可以完整證明；我電腦上 test-cases-sealed.json 最近一次存取時間是 11/10 16:35，兩份副本只差約 1.5 毫秒，推測是系統自動掃描，無法確定，請 B 核對。本週（W09）我沒有打開 evaluation/test-cases-sealed.json 和 evaluation/run-plan.json；只執行 tests/test_formal_runs.py，由測試程式自己載入保留集，終端只顯示通過或失敗。
+1. 我（D）的接觸紀錄：2026-10-19 確認檔案時讀過封存檔的檔頭與 CASE-02 標題欄位（約 600 字元），已記在 evaluation/d-drafts/protocol-v1.md 第五節與 W06 凍結報告骨架。10/19 之後我沒有刻意再打開保留集的檔案，但沒有留下紀錄可以完整證明；我電腦上 test-cases-sealed.json 最近一次存取時間是 11/10 16:35，兩份副本只差約 1.5 毫秒。B 核對後（evaluation/d-drafts/calib-v2-check-B.md）的判斷是比較像程式依序讀取，不像人手開檔，可接受，照實揭露。我 11/12 另外用檔案時間查過：專案資料夾共 539 個檔案，其中 357 個的存取時間落在同一分鐘（11/10 16:35），所以是整個資料夾被一次讀取，保留集那兩份副本只是其中兩個；.pytest_cache 最後修改是 10/8，不是我跑測試造成的。是哪個程式讀的我無法確定（11/10 15:19 我整理桌面、搬了專題資料夾，可能與之後的系統掃描有關，但我無法證明）。本週（W09）我沒有打開 evaluation/test-cases-sealed.json 和 evaluation/run-plan.json；只執行 tests/test_formal_runs.py，由測試程式自己載入保留集，終端只顯示通過或失敗。
 2. CASE-13：scripts/dev_traces.py 預設曾包含 CASE-13。B 的稽核（evaluation/source-audit-final.md 第一節第 3 點）結論是，10/15 以前出現的「CASE-13」（2317，缺 CapEx）是已廢除的舊開發草稿，與保留集 CASE-13 不是同一個案例，保留集未被污染；組長在決策第 15 節採用此結論。這是 B 與組長的判斷，我沒有自行判斷。
 3. 組長端的揭露（決策第 15、17 節）：組長 11/07 讀到稽核文件裡一行保留集 CASE-13 的情境描述，讀到前 Agent v2 已完成且只用開發集驗證，之後不據此調整任何 prompt、規則或程式；data/v12-finance-fact-sheet.md 第 128、132 行有兩個保留案例的題型層級描述，屬第一段凍結不修改，以揭露處理。
 4. 修改依據：就我經手的部分，本週沒有用保留案的內容或輸出調整任何 prompt、工具或規則。researcher-v1.2.4（11/10）的修改依據是開發集 CASE-15、18 的 v2 dual 評分（決策第 23 節）。
-5. 正式 run 的草稿與覆核存在 tmp/formal_v2.sqlite3，runs-v2.jsonl 只有狀態與預算；評分用匿名匯出由組長在 60 run 跑完後執行（scripts/export_for_scoring.py）。
+5. 正式 run 的草稿與覆核存在 tmp/formal_v2.sqlite3，runs-v2.jsonl 只有狀態與預算；評分用匿名匯出由組長在 60 run 跑完後執行（scripts/export_for_scoring.py）。決策第 29 節（11/12）：匯出會對被引用的工具結果附完整數字結果（不含順序與模式資訊），評分時不必自己重跑工具；只對 11/16 起的 run 有效。
 
 六、驗收對照與未完成事項
 驗收對照（工作包 4 條）：
 1. 參數／來源相同：見第二段。三個模式輸入、模型、預算上限相同，只有流程設計不同。
 2. 排程納入所有用途配額：見第三段，依組長 11/11 回覆。
 3. 失敗輸出也有 run_id：見第四段與 runner-smoke.md 第五段。例外是 paused_quota（還沒真的跑，不寫紀錄）。
-4. 無資料洩漏、不同版本不混分：見第五段與第四段第 3 點。我的接觸紀錄有一處無法確認，已標請 B 核對。
+4. 無資料洩漏、不同版本不混分：見第五段與第四段第 3 點。我的接觸紀錄有一處無法確認（11/10 16:35 的存取來源），B 已核對，結論是可接受、照實揭露。
 
 未完成事項：
 1. 第二段（prompt 與 Agent 程式）尚未鎖定：預計 11/13 由組長鎖定，鎖定後補第一段第 5 點的 repo commit、prompt hash、鎖定時間。提供人：組長、B。
 2. 11/11、11/12 的 single、workflow、dual 重跑結果：見 runner-smoke.md，等組長結果檔上 main。
-3. 盲評檔欄位需求（例如「停止原因與執行紀錄是否一致」這欄在盲評時做不了）：11/16 前告知組長。
-4. 保留集接觸紀錄第 1 點的不確定部分：請 B 核對。
+3. 盲評檔欄位需求：「停止原因與執行紀錄是否一致」這欄在盲評時做不了，決策第 29 節：組長端建議改成公開對照表（--reveal）之後由程式逐份比對，B 和我抽查，B 11/12 已同意，待組長確認；我 11/16 前回覆組長。
+4. 保留集接觸紀錄第 1 點：B 已核對（結論見第五段第 1 點），不用再補。
 5. run-plan.json 我沒有打開，只依組長說明和 formal_runs.py 確認排程設計；「可以照用」是我 11/09 的回覆，沒有自己逐案檢查。
 
 簽核：B 交叉評分 [待填]；組長核准 [待填]
