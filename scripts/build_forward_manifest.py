@@ -178,8 +178,14 @@ def build(root: Path) -> dict:
             inp = snapshot_inputs(root, rec, t, cutoff_dt) if rec else {}
             in_window = any(entry <= x <= exits[20] for x in exd.get(t, []))
             notes = []
+            late = bool((rec or {}).get("generated_late"))
             if rec and rec.get("generated_late"):
                 notes.append(rec["generated_late"])
+            elif rec and rec.get("generated_at") and datetime.fromisoformat(rec["generated_at"]) > cutoff_dt:
+                # 批次紀錄沒寫 generated_late 時，由產生時間與截止時間自行判定（第 3 批 21:16 產生）
+                mins = int((datetime.fromisoformat(rec["generated_at"]) - cutoff_dt).total_seconds() // 60)
+                late = True
+                notes.append(f"快照晚於截止 {mins} 分鐘產生（依 generated_at 判定；批次紀錄未記 generated_late）")
             if status == "pending_not_frozen":
                 notes.append(f"{day} 21:00 截止後由組長凍結；本列保留，不刪")
             if exits[20] >= date(2026, 12, 11):
@@ -190,7 +196,7 @@ def build(root: Path) -> dict:
                 "snapshot_sha256": (rec or {}).get("snapshot_sha256"),
                 "snapshot_verified": verified,
                 "snapshot_generated_at": (rec or {}).get("generated_at"),
-                "generated_late": bool((rec or {}).get("generated_late")),
+                "generated_late": late,
                 "period_used": ((rec or {}).get("periods_used") or {}).get(t),
                 "q3_decision": (rec or {}).get("q3_decision"),
                 "direction": r.get("direction") or ("none" if rec else None),

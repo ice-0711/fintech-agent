@@ -1,8 +1,8 @@
 {
   "batch_id": "forward-batch-3",
-  "version": "v0.8-draft-2026-11-12",
+  "version": "v1.0-frozen-2026-11-14",
   "prepared_by": "組員 B（黃意棠）",
-  "status": "draft：11/13 21:00 前逐項確認並轉為 frozen；確認前不得作為研究輸入",
+  "status": "frozen：快照 2026-11-13 21:16:11 產生（21:10 排程因 2454 缺 2025Q2 BondsPayable 中止，組長補覆寫〔凍結修訂 2〕後手動執行，晚 16 分鐘）；B 2026-11-14 稽核通過（research/forward-batch-3-audit.md）",
   "handbook_rule": "手冊第 06 章：W07–W09 每週五 21:00（台北）三檔各凍結一份研究，共 9 份；資料不足照收錄，不補造方向；12/11 截取時仍未成熟的觀察記 NA。",
   "signal_cutoff_at": "2026-11-13T21:00:00+08:00",
   "research_tickers": [
@@ -59,10 +59,13 @@
       "fixtures/test/"
     ],
     "frozen": {
-      "sha256": null,
-      "generated_at": null,
-      "raw_files": null,
-      "manual_inputs": null
+      "sha256": "64d5032e8bc473d45bad732ee36cd6d6a276041aa2b7088bdcdd4c5cc860c3ac",
+      "generated_at": "2026-11-13T21:16:11+08:00",
+      "raw_files": 22,
+      "manual_inputs": "5 個，sha256 與 main 相符（evidence-2026-11-13.csv 3f7492b8…、macro-2026-11-13.csv c5bdfc3b…、balance_overrides.csv 43dbeaf8…〔修訂 2 後〕）",
+      "q3_result": "A 中止（FinMind 無 2317 2026Q3 EPS 科目）→ B：五家都用 2026Q2；announce／mops-control-2026-11-13.csv 未讀入，第三季公告只以證據形式收錄",
+      "mops_reconciliation": "B 2026-11-14 以 MOPS 五家 114Q2～115Q3 三大報表逐欄對帳 276 項全部一致（audit 第二節）",
+      "verified_by": "組員 B 2026-11-14"
     }
   },
   "financial_sources": [
@@ -204,9 +207,10 @@
     "direction 三批全記 none（組長 10/31）",
     "第三季：A，FinMind 未上架則 B（組長 10/31）",
     "同業平均跨財報期都計入（組長 11/02）",
-    "中文金額含空格也辨識（組長 11/06，a758dc1）"
+    "中文金額含空格也辨識（組長 11/06，a758dc1）",
+    "凍結修訂 2：2454 應付公司債 0 三列（組長 11/13，決策 32；B 11/14 核對 MOPS 通過）"
   ],
-  "agent_version": "v2（researcher-v1.2.3；單次輸入上限 6,000；handoff/agent-version-changes.md）",
+  "agent_version": "v2（researcher-v1.2.5／reviewer-v1.2.2；決策 26；單次輸入上限 6,000；handoff/agent-version-changes.md）",
   "financial_basis": {
     "rule_source": "手冊 V1.2 固定資料規則；data-contract.md；decisions 第 11 節",
     "statement_basis": "consolidated（合併報表）",
@@ -223,6 +227,7 @@
     "2026-11-11 B：新增 evidence 3 列（2330 10月營收、2330 115Q3 第31款、2454 10月營收）、macro 1 列（CPIAUCSL 2026-10）、announce 1 列（2330 2026Q3）、control 1 列（2330 2026Q3）。以快照程式載入檢查：evidence 15、macro 9、前瞻季別 2330／2454／2379／3034 皆 2026Q3、control 2026Q3 四家。",
     "2330 11/10 20:48:21「訂定民國115年第三季之現金股利除息交易日」公告：（2026-11-12 查證）除息交易日為 116/03/11（2027-03-11），不在第 3 批觀察窗內，不記 corporate_action_in_window。若落在 2026-11-16～12-11（第 3 批觀察窗）要記 corporate_action_in_window；第 3 批觀察窗內已知的是 12/10 除息（第二季股利）。",
     "2026-11-12（B）：evidence 加 2 列（ev-fwd3-2317-fs-2026q3：第31款 2026-11-12 14:15:06；ev-fwd3-2317-rev-202610：營收資訊頁，擷取 20:55）、announce 1 列（2317 2026Q3）、control 1 列（2317 2026Q3 單季營收 30,156.34 億、EPS 5.52）。MOPS 重大訊息列表查至 11/12 19:07:52，其他公告（取得鴻揚創投股份、資安長與公司治理主管異動、參與投資人說明會、可轉債延長募集核准）與研究焦點無關，不收。",
-    "2026-11-12（B）：查證 2330 第三季現金股利除息交易日 2027-03-11（第14款 2026-11-10 20:48:21），不在觀察窗；觀察窗內 2330 仍只有 12/10 除息（第二季股利）。2317：MOPS 股利分配情形只有 114 年度每股 7.2 元（董事會 115/03/16，年度配息）、無 115 年季／半年配決議、11/02～11/12 重大訊息無第14款，記為觀察窗內無除權息；TWSE 預告表亦未列，但該表漏列 2330，只作輔助。"
+    "2026-11-12（B）：查證 2330 第三季現金股利除息交易日 2027-03-11（第14款 2026-11-10 20:48:21），不在觀察窗；觀察窗內 2330 仍只有 12/10 除息（第二季股利）。2317：MOPS 股利分配情形只有 114 年度每股 7.2 元（董事會 115/03/16，年度配息）、無 115 年季／半年配決議、11/02～11/12 重大訊息無第14款，記為觀察窗內無除權息；TWSE 預告表亦未列，但該表漏列 2330，只作輔助。",
+    "2026-11-14（B）：第 3 批快照稽核完成，狀態轉 frozen（research/forward-batch-3-audit.md）。人工檔最後版本為 b92ba15（11/13 19:19），截止後未再修改。"
   ]
 }

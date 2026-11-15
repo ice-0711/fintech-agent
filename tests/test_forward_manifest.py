@@ -133,3 +133,10 @@ def test_signal_price_and_basis_recorded(tmp_path):
     assert r["signal_price_available_at"] == "2026-10-30T17:30:00+08:00"
     assert r["price_basis"].startswith("raw_unadjusted")
     assert r["evidence_ids"] == "ev-1" and r["inputs_checked"] == 4
+
+def test_generated_late_derived_from_time_when_record_is_silent():
+    """第 3 批紀錄的 generated_late 是 null，但 21:16 產生、晚於 21:00 截止：要判定為晚並註記分鐘數。"""
+    by = {r["signal_id"]: r for r in bfm.build(ROOT)["signals"]}
+    for sid in ("fwd1-2330", "fwd2-2330", "fwd3-2330", "fwd3-2317", "fwd3-2454"):
+        assert by[sid]["generated_late"] is True
+    assert "晚於截止 16 分鐘" in by["fwd3-2330"]["note"]
