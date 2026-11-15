@@ -391,7 +391,10 @@ def report_detail(rv_id: str):
 def _allowed_evidence(fixture: dict[str, Any]) -> set[str]:
     allowed = set(referenced_evidence_ids())
     for v in _real_published()[0]:
-        allowed.update(s["id"] for s in ((v["report"].get("data") or {}).get("sources") or []))
+        for src in ((v["report"].get("data") or {}).get("sources") or []):
+            allowed.add(src["id"])
+            # fragments a cited tool observation actually returned (obs_trace, B 11/15)
+            allowed.update(t["id"] for t in src.get("targets") or [] if t.get("kind") == "evidence")
         for claim in v["report"].get("claims", []):
             allowed.update(claim.get("evidence_refs") or [])
     for row in fixture.get("published_reports", []):
@@ -409,8 +412,14 @@ def evidence_detail(ev_id: str):
         return jsonify({"ok": False, "error": "not_referenced", "message": "只開放已發布報告或比較面板引用的來源"}), 404
     rv_id = request.args.get("report")
     real = _real_version(rv_id) if rv_id else None
-    snap = next((x for x in ((real or {}).get("report", {}).get("data") or {}).get("sources") or []
-                 if x.get("id") == ev_id and x.get("kind") == "financial_snapshot"), None)
+    frozen = next((x for x in ((real or {}).get("report", {}).get("data") or {}).get("sources") or []
+                   if x.get("id") == ev_id), None)
+    if frozen is not None and frozen.get("kind") == "observation":
+        # a cited tool observation: show the mapping frozen in the approved JSON (obs_trace, B 11/15)
+        return jsonify({"ok": True, "evidence": {"evidence_version_id": ev_id, "synthetic_fixture": False,
+                                                 **{k: frozen.get(k) for k in ("kind", "resolved", "tool", "role",
+                                                    "tool_status", "output_hash", "via", "targets", "note", "reason")}}})
+    snap = frozen if frozen is not None and frozen.get("kind") == "financial_snapshot" else None
     if snap is not None:  # a cited financial-snapshot tool result, exactly as frozen in the approved JSON
         after = tools_impl._parse_iso(snap["available_at"]) > tools_impl._parse_iso(real["report"]["cutoff_at"])
         return jsonify({"ok": True, "evidence": {

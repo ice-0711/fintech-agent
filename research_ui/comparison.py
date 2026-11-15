@@ -116,9 +116,12 @@ def financial_traceability(code: str, cutoff: str, periods: list[str]) -> tuple[
 
 
 def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str,
-         cited_refs: list[str] | None = None) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+         cited_refs: list[str] | None = None,
+         evidence_half: tuple[str, str] | None = None) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """cited_refs: the ev- IDs a report's claims cite (report data). None = the comparison panel, which shows the
-    fragments B's peer snapshot lists for each company. No default ID is added (B, 11/09)."""
+    fragments B's peer snapshot lists for each company. No default ID is added (B, 11/09).
+    evidence_half: a report's own evidence check (research_ui.obs_trace.claim_trace: obs-* traced to their sources,
+    fact claims must cite something; B, 11/15). Given → used instead of checking cited_refs here."""
     issues: list[dict[str, Any]] = []
     snap = dict(snap)
     quarters = _quarters(code, cutoff)
@@ -211,13 +214,15 @@ def _row(code: str, snap: dict[str, Any], price_as_of: str, cutoff: str,
     yoy = _yoy_period(fin_data.get("latest_period"))
     used_periods = list(ttm_periods) + ([yoy] if yoy and any(q["period"] == yoy for q in quarters) else [])
     fin_result, fin_detail = financial_traceability(code, cutoff, used_periods)
-    if any(e["exists"] and e["hash_match"] is False for e in evidence):
+    if evidence_half is not None:  # a report: claims checked by obs_trace.claim_trace (B, 11/15)
+        ev_result, ev_detail = evidence_half
+    elif any(e["exists"] and e["hash_match"] is False for e in evidence):
         ev_result, ev_detail = "conflict", "引用的片段 hash 不符"
     elif any(not e["exists"] for e in evidence):
         ev_result, ev_detail = "missing", "引用的片段不在快照中：" + "、".join(e["id"] for e in evidence if not e["exists"])
     else:
-        ev_result, ev_detail = "pass", ""  # also when nothing is cited: that half is not checked
-    trace_result = next(r for r in ("conflict", "missing", "pass") if r in (fin_result, ev_result))
+        ev_result, ev_detail = "pass", ""  # comparison panel: only the fragments B's peer snapshot lists
+    trace_result = next(r for r in ("conflict", "missing", "not_run", "pass") if r in (fin_result, ev_result))
     trace_detail = "；".join(d for d in (fin_detail, ev_detail) if d)
     unverified = [q["period"] for q in quarters if q["period"] in ttm_periods and q.get("eps_source") == "unverified"]
     eps_ok = eps_ttm is not None and not unverified
@@ -336,7 +341,8 @@ def company_row(code: str) -> dict[str, Any]:
     return row
 
 
-def company_row_at(code: str, cutoff: str, cited_refs: list[str] | None = None) -> dict[str, Any]:
+def company_row_at(code: str, cutoff: str, cited_refs: list[str] | None = None,
+                   evidence_half: tuple[str, str] | None = None) -> dict[str, Any]:
     """Tool-derived row at any cutoff (report data). B's peer snapshot values are used for the
     consistency check only when the snapshot has the same cutoff; otherwise there is nothing to compare."""
     peer = json.loads(PEER_SNAPSHOT.read_text(encoding="utf-8"))
@@ -347,7 +353,7 @@ def company_row_at(code: str, cutoff: str, cited_refs: list[str] | None = None) 
     base = peer["companies"].get(code) or {}
     snap = dict(base) if same else {"name": base.get("name")}
     snap.setdefault("role", base.get("role") or "research")
-    row, _ = _row(code, snap, price_as_of, cutoff, cited_refs=list(cited_refs or []))
+    row, _ = _row(code, snap, price_as_of, cutoff, cited_refs=list(cited_refs or []), evidence_half=evidence_half)
     row["price_as_of"] = price_as_of
     row["compared_with_peer_snapshot"] = same
     return row

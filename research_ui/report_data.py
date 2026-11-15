@@ -23,10 +23,12 @@ from agents import tools_impl
 from agents.snapshot import SnapshotToolbox, load_case_snapshot
 
 from .comparison import DCF_ASSUMPTIONS, build_comparison, company_row_at, quarters_table
+from .obs_trace import UNAVAILABLE, check_evidence, claim_trace, map_observations, obs_traced
 from .risk import METHOD_VERSION as RISK_METHOD
 from .risk import RISK_FOOTNOTE, VALUATION_FOOTNOTE
 
-DATA_VERSION = "report-data-v1.4"  # v1.4: source_traceable = statement hashes + cited ev- fragments (B 11/09)
+DATA_VERSION = "report-data-v1.5"  # v1.5: obs-* traced to the job's tool results; fact claims must cite (B 11/15)
+# v1.4: source_traceable = statement hashes + cited ev- fragments (B 11/09)
 # v1.3: forward snapshots (snap-fwd*) read from their own file
 # v1.2: peer_snapshot_version / peer_snapshot_file (was snapshot_version)
 # v1.1: snapshot_id citations resolve to the financial-snapshot tool result
@@ -64,9 +66,44 @@ def _snapshot_source(toolbox: SnapshotToolbox, ref: str, ticker: str, cutoff: st
             "hash_match": None, "hash_note": "原始財報檔的 sha256（工具結果，不是公告片段）", "excerpt": excerpt}
 
 
-def _sources(toolbox: SnapshotToolbox, refs: list[str], ticker: str, cutoff: str) -> list[dict[str, Any]]:
+def _obs_source(toolbox: SnapshotToolbox, ref: str, obs_map: dict[str, Any] | None, cutoff: str) -> dict[str, Any]:
+    """A cited tool observation with what it actually returned (obs_trace), each fragment checked by the usual rule."""
+    if not obs_map or obs_map.get("status") != "ok":
+        return {"id": ref, "resolved": False, "kind": "observation", "reason": UNAVAILABLE}
+    entry = (obs_map.get("items") or {}).get(ref)
+    if entry is None:
+        return {"id": ref, "resolved": False, "kind": "observation", "reason": "這個 job 沒有這個工具觀察"}
+    read = lambda i: toolbox("read_evidence", {"evidence_version_id": i})  # noqa: E731
+    checked = {}
+    targets = []
+    for t in entry["targets"]:
+        t = dict(t)
+        if t["kind"] == "evidence":
+            r = checked.setdefault(t["id"], check_evidence(read, t["id"]))
+            d = r["data"] or {}
+            para = d.get("paragraph") or ""
+            t.update(exists=r["exists"], hash_match=r["hash_match"], available_at=d.get("available_at"),
+                     source_url=d.get("source_url"), content_hash=d.get("content_hash"),
+                     excerpt=para[:EXCERPT_CHARS] + ("…" if len(para) > EXCERPT_CHARS else ""))
+        if t.get("available_at"):
+            t["cutoff_ok"] = tools_impl._parse_iso(t["available_at"]) <= tools_impl._parse_iso(cutoff)
+        targets.append(t)
+    ok = obs_traced(entry, lambda i: checked.get(i, {}).get("exists") and checked[i]["hash_match"] is not False)
+    out = {"id": ref, "resolved": ok, "kind": "observation", "tool": entry["tool"], "role": entry["role"],
+           "tool_status": entry["tool_status"], "output_hash": entry["output_hash"], "via": entry["via"],
+           "targets": targets, "note": entry["note"]}
+    if not ok:
+        out["reason"] = entry["note"] or "對不到片段或快照"
+    return out
+
+
+def _sources(toolbox: SnapshotToolbox, refs: list[str], ticker: str, cutoff: str,
+             obs_map: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     out = []
     for ref in dict.fromkeys(refs):
+        if ref.startswith("obs-"):
+            out.append(_obs_source(toolbox, ref, obs_map, cutoff))
+            continue
         snap = _snapshot_source(toolbox, ref, ticker, cutoff) if ref.startswith("snap-") else None
         if snap is not None:
             out.append(snap)
@@ -135,6 +172,10 @@ def _build_report_data(job: dict[str, Any]) -> dict[str, Any]:
     ticker, cutoff, snap_id = job["ticker"], job["cutoff_at"], job["source_snapshot_id"]
     toolbox = SnapshotToolbox(ticker, snap_id, cutoff)
     refs = _claim_refs(job)
+    claims = (job.get("draft") or {}).get("claims") or []
+    # Agent v2 cites tool observations (obs-*): map them through the job's own tool record (B, 11/15).
+    obs_map = map_observations(job) if any(str(r).startswith("obs-") for r in refs) else None
+    extra = {"obs_map": obs_map} if obs_map is not None else {}
     method = {"data_version": DATA_VERSION, "risk_method": RISK_METHOD, "tools_version": "tools-v12",
               "dcf_assumptions": DCF_ASSUMPTIONS, "valuation_footnote": VALUATION_FOOTNOTE,
               "risk_footnote": RISK_FOOTNOTE, "limitations": METHOD_LIMITATIONS}
@@ -155,11 +196,12 @@ def _build_report_data(job: dict[str, Any]) -> dict[str, Any]:
             "data_quality": {"level": "unassessed", "label": "資料品質風險：未評估",
                              "reasons": ["案例快照不跑資料品質檢查"], "checks": []},
             "peer_comparison": None, "peer_na_reason": "案例快照不含同業資料",
-            "sources": _sources(toolbox, refs, ticker, cutoff),
-            "method": method,
+            "sources": _sources(toolbox, refs, ticker, cutoff, obs_map),
+            "method": method, **extra,
         }
 
-    row = company_row_at(ticker, cutoff, cited_refs=refs)
+    evidence_half = claim_trace(claims, obs_map or {"status": "ok", "items": {}}, tools_impl.read_evidence)
+    row = company_row_at(ticker, cutoff, cited_refs=refs, evidence_half=evidence_half)
     window = tools_impl.get_price_window(ticker, cutoff, 5)
     peer, peer_reason = None, "同業比較只適用 2454"
     if ticker == "2454":
@@ -193,6 +235,6 @@ def _build_report_data(job: dict[str, Any]) -> dict[str, Any]:
         "valuation": row["valuation"],
         "data_quality": {k: row["data_quality"][k] for k in ("level", "label", "reasons", "checks")},
         "peer_comparison": peer, "peer_na_reason": peer_reason,
-        "sources": _sources(toolbox, refs + [e["id"] for e in row["evidence"]], ticker, cutoff),
-        "method": method,
+        "sources": _sources(toolbox, refs + [e["id"] for e in row["evidence"]], ticker, cutoff, obs_map),
+        "method": method, **extra,
     }
