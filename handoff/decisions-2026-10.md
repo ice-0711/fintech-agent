@@ -379,3 +379,15 @@
   3. 現在不在 `AGENTS.md` 加檔名規則；乾淨版由組長之後自行進行。
 - 到時要確認的事：保留集封存檔與盲評對照表是否放入；FinMind 原始資料授權不可轉散布，不放；乾淨版註明由原 repo 的哪個 commit 產生；建立新 repo 屬對外發布，建立前由組長確認。
 - 時間：與手冊 W13-E（12/07–12/11）「打包 final 目錄並建立成果索引」同一週。
+
+## 40. 2026-11-15 鎖定前的 live 驗證（開發集 4 案 dual）；排程權限測試結果
+
+- **排程權限測試**：原訂 11/15 10:00 的自動執行因電腦不會開機，改為 19:30（與正式實驗同一時刻）；組長另要求「現在跑」，19:06 手動觸發一次。排程工作階段直接執行 `scripts/formal_runs.py --status`，沒有等待核准，13 秒完成，輸出「formal-v2：0/60 已執行；pending 60」。
+- **live 驗證**（Agent v2，researcher-v1.2.5／reviewer-v1.2.2，題目送 task，覆核規則為 11/14 修正後，commit 36758df）。紀錄：`agent/calib-v2-rules-check-1115-dual.json`。
+  - CASE-04：succeeded／review_pass，沒有補查。收盤價 2480、TTM EPS 86.28（列出四季）、本益比 28.74（引用 calculate_metrics 的結果，Reviewer 另外重算一次）。11/12、11/14 兩次被規則誤擋的必答案例，這次通過。
+  - CASE-01：succeeded／review_pass。營收、毛利率、EPS 與官方來源一致。
+  - CASE-22：insufficient_evidence／researcher_insufficient。Researcher 的三個工具回合都用在 search_evidence（每次都回同一筆來源），沒有呼叫 get_financial_snapshot；草稿寫出單季 EPS 27.25（正確），說明缺其他三季、無法計算近四季合計後停止，沒有把單季當成 TTM。11/14 同一題的路徑是「搜尋兩次 → 財報快照」而通過。屬模型選工具的變異，不是覆核規則造成。這是必答案例，停在證據不足，照實記錄。
+  - CASE-15：insufficient_evidence／researcher_insufficient（此案允許）。指出法說會正文不可讀，沒有補造內容，列出 2 個下一確認訊號；引用的單季營收 1,521.83 億元與財報工具結果相符。
+  - 四個 run 沒有程式錯誤，沒有輸出被截斷（單次輸出最長 930 token），新規則沒有誤擋。
+- **驗證範圍**：這次模型都把 TTM 的四季寫出來，所以「TTM EPS 只寫結尾季」「本益比寫結尾季」「財報工具回 no_data」三條路徑沒有在 live 出現，仍只有離線測試為證（決策 35、37、38）。本益比數值規則在 CASE-04 實際執行並通過。
+- **觀察（不處理）**：dual 的 Researcher 第一輪只有 3 個工具回合；案例快照的 search_evidence 不論查詢字串都回同一組來源，模型重複搜尋會把回合用完。這是既有設計，三模式比較會反映這個差異。
