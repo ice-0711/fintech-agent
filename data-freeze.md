@@ -5,6 +5,7 @@
 - 案例摘要 hash（cases_digest）：`98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3`
 - 工具版本：tools-v12.0；契約 v1.2-w07；prompt v1.2；快照 v1.6-tw-market
 - 核對：`python scripts/build_freeze.py --verify`
+- 第二段鎖定：2026-11-15T19:32:19+08:00（prompt v1.2；`python scripts/build_freeze.py --lock-agent`）
 
 ## 一、30 案（10 開發 + 20 保留）
 

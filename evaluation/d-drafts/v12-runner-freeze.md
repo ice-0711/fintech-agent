@@ -66,7 +66,7 @@ v12-runner-freeze.md（D，W09-D）
 5. run-plan.json 我沒有打開，只依組長說明和 formal_runs.py 確認排程設計；「可以照用」是我 11/09 的回覆，沒有自己逐案檢查。
 
 七、組長端更新（2026-11-14；組長決定不另請 D 更新，由組長端補記。與上文不一致之處以本節為準，上文 D 的原文不改）
-1. 鎖定：第二段截至 11/14 尚未鎖定，預定 11/15 由組長鎖定（上文寫 11/13）。第一段另有修訂 2（11/13，data/manual/balance_overrides.csv 的 2454 負債覆寫，決策第 32 節），cases_digest 不變。
+1. 鎖定：第二段已於 2026-11-15 19:32:19 由組長鎖定（上文寫預計 11/13），共 12 個程式檔與 2 個 prompt，`build_freeze.py --verify --strict` 通過。上文第一段第 5 點的待填項目：鎖定前 main 為 503b8be，被鎖定檔案最後修改於 ddb20c2；prompt 檔 sha256 前 12 碼為 researcher 795da03d0a11、reviewer a42c3338a07a；完整 hash 見 release/eval-version.json 與 handoff/v12-freeze.md。第一段另有修訂 2（11/13，data/manual/balance_overrides.csv 的 2454 負債覆寫，決策第 32 節），cases_digest 不變。
 2. 第二段第 2 點的輸入：自決策第 31 節（11/13）起，研究焦點送的是案例的 task（題目，一字不改），不是案例標題或變體名稱；variant、category、expected_behavior、expected_*、allow_insufficient、perturbation_location 都不進 Agent 輸入。快照若有 task_input、draft_under_review，以同名欄位原樣放進輸入，single、dual（Researcher 與 Reviewer）、workflow 都有；required_elements 只給評分者，盲評匯出會附上。三個模式的輸入仍然相同。
 3. 條件標示：校準 v1、v2 與煙霧測試（到 11/12 為止）是「送變體名稱」的條件；11/14 開發集預演與正式實驗是「送 task」的條件。每個 run 以 focus_source 標示，兩種條件的結果不放同一張表。
 4. 11/14 的覆核程式修正（prompt 版本不變，researcher-v1.2.5、reviewer-v1.2.2）：決策第 35 節（TTM EPS 的期間只寫結尾季，且數值與工具回傳的 TTM EPS 相同時視為那四季）；決策第 37 節（覆核用的財報資料改為該 job 的工具實際回傳的內容：工具對 Agent 回 no_data 時，它的數字與 TTM 季度不算工具回傳過；財報來自共用資料庫的案例也讀得到 TTM 季度）。決策第 38 節（本益比沒有附計算輸入時，數值必須出現在該 job 的某個工具結果裡，允許依主張位數四捨五入）。11/14 以前的 dual 結果是修正前規則，正式實驗用修正後規則。完整清單見 handoff/agent-version-changes.md 第 18 到 24 項。

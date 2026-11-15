@@ -391,3 +391,12 @@
   - 四個 run 沒有程式錯誤，沒有輸出被截斷（單次輸出最長 930 token），新規則沒有誤擋。
 - **驗證範圍**：這次模型都把 TTM 的四季寫出來，所以「TTM EPS 只寫結尾季」「本益比寫結尾季」「財報工具回 no_data」三條路徑沒有在 live 出現，仍只有離線測試為證（決策 35、37、38）。本益比數值規則在 CASE-04 實際執行並通過。
 - **觀察（不處理）**：dual 的 Researcher 第一輪只有 3 個工具回合；案例快照的 search_evidence 不論查詢字串都回同一組來源，模型重複搜尋會把回合用完。這是既有設計，三模式比較會反映這個差異。
+
+## 41. 2026-11-15 第二段鎖定（Agent 程式、prompt、runner）；W09-L 交付
+
+- 組長 11/15 在 live 驗證（第 40 節）後決定鎖定。鎖定前拉下 B 的 503b8be（前瞻第 3 批稽核；沒有動到凍結或待鎖定的檔案；B 複核修訂 2 通過），pytest 501 通過。
+- **鎖定**：2026-11-15 19:32:19 執行 `scripts/build_freeze.py --lock-agent`。第二段共 14 個檔（10 支 Agent 程式、2 支 runner、2 個 prompt），hash 記入 `data/v12-frozen-manifest.json`；第一段各組紀錄不變。`--verify --strict` 通過；`formal_runs.py` 的執行前檢查（`lock_ok`）回傳通過。沒有執行任何正式 run，進度 0／60。
+- **版本**：gemini-3.5-flash-lite（thinking minimal、temperature 0）、researcher-v1.2.5、reviewer-v1.2.2；單次輸入 6,000、輸出 1,500、每 job 64,000 token；每 job 8 次發送、10 次工具、2 輪補查；J=6。Agent v2 為 `handoff/agent-version-changes.md` 第 1 至 24 項。
+- **交付**（手冊 W09-L）：`release/eval-version.json`（機器可讀，含 14 個檔的完整 hash、案例與執行計畫的 hash、結果標示規則）、`handoff/v12-freeze.md`（鎖定內容、鎖定前的驗證、已知限制 8 點、鎖定後的規則、驗收對照）。手冊所稱 `research/batch-3.json` 即 `research/forward-batch-3.json`。
+- **鎖定後**：到 60 run 跑完前，鎖定與凍結的檔案不修改；必須修改時由組長決定並改用新的實驗版本代號。正式實驗 11/16 19:30 起由排程每天執行 6 個。
+- B 的稽核另外記錄、組長端知悉的事項（都不改）：前瞻第 3 批 2317 的本益比用了 11/11 而非 11/13 的收盤價，覆核沒有發現（已列入 `handoff/v12-freeze.md` 已知限制第 2 點）；2330 是輸出格式無效而停止；`research/forward-batch-3.json` 的 `generated_late` 為空，實際晚於截止 16 分鐘（決策第 32 節已記錄，是否補進該檔由組長決定）。

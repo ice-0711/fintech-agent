@@ -17,7 +17,21 @@
       "CPIAUCSL",
       "FEDFUNDS",
       "TAIEX"
-    ]
+    ],
+    "researcher_prompt_version": "researcher-v1.2.5",
+    "reviewer_prompt_version": "reviewer-v1.2.2",
+    "budget_limits": {
+      "max_calls": 8,
+      "initial_research_calls": 4,
+      "max_input_tokens": 6000,
+      "max_output_tokens": 1500,
+      "job_token_budget": 64000,
+      "max_tool_calls": 10,
+      "max_same_tool_call": 2,
+      "max_supplement_rounds": 2,
+      "max_active_seconds": 180.0,
+      "max_retries": 1
+    }
   },
   "cases": {
     "file": "evaluation/cases_manifest_v1.json",
@@ -420,8 +434,8 @@
         "agent_files",
         "prompt_files"
       ],
-      "locked": false,
-      "locked_at": null,
+      "locked": true,
+      "locked_at": "2026-11-15T19:32:19+08:00",
       "deadline": "W09 前（10/26 開發集 live 再驗後）",
       "rule": "prompt 與 Agent 程式；鎖定前 hash 僅供參照，--verify 只列變動"
     }
@@ -471,57 +485,87 @@
       "path": "agents/tools.py",
       "present": true,
       "sha256_lf": "bf3a3e807f4c8ff788ad32c781dd4803e6c9fd40adde230b0a8d91c20b10c202",
-      "bytes": 17423
+      "bytes": 17070
     },
     {
       "path": "agents/snapshot.py",
       "present": true,
-      "sha256_lf": "dc83a3ab98b73777a760da66a5404663d3c42a02fe591784514e518c30a291c7",
-      "bytes": 8571
+      "sha256_lf": "fc9c844af5138e994f52980f12de6346a933be9b83e7147b9f6c33f4a599a8df",
+      "bytes": 12822
     },
     {
       "path": "agents/contract.py",
       "present": true,
       "sha256_lf": "c7e093ef481eaf3813afaa3f34b471f9d38141c2ee2dfb60b4ecf479235bf9ed",
-      "bytes": 4424
+      "bytes": 4302
     },
     {
       "path": "agents/review_checks.py",
       "present": true,
-      "sha256_lf": "eb63968ac09b5ffb64721257cdcc1db18b151cb974c51eac49a2a34ee88b2c5f",
-      "bytes": 17957
+      "sha256_lf": "a5179ac6c1ae3aabb5c86b1e27c6cf8e02eb2717360051498288e846dee336e3",
+      "bytes": 36111
     },
     {
       "path": "agents/review_contract.py",
       "present": true,
-      "sha256_lf": "ce000c603d2a46ec5a4f04750db683d6c44defff276937e425c64103e28a0959",
-      "bytes": 7338
+      "sha256_lf": "d2abcbf19fa4a13e93673b4ce66d69d6e7bfed55208cfd01229bccd8f675bb54",
+      "bytes": 7267
     },
     {
       "path": "agents/research_graph.py",
       "present": true,
-      "sha256_lf": "14d0729817c61fcf364817c5b455a70fa2b5dfbbd02bb9bb93b9e4b223a3a1cd",
-      "bytes": 32951
+      "sha256_lf": "9dfa5936879e68cc24fabf45a388726174b0fcb54f59caeffafc1938f60769b5",
+      "bytes": 40817
     },
     {
       "path": "agents/provider.py",
       "present": true,
       "sha256_lf": "2aa8dca024880aa27bf3326c152df5471407a240585c9a7fc821cef4d6787789",
-      "bytes": 12188
+      "bytes": 11962
+    },
+    {
+      "path": "agents/budget.py",
+      "present": true,
+      "sha256_lf": "2360a38d7ed9e7379acec88a83941df36b133432cd4be23dcebcef003bbe4cf8",
+      "bytes": 11615
+    },
+    {
+      "path": "agents/store.py",
+      "present": true,
+      "sha256_lf": "1e2e38df8b1e3ae58668137328f485ce46cd8e9b85f20640e595720edbdd1718",
+      "bytes": 14995
+    },
+    {
+      "path": "agents/worker.py",
+      "present": true,
+      "sha256_lf": "77e620ca524d69c592f27b53dfe973d53d0055a3d8712268bc7d85e9770a6832",
+      "bytes": 3574
+    },
+    {
+      "path": "scripts/dev_traces.py",
+      "present": true,
+      "sha256_lf": "c1bd92f81b21db27c81b7d037d6204a2ba39f590b9d40ecbaff7f31591b5e465",
+      "bytes": 12637
+    },
+    {
+      "path": "scripts/formal_runs.py",
+      "present": true,
+      "sha256_lf": "2dab4fc4be571af1db7540ca15c512440c7d8eb6b27ee53b5fde7b1a365c4cc3",
+      "bytes": 9501
     }
   ],
   "prompt_files": [
     {
       "path": "agents/prompts/researcher-v1.2.txt",
       "present": true,
-      "sha256_lf": "72d4ad36ca774c4a80d503d85658b9ef7095d6620741120d1bb8a8fda8310c08",
-      "bytes": 2840
+      "sha256_lf": "795da03d0a1165570ca27493a9a5c312dc812b41d47e38efb03d72f7b16b671d",
+      "bytes": 3671
     },
     {
       "path": "agents/prompts/reviewer-v1.2.txt",
       "present": true,
-      "sha256_lf": "322625496a8e2ea48987a7d976febd94aa4d9c823ca3fcd0bf540cb0e1ccbaef",
-      "bytes": 2663
+      "sha256_lf": "a42c3338a07ac4bf154f67c73ffb1c0125e955d4fd88cc999d5949b7839b88f7",
+      "bytes": 2860
     }
   ],
   "summary": {

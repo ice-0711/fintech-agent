@@ -159,3 +159,7 @@ prompt 版本不變，只改覆核程式與覆核視圖。
 | 24 | `pe_ttm` 沒附計算輸入、也不是引用公告原文時，數值必須出現在這個 job 的某個工具結果裡（允許依主張位數四捨五入）；找不到列 critical | `agents/review_checks.py`（`rounds_to`、`numeric_leaves`） | 正式實驗前檢查：原本只有附 `inputs` 才會重算，prompt 沒要求附，本益比數值實際上沒有規則核對 |
 
 只會讓「不是工具算出來的本益比」被擋；已存的 36 份 v2 草稿結果不變。鎖定清單另補列 `scripts/dev_traces.py`、`scripts/formal_runs.py`（決策 38）。
+
+## 鎖定（2026-11-15 19:32，決策 41）
+
+Agent v2（第 1 至 24 項）連同兩支 runner 與兩個 prompt 已鎖定，用於 W10／W11 正式評估 `formal-v2`。鎖定內容、hash、驗證與已知限制見 `handoff/v12-freeze.md`、`release/eval-version.json`。之後的任何修改都要由組長決定並改用新的實驗版本代號，不併入 `formal-v2` 的結果。

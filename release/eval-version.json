@@ -1,0 +1,195 @@
+{
+  "experiment": "formal-v2",
+  "purpose": "W10／W11 正式評估：保留集 20 案 × 3 模式（single、dual、workflow）= 60 run",
+  "agent_version": "Agent v2（handoff/agent-version-changes.md 第 1 至 24 項）",
+  "locked_at": "2026-11-15T19:32:19+08:00",
+  "locked_by": "組長",
+  "lock_command": "python scripts/build_freeze.py --lock-agent",
+  "verify_command": "python scripts/build_freeze.py --verify --strict（scripts/formal_runs.py --live 每次執行前自動核對，不通過就拒絕執行）",
+  "commits": {
+    "head_before_lock": "503b8be",
+    "last_change_to_locked_files": "ddb20c2",
+    "note": "鎖定的 commit 只更新凍結紀錄並新增本檔與 handoff/v12-freeze.md；被鎖定的 14 個檔案內容與 503b8be 相同。每個正式 run 另在 evaluation/formal/runs-v2.jsonl 記下執行當時的 commit。"
+  },
+  "model": {
+    "provider": "Google Gemini",
+    "model_id": "gemini-3.5-flash-lite",
+    "thinking_level": "minimal",
+    "temperature": 0,
+    "source": "handoff/quota-baseline.json；執行時與環境變數 GEMINI_MODEL 比對，不一致就停止"
+  },
+  "prompts": {
+    "researcher": {
+      "version": "researcher-v1.2.5",
+      "file": "agents/prompts/researcher-v1.2.txt",
+      "sha256_lf": "795da03d0a1165570ca27493a9a5c312dc812b41d47e38efb03d72f7b16b671d"
+    },
+    "reviewer": {
+      "version": "reviewer-v1.2.2",
+      "file": "agents/prompts/reviewer-v1.2.txt",
+      "sha256_lf": "a42c3338a07ac4bf154f67c73ffb1c0125e955d4fd88cc999d5949b7839b88f7"
+    }
+  },
+  "budget_limits": {
+    "max_calls": 8,
+    "initial_research_calls": 4,
+    "max_input_tokens": 6000,
+    "max_output_tokens": 1500,
+    "job_token_budget": 64000,
+    "max_tool_calls": 10,
+    "max_same_tool_call": 2,
+    "max_supplement_rounds": 2,
+    "max_active_seconds": 180.0,
+    "max_retries": 1
+  },
+  "quota": {
+    "jobs_per_quota_day_J": {
+      "formula": "min(6, floor(max(0, floor(0.8 * RPD) - other_daily_reserved) / 8))",
+      "value": 6,
+      "reason": "RPD 500 → floor(0.8×500)=400 → floor(400/8)=50 → min(6, 50)=6"
+    },
+    "rpm": 15,
+    "tpm": 250000,
+    "rpd": 500,
+    "quota_day": "太平洋時間的日期（台北時間 16:00 重置）"
+  },
+  "agent_input": {
+    "focus": "案例的 task（題目，一字不改）",
+    "as_is_fields": [
+      "task_input",
+      "draft_under_review"
+    ],
+    "never_sent": [
+      "variant",
+      "category",
+      "expected_behavior",
+      "expected_supported_claims",
+      "expected_rejected_claims",
+      "allow_insufficient",
+      "perturbation_location",
+      "required_elements"
+    ],
+    "decision": "handoff/decisions-2026-10.md 第 31 節"
+  },
+  "cases": {
+    "freeze_version": "cases-v1",
+    "cases_digest": "98af84030d45c8a571044b7b70a37e8303f9ddaec07c5ea02888ae8028f46cd3",
+    "stage1_frozen_at": "2026-10-25T10:46:33+08:00",
+    "amendments": [
+      {
+        "revision": 1,
+        "amended_at": "2026-11-11T20:25:47+08:00"
+      },
+      {
+        "revision": 2,
+        "amended_at": "2026-11-13T21:16:30+08:00"
+      }
+    ],
+    "holdout_cases": 20,
+    "sealed_cases_file": "evaluation/test-cases-sealed.json",
+    "sealed_cases_sha256_lf": "117335c01401137d21d4b1c90120be92f497f0969adda26a49a5213916d27835",
+    "sealed_fixtures_sha256_lf": "7d9a5eebe099f1b5ae173a0149b5e12f05210f1924840a9d28bf5045163efef2"
+  },
+  "run_plan": {
+    "file": "evaluation/run-plan.json",
+    "sha256_lf": "b5276f7450867a7e79a4281d8fd25b36946f93e5bbcb72a93ff6f3e5b498b7fd",
+    "seed": 20261116,
+    "n_runs": 60,
+    "quota_days": 10,
+    "schedule": "2026-11-16 至 2026-11-25，每天 19:30（台北），每天 6 run"
+  },
+  "data_versions": {
+    "tools_version": "tools-v12.0",
+    "contract_version": "v1.2",
+    "question_version": "macro-fundamental-valuation-v1",
+    "prompt_version": "v1.2",
+    "tool_contract": "v1.2-w07",
+    "snapshot_manifest": "v1.7-price-history",
+    "snapshot_cutoff": "2026-09-30",
+    "peer_snapshot": "v1.8-w06",
+    "macro_whitelist": [
+      "CPIAUCSL",
+      "FEDFUNDS",
+      "TAIEX"
+    ]
+  },
+  "locked_files": [
+    {
+      "path": "agents/tools.py",
+      "sha256_lf": "bf3a3e807f4c8ff788ad32c781dd4803e6c9fd40adde230b0a8d91c20b10c202",
+      "bytes": 17070
+    },
+    {
+      "path": "agents/snapshot.py",
+      "sha256_lf": "fc9c844af5138e994f52980f12de6346a933be9b83e7147b9f6c33f4a599a8df",
+      "bytes": 12822
+    },
+    {
+      "path": "agents/contract.py",
+      "sha256_lf": "c7e093ef481eaf3813afaa3f34b471f9d38141c2ee2dfb60b4ecf479235bf9ed",
+      "bytes": 4302
+    },
+    {
+      "path": "agents/review_checks.py",
+      "sha256_lf": "a5179ac6c1ae3aabb5c86b1e27c6cf8e02eb2717360051498288e846dee336e3",
+      "bytes": 36111
+    },
+    {
+      "path": "agents/review_contract.py",
+      "sha256_lf": "d2abcbf19fa4a13e93673b4ce66d69d6e7bfed55208cfd01229bccd8f675bb54",
+      "bytes": 7267
+    },
+    {
+      "path": "agents/research_graph.py",
+      "sha256_lf": "9dfa5936879e68cc24fabf45a388726174b0fcb54f59caeffafc1938f60769b5",
+      "bytes": 40817
+    },
+    {
+      "path": "agents/provider.py",
+      "sha256_lf": "2aa8dca024880aa27bf3326c152df5471407a240585c9a7fc821cef4d6787789",
+      "bytes": 11962
+    },
+    {
+      "path": "agents/budget.py",
+      "sha256_lf": "2360a38d7ed9e7379acec88a83941df36b133432cd4be23dcebcef003bbe4cf8",
+      "bytes": 11615
+    },
+    {
+      "path": "agents/store.py",
+      "sha256_lf": "1e2e38df8b1e3ae58668137328f485ce46cd8e9b85f20640e595720edbdd1718",
+      "bytes": 14995
+    },
+    {
+      "path": "agents/worker.py",
+      "sha256_lf": "77e620ca524d69c592f27b53dfe973d53d0055a3d8712268bc7d85e9770a6832",
+      "bytes": 3574
+    },
+    {
+      "path": "scripts/dev_traces.py",
+      "sha256_lf": "c1bd92f81b21db27c81b7d037d6204a2ba39f590b9d40ecbaff7f31591b5e465",
+      "bytes": 12637
+    },
+    {
+      "path": "scripts/formal_runs.py",
+      "sha256_lf": "2dab4fc4be571af1db7540ca15c512440c7d8eb6b27ee53b5fde7b1a365c4cc3",
+      "bytes": 9501
+    },
+    {
+      "path": "agents/prompts/researcher-v1.2.txt",
+      "sha256_lf": "795da03d0a1165570ca27493a9a5c312dc812b41d47e38efb03d72f7b16b671d",
+      "bytes": 3671
+    },
+    {
+      "path": "agents/prompts/reviewer-v1.2.txt",
+      "sha256_lf": "a42c3338a07ac4bf154f67c73ffb1c0125e955d4fd88cc999d5949b7839b88f7",
+      "bytes": 2860
+    }
+  ],
+  "result_labels": [
+    "Agent v1 與 v2 的結果不放同一張表。",
+    "到 2026-11-12 為止的開發集結果是「送變體名稱」的條件；11/14 起與正式實驗是「送 task」的條件（每個 run 的 focus_source）。",
+    "2026-11-14 以前的 dual 結果是覆核規則修正前（第 20 至 24 項之前）；正式實驗用鎖定時的規則。",
+    "2026-11-11 以前的結果是補齊歷史股價之前。"
+  ],
+  "details": "handoff/v12-freeze.md"
+}
