@@ -564,7 +564,7 @@
 
   function refButtons(list, reportId) {
     if (!list || !list.length) return "";
-    return list.map(r => `<button type="button" class="ref${r.exists ? "" : " missing"}" data-evidence="${esc(r.id)}"${reportId ? ` data-report="${esc(reportId)}"` : ""} title="${r.exists ? "開啟精確來源版本" : "快照中沒有這個來源片段"}">${esc(r.id)}</button>`).join(" ");
+    return list.map(r => `<button type="button" class="ref${r.exists ? "" : " missing"}" data-evidence="${esc(r.id)}"${reportId ? ` data-report="${esc(reportId)}"` : ""} title="${r.exists ? (String(r.id).startsWith("obs-") ? "開啟工具觀察與它對應的來源" : "開啟精確來源版本") : (String(r.id).startsWith("obs-") ? "這個工具觀察對不到來源" : "快照中沒有這個來源片段")}">${esc(r.id)}</button>`).join(" ");
   }
 
   async function openReport(rvId) {
@@ -743,6 +743,39 @@
 
   /* ---------------- W04: source drawer ---------------- */
   let lastFocus = null;
+  // A cited tool observation (obs-*), traced through the job's own tool record (B, 11/15).
+  const TOOL_TEXT = { read_evidence: "讀取來源片段", search_evidence: "搜尋來源", get_financial_snapshot: "財報快照",
+    get_price_window: "股價視窗", get_macro_snapshot: "總經資料", calculate_metrics: "計算指標" };
+  function targetHtml(t, reportId) {
+    const cut = t.cutoff_ok === undefined ? "" : badge(t.cutoff_ok ? "cutoff 前可得" : "cutoff 後才可得", t.cutoff_ok ? "b-ok" : "b-bad");
+    if (t.kind === "evidence") {
+      const ok = t.exists && t.hash_match !== false;
+      return `<li><button type="button" class="ref${ok ? "" : " missing"}" data-evidence="${esc(t.id)}"${reportId ? ` data-report="${esc(reportId)}"` : ""}>${esc(t.id)}</button>
+        ${badge(t.seen, t.seen === "只看到摘要" ? "b-warn" : "b-neutral")}${!t.exists ? badge("不在快照中", "b-bad") : t.hash_match ? badge("hash 吻合", "b-ok") : badge("hash 不符", "b-bad")}${cut}</li>`;
+    }
+    if (t.kind === "financial_snapshot")
+      return `<li>財報快照 <span class="mono">${esc(t.source_id)}</span>：${esc(t.latest_period)}（${esc((t.periods || []).join("、"))}）${cut}<br><span class="mono small">sha256 ${esc(String(t.content_hash || "").slice(0, 16))}…</span></li>`;
+    if (t.kind === "price")
+      return `<li>股價 <span class="mono">${esc(t.source_id)}</span>：${esc((t.trade_dates || []).join("、"))}${cut}</li>`;
+    if (t.kind === "macro")
+      return `<li>總經：${(t.rows || []).map(r => `${esc(r.series_id)} ${esc(r.observation_date)}`).join("、")}</li>`;
+    return `<li>${esc(JSON.stringify(t))}</li>`;
+  }
+  function observationHtml(e, reportId) {
+    const targets = e.targets || [];
+    return `
+      <div class="actions">${badge("工具觀察", "b-run")}${e.resolved ? badge("已對應到來源", "b-ok") : badge("對不到來源", "b-bad")}</div>
+      <dl class="kv">
+        <dt>觀察編號</dt><dd class="mono">${esc(e.evidence_version_id)}</dd>
+        <dt>工具</dt><dd>${esc(TOOL_TEXT[e.tool] || e.tool || "—")} <span class="mono">${esc(e.tool || "")}</span>（${esc(e.tool_status || "—")}）</dd>
+        ${e.via && e.via.length ? `<dt>計算輸入來自</dt><dd class="mono">${e.via.map(esc).join("、")}</dd>` : ""}
+        ${e.output_hash ? `<dt>結果 hash</dt><dd class="mono">${esc(e.output_hash)}</dd>` : ""}
+      </dl>
+      ${targets.length ? `<p><b>${esc(e.evidence_version_id)} → 實際查到的來源</b></p><ul class="obs-targets">${targets.map(t => targetHtml(t, reportId)).join("")}</ul>` : ""}
+      ${e.note || e.reason ? `<div class="conn warn-line">${esc(e.note || e.reason)}</div>` : ""}
+      <p class="footnote">對應依這個 job 自己的工具紀錄（工具、參數、回傳結果），不重跑工具、不採用模型自己的說法；對到的片段再用「在快照中、hash 相符」的規則檢查。「只看到摘要」表示模型只看過搜尋結果的摘要，沒有讀全文。</p>`;
+  }
+
   function closeDrawer() {
     $("#drawer").hidden = true; $("#drawerBackdrop").hidden = true;
     if (lastFocus) lastFocus.focus();
@@ -756,6 +789,7 @@
     try {
       const q = reportId ? `?report=${encodeURIComponent(reportId)}` : "";
       const { evidence: e } = await getJson(`/api/ui/evidence/${encodeURIComponent(id)}${q}`);
+      if (e.kind === "observation") { $("#drawerBody").innerHTML = observationHtml(e, reportId); return; }
       const isSnap = e.kind === "financial_snapshot";
       $("#drawerBody").innerHTML = `
         <div class="actions">${e.synthetic_fixture ? badge("FIXTURE", "b-fixture") : ""}${isSnap ? badge("財報快照・工具結果", "b-run") : e.hash_match ? badge("hash 吻合", "b-ok") : badge("hash 不符・待 B 核對", "b-bad")}${e.cutoff_check ? badge(e.cutoff_check, e.cutoff_check.startsWith("cutoff 前") ? "b-ok" : "b-bad") : ""}</div>

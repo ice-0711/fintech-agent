@@ -286,6 +286,27 @@ def render_report_pdf(report: dict[str, Any], version: dict[str, Any]) -> bytes:
     # ---- sources
     d.heading("來源")
     for s in data.get("sources") or []:
+        if s.get("kind") == "observation":  # obs-* traced through the job's tool record (B, 11/15)
+            head = f"{s['id']}　工具觀察 {s.get('tool') or ''}"
+            if not s.get("resolved"):
+                d.text(f"{head}　對不到來源：{s.get('reason')}", 8.5, color=RED)
+                continue
+            d.text(head + (f"（計算輸入來自 {'、'.join(s.get('via') or [])}）" if s.get("via") else ""), 8.5, True)
+            for t in s.get("targets") or []:
+                if t.get("kind") == "evidence":
+                    state = "不在快照中" if not t.get("exists") else ("hash 相符" if t.get("hash_match") else "hash 不符")
+                    d.text(f"　→ {t['id']}（{t.get('seen')}；{state}；可得 {_tw(t.get('available_at'))}）", 8.5, color=MUTED)
+                elif t.get("kind") == "financial_snapshot":
+                    d.text(f"　→ 財報快照 {t.get('source_id')}：{t.get('latest_period')}（{'、'.join(t.get('periods') or [])}）",
+                           8.5, color=MUTED)
+                elif t.get("kind") == "price":
+                    d.text(f"　→ 股價 {t.get('source_id')}：{'、'.join(t.get('trade_dates') or [])}", 8.5, color=MUTED)
+                elif t.get("kind") == "macro":
+                    d.text("　→ 總經：" + "、".join(f"{r.get('series_id')} {r.get('observation_date')}"
+                                                 for r in t.get("rows") or []), 8.5, color=MUTED)
+            if s.get("note"):
+                d.text(f"　{s['note']}", 8.5, color=MUTED)
+            continue
         if s.get("resolved") and s.get("kind") == "financial_snapshot":
             d.text(f"{s['id']}　財報快照（工具結果）　可得 {_tw(s.get('available_at'))}　原始檔 {s.get('source_id')}　"
                    f"sha256 {str(s.get('content_hash'))[:16]}…", 8.5, True)
