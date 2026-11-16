@@ -408,3 +408,18 @@
 - **generated_late（組長決定補）**：`research/forward-batch-3.json` 的 `generated_late` 由 null 改為文字（排程中止原因、21:16 手動執行、晚於截止 16 分鐘），寫法同第 1、2 批；只改這一欄，快照與其 hash 不變。B 的總表程式兩種情況都能讀；B 的測試 `test_generated_late_derived_from_time_when_record_is_silent` 原本靠第 3 批紀錄為 null 來測「紀錄沒寫時由產生時間判定」，改名為 `test_generated_late_for_the_real_batches`，另以假資料補一個同名測試涵蓋該情況。
 - 仍待組長決定：公開對照表後由程式比對停止原因（B、D 11/12 同意，需在 11/25 匯出前完成）；前瞻第 3 批是否發布。
 - pytest 503 通過；`build_freeze.py --verify --strict` 通過；正式進度 0／60。
+
+## 43. 2026-11-16 合併 A 的兩個分支（回放清單、obs 對回來源）；前瞻第 3 批的來源對應結果
+
+- **A 11/15 的提問**（發布程式要不要把 obs-N 和它查到的來源存進報告、改 `agents/publication.py`）：A 隨後找到不改 `publication.py` 的做法（發布時傳入的 job 本來就帶工具紀錄），這題不用決定。
+- **合併**（組長 11/16 決定）：
+  - `codex/A-replay-task-batches`：回放清單加入 11/14、11/15 兩批（題目送 task）並自成一組；三條示範路徑為 CASE-04 通過、CASE-19 退回修正後通過、CASE-15 證據不足；另有 52 秒回放影片與 12 張截圖（`design/replay-demo-paths-1115.md`）。
+  - `codex/A-obs-source-map`：報告的「來源可追溯」改為把 obs-* 對回這個 job 自己的工具紀錄（規則依 B 11/15，`design/obs-source-trace-1115.md`）：read_evidence／search_evidence 對到它讀到或看到的片段、財報／股價／總經對到快照實際回傳的季別與日期、calculate_metrics 要往回追到更早的工具結果；對不到判「缺來源」，事實主張沒有引用任何來源也判缺。對應表存進發布版本（`data.obs_map`），來源抽屜與 PDF 會列出。
+  - 兩個分支都沒有動到第二段鎖定的檔案、`data/`、`fixtures/`、案例檔與 `agents/publication.py`。合併前在暫存區試合、合併後在 main 上各驗一次：pytest 516 通過，`build_freeze.py --verify --strict` 通過，正式 runner 的執行前檢查通過，正式進度 0／60。
+  - 組長端以合併前後的程式重算 9 份前瞻報告的資料：兩份已發布的 Agent v1 報告（第 1 批 2317、第 2 批 2330）以及其他 Agent v1 草稿，除了版本號（report-data-v1.4 → v1.5）外完全相同；判定改變的只有引用 obs 的草稿（第 2 批 2454 由 pass 改為 missing，未發布）。
+- **第 3 批的對應結果**（`scripts/obs_trace_check.py --batch 3`，只讀組長 Mac 的 job 資料庫、不呼叫模型；結果 `research/forward-batch-3-obs-trace.json`，交 B 核對）：
+  - 2454：3 個 obs 都對到快照的來源（4 筆片段 hash 相符、財報快照 2025Q3–2026Q2、股價 11/13），來源可追溯 pass，資料品質風險低。
+  - 2317：obs-5（計算本益比的 calculate_metrics）在紀錄中找不到計算輸入，判「計算結果，輸入未驗證」，來源可追溯 missing，資料品質風險高。原因是 job 紀錄只保存工具結果與參數雜湊，沒有保存 calculate_metrics 的輸入數值。B 11/14 稽核另外發現這個本益比用的是 11/11 而非 11/13 的收盤價。
+  - 2330：沒有可發布的草稿，略過。
+- **已知限制**：job 紀錄不保存計算輸入，所以之後用 calculate_metrics 算出本益比等數值的 Agent v2 報告，發布時這一項都可能被判缺來源。要從根本修需要改 `agents/research_graph.py`（第二段鎖定中），只能在 60 run 跑完後另議；正式實驗不發布報告，不受影響。
+- **待組長決定**：B 核對對應結果後，第 3 批是否只發布 2454（組長端建議：發布 2454，補上「三份研究 PDF」缺的聯發科；第 3 批 2317 不發布，2317 已有第 1 批的已發布報告）。

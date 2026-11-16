@@ -1,0 +1,325 @@
+{
+ "batch": 3,
+ "snapshot_sha256": "64d5032e8bc473d45bad732ee36cd6d6a276041aa2b7088bdcdd4c5cc860c3ac",
+ "results": [
+  {
+   "job_id": "ba3d694c-dd56-464f-9356-a0a228833bb1",
+   "ticker": "2330",
+   "status": "insufficient_evidence",
+   "source_snapshot_id": "snap-fwd3-64d5032e8bc4",
+   "claims": [],
+   "obs_map_status": null,
+   "observations": [],
+   "source_traceable": {
+    "result": "pass",
+    "detail": ""
+   },
+   "data_quality": "資料品質風險：低"
+  },
+  {
+   "job_id": "a1238bbc-1bab-4db4-942d-1f4db3972ed3",
+   "ticker": "2317",
+   "status": "succeeded",
+   "source_snapshot_id": "snap-fwd3-64d5032e8bc4",
+   "claims": [
+    {
+     "claim_id": "c1",
+     "kind": "fact",
+     "evidence_refs": [
+      "obs-1"
+     ]
+    },
+    {
+     "claim_id": "c2",
+     "kind": "fact",
+     "evidence_refs": [
+      "obs-2"
+     ]
+    },
+    {
+     "claim_id": "c3",
+     "kind": "fact",
+     "evidence_refs": [
+      "obs-3",
+      "obs-5"
+     ]
+    }
+   ],
+   "obs_map_status": "ok",
+   "observations": [
+    {
+     "id": "obs-1",
+     "resolved": true,
+     "tool": "search_evidence",
+     "tool_status": "ok",
+     "via": [],
+     "targets": [
+      {
+       "kind": "evidence",
+       "id": "ev-fwd1-2317-rev-202609",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-10-28T21:18:00+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t146sb05",
+       "content_hash": "3062e5fb7c06a10fa11293dec370818fa86207be7480654a1938e7cbffc091f7",
+       "excerpt": "鴻海最近12個月份（累計與當月）營業收入統計表（單位：仟元；表格數值整理，取 115 年 7–9 月三列）：115年9月 當月營收1,158,633,235，去年當月營收837,067,572，去年同月增減38.42%，當月累計營收7,669,772,510，去年累計營收5,496,964,888，前期比較增減39.53%；115年8月 當月營收921,766,023，去年當月營收606,512,…",
+       "cutoff_ok": true
+      },
+      {
+       "kind": "evidence",
+       "id": "ev-fwd1-2317-itc337",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-10-11T16:59:13+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t05st01",
+       "content_hash": "0e610b48185433fb4c3b6c0a2be1c6c866a8dbd5a43493278458c48370cb8931",
+       "excerpt": "本公司近日獲悉，美國國際貿易委員會（United States International Trade Commission，USITC）於美國時間2026年10月9日，就美國Vicor Corporation提出之專利侵權主張，正式啟動337調查（調查編號：337-TA-1526）。本次調查涉及美國專利US 10,903,734，調查範圍包括特定垂直供電系統、相關組件，以及搭載該等系統之運算系統…",
+       "cutoff_ok": true
+      },
+      {
+       "kind": "evidence",
+       "id": "ev-fwd3-2317-fs-2026q3",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-11-12T14:15:06+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t05st01",
+       "content_hash": "cecd9109edb96fda81369532ef3a34f5419a8fa1817bba08d9ea7d35edbf6c2f",
+       "excerpt": "1.提報董事會或經董事會決議日期:115/11/12 2.審計委員會通過日期:115/11/12 3.財務報告或年度自結財務資訊報導期間起訖日期(XXX/XX/XX~XXX/XX/XX):115/1/1~115/9/30 4.1月1日累計至本期止營業收入(仟元):7,661,061,739 5.1月1日累計至本期止營業毛利(毛損) (仟元):467,027,173 6.1月1日累計至本期止營業利益…",
+       "cutoff_ok": true
+      },
+      {
+       "kind": "evidence",
+       "id": "ev-fwd3-2317-rev-202610",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-11-12T20:55:00+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t146sb05",
+       "content_hash": "e6fe5f9d3921dd641e1e15b964a8525d3c1dabe662e5f75325193510539f467c",
+       "excerpt": "鴻海營收資訊（單位：新台幣仟元）：本年迄今累計營收8,975,092,122，去年同期累計營收6,392,673,413，累計營收成長率40.40%；115年10月營收1,305,319,612，去年同期月營收895,708,525，月營收成長率45.73%；115年09月營收1,158,633,235，去年同期月營收837,067,572，月營收成長率38.42%",
+       "cutoff_ok": true
+      }
+     ],
+     "note": "",
+     "reason": null
+    },
+    {
+     "id": "obs-2",
+     "resolved": true,
+     "tool": "get_financial_snapshot",
+     "tool_status": "ok",
+     "via": [],
+     "targets": [
+      {
+       "kind": "financial_snapshot",
+       "source_id": "src-finmind-2317-fs",
+       "snapshot_id": "snap-2317-2026Q2",
+       "latest_period": "2026Q2",
+       "periods": [
+        "2025Q3",
+        "2025Q4",
+        "2026Q1",
+        "2026Q2"
+       ],
+       "period_basis": "single_quarter",
+       "content_hash": "1442fc6df2415e638621201af72b6364485c01a83e418a635efeadeddfea9718",
+       "available_at": "2026-08-12T14:15:01+08:00",
+       "cutoff_ok": true
+      }
+     ],
+     "note": "",
+     "reason": null
+    },
+    {
+     "id": "obs-3",
+     "resolved": true,
+     "tool": "get_price_window",
+     "tool_status": "ok",
+     "via": [],
+     "targets": [
+      {
+       "kind": "price",
+       "source_id": "finmind_price",
+       "content_hash": "373e510bffb0bc7605b7018cf4ccf78f07c485c10c22d34d501950538d6d4acc",
+       "trade_dates": [
+        "2026-11-09",
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13"
+       ],
+       "price_basis": "raw_close",
+       "available_at": "2026-11-13T17:30:00+08:00",
+       "cutoff_ok": true
+      }
+     ],
+     "note": "",
+     "reason": null
+    },
+    {
+     "id": "obs-5",
+     "resolved": false,
+     "tool": "calculate_metrics",
+     "tool_status": "ok",
+     "via": [],
+     "targets": [],
+     "note": "計算結果，輸入未驗證（紀錄找不到這次計算的輸入）",
+     "reason": "計算結果，輸入未驗證（紀錄找不到這次計算的輸入）"
+    }
+   ],
+   "source_traceable": {
+    "result": "missing",
+    "detail": "obs-5 對不到來源（計算結果，輸入未驗證（紀錄找不到這次計算的輸入））"
+   },
+   "data_quality": "資料品質風險：高"
+  },
+  {
+   "job_id": "50f04881-d6d8-48fb-9c30-29a2d33cdf37",
+   "ticker": "2454",
+   "status": "succeeded",
+   "source_snapshot_id": "snap-fwd3-64d5032e8bc4",
+   "claims": [
+    {
+     "claim_id": "c1",
+     "kind": "fact",
+     "evidence_refs": [
+      "obs-1"
+     ]
+    },
+    {
+     "claim_id": "c2",
+     "kind": "fact",
+     "evidence_refs": [
+      "obs-2"
+     ]
+    },
+    {
+     "claim_id": "c3",
+     "kind": "fact",
+     "evidence_refs": [
+      "obs-3"
+     ]
+    }
+   ],
+   "obs_map_status": "ok",
+   "observations": [
+    {
+     "id": "obs-1",
+     "resolved": true,
+     "tool": "search_evidence",
+     "tool_status": "ok",
+     "via": [],
+     "targets": [
+      {
+       "kind": "evidence",
+       "id": "ev-fwd1-2454-rev-202609",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-10-08T16:55:37+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t05st01",
+       "content_hash": "bccc69e0bfdd48fb0b8c50bc3df4995b767094a9393bc7176ec39f773826ab10",
+       "excerpt": "聯發科技一百一十五年九月份自結合併營收淨額為新台幣553億9仟9佰萬元，較前月合併營收淨額新台幣641億8仟3佰萬元減少13.69%。",
+       "cutoff_ok": true
+      },
+      {
+       "kind": "evidence",
+       "id": "ev-fwd1-2454-fs-2026q3",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-10-30T17:02:29+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t05st01",
+       "content_hash": "f1dc352d62d660b3fac524f62cbc93237fd7cf216bd5d2c6a56448bf84c5cb82",
+       "excerpt": "1.提報董事會或經董事會決議日期:115/10/30 2.審計委員會通過日期:115/10/29 3.財務報告或年度自結財務資訊報導期間起訖日期(XXX/XX/XX~XXX/XX/XX):115/01/01~115/09/30 4.1月1日累計至本期止營業收入(仟元):469,390,909 5.1月1日累計至本期止營業毛利(毛損) (仟元):217,211,357 6.1月1日累計至本期止營業利…",
+       "cutoff_ok": true
+      },
+      {
+       "kind": "evidence",
+       "id": "ev-fwd1-2454-call-2026q3",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-10-30T17:04:17+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t05st01",
+       "content_hash": "a89afc0754681cdf68dc34a6b13ce8e796e2d3ba1aee6878040bdfdecfe97ece",
+       "excerpt": "聯發科技公佈2026年第三季合併財務報告。本季合併營收為新台幣1,680億5仟8佰萬元，較前季增加10.4%，較去年同期增加18.3%。本季合併毛利率為46.3%，較前季增加0.1個百分點，較去年同期減少0.2個百分點。本季合併營業利益為新台幣271億2佰萬元，較前季增加18.5%，較去年同期增加22.2%。本季合併本期淨利為新台幣281億9仟9佰萬元，較前季增加14.6%，較去年同期增加10.8…",
+       "cutoff_ok": true
+      },
+      {
+       "kind": "evidence",
+       "id": "ev-fwd3-2454-rev-202610",
+       "seen": "只看到摘要",
+       "exists": true,
+       "hash_match": true,
+       "available_at": "2026-11-10T16:55:49+08:00",
+       "source_url": "https://mops.twse.com.tw/mops/#/web/t05st01",
+       "content_hash": "a85ece190563549e41a7c3fffda27be1977027664b3558c6445dd70f3d10b614",
+       "excerpt": "聯發科技一百一十五年十月份自結合併營收淨額為新台幣550億2仟6佰萬元，較前月合併營收淨額新台幣553億9仟9佰萬元減少0.67%。",
+       "cutoff_ok": true
+      }
+     ],
+     "note": "",
+     "reason": null
+    },
+    {
+     "id": "obs-2",
+     "resolved": true,
+     "tool": "get_financial_snapshot",
+     "tool_status": "ok",
+     "via": [],
+     "targets": [
+      {
+       "kind": "financial_snapshot",
+       "source_id": "src-finmind-2454-fs",
+       "snapshot_id": "snap-2454-2026Q2",
+       "latest_period": "2026Q2",
+       "periods": [
+        "2025Q3",
+        "2025Q4",
+        "2026Q1",
+        "2026Q2"
+       ],
+       "period_basis": "single_quarter",
+       "content_hash": "26f9b31fb96869c8859b22ca10be6c994e8d979c5796ab632ec1eda0d9ad6db3",
+       "available_at": "2026-07-31T18:41:57+08:00",
+       "cutoff_ok": true
+      }
+     ],
+     "note": "",
+     "reason": null
+    },
+    {
+     "id": "obs-3",
+     "resolved": true,
+     "tool": "get_price_window",
+     "tool_status": "ok",
+     "via": [],
+     "targets": [
+      {
+       "kind": "price",
+       "source_id": "finmind_price",
+       "content_hash": "8f6cd5ac05497e2960162a28313bc8e49e92c85cdc31b680e544059638706239",
+       "trade_dates": [
+        "2026-11-13"
+       ],
+       "price_basis": "raw_close",
+       "available_at": "2026-11-13T17:30:00+08:00",
+       "cutoff_ok": true
+      }
+     ],
+     "note": "",
+     "reason": null
+    }
+   ],
+   "source_traceable": {
+    "result": "pass",
+    "detail": ""
+   },
+   "data_quality": "資料品質風險：低"
+  }
+ ]
+}
