@@ -400,3 +400,11 @@
 - **交付**（手冊 W09-L）：`release/eval-version.json`（機器可讀，含 14 個檔的完整 hash、案例與執行計畫的 hash、結果標示規則）、`handoff/v12-freeze.md`（鎖定內容、鎖定前的驗證、已知限制 8 點、鎖定後的規則、驗收對照）。手冊所稱 `research/batch-3.json` 即 `research/forward-batch-3.json`。
 - **鎖定後**：到 60 run 跑完前，鎖定與凍結的檔案不修改；必須修改時由組長決定並改用新的實驗版本代號。正式實驗 11/16 19:30 起由排程每天執行 6 個。
 - B 的稽核另外記錄、組長端知悉的事項（都不改）：前瞻第 3 批 2317 的本益比用了 11/11 而非 11/13 的收盤價，覆核沒有發現（已列入 `handoff/v12-freeze.md` 已知限制第 2 點）；2330 是輸出格式無效而停止；`research/forward-batch-3.json` 的 `generated_late` 為空，實際晚於截止 16 分鐘（決策第 32 節已記錄，是否補進該檔由組長決定）。
+
+## 42. 2026-11-16 盲評範本補欄位；前瞻第 3 批補記 generated_late（回覆 B 11/15 的 W10-B 確認）
+
+- **評分時程**（B 詢問）：照決策 22，B、D 的評分與裁決排在 W11 後半；手冊 W10-B、W11-B 的評分合併，60 run 跑完匯出後一次做。交付檔仍照手冊分兩份，前 10 案／後 10 案依 `evaluation/run-plan.json` 的順序（第 1–5 天的 10 案為 batch1）。評分原檔放 `evaluation/formal/scoring-v2/`，檔名用 `scores-B`、`scores-D` 開頭（`--reveal` 只認這個開頭）；匯出前該資料夾不能放任何檔案（匯出程式會拒絕執行）。
+- **範本補欄位（組長決定加）**：`scripts/export_for_scoring.py` 產生的 B、D 評分範本，每份答卷補上 rubric 第六節的「植入錯誤：預期／被指出／修正幾個」「拒答：是否選 insufficient、是否說明缺口」兩欄；表頭寫明另存檔名 `scores-{評分者}.txt`。匯出程式不在鎖定清單，不影響正式實驗。測試 `tests/test_export_for_scoring.py` 新增 1 項。
+- **generated_late（組長決定補）**：`research/forward-batch-3.json` 的 `generated_late` 由 null 改為文字（排程中止原因、21:16 手動執行、晚於截止 16 分鐘），寫法同第 1、2 批；只改這一欄，快照與其 hash 不變。B 的總表程式兩種情況都能讀；B 的測試 `test_generated_late_derived_from_time_when_record_is_silent` 原本靠第 3 批紀錄為 null 來測「紀錄沒寫時由產生時間判定」，改名為 `test_generated_late_for_the_real_batches`，另以假資料補一個同名測試涵蓋該情況。
+- 仍待組長決定：公開對照表後由程式比對停止原因（B、D 11/12 同意，需在 11/25 匯出前完成）；前瞻第 3 批是否發布。
+- pytest 503 通過；`build_freeze.py --verify --strict` 通過；正式進度 0／60。

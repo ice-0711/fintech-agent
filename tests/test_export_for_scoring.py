@@ -112,3 +112,17 @@ def test_export_shows_scorers_the_task_and_the_fields_given_to_the_agent(env, mo
     md = (tmp / "out" / "answers.md").read_text(encoding="utf-8")
     assert "給 Agent 的 task：合成題目" in md and "只給評分者的 required_elements（沒有給 Agent）" in md
     assert "NOT-EXPORTED" not in md
+
+
+def test_score_templates_carry_rubric_rows_and_the_file_name_reveal_expects(env):
+    """11/16（B 提出，決策 42）：rubric 第六節的植入錯誤、拒答兩欄每份答卷都有；表頭寫明 --reveal 認的檔名。"""
+    tmp, db = env
+    ex.export(db=db)
+    for who in ("B", "D"):
+        text = (tmp / "out" / f"score-template-{who}.txt").read_text(encoding="utf-8")
+        n = text.count(" | 案例: ")
+        assert n == 9
+        assert text.count("植入錯誤: 預期") == n and text.count("拒答: 是否選 insufficient") == n
+        assert f"scores-{who}" in text
+        for leak in ("single", "dual", "workflow", "formal-v2-"):
+            assert leak not in text

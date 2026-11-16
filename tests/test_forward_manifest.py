@@ -134,9 +134,15 @@ def test_signal_price_and_basis_recorded(tmp_path):
     assert r["price_basis"].startswith("raw_unadjusted")
     assert r["evidence_ids"] == "ev-1" and r["inputs_checked"] == 4
 
-def test_generated_late_derived_from_time_when_record_is_silent():
-    """第 3 批紀錄的 generated_late 是 null，但 21:16 產生、晚於 21:00 截止：要判定為晚並註記分鐘數。"""
+def test_generated_late_for_the_real_batches():
+    """實際三批都晚於截止：第 1、2 批紀錄有寫；第 3 批 21:16 產生、晚 16 分鐘，紀錄 11/16 由組長端補記（決策 42）。"""
     by = {r["signal_id"]: r for r in bfm.build(ROOT)["signals"]}
     for sid in ("fwd1-2330", "fwd2-2330", "fwd3-2330", "fwd3-2317", "fwd3-2454"):
         assert by[sid]["generated_late"] is True
     assert "晚於截止 16 分鐘" in by["fwd3-2330"]["note"]
+
+
+def test_generated_late_derived_from_time_when_record_is_silent(tmp_path):
+    """批次紀錄沒寫 generated_late、產生時間晚於截止（第 3 批原本的情況）：由產生時間判定為晚並註記分鐘數。"""
+    r = bfm.build(_fake_repo(tmp_path))["signals"][0]
+    assert r["generated_late"] is True and "依 generated_at 判定" in r["note"]

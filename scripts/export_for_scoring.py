@@ -165,12 +165,17 @@ def render_md(answers: list[dict]) -> str:
 
 def template(answers: list[dict], who: str) -> str:
     out = [f"正式評估 v2 盲評紀錄（{who}）。標籤只用 supported / unsupported / unknown；inference 與 unknown 類不計分。",
-           "每份答卷照 rubric-v1-final.md 第六節填寫；兩人獨立，先不看對方分數。", ""]
+           "每份答卷照 rubric-v1-final.md 第六節填寫；兩人獨立，先不看對方分數。",
+           f"填完另存為 scores-{who}.txt，放在 evaluation/formal/scoring-v2/（--reveal 只認 scores-{who} 開頭的檔名）。", ""]
     for a in sorted(answers, key=lambda x: x["answer_id"]):
         out.append(f"{a['answer_id']} | 案例: {a['case_id']}")
         for c in ((a["draft"] or {}).get("claims") or []):
             out.append(f"  {c.get('claim_id')}({c.get('kind')}): 標註:   理由: ")
-        out += ["  引用可解析數/總數: ", "  整體結果: 符合預期 / 不符合預期   理由: ", "  備註: ", ""]
+        # rubric 第六節的植入錯誤、拒答兩欄（B 11/16 提出，決策 42）
+        out += ["  引用可解析數/總數: ",
+                "  植入錯誤: 預期   個、被指出   個、修正   個",
+                "  拒答: 是否選 insufficient: 是 / 否   是否說明缺口: 是 / 否",
+                "  整體結果: 符合預期 / 不符合預期   理由: ", "  備註: ", ""]
     return "\n".join(out) + "\n"
 
 
