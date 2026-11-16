@@ -116,3 +116,9 @@ def test_case04_runs_misjudged_by_since_fixed_rules_are_annotated_and_nothing_el
 
 def test_replays_never_read_the_sealed_holdout():
     assert all("holdout" not in rel and rel.startswith("agent/") for rel in TRACE_FILES)
+
+
+
+def test_a_replay_that_passed_review_is_not_shown_as_waiting_for_approval():
+    js = (ROOT / "static" / "research.js").read_text(encoding="utf-8")
+    assert 'job.replay && job.status === "succeeded" ? ["覆核通過（回放紀錄，不發布）"' in js

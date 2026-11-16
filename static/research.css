@@ -262,3 +262,6 @@ button.danger { background: var(--panel); color: var(--danger); border: 1px soli
 .obs-targets { margin: 6px 0 10px; padding-left: 18px; }
 .obs-targets li { margin: 6px 0; line-height: 1.6; }
 .obs-targets .small { font-size: 12px; color: var(--muted, #5b6566); }
+.obs-inputs { width: 100%; border-collapse: collapse; font-size: 13px; margin: 4px 0 10px; }
+.obs-inputs th, .obs-inputs td { border-bottom: 1px solid #e3e8e8; padding: 6px 6px; text-align: left; vertical-align: top; }
+.obs-inputs td.num { text-align: right; white-space: nowrap; }

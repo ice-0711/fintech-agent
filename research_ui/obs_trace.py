@@ -13,6 +13,9 @@ Per tool (B, 11/15):
 - get_macro_snapshot      → the macro rows returned
 - calculate_metrics       → traced through its inputs: each input value must appear in an earlier tool result of the
                             same job; then it follows those observations. Otherwise "計算結果，輸入未驗證".
+                            Each input keeps where it was found: obs, field path, the row's date (e.g. which day's
+                            close), whether more places hold the same number, and whether it is a small integer or
+                            year that can match by coincidence (B, 11/16).
 
 The ev- fragments found this way are then checked with the existing rule (in the snapshot, hash matches). The
 result is frozen into the report version (data["obs_map"]), so the source drawer shows the actual mapping and it
@@ -102,6 +105,46 @@ def _same(a: float, b: float) -> bool:
     return abs(a - b) <= 1e-9 * max(1.0, abs(a), abs(b))
 
 
+# which key dates a row, nearest first: a price row's trade day, a macro row's date, a statement's quarter, …
+DATE_KEYS = ("trade_date", "observation_date", "period", "latest_period", "date", "available_at")
+
+
+def _locate(value: float, data: Any, path: str = "", date: tuple[str, str] | None = None) -> list[dict[str, Any]]:
+    """Every place in a tool result where `value` occurs: field path, the row's date and which key it came from,
+    and whether it was a number field or only a number inside text (B, 11/16: record the field, not just the value)."""
+    if isinstance(data, dict):
+        key = next((k for k in DATE_KEYS if isinstance(data.get(k), str) and data.get(k)), None)
+        row = (key, str(data[key])) if key else date
+        return [m for k, v in data.items() for m in _locate(value, v, f"{path}.{k}" if path else k, row)]
+    if isinstance(data, list):
+        return [m for i, v in enumerate(data) for m in _locate(value, v, f"{path}[{i}]", date)]
+    if isinstance(data, bool):
+        return []
+    hit = (isinstance(data, (int, float)) and _same(value, float(data))) or \
+        (isinstance(data, str) and any(_same(value, n) for n in _numbers(data)))
+    if not hit:
+        return []
+    return [{"field": path, "date": date[1] if date else None, "date_key": date[0] if date else None,
+             "in_text": isinstance(data, str)}]
+
+
+def _weak(value: float) -> bool:
+    """Small integers and year-like numbers match by coincidence too easily (B, 11/16)."""
+    return float(value).is_integer() and (abs(value) < 10 or 1900 <= value <= 2100)
+
+
+def _input_leaves(values: Any, path: str = "") -> list[tuple[str, float]]:
+    if isinstance(values, bool):
+        return []
+    if isinstance(values, (int, float)):
+        return [(path, float(values))]
+    if isinstance(values, dict):
+        return [x for k, v in values.items() for x in _input_leaves(v, f"{path}.{k}" if path else k)]
+    if isinstance(values, list):
+        return [x for i, v in enumerate(values) for x in _input_leaves(v, f"{path}[{i}]")]
+    return []
+
+
 def _targets(o: dict[str, Any]) -> tuple[list[dict[str, Any]], str]:
     """What a non-calculation observation points at, read from its recorded result."""
     data = o.get("data")
@@ -141,24 +184,29 @@ def map_observations(job: dict[str, Any]) -> dict[str, Any]:
     for idx, o in enumerate(observations):
         oid = o["obs_id"]
         entry = {"obs_id": oid, "role": o.get("role"), "tool": o.get("tool_name"), "tool_status": o.get("status"),
-                 "args": args.get(oid), "output_hash": o.get("output_hash"), "via": [], "targets": [], "note": ""}
+                 "args": args.get(oid), "output_hash": o.get("output_hash"), "via": [], "inputs": [], "targets": [],
+                 "note": ""}
         if o.get("status") != "ok":
             entry["note"] = f"工具沒有成功（{o.get('status')}{'：' + o['reason'] if o.get('reason') else ''}），沒有來源"
         elif o.get("tool_name") == "calculate_metrics":
             values = (args.get(oid) or {}).get("values")
-            inputs = _input_numbers(values) if isinstance(values, dict) else []
+            leaves = _input_leaves(values) if isinstance(values, dict) else []
             earlier = [p for p in observations[:idx] if p.get("status") == "ok" and p.get("tool_name") != "calculate_metrics"]
-            via: list[str] = []
-            missing = []
-            for v in inputs:
-                hit = next((p["obs_id"] for p in earlier if any(_same(v, n) for n in _numbers(p.get("data")))), None)
-                if hit is None:
+            inputs, via, missing = [], [], []
+            for name, v in leaves:
+                found = [{"obs_id": p["obs_id"], "tool": p.get("tool_name"), **m}
+                         for p in earlier for m in _locate(v, p.get("data"))]
+                found.sort(key=lambda m: m["in_text"])  # a number field before a number inside text
+                inputs.append({"name": name, "value": v, "match": found[0] if found else None,
+                               "other_matches": len(found) - 1 if found else 0, "weak": _weak(v)})
+                if not found:
                     missing.append(v)
-                elif hit not in via:
-                    via.append(hit)
+                elif found[0]["obs_id"] not in via:
+                    via.append(found[0]["obs_id"])
+            entry["inputs"] = inputs
             if args.get(oid) is None:
                 entry["note"] = "計算結果，輸入未驗證（紀錄找不到這次計算的輸入）"
-            elif not inputs or missing:
+            elif not leaves or missing:
                 entry["note"] = "計算結果，輸入未驗證" + (
                     f"（{'、'.join(f'{m:g}' for m in missing)} 不在先前的工具結果中）" if missing else "（沒有數值輸入）")
             else:

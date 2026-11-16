@@ -418,7 +418,7 @@ def evidence_detail(ev_id: str):
         # a cited tool observation: show the mapping frozen in the approved JSON (obs_trace, B 11/15)
         return jsonify({"ok": True, "evidence": {"evidence_version_id": ev_id, "synthetic_fixture": False,
                                                  **{k: frozen.get(k) for k in ("kind", "resolved", "tool", "role",
-                                                    "tool_status", "output_hash", "via", "targets", "note", "reason")}}})
+                                                    "tool_status", "output_hash", "via", "inputs", "targets", "note", "reason")}}})
     snap = frozen if frozen is not None and frozen.get("kind") == "financial_snapshot" else None
     if snap is not None:  # a cited financial-snapshot tool result, exactly as frozen in the approved JSON
         after = tools_impl._parse_iso(snap["available_at"]) > tools_impl._parse_iso(real["report"]["cutoff_at"])
