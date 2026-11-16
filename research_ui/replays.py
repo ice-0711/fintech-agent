@@ -19,23 +19,54 @@ from .review_view import ISSUE_FIELDS, review_view
 
 ROOT = Path(__file__).resolve().parent.parent
 # Which Agent version and which run conditions each recorded file belongs to (handoff/agent-version-changes.md).
-# Shown on every replay so a viewer never reads runs of different versions as one set of results
-# (AGENTS.md: v1 and v2 results are not compared in one table). Newest group first.
+# Shown on every replay so a viewer never reads runs of different versions or conditions as one set of results
+# (AGENTS.md: v1 and v2 results are not compared in one table). `group` is the dropdown section: from 11/14 the
+# question is sent as the case `task` instead of the variant name (decision 31), so those runs form their own
+# group and are not listed with the earlier `variant` runs (lead, 11/14). Newest group first.
 DEV = "開發期（v1 之前）"
 V2 = "Agent v2"
-TRACE_FILES: dict[str, dict[str, str]] = {
-    "agent/calib-v2-dual-postprice-1112.json": {"agent_version": V2, "frozen_cases": True, "condition": "補股價後・題目送 variant・覆核規則修正前（第 28 節）"},
-    "agent/calib-v2-dual-rerun-1112.json": {"agent_version": V2, "frozen_cases": True, "condition": "補股價後・題目送 variant"},
-    "agent/calib-v2-dual-day3.json": {"agent_version": V2, "frozen_cases": True, "condition": "補股價前・題目送 variant"},
-    "agent/calib-v2-dual-day2.json": {"agent_version": V2, "frozen_cases": True, "condition": "補股價前・題目送 variant"},
-    "agent/calib-v2-dual-day1.json": {"agent_version": V2, "frozen_cases": True, "condition": "補股價前・題目送 variant"},
-    "agent/dev-v14-batch1.json": {"agent_version": DEV, "condition": "開發集早期試跑"},
-    "agent/researcher-v12-traces.json": {"agent_version": DEV, "condition": "開發集早期試跑"},
-    "agent/researcher-v12-traces-gemini-3.6-flash.json": {"agent_version": DEV, "condition": "開發集早期試跑（另一模型）"},
+V2_TASK = "Agent v2・題目送 task"
+V2_VARIANT = "Agent v2・題目送 variant"
+TRACE_FILES: dict[str, dict[str, Any]] = {
+    "agent/calib-v2-rules-check-1115-dual.json": {
+        "agent_version": V2, "group": V2_TASK, "frozen_cases": True,
+        "condition": "補股價後・題目送 task・11/14 覆核規則修正後（第 35、37、38 節）"},
+    "agent/calib-v2-task-rehearsal-1114-dual.json": {
+        "agent_version": V2, "group": V2_TASK, "frozen_cases": True,
+        "condition": "補股價後・題目送 task・11/14 覆核規則修正前（第 35、37、38 節）"},
+    "agent/calib-v2-dual-postprice-1112.json": {
+        "agent_version": V2, "group": V2_VARIANT, "frozen_cases": True,
+        "condition": "補股價後・題目送 variant・覆核規則修正前（第 28 節）"},
+    "agent/calib-v2-dual-rerun-1112.json": {
+        "agent_version": V2, "group": V2_VARIANT, "frozen_cases": True, "condition": "補股價後・題目送 variant"},
+    "agent/calib-v2-dual-day3.json": {
+        "agent_version": V2, "group": V2_VARIANT, "frozen_cases": True, "condition": "補股價前・題目送 variant"},
+    "agent/calib-v2-dual-day2.json": {
+        "agent_version": V2, "group": V2_VARIANT, "frozen_cases": True, "condition": "補股價前・題目送 variant"},
+    "agent/calib-v2-dual-day1.json": {
+        "agent_version": V2, "group": V2_VARIANT, "frozen_cases": True, "condition": "補股價前・題目送 variant"},
+    "agent/dev-v14-batch1.json": {"agent_version": DEV, "group": DEV, "condition": "開發集早期試跑"},
+    "agent/researcher-v12-traces.json": {"agent_version": DEV, "group": DEV, "condition": "開發集早期試跑"},
+    "agent/researcher-v12-traces-gemini-3.6-flash.json": {
+        "agent_version": DEV, "group": DEV, "condition": "開發集早期試跑（另一模型）"},
+}
+
+# The recorded runs the demo script uses for its three paths (E01 shown as REPLAY, decision 34). All three come
+# from the same condition group, so the demo never mixes `task` and `variant` runs.
+DEMO_PATHS = {
+    "calib-v2-rules-check-1115-dual:CASE-04": "示範：正常通過",
+    "calib-v2-task-rehearsal-1114-dual:CASE-19": "示範：覆核要求補查後修正通過",
+    "calib-v2-rules-check-1115-dual:CASE-15": "示範：資料不足停止",
 }
 
 # Recorded runs whose result is known to come from a since-fixed program rule. Kept as recorded, with this note.
 RECORD_NOTES = {
+    "calib-v2-task-rehearsal-1114-dual:CASE-04": {
+        "label": "覆核程式誤判，規則已修",
+        "note": "這次停在證據不足，是覆核規則誤擋：收盤價、TTM EPS、本益比都與快照一致，只因 TTM EPS 的期間寫成"
+                "結尾季（2026Q2）就被列為 critical，模型兩輪覆核都判通過。11/14 已修正規則；11/15 以修正後規則重跑同題通過"
+                "（calib-v2-rules-check-1115-dual:CASE-04）。紀錄照實保留。依據：handoff/decisions-2026-10.md 第 35 節。",
+    },
     "calib-v2-dual-postprice-1112:CASE-04": {
         "label": "覆核程式誤判，規則已修",
         "note": "這次停在證據不足，是覆核程式把「TTM 要四個連續單季」套到本益比造成的誤判，不是模型錯誤；"
@@ -84,6 +115,8 @@ def _load() -> list[dict[str, Any]]:
                 "superseded": SUPERSEDED.get(replay_id),
                 "record_note": RECORD_NOTES.get(replay_id),
                 "agent_version": meta["agent_version"],
+                "group": meta["group"],
+                "demo_path": DEMO_PATHS.get(replay_id),
                 # Runs after the 10/25 case freeze used exactly these frozen cases; earlier drafts may differ.
                 "cutoff_at": dev.get(case["case_id"], {}).get("cutoff_at") if meta.get("frozen_cases") else None,
                 "source_snapshot_id": (dev.get(case["case_id"], {}).get("source_snapshot_id")
@@ -106,7 +139,8 @@ def _load() -> list[dict[str, Any]]:
 
 def list_replays() -> list[dict[str, Any]]:
     return [{k: r[k] for k in ("replay_id", "file", "generated_at", "commit", "model_id", "case_id", "ticker",
-                               "category", "title", "superseded", "record_note", "agent_version", "condition", "prompt_versions",
+                               "category", "title", "superseded", "record_note", "agent_version", "group", "demo_path", "condition",
+                               "prompt_versions",
                                "cutoff_at")}
             | {"status": r["run"].get("status"), "stop_reason": r["run"].get("stop_reason"),
                "review_rounds": sum(1 for s in r["run"].get("steps", []) if s.get("event") == "review")}
@@ -166,9 +200,9 @@ def get_replay(replay_id: str) -> dict[str, Any] | None:
         "replay_id": found["replay_id"],
         "label": "REPLAY",
         "source": {k: found[k] for k in ("file", "generated_at", "commit", "model_id", "prompt_versions",
-                                         "agent_version", "condition")},
+                                         "agent_version", "group", "condition")},
         "case": {k: found[k] for k in ("case_id", "ticker", "category", "title", "expected_behavior", "superseded",
-                                       "record_note")},
+                                       "record_note", "demo_path")},
         "job": {"status": run.get("status"), "stage": "finished", "stop_reason": run.get("stop_reason"),
                 "ticker": found["ticker"], "mode": "dual", "model_id": found["model_id"],
                 "cutoff_at": found["cutoff_at"], "source_snapshot_id": found["source_snapshot_id"],

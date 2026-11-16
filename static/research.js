@@ -334,7 +334,7 @@
     const recovered = (events || []).some(e => e.event_type === "lease_recovered");
     $("#jobPanel").innerHTML = `
       ${connNote ? `<div class="conn" role="status">${connNote}</div>` : ""}
-      <div class="actions">${badge(text, cls)}${badge(`階段：${STAGE_TEXT[job.stage] || job.stage}`, "b-neutral")}${job.mock ? badge("MOCK", "b-fixture") : ""}${job.replay ? badge("REPLAY", "b-fixture") : ""}${job.replay && job.replay.agent_version ? badge(job.replay.agent_version, "b-neutral") : ""}</div>
+      <div class="actions">${badge(text, cls)}${badge(`階段：${STAGE_TEXT[job.stage] || job.stage}`, "b-neutral")}${job.mock ? badge("MOCK", "b-fixture") : ""}${job.replay ? badge("REPLAY", "b-fixture") : ""}${job.replay && job.replay.agent_version ? badge(job.replay.agent_version, "b-neutral") : ""}${job.replay && job.replay.demo_path ? badge(job.replay.demo_path, "b-neutral") : ""}</div>
       ${note}
       ${recovered ? `<p class="hint">worker 中途中斷，已由檢查點接手繼續；已用的請求與工具次數延續，沒有歸零。</p>` : ""}
       <dl class="kv">
@@ -511,17 +511,18 @@
     const sel = $("#replaySelect");
     try {
       const body = await getJson("/api/ui/replays");
-      // One <optgroup> per Agent version: runs of different versions are never listed as one set.
+      // One <optgroup> per Agent version and question condition (task vs variant): runs of different
+      // versions or conditions are never listed as one set.
       const groups = [];
       body.replays.forEach(r => {
-        const key = r.agent_version || "未標版本";
+        const key = r.group || r.agent_version || "未標版本";
         let g = groups.find(x => x.key === key);
         if (!g) { g = { key, rows: [] }; groups.push(g); }
         g.rows.push(r);
       });
       const opt = r => {
         const flag = r.superseded || r.record_note;
-        return `<option value="${esc(r.replay_id)}">${flag ? `【${esc(flag.label)}】` : ""}${esc(r.case_id)}・${esc(r.ticker)}・${esc(r.category)}・${esc(r.stop_reason)}${r.review_rounds ? `・覆核 ${r.review_rounds} 輪` : ""}（${esc((r.generated_at || "").slice(0, 10))}・${esc((r.prompt_versions || {}).researcher || "")}）</option>`;
+        return `<option value="${esc(r.replay_id)}">${r.demo_path ? `★${esc(r.demo_path)}・` : ""}${flag ? `【${esc(flag.label)}】` : ""}${esc(r.case_id)}・${esc(r.ticker)}・${esc(r.category)}・${esc(r.stop_reason)}${r.review_rounds ? `・覆核 ${r.review_rounds} 輪` : ""}（${esc((r.generated_at || "").slice(0, 10))}・${esc((r.prompt_versions || {}).researcher || "")}）</option>`;
       };
       sel.innerHTML = `<option value="">選擇一次真實執行紀錄…</option>` + groups.map(g =>
         `<optgroup label="${esc(g.key)}">${g.rows.map(opt).join("")}</optgroup>`).join("");

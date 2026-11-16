@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from research_ui.replays import TRACE_FILES, V2, list_replays
+from research_ui.replays import DEMO_PATHS, TRACE_FILES, V2, V2_TASK, V2_VARIANT, list_replays
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,16 +37,47 @@ def test_every_replay_carries_its_agent_version_and_run_condition(ui):
     assert all(_researcher_minor(r) < 2 for r in other)
 
 
-def test_versions_are_listed_as_separate_groups_newest_first():
+def test_groups_are_contiguous_newest_first_and_task_runs_are_apart_from_variant_runs():
     rows = list_replays()
-    order = list(dict.fromkeys(r["agent_version"] for r in rows))
-    assert order[0] == V2
-    # each version forms one contiguous block, so the dropdown's <optgroup>s never interleave
-    assert len(order) == len({v["agent_version"] for v in TRACE_FILES.values()})
-    blocks = [r["agent_version"] for r in rows]
-    assert all(blocks.index(v) + blocks.count(v) - 1 == len(blocks) - 1 - blocks[::-1].index(v) for v in order)
+    order = list(dict.fromkeys(r["group"] for r in rows))
+    assert order[:2] == [V2_TASK, V2_VARIANT]
+    assert len(order) == len({v["group"] for v in TRACE_FILES.values()})
+    blocks = [r["group"] for r in rows]
+    # each group forms one contiguous block, so the dropdown's <optgroup>s never interleave
+    assert all(blocks[blocks.index(g):blocks.index(g) + blocks.count(g)] == [g] * blocks.count(g) for g in order)
+    # from 11/14 the question is sent as `task` (decision 31): those files, and only those, are in the task group
+    for rel, meta in TRACE_FILES.items():
+        assert (meta["group"] == V2_TASK) == ("題目送 task" in meta["condition"]), rel
     js = (ROOT / "static" / "research.js").read_text(encoding="utf-8")
-    assert "<optgroup label=" in js
+    assert "<optgroup label=" in js and "r.group ||" in js
+
+
+def test_new_task_batches_carry_the_lead_conditions():
+    rows = {r["replay_id"]: r for r in list_replays()}
+    assert rows["calib-v2-rules-check-1115-dual:CASE-04"]["condition"] == \
+        "補股價後・題目送 task・11/14 覆核規則修正後（第 35、37、38 節）"
+    assert rows["calib-v2-task-rehearsal-1114-dual:CASE-19"]["condition"] == \
+        "補股價後・題目送 task・11/14 覆核規則修正前（第 35、37、38 節）"
+    assert sum(r.startswith("calib-v2-rules-check-1115-dual:") for r in rows) == 4
+    assert sum(r.startswith("calib-v2-task-rehearsal-1114-dual:") for r in rows) == 4
+
+
+def test_three_demo_paths_use_one_condition_group_and_match_their_records(ui):
+    rows = {r["replay_id"]: r for r in ui.get("/api/ui/replays").get_json()["replays"]}
+    assert {rows[rid]["group"] for rid in DEMO_PATHS} == {V2_TASK}
+    assert [r for r in rows if rows[r]["demo_path"]] and set(r for r in rows if rows[r]["demo_path"]) == set(DEMO_PATHS)
+
+    def rounds(rid):
+        return [x["final_decision"] for x in ui.get(f"/api/ui/replays/{rid}").get_json()["review_view"]["rounds"]]
+
+    ok = "calib-v2-rules-check-1115-dual:CASE-04"
+    assert rows[ok]["status"] == "succeeded" and rounds(ok) == ["pass"]
+    fixed = "calib-v2-task-rehearsal-1114-dual:CASE-19"
+    assert rows[fixed]["status"] == "succeeded" and rounds(fixed) == ["revise", "pass"]
+    stop = "calib-v2-rules-check-1115-dual:CASE-15"
+    assert rows[stop]["status"] == "insufficient_evidence" and rows[stop]["stop_reason"] == "researcher_insufficient"
+    r = ui.get(f"/api/ui/replays/{fixed}").get_json()
+    assert r["case"]["demo_path"] and r["source"]["group"] == V2_TASK
 
 
 def test_revise_path_has_a_recorded_v2_run_with_two_review_rounds(ui):
@@ -69,12 +100,18 @@ def test_v2_replays_show_the_frozen_dev_case_cutoff_and_snapshot(ui):
     assert old["job"]["cutoff_at"] is None and old["job"]["source_snapshot_id"] is None  # pre-freeze: not guessed
 
 
-def test_case04_misjudged_by_the_since_fixed_rule_is_annotated_and_nothing_else_is(ui):
+def test_case04_runs_misjudged_by_since_fixed_rules_are_annotated_and_nothing_else_is(ui):
     rows = ui.get("/api/ui/replays").get_json()["replays"]
-    noted = [r["replay_id"] for r in rows if r["record_note"]]
-    assert noted == ["calib-v2-dual-postprice-1112:CASE-04"]
-    r = ui.get("/api/ui/replays/calib-v2-dual-postprice-1112:CASE-04").get_json()
-    assert "第 28 節" in r["case"]["record_note"]["note"]
+    noted = sorted(r["replay_id"] for r in rows if r["record_note"])
+    assert noted == ["calib-v2-dual-postprice-1112:CASE-04", "calib-v2-task-rehearsal-1114-dual:CASE-04"]
+    old = ui.get("/api/ui/replays/calib-v2-dual-postprice-1112:CASE-04").get_json()
+    assert "第 28 節" in old["case"]["record_note"]["note"]
+    new = ui.get("/api/ui/replays/calib-v2-task-rehearsal-1114-dual:CASE-04").get_json()
+    assert "第 35 節" in new["case"]["record_note"]["note"]
+    # the 11/15 rerun under the fixed rule is a normal result: no note; CASE-22 stays as recorded, no note
+    fixed = {r["replay_id"]: r for r in rows}
+    assert fixed["calib-v2-rules-check-1115-dual:CASE-04"]["record_note"] is None
+    assert fixed["calib-v2-rules-check-1115-dual:CASE-22"]["record_note"] is None
 
 
 def test_replays_never_read_the_sealed_holdout():
