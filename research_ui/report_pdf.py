@@ -292,6 +292,15 @@ def render_report_pdf(report: dict[str, Any], version: dict[str, Any]) -> bytes:
                 d.text(f"{head}　對不到來源：{s.get('reason')}", 8.5, color=RED)
                 continue
             d.text(head + (f"（計算輸入來自 {'、'.join(s.get('via') or [])}）" if s.get("via") else ""), 8.5, True)
+            for i in s.get("inputs") or []:  # B, 11/16: field and date of every calculation input
+                m = i.get("match")
+                label = {"trade_date": "交易日", "observation_date": "資料日", "period": "季別", "latest_period": "季別",
+                         "available_at": "可得"}.get(m.get("date_key") or "", "日期") if m else ""
+                where = (f"{m['obs_id']} {m.get('field')}" + (f"（{label} {str(m['date'])[:10]}）" if m.get("date") else "")
+                         + ("（文字中的數字）" if m.get("in_text") else "")) if m else "找不到"
+                extra = "".join([f"；另有 {i['other_matches']} 處相同數值" if i.get("other_matches") else "",
+                                 "；小整數或年份，可能湊巧相同" if i.get("weak") else ""])
+                d.text(f"　輸入 {i['name']} = {i['value']:g} → {where}{extra}", 8.5, color=MUTED)
             for t in s.get("targets") or []:
                 if t.get("kind") == "evidence":
                     state = "不在快照中" if not t.get("exists") else ("hash 相符" if t.get("hash_match") else "hash 不符")

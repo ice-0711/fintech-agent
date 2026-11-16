@@ -27,7 +27,8 @@ from .obs_trace import UNAVAILABLE, check_evidence, claim_trace, map_observation
 from .risk import METHOD_VERSION as RISK_METHOD
 from .risk import RISK_FOOTNOTE, VALUATION_FOOTNOTE
 
-DATA_VERSION = "report-data-v1.5"  # v1.5: obs-* traced to the job's tool results; fact claims must cite (B 11/15)
+DATA_VERSION = "report-data-v1.6"  # v1.6: each calculation input records its obs, field and row date (B 11/16)
+# v1.5: obs-* traced to the job's tool results; fact claims must cite (B 11/15)
 # v1.4: source_traceable = statement hashes + cited ev- fragments (B 11/09)
 # v1.3: forward snapshots (snap-fwd*) read from their own file
 # v1.2: peer_snapshot_version / peer_snapshot_file (was snapshot_version)
@@ -91,6 +92,7 @@ def _obs_source(toolbox: SnapshotToolbox, ref: str, obs_map: dict[str, Any] | No
     ok = obs_traced(entry, lambda i: checked.get(i, {}).get("exists") and checked[i]["hash_match"] is not False)
     out = {"id": ref, "resolved": ok, "kind": "observation", "tool": entry["tool"], "role": entry["role"],
            "tool_status": entry["tool_status"], "output_hash": entry["output_hash"], "via": entry["via"],
+           "inputs": entry.get("inputs") or [],
            "targets": targets, "note": entry["note"]}
     if not ok:
         out["reason"] = entry["note"] or "對不到片段或快照"

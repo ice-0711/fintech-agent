@@ -95,6 +95,7 @@ def test_calculation_follows_inputs_found_in_earlier_results_else_unverified():
     job = make_job([FIN, PRICE, pe(close, eps), pe(close, 99.99)], [fact("c1", ["obs-3"])])
     items = map_observations(job)["items"]
     assert items["obs-3"]["tool_status"] == "ok" and items["obs-3"]["via"] == ["obs-2", "obs-1"]
+    assert [i["name"] for i in items["obs-3"]["inputs"]] == ["price", "eps_ttm"]
     assert [t["kind"] for t in items["obs-3"]["targets"]] == ["price", "financial_snapshot"]
     assert items["obs-4"]["tool_status"] == "ok" and items["obs-4"]["targets"] == []
     assert "輸入未驗證" in items["obs-4"]["note"] and "99.99" in items["obs-4"]["note"]
@@ -186,3 +187,49 @@ def test_drawer_shows_the_frozen_mapping_and_opens_the_fragments_it_found(tmp_pa
     # a fragment the search returned opens in the drawer too (it is part of the approved JSON)
     nested = client.get(f"/api/ui/evidence/{found[0]['id']}?report={rv}").get_json()
     assert nested["ok"] and nested["evidence"]["hash_match"] is True
+
+
+
+def test_each_calculation_input_records_the_field_and_the_row_date():
+    """B, 11/16: batch-3 2317's P/E used 242, the 11/11 close, not the latest trading day's (11/13, 241)."""
+    with snapshot_context(SNAP):
+        tb = SnapshotToolbox("2317", SNAP, CUT)
+        closes = {c["trade_date"][:10]: c["close_price"] for c in tb(*PRICE[1:])["data"]["closes"]}
+        eps = tb(*FIN[1:])["data"]["metrics"]["eps_ttm"]
+    assert closes["2026-11-11"] == 242.0 and closes["2026-11-13"] == 241.0
+    calc = ("researcher", "calculate_metrics",
+            {"operation": "pe_ttm", "values": {"price": 242.0, "eps_ttm": eps}, "evidence_refs": ["obs-1", "obs-2"]})
+    job = make_job([PRICE, FIN, calc], [fact("c1", ["obs-3"])])
+    entry = map_observations(job)["items"]["obs-3"]
+    price = next(i for i in entry["inputs"] if i["name"] == "price")
+    assert price["match"]["obs_id"] == "obs-1" and price["match"]["tool"] == "get_price_window"
+    assert price["match"]["field"].startswith("closes[") and price["match"]["field"].endswith(".close_price")
+    assert price["match"]["date"].startswith("2026-11-11") and price["match"]["date_key"] == "trade_date"
+    assert price["match"]["in_text"] is False
+    assert price["weak"] is False
+    eps_in = next(i for i in entry["inputs"] if i["name"] == "eps_ttm")
+    assert eps_in["match"]["obs_id"] == "obs-2" and eps_in["match"]["field"] == "metrics.eps_ttm"
+    assert (eps_in["match"]["date_key"], eps_in["match"]["date"]) == ("latest_period", "2026Q2")
+    # the mapping is frozen into the report: the drawer and PDF can show the date
+    data = build_report_data(job)
+    src = next(s for s in data["sources"] if s["id"] == "obs-3")
+    assert src["inputs"][0]["match"]["date"].startswith("2026-11-11")
+
+
+def test_small_integers_and_years_are_flagged_and_number_fields_win_over_text():
+    def plant(obs):  # one result with the number only inside text, a later one with it as a number field
+        obs[0]["data"] = {"paragraph": "2026 年第 4 季", "available_at": "2026-11-01T00:00:00+08:00"}
+        obs[1]["data"] = {"rows": [{"period": "2026Q4", "count": 4}]}
+
+    calc = ("researcher", "calculate_metrics",
+            {"operation": "growth_rate", "values": {"current": 2026, "previous": 4}, "evidence_refs": ["obs-1"]})
+    job = make_job([READ, FIN, calc], [fact("c1", ["obs-3"])], mutate=plant)
+    inputs = {i["name"]: i for i in map_observations(job)["items"]["obs-3"]["inputs"]}
+    assert inputs["current"]["weak"] and inputs["previous"]["weak"]
+    assert inputs["current"]["match"] == {"obs_id": "obs-1", "tool": "read_evidence", "field": "paragraph",
+                                          "date": "2026-11-01T00:00:00+08:00", "date_key": "available_at",
+                                          "in_text": True}
+    prev = inputs["previous"]
+    assert prev["match"]["obs_id"] == "obs-2" and prev["match"]["field"] == "rows[0].count"
+    # also inside "第 4 季" and inside the period label "2026Q4": shown as 2 other places
+    assert prev["match"]["date"] == "2026Q4" and prev["match"]["in_text"] is False and prev["other_matches"] == 2

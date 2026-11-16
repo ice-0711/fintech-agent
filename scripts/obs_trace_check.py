@@ -44,7 +44,7 @@ def trace_job(job: dict) -> dict:
     return {"job_id": job["job_id"], "ticker": job["ticker"], "status": job.get("status"),
             "source_snapshot_id": job.get("source_snapshot_id"), "claims": claims,
             "obs_map_status": (data.get("obs_map") or {}).get("status"),
-            "observations": [{k: s.get(k) for k in ("id", "resolved", "tool", "tool_status", "via", "targets", "note",
+            "observations": [{k: s.get(k) for k in ("id", "resolved", "tool", "tool_status", "via", "inputs", "targets", "note",
                                                      "reason")} for s in obs],
             "source_traceable": {"result": check["result"], "detail": check["detail"]} if check else None,
             "data_quality": (data.get("data_quality") or {}).get("label")}
@@ -86,6 +86,12 @@ def main() -> None:
                     print(f"      → 股價 {t['source_id']} {t['trade_dates']}")
                 elif t["kind"] == "macro":
                     print(f"      → 總經 {[(x['series_id'], x['observation_date']) for x in t['rows']]}")
+            for i in o.get("inputs") or []:
+                m = i.get("match")
+                where = (f"{m['obs_id']} {m['field']} {m.get('date') or ''}" + (" (文字)" if m["in_text"] else "")) if m else "找不到"
+                extra = (f"，另有 {i['other_matches']} 處相同" if i.get("other_matches") else "") + \
+                    ("，小整數或年份" if i.get("weak") else "")
+                print(f"      輸入 {i['name']} = {i['value']:g} → {where}{extra}")
             if o.get("via"):
                 print(f"      計算輸入來自 {', '.join(o['via'])}")
             if o.get("note") or o.get("reason"):

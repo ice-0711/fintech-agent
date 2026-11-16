@@ -319,7 +319,9 @@
 
   function renderJob(job, events, connNote) {
     syncEntry(job);
-    const [text, cls] = STATUS_TEXT[job.status] || [job.status, "b-neutral"];
+    // a REPLAY is a record: it is never waiting for anyone's approval
+    const [text, cls] = job.replay && job.status === "succeeded" ? ["覆核通過（回放紀錄，不發布）", "b-ok"]
+      : STATUS_TEXT[job.status] || [job.status, "b-neutral"];
     let note = "";
     if (job.status === "queued") note = `<p class="hint">一次只執行 1 個 job，前面還有 ${esc(job.queue_ahead ?? 0)} 個。</p>`;
     const NOTES = {
@@ -761,6 +763,21 @@
       return `<li>總經：${(t.rows || []).map(r => `${esc(r.series_id)} ${esc(r.observation_date)}`).join("、")}</li>`;
     return `<li>${esc(JSON.stringify(t))}</li>`;
   }
+  // calculate_metrics: each input, where it was found (obs, field, row date) — B, 11/16
+  function inputsHtml(inputs) {
+    if (!inputs || !inputs.length) return "";
+    const rows = inputs.map(i => {
+      const m = i.match;
+      const where = m ? `<span class="mono">${esc(m.obs_id)}</span> ${esc(TOOL_TEXT[m.tool] || m.tool || "")}<br><span class="mono small">${esc(m.field)}</span>${m.in_text ? "（文字中的數字）" : ""}` : badge("找不到", "b-bad");
+      const DATE_TEXT = { trade_date: "交易日", observation_date: "資料日", period: "季別", latest_period: "季別",
+        date: "日期", available_at: "可得時間" };
+      const notes = [m && m.date ? `${DATE_TEXT[m.date_key] || "日期"} ${esc(m.date_key === "available_at" ? fmtTime(m.date) : String(m.date).slice(0, 10))}` : "",
+        i.other_matches ? `另有 ${i.other_matches} 處相同數值` : "",
+        i.weak ? "小整數或年份，可能湊巧相同" : ""].filter(Boolean).join("；");
+      return `<tr><td class="mono">${esc(i.name)}</td><td class="num">${esc(Number(i.value).toLocaleString("zh-TW", { maximumFractionDigits: 6 }))}</td><td>${where}</td><td>${notes || "—"}</td></tr>`;
+    }).join("");
+    return `<p><b>計算輸入對到哪裡</b></p><div class="sens-wrap"><table class="obs-inputs"><thead><tr><th>輸入</th><th>數值</th><th>對到</th><th>備註</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
   function observationHtml(e, reportId) {
     const targets = e.targets || [];
     return `
@@ -771,6 +788,7 @@
         ${e.via && e.via.length ? `<dt>計算輸入來自</dt><dd class="mono">${e.via.map(esc).join("、")}</dd>` : ""}
         ${e.output_hash ? `<dt>結果 hash</dt><dd class="mono">${esc(e.output_hash)}</dd>` : ""}
       </dl>
+      ${inputsHtml(e.inputs)}
       ${targets.length ? `<p><b>${esc(e.evidence_version_id)} → 實際查到的來源</b></p><ul class="obs-targets">${targets.map(t => targetHtml(t, reportId)).join("")}</ul>` : ""}
       ${e.note || e.reason ? `<div class="conn warn-line">${esc(e.note || e.reason)}</div>` : ""}
       <p class="footnote">對應依這個 job 自己的工具紀錄（工具、參數、回傳結果），不重跑工具、不採用模型自己的說法；對到的片段再用「在快照中、hash 相符」的規則檢查。「只看到摘要」表示模型只看過搜尋結果的摘要，沒有讀全文。</p>`;
