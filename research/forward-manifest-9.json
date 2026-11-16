@@ -290,7 +290,7 @@
       "price_basis": "raw_unadjusted（FinMind TaiwanStockPrice 未還原；進場開盤與 D1／D5／D20 收盤用同一口徑）",
       "returns": "由 D 的 scripts/forward_eval.py 依實際價格計算；本表不填",
       "audit_file": "research/forward-batch-3-audit.md",
-      "note": "快照晚於截止 16 分鐘產生（依 generated_at 判定；批次紀錄未記 generated_late）；D20 落在 12/11 定稿日：收盤 17:30 才可得，截取早於 17:30 記 NA"
+      "note": "排程 21:10 執行時在凍結快照步驟中止（2454 缺 2025Q2 應付公司債：FinMind 11/06 後新增該科目）；組長補負債覆寫（第一段凍結修訂 2）後 21:16 手動執行，晚於截止 16 分鐘；只用截止前可得的資料，不重抓覆蓋。；D20 落在 12/11 定稿日：收盤 17:30 才可得，截取早於 17:30 記 NA"
     },
     {
       "signal_id": "fwd3-2317",
@@ -330,7 +330,7 @@
       "price_basis": "raw_unadjusted（FinMind TaiwanStockPrice 未還原；進場開盤與 D1／D5／D20 收盤用同一口徑）",
       "returns": "由 D 的 scripts/forward_eval.py 依實際價格計算；本表不填",
       "audit_file": "research/forward-batch-3-audit.md",
-      "note": "快照晚於截止 16 分鐘產生（依 generated_at 判定；批次紀錄未記 generated_late）；D20 落在 12/11 定稿日：收盤 17:30 才可得，截取早於 17:30 記 NA"
+      "note": "排程 21:10 執行時在凍結快照步驟中止（2454 缺 2025Q2 應付公司債：FinMind 11/06 後新增該科目）；組長補負債覆寫（第一段凍結修訂 2）後 21:16 手動執行，晚於截止 16 分鐘；只用截止前可得的資料，不重抓覆蓋。；D20 落在 12/11 定稿日：收盤 17:30 才可得，截取早於 17:30 記 NA"
     },
     {
       "signal_id": "fwd3-2454",
@@ -370,7 +370,7 @@
       "price_basis": "raw_unadjusted（FinMind TaiwanStockPrice 未還原；進場開盤與 D1／D5／D20 收盤用同一口徑）",
       "returns": "由 D 的 scripts/forward_eval.py 依實際價格計算；本表不填",
       "audit_file": "research/forward-batch-3-audit.md",
-      "note": "快照晚於截止 16 分鐘產生（依 generated_at 判定；批次紀錄未記 generated_late）；D20 落在 12/11 定稿日：收盤 17:30 才可得，截取早於 17:30 記 NA"
+      "note": "排程 21:10 執行時在凍結快照步驟中止（2454 缺 2025Q2 應付公司債：FinMind 11/06 後新增該科目）；組長補負債覆寫（第一段凍結修訂 2）後 21:16 手動執行，晚於截止 16 分鐘；只用截止前可得的資料，不重抓覆蓋。；D20 落在 12/11 定稿日：收盤 17:30 才可得，截取早於 17:30 記 NA"
     }
   ]
 }
