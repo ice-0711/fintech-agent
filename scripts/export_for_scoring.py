@@ -165,7 +165,8 @@ def render_md(answers: list[dict]) -> str:
 
 def template(answers: list[dict], who: str) -> str:
     out = [f"正式評估 v2 盲評紀錄（{who}）。標籤只用 supported / unsupported / unknown；inference 與 unknown 類不計分。",
-           "每份答卷照 rubric-v1-final.md 第六節填寫；兩人獨立，先不看對方分數。",
+           "每份答卷照 rubric-v1-final.md 第六節填寫；第三節、第四節第 5 點、第五節照 rubric-v1-confirmed-1116.md（B 11/16 確認）。"
+           "兩人獨立，先不看對方分數。",
            f"填完另存為 scores-{who}.txt，放在 evaluation/formal/scoring-v2/（--reveal 只認 scores-{who} 開頭的檔名）。", ""]
     for a in sorted(answers, key=lambda x: x["answer_id"]):
         out.append(f"{a['answer_id']} | 案例: {a['case_id']}")

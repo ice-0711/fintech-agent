@@ -42,6 +42,23 @@
 
 手冊驗收清單裡的「來源與版本完整」「未完成聲明不刪」「明確標回放片段」，以第 2、3、4 點的做法（附錄、備註欄、短標籤）視為符合，不需要每頁都寫。
 
+## 六、正式實驗期間不能改的檔案（組長 2026-11-17）
+
+正式實驗 formal-v2 在 11/16–11/25 每天 19:30 執行。開跑前程式會嚴格核對下列檔案，**任何一個被改過，當天的實驗就會停止**（11/17 就因為評分規則檔被改而停了一次）。到 60 個 run 跑完、組長宣布之前：
+
+- 下列檔案不要修改、搬動或改名，也不要送包含它們的 PR：
+  - `agents/` 整個資料夾（含 `agents/prompts/`）
+  - `scripts/dev_traces.py`、`scripts/formal_runs.py`
+  - `data/` 整個資料夾、`fixtures/` 整個資料夾
+  - `evaluation/dev-cases.json`、`evaluation/test-cases-sealed.json`、`evaluation/cases_manifest_v1.json`、`evaluation/run-plan.json`
+  - `evaluation/d-drafts/rubric-v1-final.md`、`evaluation/d-drafts/protocol-v1.md`（評分規則的補充寫在另一個檔，例如 `rubric-v1-confirmed-1116.md`）
+  - `valuation_agent/dcf_model.py`
+  - 根目錄的 `data-contract.md`、`source-register.csv`、`graph-reviewed.csv`、`graph-source-register.csv`
+- 真的需要改：先照第四節的三行格式問組長，不要直接改、不要先送 PR。
+- 送 PR 前自己檢查：`python scripts/build_freeze.py --verify --strict`，顯示「凍結紀錄一致」才送。
+- 評分者（B、D）交出評分前，不要打開 `evaluation/formal/runs-v2.jsonl`，也不要看 GitHub 上「Formal evaluation v2」的 commit（決策 44）；`evaluation/formal/scoring-v2/` 在匯出前不要放任何檔案。
+- 其他檔案（`research_ui/`、`static/`、`design/`、`media/`、`demo/`、`docs/`、`slides/`、`report/`、`deliverables/`、`tests/`，以及上面沒列到的 `evaluation/` 文件）照常可以改。
+
 ## 參考
 
 - 決策紀錄：`handoff/decisions-2026-10.md`（第 19 節：C 的文稿已全部核准）
